@@ -1,5 +1,5 @@
-libSieve 2.1.3
---------------
+libSieve: a library for parsing, sorting and filtering your mail
+-----------------------------------------------------------------
 
 This code is a standalone library based upon code which had been distributed
 with the Cyrus Mail Server. API changes will be made to create a more

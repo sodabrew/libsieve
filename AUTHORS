@@ -1,4 +1,4 @@
-libSieve is maintained by Aaron Stone. Please don't bug anyone else!
+libSieve is now maintained by Aaron Stone. Please don't bug anyone else!
 
 To get in touch with the usage and development communities for libSieve,
 please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
@@ -6,9 +6,11 @@ please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
 The contributors to libSieve include:
 
   Aaron Stone <aaron@serendipity.cx> broke the mold and made libSieve into
-  its own distribution with some API changes to for easier integration.
+  its own distribution with some API changes for easier integration.
 
   Timo Sirainen <tss@iki.fi> submitted fixes for potential buffer overflows.
+  
+  Oliver Tappe <zooey@hirschkaefer.de> submitted fixes for BeOS builds.
 
 Their work builds upon these fine fellows' work at CMU:
 
