@@ -92,11 +92,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* This only works in C99 and higher... */
+/* Be sure to use double parens when calling! */
 #ifdef DEBUG
-#define libsieve_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(ARGS) printf ARGS
 #else
-#define libsieve_debugf(...) 
+#define libsieve_debugf(ARGS) 
 #endif /* ifdef DEBUG */
 
 /* Better yacc error messages please */
@@ -1025,7 +1025,7 @@ yyreduce:
   case 4:
 #line 59 "header.y"
     {
-                libsieve_debugf( "header: NAME COLON: %s:\n", yyvsp[-1] );
+                libsieve_debugf(( "header: NAME COLON: %s:\n", yyvsp[-1] ));
                 libsieve_headerentry(hl->h, yyvsp[-1], NULL);
                 }
     break;
@@ -1033,7 +1033,7 @@ yyreduce:
   case 5:
 #line 63 "header.y"
     {
-                libsieve_debugf( "header: NAME COLON body: %s:%s\n", yyvsp[-2], yyvsp[0] );
+                libsieve_debugf(( "header: NAME COLON body: %s:%s\n", yyvsp[-2], yyvsp[0] ));
                 libsieve_headerentry(hl->h, yyvsp[-2], yyvsp[0]);
                 }
     break;
@@ -1042,14 +1042,14 @@ yyreduce:
 #line 68 "header.y"
     {
                 /* Default action is $$ = $1 */
-                libsieve_debugf( "body: TEXT: %s\n", yyvsp[0] );
+                libsieve_debugf(( "body: TEXT: %s\n", yyvsp[0] ));
                 }
     break;
 
   case 7:
 #line 72 "header.y"
     {
-                libsieve_debugf( "body: body WRAP: %s %s\n", yyvsp[-1], yyvsp[0] );
+                libsieve_debugf(( "body: body WRAP: %s %s\n", yyvsp[-1], yyvsp[0] ));
                 yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-1], yyvsp[0], NULL ), strlen(yyvsp[-1])+strlen(yyvsp[0]), FREEME);
                 }
     break;
@@ -1277,7 +1277,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     (const char *)libsieve_headerptr = *ptr;
 
     if(libsieve_headerparse()) {
-	libsieve_debugf( "Header parse error: %s\n", libsieve_headererr );
+	libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
         libsieve_free(hl->h->contents);
         libsieve_free(hl->h);
         libsieve_free(hl);
@@ -1318,7 +1318,7 @@ int libsieve_headerappend(header_list_t **hl)
     if (c == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    libsieve_debugf( "Prepending a new headerlist and header struct\n" );
+    libsieve_debugf(( "Prepending a new headerlist and header struct\n" ));
     newhead->count = 0;
     newhead->space = 1;
     newhead->contents = c;
@@ -1333,9 +1333,9 @@ int libsieve_headerappend(header_list_t **hl)
 
 void libsieve_headerentry(header_t *h, char *name, char *body)
 {
-    libsieve_debugf( "Entering name and body into header struct\n" );
+    libsieve_debugf(( "Entering name and body into header struct\n" ));
     if (h == NULL)
-        libsieve_debugf( "Why are you giving me a NULL struct!?\n" );
+        libsieve_debugf(( "Why are you giving me a NULL struct!?\n" ));
 	/* Hmm, big big trouble here... */;
 
     h->name = libsieve_strtolower(libsieve_strdup(name, strlen(name)), strlen(name));

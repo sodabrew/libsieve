@@ -27,11 +27,11 @@
 /* sv_util */
 #include "util.h"
 
-/* This only works in C99 and higher... */
+/* Be sure to use double parens when calling! */
 #ifdef DEBUG
-#define libsieve_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(ARGS) printf ARGS
 #else
-#define libsieve_debugf(...) 
+#define libsieve_debugf(ARGS) 
 #endif /* ifdef DEBUG */
 
 /* These functions interact with the Sieve 2 API's 
@@ -100,8 +100,8 @@ int libsieve_message2_freecache(sieve2_message *m)
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            libsieve_debugf( "libsieve_message2_freecache(): free()ing header: [%s]\n",
-                m->hash[i]->name );
+            libsieve_debugf(( "libsieve_message2_freecache(): free()ing header: [%s]\n",
+                m->hash[i]->name ));
             /*
 	     * This memory is no longer free()d here,
 	     * but rather in headerlexfree() and headeryaccfree(),
@@ -111,10 +111,10 @@ int libsieve_message2_freecache(sieve2_message *m)
             for (j = 0; j < m->hash[i]->count; j++)
               {
                 // * Free each used entry in the contents array * /
-                libsieve_debugf( "libsieve_message2_freecache(): free()ing count: [%d]\n",
-                    j );
-                libsieve_debugf( "libsieve_message2_freecache(): free()ing entry: [%s]\n",
-                    m->hash[i]->contents[j] );
+                libsieve_debugf(( "libsieve_message2_freecache(): free()ing count: [%d]\n",
+                    j ));
+                libsieve_debugf(( "libsieve_message2_freecache(): free()ing entry: [%s]\n",
+                    m->hash[i]->contents[j] ));
                 libsieve_free(m->hash[i]->contents[j]);
               }
             */
@@ -166,7 +166,7 @@ int libsieve_message2_headercache(sieve2_message *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                libsieve_debugf("libsieve_message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
+                libsieve_debugf(("libsieve_message2_headercache(): Expanding hash for [%s]\n", hl->h->name));
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));

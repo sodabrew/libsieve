@@ -407,11 +407,11 @@ char *yytext;
  *      FIXME: Needs Copyright                             *
  ***********************************************************/
 
-/* This only works in C99 and higher... */
+/* Be sure to use double parens when calling! */
 #ifdef DEBUG
-#define libsieve_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(ARGS) printf ARGS
 #else
-#define libsieve_debugf(...) 
+#define libsieve_debugf(ARGS) 
 #endif /* ifdef DEBUG */
 
 /* Must be defined before header.h */
@@ -684,7 +684,7 @@ YY_RULE_SETUP
 #line 47 "header-lex.l"
 {
                 BEGIN S_NAME;
-                libsieve_debugf( "Begin NAME\n" );
+                libsieve_debugf(( "Begin NAME\n" ));
                 yyless(0);
                 }
 	YY_BREAK
@@ -693,7 +693,7 @@ YY_RULE_SETUP
 #line 52 "header-lex.l"
 {
                 BEGIN S_WRAP;
-                libsieve_debugf( "Begin WRAP (line started with whitespace)\n" );
+                libsieve_debugf(( "Begin WRAP (line started with whitespace)\n" ));
                 yyless(0);
                 }
 	YY_BREAK
@@ -702,7 +702,7 @@ YY_RULE_SETUP
 #line 57 "header-lex.l"
 {
                 BEGIN S_WRAP;
-                libsieve_debugf( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" );
+                libsieve_debugf(( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" ));
                 /* Push back the whitespace but not the CRLF; since the
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
@@ -713,7 +713,7 @@ YY_RULE_SETUP
 #line 64 "header-lex.l"
 {
                 /* Special case of an empty header: whitespace followed by newlines */
-                libsieve_debugf( "Eat some whitespace and return COLON, forget TEXT\n" );
+                libsieve_debugf(( "Eat some whitespace and return COLON, forget TEXT\n" ));
                 return COLON;
                 }
 	YY_BREAK
@@ -723,7 +723,7 @@ YY_RULE_SETUP
 {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
-                libsieve_debugf( "Begin TEXT, eat some whitespace and return COLON\n" );
+                libsieve_debugf(( "Begin TEXT, eat some whitespace and return COLON\n" ));
                 return COLON;
                 }
 	YY_BREAK
@@ -743,7 +743,7 @@ YY_RULE_SETUP
                  * 33  !  to  57  9
                  * 59  ;  to  126 ~
                  * Note that  58  :  is reserved as the field separator */
-                libsieve_debugf( "NAME: %s\n", yytext );
+                libsieve_debugf(( "NAME: %s\n", yytext ));
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return NAME;
@@ -753,7 +753,7 @@ case 8:
 YY_RULE_SETUP
 #line 91 "header-lex.l"
 {
-                libsieve_debugf( "TEXT: %s\n", yytext );
+                libsieve_debugf(( "TEXT: %s\n", yytext ));
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return TEXT;
@@ -763,7 +763,7 @@ case 9:
 YY_RULE_SETUP
 #line 98 "header-lex.l"
 {
-                libsieve_debugf( "WRAP: %s\n", yytext );
+                libsieve_debugf(( "WRAP: %s\n", yytext ));
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return WRAP;

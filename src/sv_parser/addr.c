@@ -111,11 +111,11 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-/* This only works in C99 and higher... */
+/* Be sure to use double parens when calling! */
 #ifdef DEBUG
-#define libsieve_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(ARGS) printf ARGS
 #else
-#define libsieve_debugf(...) 
+#define libsieve_debugf(ARGS)
 #endif /* ifdef DEBUG */
 
 /* Better yacc error messages make me happy */
@@ -1066,30 +1066,30 @@ yyreduce:
     {
         case 2:
 #line 65 "addr.y"
-    { libsieve_debugf( "address: mailbox: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "address: mailbox: %s\n", yyvsp[0] )); }
     break;
 
   case 3:
 #line 66 "addr.y"
-    { libsieve_debugf( "address: group: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "address: group: %s\n", yyvsp[0] )); }
     break;
 
   case 4:
 #line 68 "addr.y"
-    { libsieve_debugf( "group: phrase: %s\n", yyvsp[-2] ); }
+    { libsieve_debugf(( "group: phrase: %s\n", yyvsp[-2] )); }
     break;
 
   case 5:
 #line 69 "addr.y"
-    { libsieve_debugf( "group: phrase mailboxes: %s %s\n", yyvsp[-3], yyvsp[-1] ); }
+    { libsieve_debugf(( "group: phrase mailboxes: %s %s\n", yyvsp[-3], yyvsp[-1] )); }
     break;
 
   case 6:
 #line 71 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf( "mailboxes: mailbox: %s\n", yyvsp[0] );
-		libsieve_debugf( "allocating newaddr\n" );
+		libsieve_debugf(( "mailboxes: mailbox: %s\n", yyvsp[0] ));
+		libsieve_debugf(( "allocating newaddr\n" ));
 		libsieve_addrappend(&addr);
 		}
     break;
@@ -1098,43 +1098,43 @@ yyreduce:
 #line 77 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf( "mailboxes: mailboxes mailbox: %s %s\n", yyvsp[-2], yyvsp[0] );
-		libsieve_debugf( "allocating newaddr\n" );
+		libsieve_debugf(( "mailboxes: mailboxes mailbox: %s %s\n", yyvsp[-2], yyvsp[0] ));
+		libsieve_debugf(( "allocating newaddr\n" ));
 		libsieve_addrappend(&addr);
 		}
     break;
 
   case 8:
 #line 85 "addr.y"
-    { libsieve_debugf( "mailbox: routeaddr: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "mailbox: routeaddr: %s\n", yyvsp[0] )); }
     break;
 
   case 9:
 #line 86 "addr.y"
-    { libsieve_debugf( "mailbox: addrspec: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "mailbox: addrspec: %s\n", yyvsp[0] )); }
     break;
 
   case 10:
 #line 87 "addr.y"
     {
-		libsieve_debugf( "mailbox: phrase routeaddr: %s %s\n", yyvsp[-1], yyvsp[0] );
+		libsieve_debugf(( "mailbox: phrase routeaddr: %s %s\n", yyvsp[-1], yyvsp[0] ));
 		// This is a "top terminal" state...
-		libsieve_debugf( "addr->name: %s\n", yyvsp[-1] );
+		libsieve_debugf(( "addr->name: %s\n", yyvsp[-1] ));
 		addr->name = libsieve_strdup( yyvsp[-1], strlen(yyvsp[-1]) );
 		}
     break;
 
   case 11:
 #line 94 "addr.y"
-    { libsieve_debugf( "routeaddr: addrspec: %s\n", yyvsp[-1] ); }
+    { libsieve_debugf(( "routeaddr: addrspec: %s\n", yyvsp[-1] )); }
     break;
 
   case 12:
 #line 95 "addr.y"
     {
-		libsieve_debugf( "routeaddr: route addrspec: %s:%s\n", yyvsp[-3], yyvsp[-1] );
+		libsieve_debugf(( "routeaddr: route addrspec: %s:%s\n", yyvsp[-3], yyvsp[-1] ));
 		// This is a "top terminal" state...
-		libsieve_debugf( "addr->route: %s\n", yyvsp[-3] );
+		libsieve_debugf(( "addr->route: %s\n", yyvsp[-3] ));
 		addr->route = libsieve_strdup( yyvsp[-3], strlen(yyvsp[-3]) );
 		}
     break;
@@ -1142,11 +1142,11 @@ yyreduce:
   case 13:
 #line 102 "addr.y"
     {
-		libsieve_debugf( "addrspec: localpart domain: %s %s\n", yyvsp[-2], yyvsp[0] );
+		libsieve_debugf(( "addrspec: localpart domain: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		// This is a "top terminal" state...
-		libsieve_debugf( "addr->mailbox: %s\n", yyvsp[-2] );
+		libsieve_debugf(( "addr->mailbox: %s\n", yyvsp[-2] ));
 		addr->mailbox = libsieve_strdup( yyvsp[-2], strlen(yyvsp[-2]) );
-		libsieve_debugf( "addr->domain: %s\n", yyvsp[0] );
+		libsieve_debugf(( "addr->domain: %s\n", yyvsp[0] ));
 		addr->domain = libsieve_strdup( yyvsp[0], strlen(yyvsp[0]) );
 		}
     break;
@@ -1154,7 +1154,7 @@ yyreduce:
   case 14:
 #line 111 "addr.y"
     {
-		libsieve_debugf( "route: domain: %s\n", yyvsp[0] );
+		libsieve_debugf(( "route: domain: %s\n", yyvsp[0] ));
                 yyval = libsieve_strbuf(ml, libsieve_strconcat( "@", yyvsp[0], NULL ), strlen(yyvsp[0])+1, FREEME);
 		}
     break;
@@ -1162,87 +1162,87 @@ yyreduce:
   case 15:
 #line 115 "addr.y"
     {
-		libsieve_debugf( "route: domain route: %s %s\n", yyvsp[-2], yyvsp[0] );
+		libsieve_debugf(( "route: domain route: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( "@", yyvsp[-2], ",", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+2, FREEME);
 		}
     break;
 
   case 16:
 #line 120 "addr.y"
-    { libsieve_debugf( "localpart: word: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "localpart: word: %s\n", yyvsp[0] )); }
     break;
 
   case 17:
 #line 121 "addr.y"
     {
-		libsieve_debugf( "localpart: localpart word: %s %s\n", yyvsp[-2], yyvsp[0] );
+		libsieve_debugf(( "localpart: localpart word: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-2], ".", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+1, FREEME);
 		}
     break;
 
   case 18:
 #line 126 "addr.y"
-    { libsieve_debugf( "domain: subdomain: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "domain: subdomain: %s\n", yyvsp[0] )); }
     break;
 
   case 19:
 #line 127 "addr.y"
     {
-		libsieve_debugf( "domain: domain subdomain: %s %s\n", yyvsp[-2], yyvsp[0] );
+		libsieve_debugf(( "domain: domain subdomain: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-2], ".", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+1, FREEME);
 		}
     break;
 
   case 20:
 #line 132 "addr.y"
-    { libsieve_debugf( "subdomain: domainref: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "subdomain: domainref: %s\n", yyvsp[0] )); }
     break;
 
   case 21:
 #line 133 "addr.y"
-    { libsieve_debugf( "subdomain: domainlit: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "subdomain: domainlit: %s\n", yyvsp[0] )); }
     break;
 
   case 22:
 #line 135 "addr.y"
-    { libsieve_debugf( "domainref: ATOM: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "domainref: ATOM: %s\n", yyvsp[0] )); }
     break;
 
   case 23:
 #line 137 "addr.y"
     {
-	 	libsieve_debugf( "domainlit: DTEXT: %s\n", yyvsp[-1] );
+	 	libsieve_debugf(( "domainlit: DTEXT: %s\n", yyvsp[-1] ));
 		yyval = yyvsp[-1];
 		}
     break;
 
   case 24:
 #line 142 "addr.y"
-    { libsieve_debugf( "phrase: word: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "phrase: word: %s\n", yyvsp[0] )); }
     break;
 
   case 25:
 #line 143 "addr.y"
     {
-		libsieve_debugf( "phrase: phrase word: %s %s\n", yyvsp[-1], yyvsp[0] );
+		libsieve_debugf(( "phrase: phrase word: %s %s\n", yyvsp[-1], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-1], " ", yyvsp[0], NULL ), strlen(yyvsp[-1])+strlen(yyvsp[0])+1, FREEME);
 		}
     break;
 
   case 26:
 #line 148 "addr.y"
-    { libsieve_debugf( "word: ATOM: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "word: ATOM: %s\n", yyvsp[0] )); }
     break;
 
   case 27:
 #line 149 "addr.y"
-    { libsieve_debugf( "word: qstring: %s\n", yyvsp[0] ); }
+    { libsieve_debugf(( "word: qstring: %s\n", yyvsp[0] )); }
     break;
 
   case 28:
 #line 151 "addr.y"
     {
-		libsieve_debugf( "qstring: QTEXT: %s\n", yyvsp[-1] );
+		libsieve_debugf(( "qstring: QTEXT: %s\n", yyvsp[-1] ));
 		yyval = yyvsp[-1];
 		}
     break;
@@ -1477,7 +1477,7 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
     if(libsieve_addrparse()) {
         /*
         *err = libsieve_strdup(addrerr);
-        libsieve_debugf( "%s\n", err );
+        libsieve_debugf(( "%s\n", err ));
         libsieve_free(err);
         */
         // FIXME: Make sure that this is sufficient cleanup
@@ -1517,13 +1517,13 @@ void libsieve_addrstructfree(struct address *addr, int freeall)
     while(addr != NULL) {
         bddr = addr;
         if(freeall) {
-            libsieve_debugf("I'd like to free this: %s\n", bddr->mailbox);
+            libsieve_debugf(("I'd like to free this: %s\n", bddr->mailbox));
             libsieve_free(bddr->mailbox);
-            libsieve_debugf("I'd like to free this: %s\n", bddr->domain);
+            libsieve_debugf(("I'd like to free this: %s\n", bddr->domain));
             libsieve_free(bddr->domain);
-            libsieve_debugf("I'd like to free this: %s\n", bddr->route);
+            libsieve_debugf(("I'd like to free this: %s\n", bddr->route));
             libsieve_free(bddr->route);
-            libsieve_debugf("I'd like to free this: %s\n", bddr->name);
+            libsieve_debugf(("I'd like to free this: %s\n", bddr->name));
             libsieve_free(bddr->name);
         }
         addr = bddr->next;
@@ -1537,13 +1537,13 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     struct address *tmp = addr;
     struct address *top = libsieve_malloc(sizeof(struct address));
 
-    libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox);
+    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
     top->mailbox = tmp->mailbox;
-    libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain);
+    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
     top->domain = tmp->domain;
-    libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route);
+    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
     top->route = tmp->route;
-    libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name);
+    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
     top->name = tmp->name;
     tmp = tmp->next;
     new = top;
@@ -1553,13 +1553,13 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
             return NULL;   
         else
             new = new->next;
-        libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox);
+        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
         new->mailbox = tmp->mailbox;
-        libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain);
+        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
         new->domain = tmp->domain;
-        libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route);
+        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
         new->route = tmp->route;
-        libsieve_debugf("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name);
+        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
         new->name = tmp->name;
         tmp = tmp->next;
     }
@@ -1570,8 +1570,8 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
 
 void libsieve_addrappend(struct address **a)
 {
-    libsieve_debugf( "Prepending a new addr struct\n" );
     struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
+    libsieve_debugf(( "Prepending a new addr struct\n" ));
     new->mailbox = NULL;
     new->domain = NULL;
     new->route = NULL;

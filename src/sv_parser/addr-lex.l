@@ -27,12 +27,13 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-/* This only works in C99 and higher... */
+/* Be sure to use double parens when calling! */
 #ifdef DEBUG
-#define libsieve_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(ARGS) printf ARGS
 #else
-#define libsieve_debugf(...) 
+#define libsieve_debugf(ARGS)
 #endif /* ifdef DEBUG */
+
 
 /* Must be defined before addr.h */
 #define YYSTYPE char *
@@ -63,9 +64,9 @@ void libsieve_addrfatalerror(const char msg[]);
 
 %%
 
-\"				{ BEGIN QSTRING; libsieve_debugf( "Begin QSTRING\n" ); return QUOTE; }
-\[				{ BEGIN DOMAINLIT; libsieve_debugf( "Begin DOMAINLIT\n" ); return yytext[0]; }
-\(				{ ncom = 1; libsieve_debugf( "Begin COMMENT\n" ); BEGIN COMMENT; }
+\"				{ BEGIN QSTRING; libsieve_debugf(( "Begin QSTRING\n" )); return QUOTE; }
+\[				{ BEGIN DOMAINLIT; libsieve_debugf(( "Begin DOMAINLIT\n" )); return yytext[0]; }
+\(				{ ncom = 1; libsieve_debugf(( "Begin COMMENT\n" )); BEGIN COMMENT; }
 \)				{ libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
@@ -76,7 +77,7 @@ void libsieve_addrfatalerror(const char msg[]);
 		return yytext[0];
 				}
 ([ \t\n\r])+			{
-		libsieve_debugf( "Whitespace silently murdered.\n" );
+		libsieve_debugf(( "Whitespace silently murdered.\n" ));
 		/* Ignore whitespace by not returning */
 				}
 ([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
@@ -93,14 +94,14 @@ void libsieve_addrfatalerror(const char msg[]);
 				}
 <QSTRING>\"			{
 		BEGIN INITIAL;
-		libsieve_debugf( "End QSTRING\n" );
+		libsieve_debugf(( "End QSTRING\n" ));
 		return QUOTE;
 				}
 
 <DOMAINLIT>([^\[\]\n\r\\]|\\.)*	return DTEXT;
 <DOMAINLIT>\]			{
 		BEGIN INITIAL;
-		libsieve_debugf( "End DOMAINLIT\n" );
+		libsieve_debugf(( "End DOMAINLIT\n" ));
 		return yytext[0];
 		};
 
