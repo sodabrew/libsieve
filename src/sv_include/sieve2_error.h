@@ -22,6 +22,7 @@
 #define SIEVE2_ERROR_EXEC              5
 #define SIEVE2_ERROR_INTERNAL          6
 #define SIEVE2_ERROR_NOMEM             7
+#define SIEVE2_ERROR_UNSUPPORTED       8
 
 static const char * const sieve2_error_text[] = {
     "Sieve OK: no trouble at all",
@@ -32,6 +33,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: execution error",
     "Sieve Error: internal error",
     "Sieve Error: out of memory",
+    "Sieve Error: unsupported feature",
     0
 };
 #endif /* SIEVE2_ERROR_H */

@@ -79,10 +79,8 @@ int sieve2_support_bind(sieve2_support_t *p, sieve2_script_t *s)
 int sieve2_support_register(sieve2_support_t *p, int support)
 {
     sieve_support_t *q = (sieve_support_t *)p;
-    /* FIXME: If the client program supports something that the 
-     * interpreter doesn't then we've got a problem, right? */
     if(!(support & SIEVE2_ACTION_ALL))
-        return SIEVE2_ERROR_EXEC;
+        return SIEVE2_ERROR_UNSUPPORTED;
     if(support & SIEVE2_ACTION_REJECT)
         q->reject = 1;
     if(support & SIEVE2_ACTION_FILEINTO)
@@ -96,9 +94,10 @@ int sieve2_support_register(sieve2_support_t *p, int support)
     return SIEVE2_OK;
 }
 
-/* Main entry point for script execution in the version 2 api
+/* This is where we really do it:
+ * run a script over a message to produce an action list
  */
-int sieve2_script_exec(sieve2_script_t *s, sieve2_message_t *m, sieve2_action_t *a)
+int sieve2_execute(sieve2_script_t *s, sieve2_message_t *m, sieve2_action_t *a)
 {
     int ret;
     const char *errmsg = NULL;
@@ -197,6 +196,9 @@ int sieve2_action_free(sieve2_action_t *in)
                 /* FIXME: Should we add all the other codes back in, to
                  * be able to be certain that we're not missing anything? */
 //                return SIEVE2_ERROR_EXEC;
+                /* TODO: I believe that simply returning SIEVE2_ERROR_UNSUPPORTED
+                 * will do the trick... but does that make sense? We're generating
+                 * something that we ourselves don't support!? Hmm... */
                 break;
         }
         a = b->next;
@@ -312,21 +314,37 @@ int sieve2_script_free(sieve2_script_t *s)
 }
 
 /* Given a script, produce an opaque struct holding the executable code */
-int sieve2_script_parse(sieve2_script_t *s, char *script)
+int sieve2_script_register(sieve2_script_t *s, void *thing, int type)
 {
     extern int sievelineno;
     sieve_script_t *t = (sieve_script_t *)s;
 
-    t->err = 0;
-    sievelineno = 1;    /* reset line number */
-    t->cmds = sieve_parse_buffer(t, script);
-    if (t->err > 0) {
-	if (t->cmds) {
-	    free_tree(t->cmds);
-	}
-	t->cmds = NULL;
-	return SIEVE2_ERROR_PARSE;
+    if (thing == NULL)
+        return SIEVE2_ERROR_EXEC;
+
+    switch(type) {
+        case SIEVE2_SCRIPT_CHAR_ARRAY:
+            t->err = 0;
+            sievelineno = 1;    /* reset line number */
+            t->cmds = sieve_parse_buffer(t, (char *)thing);
+            if (t->err > 0) {
+                if (t->cmds) {
+                    free_tree(t->cmds);
+                }
+                t->cmds = NULL;
+                return SIEVE2_ERROR_PARSE;
+            }
+            break;
+        case SIEVE2_SCRIPT_SIZE:
+        case SIEVE2_SCRIPT_CALLBACK:
+        case SIEVE2_SCRIPT_INCLUDE_CALLBACK:
+        case SIEVE2_SCRIPT_FILE_POINTER:
+            /* Since we don't support these yet... */
+        default:
+            return SIEVE2_ERROR_UNSUPPORTED;
+            break;
     }
+
     return SIEVE2_OK;
 }
 
@@ -387,8 +405,7 @@ int sieve2_message_register(sieve2_message_t *m, void *thing, int type)
             n->envelope = (char *)thing;
             break;
         default:
-            /* FIXME: Or should we just quietly ignore this? */
-            return SIEVE2_ERROR_EXEC;
+            return SIEVE2_ERROR_UNSUPPORTED;
             break;
     }
 
