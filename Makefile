@@ -1,6 +1,6 @@
 # this is the version number :-)
 PACKAGE = libsieve
-VERSION = 2.1.1
+VERSION = 2.1.3
 SOURCES = src
 DOCS = html
 OTHERS = AUTHORS COPYING NEWS README Makefile

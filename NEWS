@@ -1,3 +1,25 @@
+libSieve 2.1.3
+--------------
+
+- Accepted patches from Timo Sirainen:
+
+  - Added function xstrconcat
+  - Changed strdup to strndup
+  - Changed strcpy to xstrcpy
+  - Changed uglies to xstrconcat
+  - Rebuild .y and .l in Makefile.am
+  - Changed int to size_t where applicable
+  - Added explicit casting where applicable
+
+libSieve 2.1.2
+--------------
+
+- Changed `timestamp` to $timestamp in configure scripts.
+
+- Added missing autoconf and libtool scripts.
+
+- Fixed a typo in index.html
+
 libSieve 2.1.1
 --------------
 

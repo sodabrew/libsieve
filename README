@@ -1,9 +1,12 @@
-libSieve 2.1.1
+libSieve 2.1.3
 --------------
 
 This code is a standalone library based upon code which had been distributed
 with the Cyrus Mail Server. API changes will be made to create a more
 extensible interface as this version of the Sieve library evolves.
+
+To get in touch with the usage and development communities for libSieve,
+please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
 
 Notes on implementation
 -----------------------
