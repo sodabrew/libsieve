@@ -64,6 +64,9 @@ void headerfatalerror(const char msg[]);
                 sv_debugf( "Begin TEXT, eat some whitespace and return COLON\n" );
                 return COLON;
                 }
+(\r|\n)+                {
+                /* Eat stray newlines, such as those at the end of every line... */
+                }
 
 <S_NAME>([^:])+         {
                 /* FIXME: Should be something like [!-9;-~]... */
