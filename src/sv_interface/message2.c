@@ -32,9 +32,9 @@
 
 /* This only works in C99 and higher... */
 #ifdef DEBUG
-#define sv_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(...) printf(__VA_ARGS__)
 #else
-#define sv_debugf(...) 
+#define libsieve_debugf(...) 
 #endif /* ifdef DEBUG */
 
 /* These functions interact with the Sieve 2 API's 
@@ -60,11 +60,11 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
     *body = NULL;
 
     /* Make a non-const copy of the header */
-    head = sv_strdup(chead, strlen(chead));
+    head = libsieve_strdup(chead, strlen(chead));
     if (head == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    head = sv_strtolower(head, strlen(head));
+    head = libsieve_strtolower(head, strlen(head));
 
     /* Get a hash number of the header name */
     cl = c = message2_hashheader(head, m->hashsize);
@@ -80,7 +80,7 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
         if (c == cl) break;
     }
 
-    sv_free(head);
+    libsieve_free(head);
 
     if (*body) {
         return SIEVE2_OK;
@@ -98,12 +98,12 @@ int message2_getenvelope(sieve2_message *m, const char *chead, const char ***bod
 
 int message2_freecache(sieve2_message *m)
 {
-    int i, j;
+    int i; /*, j; */
 
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            sv_debugf( "message2_freecache(): free()ing header: [%s]\n",
+            libsieve_debugf( "message2_freecache(): free()ing header: [%s]\n",
                 m->hash[i]->name );
             /*
 	     * This memory is no longer free()d here,
@@ -114,20 +114,20 @@ int message2_freecache(sieve2_message *m)
             for (j = 0; j < m->hash[i]->count; j++)
               {
                 // * Free each used entry in the contents array * /
-                sv_debugf( "message2_freecache(): free()ing count: [%d]\n",
+                libsieve_debugf( "message2_freecache(): free()ing count: [%d]\n",
                     j );
-                sv_debugf( "message2_freecache(): free()ing entry: [%s]\n",
+                libsieve_debugf( "message2_freecache(): free()ing entry: [%s]\n",
                     m->hash[i]->contents[j] );
-                sv_free(m->hash[i]->contents[j]);
+                libsieve_free(m->hash[i]->contents[j]);
               }
             */
-            sv_free(m->hash[i]->contents);
-            sv_free(m->hash[i]->name);
+            libsieve_free(m->hash[i]->contents);
+            libsieve_free(m->hash[i]->name);
         }
-        sv_free(m->hash[i]);
+        libsieve_free(m->hash[i]);
     }
-    sv_free(m->hash);
-    sv_free(m);
+    libsieve_free(m->hash);
+    libsieve_free(m);
 
     return SIEVE2_OK;
 }
@@ -166,10 +166,10 @@ int message2_headercache(sieve2_message *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                sv_debugf("message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
+                libsieve_debugf("message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
                 /* Need to make some more space in here */
                 char **tmp;
-                tmp = (char **)sv_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
+                tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
                 if (tmp == NULL)
                     return SIEVE2_ERROR_NOMEM;
                 else
@@ -181,9 +181,9 @@ int message2_headercache(sieve2_message *m)
             }
           /* Since we're not using this header_t struct, free it.
            * Note that we're not freeing each of contents, we need those. */
-          sv_free(hl->h->contents);
-          sv_free(hl->h->name);
-          sv_free(hl->h);
+          libsieve_free(hl->h->contents);
+          libsieve_free(hl->h->name);
+          libsieve_free(hl->h);
         } else {
             /* Make of copy of the pointer */
             m->hash[c] = hl->h;
@@ -192,7 +192,7 @@ int message2_headercache(sieve2_message *m)
 	/* Advance the cursor and cleanup as we go */
 	hlfree = hl;
         hl = hl->next;
-	sv_free(hlfree);
+	libsieve_free(hlfree);
     }
 
     m->hashfull = 1;

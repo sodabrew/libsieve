@@ -2,7 +2,7 @@
 PACKAGE = libsieve
 VERSION = 2.2.0pre1
 SOURCES = src
-DOCS = html
+DOCS = www rfc
 OTHERS = AUTHORS COPYING NEWS README Makefile
 
 all:

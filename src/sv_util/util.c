@@ -21,7 +21,7 @@
 #include "util.h"
 
 /* Wrapper around memset() */
-void *sv_memset(void *ptr, int c, size_t len)
+void *libsieve_memset(void *ptr, int c, size_t len)
 {
     if(ptr != NULL && c >= 0 && c < 254 && len > 0)
         return memset(ptr, c, len);
@@ -29,7 +29,7 @@ void *sv_memset(void *ptr, int c, size_t len)
 }
 
 /* Wrapper around free() */
-void sv_free(void *ptr)
+void libsieve_free(void *ptr)
 {
     if(ptr)
         free(ptr);
@@ -37,7 +37,7 @@ void sv_free(void *ptr)
 }
 
 /* Wrapper around malloc() */
-void *sv_malloc (size_t size)
+void *libsieve_malloc (size_t size)
 {
     void *ret;
 
@@ -49,7 +49,7 @@ void *sv_malloc (size_t size)
 }
 
 /* Wrapper around realloc() */
-void *sv_realloc (void *ptr, size_t size)
+void *libsieve_realloc (void *ptr, size_t size)
 {
     void *ret;
 
@@ -63,7 +63,7 @@ void *sv_realloc (void *ptr, size_t size)
 /* Convert a string to lower case
  * (translate from 65-90 to 97-122)
  */
-char *sv_strtolower (char *str, size_t len)
+char *libsieve_strtolower (char *str, size_t len)
   {
     size_t i;
 
@@ -77,7 +77,7 @@ char *sv_strtolower (char *str, size_t len)
 /* Convert a string to upper case
  * (translate from 97-122 to 65-90)
  */
-char *sv_strtoupper (char *str, size_t len)
+char *libsieve_strtoupper (char *str, size_t len)
   {
     size_t i;
 
@@ -88,7 +88,7 @@ char *sv_strtoupper (char *str, size_t len)
     return str;
   }
 
-int sv_strisatom (const char *str, size_t len)
+int libsieve_strisatom (const char *str, size_t len)
   {
     size_t i;
 
@@ -117,7 +117,7 @@ int sv_strisatom (const char *str, size_t len)
   }
 
 /* Convert a common human format to actual byte count */
-int sv_strtonum(const char *str)
+int libsieve_strtonum(const char *str)
   {
     int val = 0;
     char *tail = NULL;
@@ -139,24 +139,24 @@ int sv_strtonum(const char *str)
     else return val;
   }
 
-char *sv_strdup(const char *str, size_t len)
+/* Self implementation of strdup()... well, strndup() */
+char *libsieve_strdup(const char *str, size_t len)
   {
     char *p = NULL;
     
-    if ((p = sv_memset((char *)sv_malloc(len+1), 0, len+1)) != NULL) {
-        /* The NULL is not be copied */
+    p = (char *)libsieve_malloc(sizeof(char) * (len + 1));
+    if (p != NULL) {
+        /* The nul is not copied */
         strncpy(p, str, len);
-        /* A new NULL is thus added */
-        // *(p+len+1) = '\0';
-	// Because of the memset,
-	// we don't need this NULL
+        /* A new nul is added */
+        *(p+len) = '\0';
     }
 
     return p;
   }
 
 /* Contributed by Timo Sirainen, December 2002 */
-char *sv_strconcat (const char *str, ...)
+char *libsieve_strconcat (const char *str, ...)
   {
     va_list va;
     char *buf;
@@ -172,7 +172,7 @@ char *sv_strconcat (const char *str, ...)
 	len = strlen(str);
 	if (size-pos < len) {
 	    size += len + 256;
-	    buf = sv_realloc(buf, size);
+	    buf = libsieve_realloc(buf, size);
 	}
 	memcpy(buf+pos, str, len);
         pos += len;
@@ -185,18 +185,19 @@ char *sv_strconcat (const char *str, ...)
   }
 
 /* This is a spiffy function that helps to maintain
- * a single buffer holding multiple separate strings.
+ * a single buffer holding pointers to multiple strings.
  *
  * The caller must have the ml... variables declared
  * and in scope and is responsible for freeing mlbuf. */
-char *sv_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
+char *libsieve_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
 {
     char *stmp; /* Temporary for a pointer */
     char **sstmp; /* Temporary for a pointer to a pointer */
 
     if (ml->pos + 1 >= ml->siz)
       {
-        sstmp = (char **)sv_malloc(sizeof(char *) * (ml->siz += 200));
+        /* This gives a logarithmic growth, reducing the need for realloc's */
+        sstmp = (char **)libsieve_realloc(ml->buf, sizeof(char *) * (ml->siz *= 2));
         /* Point to the new memory */
         if (sstmp != NULL)
             ml->buf = sstmp;
@@ -205,7 +206,7 @@ char *sv_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
             return NULL;
       }
 
-    stmp = (char *)sv_strdup(str, len);
+    stmp = (char *)libsieve_strdup(str, len);
     /* Point to the new memory */
     if (stmp != NULL)
         ml->buf[ml->pos] = stmp;
@@ -221,12 +222,12 @@ char *sv_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
 
     /* Free the incoming string, if requested */
     if (freeme)
-        sv_free(str);
+        libsieve_free(str);
 
     return ml->buf[ml->pos-1];
 }
 
-void sv_strbuffree(struct mlbuf **ml, int freeall)
+void libsieve_strbuffree(struct mlbuf **ml, int freeall)
 {
     size_t i;
 
@@ -235,20 +236,23 @@ void sv_strbuffree(struct mlbuf **ml, int freeall)
       {
         for (i = 0; i < (*ml)->pos; i++)
           {
-            sv_free((*ml)->buf[i]);
+            libsieve_free((*ml)->buf[i]);
           }
       }
     /* Free the buf array */
-    sv_free((*ml)->buf);
+    libsieve_free((*ml)->buf);
     /* Free the mlbuf itself */
-    sv_free((*ml));
+    libsieve_free((*ml));
     /* NULLify the free()'d pointer */
     *ml = NULL;
 }
 
-void sv_strbufalloc(struct mlbuf **ml)
+/* FIXME: This should have a return value, you know, SIEVE2_ERROR_NOMEM... */
+void libsieve_strbufalloc(struct mlbuf **ml)
 {
-    *ml = (struct mlbuf *)sv_malloc(sizeof(struct mlbuf));
-    (*ml)->buf = NULL;
-    (*ml)->siz = (*ml)->pos = 0;
+    *ml = (struct mlbuf *)libsieve_malloc(sizeof(struct mlbuf));
+    (*ml)->pos = 0; /* Naturally, we start at position zero */
+    (*ml)->siz = 256; /* This is the initial number of buffers we can hold */
+    (*ml)->buf = (char **)libsieve_malloc(sizeof(char *) * (*ml)->siz);
 }
+

@@ -10,9 +10,9 @@
 
 /* This only works in C99 and higher... */
 #ifdef DEBUG
-#define sv_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(...) printf(__VA_ARGS__)
 #else
-#define sv_debugf(...) 
+#define libsieve_debugf(...) 
 #endif /* ifdef DEBUG */
 
 /* Must be defined before header.h */
@@ -36,7 +36,7 @@ void headerfatalerror(const char msg[]);
 %}
 
 %option noyywrap
-%option prefix="header"
+%option prefix="libsieve_header"
 
 %x S_NAME S_TEXT S_WRAP
 
@@ -44,30 +44,30 @@ void headerfatalerror(const char msg[]);
 
 ^[^\ \t\r\n]            {
                 BEGIN S_NAME;
-                sv_debugf( "Begin NAME\n" );
+                libsieve_debugf( "Begin NAME\n" );
                 yyless(0);
                 }
 ^[\ \t]                 {
                 BEGIN S_WRAP;
-                sv_debugf( "Begin WRAP (line started with whitespace)\n" );
+                libsieve_debugf( "Begin WRAP (line started with whitespace)\n" );
                 yyless(0);
                 }
 \r\n[\ \t]              {
                 BEGIN S_WRAP;
-                sv_debugf( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" );
+                libsieve_debugf( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" );
                 /* Push back the whitespace but not the CRLF; since the
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
 :([\ \t])+(\r|\n)+      {
                 /* Special case of an empty header: whitespace followed by newlines */
-                sv_debugf( "Eat some whitespace and return COLON, forget TEXT\n" );
+                libsieve_debugf( "Eat some whitespace and return COLON, forget TEXT\n" );
                 return COLON;
                 }
 :([\ \t])+              {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
-                sv_debugf( "Begin TEXT, eat some whitespace and return COLON\n" );
+                libsieve_debugf( "Begin TEXT, eat some whitespace and return COLON\n" );
                 return COLON;
                 }
 (\r|\n)+                {
@@ -80,22 +80,22 @@ void headerfatalerror(const char msg[]);
                  * 33  !  to  57  9
                  * 59  ;  to  126 ~
                  * Note that  58  :  is reserved as the field separator */
-                sv_debugf( "NAME: %s\n", yytext );
-		headerlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
+                libsieve_debugf( "NAME: %s\n", yytext );
+		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return NAME;
                 }
 
 <S_TEXT>([^\r\n])+      {
-                sv_debugf( "TEXT: %s\n", yytext );
-		headerlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
+                libsieve_debugf( "TEXT: %s\n", yytext );
+		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return TEXT;
                 }
 
 <S_WRAP>([^\r\n])+      {
-                sv_debugf( "WRAP: %s\n", yytext );
-		headerlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
+                libsieve_debugf( "WRAP: %s\n", yytext );
+		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return WRAP;
                 }
@@ -123,14 +123,14 @@ int headerinput(char *buf, int max)
 /* Clean up after ourselves by free()ing the current buffer */
 void headerlexfree()
 {
-    sv_strbuffree(&ml, FREEME);
+    libsieve_strbuffree(&ml, FREEME);
     header_delete_buffer( YY_CURRENT_BUFFER );
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void headerlexalloc()
 {
-    sv_strbufalloc(&ml);
+    libsieve_strbufalloc(&ml);
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,

@@ -6,14 +6,11 @@
 
 #define HEADERHASHSIZE 1019
 
-int headerlex(void);
-int headerparse(void);
-int headerinput(char *buf, int max_size);
-void headererror(const char *str);
-int headerappend(header_list_t **hl);
-void headerentry(header_t *h, char *name, char *body);
-
-void headeryaccalloc(void);
-void headeryaccfree(void);
+int libsieve_headerlex(void);
+int libsieve_headerparse(void);
+int libsieve_headerinput(char *buf, int max_size);
+void libsieve_headererror(const char *str);
+int libsieve_headerappend(header_list_t **hl);
+void libsieve_headerentry(header_t *h, char *name, char *body);
 
 #endif /* HEADERINC_H */

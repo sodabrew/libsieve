@@ -111,12 +111,12 @@ int sieve_script_buffer(sieve_interp_t *interp, char *script,
     int res = SIEVE_OK;
     extern int sievelineno;
 
-    res = interp_verify(interp);
+    res = libsieve_interp_verify(interp);
     if (res != SIEVE_OK) {
 	return res;
     }
 
-    s = (sieve_script_t *) sv_malloc(sizeof(sieve_script_t));
+    s = (sieve_script_t *) libsieve_malloc(sizeof(sieve_script_t));
     s->interp = *interp;
     s->script_context = script_context;
     /* clear all support bits */
@@ -131,7 +131,7 @@ int sieve_script_buffer(sieve_interp_t *interp, char *script,
     s->cmds = sieve_parse_buffer(s, script);
     if (s->err > 0) {
 	if (s->cmds) {
-	    free_tree(s->cmds);
+	    libsieve_free_tree(s->cmds);
 	}
 	s->cmds = NULL;
 	res = SIEVE_PARSE_ERROR;
@@ -150,12 +150,12 @@ int sieve_script_parse(sieve_interp_t *interp, FILE *script,
     int res = SIEVE_OK;
     extern int sievelineno;
 
-    res = interp_verify(interp);
+    res = libsieve_interp_verify(interp);
     if (res != SIEVE_OK) {
 	return res;
     }
 
-    s = (sieve_script_t *) sv_malloc(sizeof(sieve_script_t));
+    s = (sieve_script_t *) libsieve_malloc(sizeof(sieve_script_t));
     s->interp = *interp;
     s->script_context = script_context;
     /* clear all support bits */
@@ -170,7 +170,7 @@ int sieve_script_parse(sieve_interp_t *interp, FILE *script,
     s->cmds = sieve_parse(s, script);
     if (s->err > 0) {
 	if (s->cmds) {
-	    free_tree(s->cmds);
+	    libsieve_free_tree(s->cmds);
 	}
 	s->cmds = NULL;
 	res = SIEVE_PARSE_ERROR;
@@ -184,9 +184,9 @@ int sieve_script_free(sieve_script_t **s)
 {
     if (*s) {
 	if ((*s)->cmds) {
-	    free_tree((*s)->cmds);
+	    libsieve_free_tree((*s)->cmds);
 	}
-	sv_free(*s);
+	libsieve_free(*s);
     }
     
     /* These used to be in sieve.y, but needed to be higher */
@@ -229,9 +229,9 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 	struct addr_marker *marker = NULL;
 	char *addr;
 	
-	parse_address(body[l], &data, &marker);
+	libsieve_parse_address(body[l], &data, &marker);
 	/* loop through each address in the header */
-	while (!found && ((addr = get_address(ADDRESS_ALL, 
+	while (!found && ((addr = libsieve_get_address(ADDRESS_ALL, 
 					      &data, &marker, 1)) != NULL)) {
 	    if (!strcasecmp(addr, myaddr)) {
 		found = myaddr;
@@ -244,15 +244,15 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 		char *altaddr;
 
 		/* is this address one of my addresses? */
-		parse_address(sl->s, &altdata, &altmarker);
-		altaddr = get_address(ADDRESS_ALL, &altdata, &altmarker, 1);
+		libsieve_parse_address(sl->s, &altdata, &altmarker);
+		altaddr = libsieve_get_address(ADDRESS_ALL, &altdata, &altmarker, 1);
 		if (!strcasecmp(addr, altaddr))
 		    found = sl->s;
 
-		free_address(&altdata, &altmarker);
+		libsieve_free_address(&altdata, &altmarker);
 	    }
 	}
-	free_address(&data, &marker);
+	libsieve_free_address(&data, &marker);
     }
 
     return found;
@@ -296,14 +296,14 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
 		    struct addr_marker *marker = NULL;
 		    char *val;
 
-		    parse_address(body[l], &data, &marker);
-                    val = get_address(addrpart, &data, &marker, 0);
+		    libsieve_parse_address(body[l], &data, &marker);
+                    val = libsieve_get_address(addrpart, &data, &marker, 0);
 		    while (val != NULL && !res) { 
 			/* loop through each address */
 			res |= t->u.ae.comp(pl->p, val);
-			val = get_address(addrpart, &data, &marker, 0);
+			val = libsieve_get_address(addrpart, &data, &marker, 0);
        		    }
-		    free_address(&data, &marker);
+		    libsieve_free_address(&data, &marker);
 		}
 	    }
 	}
@@ -439,22 +439,22 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		res = eval(i, c->u.i.do_else, m, actions, errmsg);
 	    break;
 	case REJCT:
-	    res = do_reject(actions, c->u.str);
+	    res = libsieve_do_reject(actions, c->u.str);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Reject can not be used with any other action";
 	    break;
 	case FILEINTO:
-	    res = do_fileinto(actions, c->u.str, &i->curflags);
+	    res = libsieve_do_fileinto(actions, c->u.str, &i->curflags);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Fileinto can not be used with Reject";
 	    break;
 	case REDIRECT:
-	    res = do_redirect(actions, c->u.str);
+	    res = libsieve_do_redirect(actions, c->u.str);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Redirect can not be used with Reject";
 	    break;
 	case KEEP:
-	    res = do_keep(actions, &i->curflags);
+	    res = libsieve_do_keep(actions, &i->curflags);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Keep can not be used with Reject";
 	    break;
@@ -498,10 +498,10 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		    strcpy(buf, "to");
 		    l = call_getenvelope(i, m, buf, &body);
 		    if (body[0]) {
-			parse_address(body[0], &data, &marker);
-			tmp = get_address(ADDRESS_ALL, &data, &marker, 1);
-			myaddr = (tmp != NULL) ? sv_strdup(tmp, strlen(tmp)) : NULL;
-			free_address(&data, &marker);
+			libsieve_parse_address(body[0], &data, &marker);
+			tmp = libsieve_get_address(ADDRESS_ALL, &data, &marker, 1);
+			myaddr = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
+			libsieve_free_address(&data, &marker);
 		    }
 		}
 		if (l == SIEVE_OK) {
@@ -511,10 +511,10 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		if (l == SIEVE_OK && body[0]) {
 		    /* we have to parse this address & decide whether we
 		       want to respond to it */
-		    parse_address(body[0], &data, &marker);
-		    tmp = get_address(ADDRESS_ALL, &data, &marker, 1);
-		    reply_to = (tmp != NULL) ? sv_strdup(tmp, strlen(tmp)) : NULL;
-		    free_address(&data, &marker);
+		    libsieve_parse_address(body[0], &data, &marker);
+		    tmp = libsieve_get_address(ADDRESS_ALL, &data, &marker, 1);
+		    reply_to = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
+		    libsieve_free_address(&data, &marker);
 
 		    /* first, is there a reply-to address? */
 		    if (reply_to == NULL) {
@@ -588,67 +588,67 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		    /* who do we want the message coming from? */
 		    fromaddr = found;
 		
-		    res = do_vacation(actions, reply_to,
-				      sv_strdup(fromaddr, strlen(fromaddr)),
-				      sv_strdup(buf, strlen(buf)),
+		    res = libsieve_do_vacation(actions, reply_to,
+				      libsieve_strdup(fromaddr, strlen(fromaddr)),
+				      libsieve_strdup(buf, strlen(buf)),
 				      c->u.v.message, c->u.v.days, c->u.v.mime);
 		
 		     if (res == SIEVE_RUN_ERROR)
 			 *errmsg = "Vacation can not be used with Reject or Vacation";
 
 		} else {
-                    sv_free(reply_to);
+                    libsieve_free(reply_to);
 		    if (l != SIEVE_DONE) res = -1; /* something went wrong */
 		}
-		sv_free(myaddr);
+		libsieve_free(myaddr);
 		break;
 	    }
 	case STOP:
 	    res = 1;
 	    break;
 	case DISCARD:
-	    res = do_discard(actions);
+	    res = libsieve_do_discard(actions);
 	    break;
 	case SETFLAG:
 	    sl = c->u.sl;
-	    res = do_setflag(actions, sl->s);
+	    res = libsieve_do_setflag(actions, sl->s);
 	    for (sl = sl->next; res == 0 && sl != NULL; sl = sl->next) {
-		res = do_addflag(actions, sl->s);
+		res = libsieve_do_addflag(actions, sl->s);
 	    }
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Setflag can not be used with Reject";
 	    break;
 	case ADDFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = do_addflag(actions, sl->s);
+		res = libsieve_do_addflag(actions, sl->s);
 	    }
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Addflag can not be used with Reject";
 	    break;
 	case REMOVEFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = do_removeflag(actions, sl->s);
+		res = libsieve_do_removeflag(actions, sl->s);
 	    }
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Removeflag can not be used with Reject";
 	    break;
 	case MARK:
-	    res = do_mark(actions);
+	    res = libsieve_do_mark(actions);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Mark can not be used with Reject";
 	    break;
 	case UNMARK:
-	    res = do_unmark(actions);
+	    res = libsieve_do_unmark(actions);
 	    if (res == SIEVE_RUN_ERROR)
 		*errmsg = "Unmark can not be used with Reject";
 	    break;
 	case NOTIFY:
-	    res = do_notify(actions, c->u.n.id, c->u.n.method,
+	    res = libsieve_do_notify(actions, c->u.n.id, c->u.n.method,
 			    c->u.n.options, c->u.n.priority, c->u.n.message);
 			    
 	    break;
 	case DENOTIFY:
-	    res = do_denotify(actions, c->u.d.comp, c->u.d.pattern,
+	    res = libsieve_do_denotify(actions, c->u.d.comp, c->u.d.pattern,
 			      c->u.d.priority);
 	    break;
 
@@ -687,7 +687,7 @@ static void add_header(sieve_interp_t *i, int isenv, char *header,
     if ( (*outlen) + addlen >= *outalloc)
     {
 	*outalloc = (*outlen) + addlen + GROW_AMOUNT;
-	*out = sv_realloc(*out, *outalloc);
+	*out = libsieve_realloc(*out, *outalloc);
     }
 
     /* add header value */
@@ -703,7 +703,7 @@ static int fillin_headers(sieve_interp_t *i, char *msg,
     char *c;
     size_t n;
 
-    *out = sv_malloc(GROW_AMOUNT);
+    *out = libsieve_malloc(GROW_AMOUNT);
     *outlen = 0;
     (*out)[0]='\0';
 
@@ -732,7 +732,7 @@ static int fillin_headers(sieve_interp_t *i, char *msg,
 	    /* realloc if necessary */
 	    if ( (*outlen) + n+1 >= allocsize) {
 		allocsize = (*outlen) + n+1 + GROW_AMOUNT;
-		*out = sv_realloc(*out, allocsize);
+		*out = libsieve_realloc(*out, allocsize);
 	    }
 	    /* copy the plaintext */
 	    strncat(*out, c, n);
@@ -759,9 +759,9 @@ static int sieve_addflag(sieve_imapflags_t *imapflags, char *flag)
     if (n == imapflags->nflags) {
 	imapflags->nflags++;
 	imapflags->flag =
-	    (char **) sv_realloc((char *)imapflags->flag,
+	    (char **) libsieve_realloc((char *)imapflags->flag,
 			       imapflags->nflags*sizeof(char *));
-	imapflags->flag[imapflags->nflags-1] = sv_strdup(flag, strlen(flag));
+	imapflags->flag[imapflags->nflags-1] = libsieve_strdup(flag, strlen(flag));
     }
  
     return SIEVE_OK;
@@ -779,14 +779,14 @@ static int sieve_removeflag(sieve_imapflags_t *imapflags, char *flag)
  
     /* remove flag from list, iff in list */
     if (n < imapflags->nflags) {
-	sv_free(imapflags->flag[n]);
+	libsieve_free(imapflags->flag[n]);
 	imapflags->nflags--;
  
 	for (; n < imapflags->nflags; n++)
 	    imapflags->flag[n] = imapflags->flag[n+1];
  
 	imapflags->flag =
-	    (char **) sv_realloc((char *)imapflags->flag,
+	    (char **) libsieve_realloc((char *)imapflags->flag,
 			       imapflags->nflags*sizeof(char *));
     }
  
@@ -811,11 +811,11 @@ static int send_notify_callback(sieve_script_t *s, void *message_context,
     fillin_headers(&(s->interp), notify->message, message_context, 
 		   &out_msg, &out_msglen);
 
-    nc.message = sv_malloc(out_msglen + strlen(actions_string) + 30);
+    nc.message = libsieve_malloc(out_msglen + strlen(actions_string) + 30);
 
     strcpy(nc.message, out_msg);
     strcat(nc.message, "\n\n");
-    sv_free(out_msg);
+    libsieve_free(out_msg);
 
     strcat(nc.message,actions_string);
 
@@ -825,17 +825,17 @@ static int send_notify_callback(sieve_script_t *s, void *message_context,
 			   message_context,
 			   errmsg);    
 
-    /* Not to worry, free_notify_list() does this for us.
+    /* Not to worry, libsieve_free_notify_list() does this for us.
     if (nc.options) {
 	char **opts = nc.options;
 	while (opts && *opts) {
-	    sv_free(*opts);
+	    libsieve_free(*opts);
 	    opts++;
 	}
-	sv_free(nc.options);
+	libsieve_free(nc.options);
     }
     */
-    sv_free(nc.message);
+    libsieve_free(nc.message);
 
     return ret;
 }
@@ -885,10 +885,10 @@ static int makehash(unsigned char hash[HASHSIZE], char *s1, char *s2)
 {
     MD5_CTX ctx;
 
-    MD5Init(&ctx);
-    MD5Update(&ctx, s1, strlen(s1));
-    MD5Update(&ctx, s2, strlen(s2));
-    MD5Final(hash, &ctx);
+    libsieve_MD5Init(&ctx);
+    libsieve_MD5Update(&ctx, s1, strlen(s1));
+    libsieve_MD5Update(&ctx, s2, strlen(s2));
+    libsieve_MD5Final(hash, &ctx);
 
     return SIEVE_OK;
 }
@@ -905,7 +905,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
     char actions_string[4096] = "";
     const char *errmsg = NULL;
 
-    actions = new_action_list();
+    actions = libsieve_new_action_list();
     if (actions == NULL) {
 	ret = SIEVE_NOMEM;
 	goto error;
@@ -938,7 +938,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
 		snprintf(actions_string+strlen(actions_string),
 			 sizeof(actions_string)-strlen(actions_string), 
 			 "Rejected with: %s\n", ((sieve_reject_context_t *)(a->u))->msg);
-	    sv_free((sieve_reject_context_t *)(a->u));
+	    libsieve_free((sieve_reject_context_t *)(a->u));
 	    break;
 
 	case ACTION_FILEINTO:
@@ -955,7 +955,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
 		snprintf(actions_string+strlen(actions_string),
 			 sizeof(actions_string)-strlen(actions_string),
 			 "Filed into: %s\n",((sieve_fileinto_context_t *)(a->u))->mailbox);
-	    sv_free((sieve_fileinto_context_t *)(a->u));
+	    libsieve_free((sieve_fileinto_context_t *)(a->u));
 	    break;
 
 	case ACTION_KEEP:
@@ -986,7 +986,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
 		snprintf(actions_string+strlen(actions_string),
 			 sizeof(actions_string)-strlen(actions_string),
 			 "Redirected to %s\n", ((sieve_redirect_context_t *)(a->u))->addr);
-	    sv_free((sieve_redirect_context_t *)(a->u));
+	    libsieve_free((sieve_redirect_context_t *)(a->u));
 	    break;
 
 	case ACTION_DISCARD:
@@ -1047,7 +1047,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
 
  
 	case ACTION_SETFLAG:
-	    free_imapflags(&s->interp.curflags);
+	    libsieve_free_imapflags(&s->interp.curflags);
 	    ret = sieve_addflag(&s->interp.curflags, ((sieve_imaponeflag_t *)(a->u))->flag);
 	    break;
 	case ACTION_ADDFLAG:
@@ -1096,8 +1096,8 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
                         n = n->next;
                     }
       
-                    free_notify_list(n_top);
-		    sv_free(n_top);     /* The very top isn't free()ed above.*/
+                    libsieve_free_notify_list(n_top);
+		    libsieve_free(n_top);     /* The very top isn't free()ed above.*/
                     n_top = NULL;       /* Don't try any notifications again */
       
                     if (notify_ret != SIEVE_OK) {
@@ -1173,7 +1173,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
     }
 
     if (actions)
-	free_action_list(actions);
+	libsieve_free_action_list(actions);
   
     return ret;
 }

@@ -215,7 +215,7 @@ static int ascii_numeric_is(const char *pat, const char *text)
     else return 1; /* both not digits */
 }
 
-comparator_t *lookup_comp(const char *comp, int mode)
+comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
 {
     comparator_t *ret;
 

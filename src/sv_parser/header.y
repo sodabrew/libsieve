@@ -14,9 +14,9 @@
 
 /* This only works in C99 and higher... */
 #ifdef DEBUG
-#define sv_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(...) printf(__VA_ARGS__)
 #else
-#define sv_debugf(...) 
+#define libsieve_debugf(...) 
 #endif /* ifdef DEBUG */
 
 /* Better yacc error messages please */
@@ -45,60 +45,60 @@ static struct mlbuf *ml = NULL;
 %%
 headers: header                 {
                 /* Allocate a new cache block */
-                if (headerappend(&hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 }
         | headers header        {
                 /* Allocate a new cache block */
-                if (headerappend(&hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 };
 
 header: NAME COLON              {
-                sv_debugf( "header: NAME COLON: %s:\n", $1 );
-                headerentry(hl->h, $1, NULL);
+                libsieve_debugf( "header: NAME COLON: %s:\n", $1 );
+                libsieve_headerentry(hl->h, $1, NULL);
                 }
         | NAME COLON body       {
-                sv_debugf( "header: NAME COLON body: %s:%s\n", $1, $3 );
-                headerentry(hl->h, $1, $3);
+                libsieve_debugf( "header: NAME COLON body: %s:%s\n", $1, $3 );
+                libsieve_headerentry(hl->h, $1, $3);
                 };
 
 body: TEXT                      {
                 /* Default action is $$ = $1 */
-                sv_debugf( "body: TEXT: %s\n", $1 );
+                libsieve_debugf( "body: TEXT: %s\n", $1 );
                 }
         | body WRAP             {
-                sv_debugf( "body: body WRAP: %s %s\n", $1, $2 );
-                $$ = sv_strbuf(ml, sv_strconcat( $1, $2, NULL ), strlen($1)+strlen($2), FREEME);
+                libsieve_debugf( "body: body WRAP: %s %s\n", $1, $2 );
+                $$ = libsieve_strbuf(ml, libsieve_strconcat( $1, $2, NULL ), strlen($1)+strlen($2), FREEME);
                 };
 
 %%
 
 /* copy header error message into buffer provided by sieve parser */
-void headererror(const char *s)
+void libsieve_headererror(const char *s)
 {
-    extern char *headererr;
-    headererr = sv_strdup(s, strlen(s));
+    extern char *libsieve_headererr;
+    headererr = libsieve_strdup(s, strlen(s));
 }
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  */
-header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
     extern struct mlbuf *ml;
 
     hl = NULL;
-    if (headerappend(&hl) != SIEVE2_OK)
+    if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
-    (const char *)headerptr = *ptr;
+    (const char *)libsieve_headerptr = *ptr;
 
-    if(headerparse()) {
-	sv_strbuffree(&ml, FREEME);
-	sv_debugf( "Parser ERROR: %s\n", headererr );
+    if(libsieve_headerparse()) {
+	libsieve_strbuffree(&ml, FREEME);
+	libsieve_debugf( "Parser ERROR: %s\n", headererr );
 	return NULL;
     }
 
@@ -110,9 +110,9 @@ header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err)
 
     /* Same thing with that extra struct... */
     newdata = hl->next;
-    sv_free(hl->h->contents);
-    sv_free(hl->h);
-    sv_free(hl);
+    libsieve_free(hl->h->contents);
+    libsieve_free(hl->h);
+    libsieve_free(hl);
 
     if(*data == NULL)
         *data = newdata;
@@ -120,23 +120,23 @@ header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err)
     return *data;
 }
 
-int headerappend(header_list_t **hl)
+int libsieve_headerappend(header_list_t **hl)
 {
     header_list_t *newlist = NULL;
     header_t *newhead = NULL;
     char **c = NULL;
 
-    newlist = (header_list_t *)sv_malloc(sizeof(header_list_t));
+    newlist = (header_list_t *)libsieve_malloc(sizeof(header_list_t));
     if (newlist == NULL)
         return SIEVE2_ERROR_NOMEM;
-    newhead = (header_t *)sv_malloc(sizeof(header_t));
+    newhead = (header_t *)libsieve_malloc(sizeof(header_t));
     if (newhead == NULL)
         return SIEVE2_ERROR_NOMEM;
-    c = (char **)sv_malloc(2 * sizeof(char *));
+    c = (char **)libsieve_malloc(2 * sizeof(char *));
     if (c == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    sv_debugf( "Prepending a new headerlist and header struct\n" );
+    libsieve_debugf( "Prepending a new headerlist and header struct\n" );
     newhead->count = 0;
     newhead->space = 1;
     newhead->contents = c;
@@ -149,16 +149,16 @@ int headerappend(header_list_t **hl)
     return SIEVE2_OK;
 }
 
-void headerentry(header_t *h, char *name, char *body)
+void libsieve_headerentry(header_t *h, char *name, char *body)
 {
-    sv_debugf( "Entering name and body into header struct\n" );
+    libsieve_debugf( "Entering name and body into header struct\n" );
     if (h == NULL)
-        sv_debugf( "Why are you giving me a NULL struct!?\n" );
+        libsieve_debugf( "Why are you giving me a NULL struct!?\n" );
 	/* Hmm, big big trouble here... */;
 
-    h->name = sv_strtolower(sv_strdup(name, strlen(name)), strlen(name));
+    h->name = libsieve_strtolower(libsieve_strdup(name, strlen(name)), strlen(name));
     /* Looks like we don't need to make a copy here after all
-    h->contents[0] = sv_strdup(body, strlen(body));
+    h->contents[0] = libsieve_strdup(body, strlen(body));
     */
     h->contents[0] = body;
     h->count = 1;
@@ -168,16 +168,16 @@ void headerentry(header_t *h, char *name, char *body)
      */
 }
 
-void headeryaccalloc()
+void libsieve_headeryaccalloc()
 {
-    sv_strbufalloc(&ml);
+    libsieve_strbufalloc(&ml);
 }
 
-void headeryaccfree()
+void libsieve_headeryaccfree()
 {
     /* This must correspond to sieve2_messagecache
      * knowing not to free its contents[] entries.
      */
-    sv_strbuffree(&ml, FREEME);
+    libsieve_strbuffree(&ml, FREEME);
 }
 

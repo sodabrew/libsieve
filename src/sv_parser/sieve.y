@@ -113,12 +113,12 @@ commands: command		{ $$ = $1; }
 	;
 
 command: action ';'		{ $$ = $1; }
-	| IF test block elsif   { $$ = new_if($2, $3, $4); }
-	| error ';'		{ $$ = new_command(STOP); }
+	| IF test block elsif   { $$ = libsieve_new_if($2, $3, $4); }
+	| error ';'		{ $$ = libsieve_new_command(STOP); }
 	;
 
 elsif: /* empty */               { $$ = NULL; }
-	| ELSIF test block elsif { $$ = new_if($2, $3, $4); }
+	| ELSIF test block elsif { $$ = libsieve_new_if($2, $3, $4); }
 	| ELSE block             { $$ = $2; }
 	;
 
@@ -126,7 +126,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
 				     sieveerror("reject not required");
 				     YYERROR;
 				   }
-				   $$ = new_command(REJCT); $$->u.str = $2; }
+				   $$ = libsieve_new_command(REJCT); $$->u.str = $2; }
 	| FILEINTO STRING	 { if (!parse_script->support.fileinto) {
 				     sieveerror("fileinto not required");
 	                             YYERROR;
@@ -134,19 +134,19 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
 				   if (!verify_mailbox($2)) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
-	                           $$ = new_command(FILEINTO);
+	                           $$ = libsieve_new_command(FILEINTO);
 				   $$->u.str = $2; }
-	| REDIRECT STRING         { $$ = new_command(REDIRECT);
+	| REDIRECT STRING         { $$ = libsieve_new_command(REDIRECT);
 				   if (!verify_address($2)) {
 				     YYERROR; /* va should call sieveerror() */
 				   }
 				   $$->u.str = $2; }
-	| KEEP			 { $$ = new_command(KEEP); }
-	| STOP			 { $$ = new_command(STOP); }
-	| DISCARD		 { $$ = new_command(DISCARD); }
+	| KEEP			 { $$ = libsieve_new_command(KEEP); }
+	| STOP			 { $$ = libsieve_new_command(STOP); }
+	| DISCARD		 { $$ = libsieve_new_command(DISCARD); }
 	| VACATION vtags STRING  { if (!parse_script->support.vacation) {
 				     sieveerror("vacation not required");
-				     $$ = new_command(VACATION);
+				     $$ = libsieve_new_command(VACATION);
 				     YYERROR;
 				   } else {
   				     $$ = build_vacation(VACATION,
@@ -159,7 +159,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   if (!verify_stringlist($2, verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                   }
-                                  $$ = new_command(SETFLAG);
+                                  $$ = libsieve_new_command(SETFLAG);
                                   $$->u.sl = $2; }
          | ADDFLAG stringlist     { if (!parse_script->support.imapflags) {
                                     sieveerror("imapflags not required");
@@ -168,7 +168,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   if (!verify_stringlist($2, verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                   }
-                                  $$ = new_command(ADDFLAG);
+                                  $$ = libsieve_new_command(ADDFLAG);
                                   $$->u.sl = $2; }
          | REMOVEFLAG stringlist  { if (!parse_script->support.imapflags) {
                                     sieveerror("imapflags not required");
@@ -177,22 +177,22 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   if (!verify_stringlist($2, verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                   }
-                                  $$ = new_command(REMOVEFLAG);
+                                  $$ = libsieve_new_command(REMOVEFLAG);
                                   $$->u.sl = $2; }
          | MARK                   { if (!parse_script->support.imapflags) {
                                     sieveerror("imapflags not required");
                                     YYERROR;
                                     }
-                                  $$ = new_command(MARK); }
+                                  $$ = libsieve_new_command(MARK); }
          | UNMARK                 { if (!parse_script->support.imapflags) {
                                     sieveerror("imapflags not required");
                                     YYERROR;
                                     }
-                                  $$ = new_command(UNMARK); }
+                                  $$ = libsieve_new_command(UNMARK); }
 
          | NOTIFY ntags           { if (!parse_script->support.notify) {
 				       sieveerror("notify not required");
-				       $$ = new_command(NOTIFY); 
+				       $$ = libsieve_new_command(NOTIFY); 
 				       YYERROR;
 	 			    } else {
 				      $$ = build_notify(NOTIFY,
@@ -200,7 +200,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
 				    } }
          | DENOTIFY dtags         { if (!parse_script->support.notify) {
                                        sieveerror("notify not required");
-				       $$ = new_command(DENOTIFY);
+				       $$ = libsieve_new_command(DENOTIFY);
 				       YYERROR;
 				    } else {
 					$$ = build_denotify(DENOTIFY, $2);
@@ -277,22 +277,22 @@ vtags: /* empty */		 { $$ = new_vtags(); }
 	;
 
 stringlist: '[' strings ']'      { $$ = $2; }
-	| STRING		 { $$ = new_sl($1, NULL); }
+	| STRING		 { $$ = libsieve_new_sl($1, NULL); }
 	;
 
-strings: STRING			 { $$ = new_sl($1, NULL); }
-	| STRING ',' strings	 { $$ = new_sl($1, $3); }
+strings: STRING			 { $$ = libsieve_new_sl($1, NULL); }
+	| STRING ',' strings	 { $$ = libsieve_new_sl($1, $3); }
 	;
 
 block: '{' commands '}'		 { $$ = $2; }
 	| '{' '}'		 { $$ = NULL; }
 	;
 
-test: ANYOF testlist		 { $$ = new_test(ANYOF); $$->u.tl = $2; }
-	| ALLOF testlist	 { $$ = new_test(ALLOF); $$->u.tl = $2; }
-	| EXISTS stringlist      { $$ = new_test(EXISTS); $$->u.sl = $2; }
-	| SFALSE		 { $$ = new_test(SFALSE); }
-	| STRUE			 { $$ = new_test(STRUE); }
+test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
+	| ALLOF testlist	 { $$ = libsieve_new_test(ALLOF); $$->u.tl = $2; }
+	| EXISTS stringlist      { $$ = libsieve_new_test(EXISTS); $$->u.sl = $2; }
+	| SFALSE		 { $$ = libsieve_new_test(SFALSE); }
+	| STRUE			 { $$ = libsieve_new_test(STRUE); }
 	| HEADER htags stringlist stringlist
 				 { patternlist_t *pl;
                                    if (!verify_stringlist($3, verify_header)) {
@@ -329,8 +329,8 @@ test: ANYOF testlist		 { $$ = new_test(ANYOF); $$->u.tl = $2; }
 				       
 				   $$ = build_address($1, $2, $3, pl);
 				   if ($$ == NULL) { YYERROR; } }
-	| NOT test		 { $$ = new_test(NOT); $$->u.t = $2; }
-	| SIZE sizetag NUMBER    { $$ = new_test(SIZE); $$->u.sz.t = $2;
+	| NOT test		 { $$ = libsieve_new_test(NOT); $$->u.t = $2; }
+	| SIZE sizetag NUMBER    { $$ = libsieve_new_test(SIZE); $$->u.sz.t = $2;
 		                   $$->u.sz.n = $3; }
 	| error			 { $$ = NULL; }
 	;
@@ -399,8 +399,8 @@ sizetag: OVER			 { $$ = OVER; }
 testlist: '(' tests ')'		 { $$ = $2; }
 	;
 
-tests: test                      { $$ = new_testlist($1, NULL); }
-	| test ',' tests         { $$ = new_testlist($1, $3); }
+tests: test                      { $$ = libsieve_new_testlist($1, NULL); }
+	| test ',' tests         { $$ = libsieve_new_testlist($1, $3); }
 	;
 
 %%
@@ -422,10 +422,10 @@ commandlist_t *sieve_parse_buffer(sieve_script_t *script, char *b)
     // sievelexalloc();
     if (sieveparse()) {
     /*
-        err = sv_strconcat("address '", s, "': ", addrerr, NULL);
+        err = libsieve_strconcat("address '", s, "': ", addrerr, NULL);
         sieveerror(err);
-        sv_free(addrerr);
-        sv_free(err);
+        libsieve_free(addrerr);
+        libsieve_free(err);
     */
         t = NULL;
     } else {
@@ -450,7 +450,7 @@ commandlist_t *sieve_parse(sieve_script_t *script, FILE *f)
     f_buf = NULL; // If null, realloc() behaves as malloc()
     while(!feof(f)) {
         if( f_pos + 1 >= f_len ) {
-            tmp_buf = sv_realloc(f_buf, sizeof(char) * (f_len+=200));
+            tmp_buf = libsieve_realloc(f_buf, sizeof(char) * (f_len+=200));
             if( tmp_buf )
     	        f_buf = tmp_buf;
             else
@@ -464,7 +464,7 @@ commandlist_t *sieve_parse(sieve_script_t *script, FILE *f)
     f_buf[f_pos] = '\0';
 
    t = sieve_parse_buffer(script, f_buf);
-   sv_free(f_buf);
+   libsieve_free(f_buf);
 
    return t;
 }
@@ -484,12 +484,12 @@ int sieveerror(char *msg)
     } else {
     /* We're in the Sieve 2 API */
         if( sieveerr )
-            tmperr = sv_strconcat(sieveerr, ", ", msg, NULL);
+            tmperr = libsieve_strconcat(sieveerr, ", ", msg, NULL);
         else
-            tmperr = sv_strconcat(msg, NULL);
+            tmperr = libsieve_strconcat(msg, NULL);
         if( tmperr )
-            sieveerr = sv_strdup(tmperr, strlen(tmperr));
-        sv_free(tmperr);
+            sieveerr = libsieve_strdup(tmperr, strlen(tmperr));
+        libsieve_free(tmperr);
     }
 
     return 0;
@@ -506,8 +506,8 @@ static int check_reqs(stringlist_t *sl)
 
 	i &= script_require(parse_script, s->s);
 
-	sv_free(s->s);
-	sv_free(s);
+	libsieve_free(s->s);
+	libsieve_free(s);
     }
     return i;
 }
@@ -515,19 +515,19 @@ static int check_reqs(stringlist_t *sl)
 static test_t *build_address(int t, struct aetags *ae,
 			     stringlist_t *sl, patternlist_t *pl)
 {
-    test_t *ret = new_test(t);	/* can be either ADDRESS or ENVELOPE */
+    test_t *ret = libsieve_new_test(t);	/* can be either ADDRESS or ENVELOPE */
 
     assert((t == ADDRESS) || (t == ENVELOPE));
 
     if (ret) {
 	ret->u.ae.comptag = ae->comptag;
-	ret->u.ae.comp = lookup_comp(ae->comparator, ae->comptag);
+	ret->u.ae.comp = libsieve_comparator_lookup(ae->comparator, ae->comptag);
 	ret->u.ae.sl = sl;
 	ret->u.ae.pl = pl;
 	ret->u.ae.addrpart = ae->addrtag;
 	free_aetags(ae);
 	if (ret->u.ae.comp == NULL) {
-	    free_test(ret);
+	    libsieve_free_test(ret);
 	    ret = NULL;
 	}
     }
@@ -537,18 +537,18 @@ static test_t *build_address(int t, struct aetags *ae,
 static test_t *build_header(int t, struct htags *h,
 			    stringlist_t *sl, patternlist_t *pl)
 {
-    test_t *ret = new_test(t);	/* can be HEADER */
+    test_t *ret = libsieve_new_test(t);	/* can be HEADER */
 
     assert(t == HEADER);
 
     if (ret) {
 	ret->u.h.comptag = h->comptag;
-	ret->u.h.comp = lookup_comp(h->comparator, h->comptag);
+	ret->u.h.comp = libsieve_comparator_lookup(h->comparator, h->comptag);
 	ret->u.h.sl = sl;
 	ret->u.h.pl = pl;
 	free_htags(h);
 	if (ret->u.h.comp == NULL) {
-	    free_test(ret);
+	    libsieve_free_test(ret);
 	    ret = NULL;
 	}
     }
@@ -557,7 +557,7 @@ static test_t *build_header(int t, struct htags *h,
 
 static commandlist_t *build_vacation(int t, struct vtags *v, char *reason)
 {
-    commandlist_t *ret = new_command(t);
+    commandlist_t *ret = libsieve_new_command(t);
 
     assert(t == VACATION);
 
@@ -574,7 +574,7 @@ static commandlist_t *build_vacation(int t, struct vtags *v, char *reason)
 
 static commandlist_t *build_notify(int t, struct ntags *n)
 {
-    commandlist_t *ret = new_command(t);
+    commandlist_t *ret = libsieve_new_command(t);
 
     assert(t == NOTIFY);
 
@@ -591,13 +591,13 @@ static commandlist_t *build_notify(int t, struct ntags *n)
 
 static commandlist_t *build_denotify(int t, struct dtags *d)
 {
-    commandlist_t *ret = new_command(t);
+    commandlist_t *ret = libsieve_new_command(t);
 
     assert(t == DENOTIFY);
 
     if (ret) {
 	ret->u.d.comptag = d->comptag;
-	ret->u.d.comp = lookup_comp("i;ascii-casemap", d->comptag);
+	ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
 	ret->u.d.pattern = d->pattern; d->pattern = NULL;
 	ret->u.d.priority = d->priority;
 	free_dtags(d);
@@ -607,7 +607,7 @@ static commandlist_t *build_denotify(int t, struct dtags *d)
 
 static struct aetags *new_aetags(void)
 {
-    struct aetags *r = (struct aetags *) sv_malloc(sizeof(struct aetags));
+    struct aetags *r = (struct aetags *) libsieve_malloc(sizeof(struct aetags));
 
     r->addrtag = r->comptag = -1;
     r->comparator = NULL;
@@ -619,20 +619,20 @@ static struct aetags *canon_aetags(struct aetags *ae)
 {
     char *map = "i;ascii-casemap";
     if (ae->addrtag == -1) { ae->addrtag = ALL; }
-    if (ae->comparator == NULL) { ae->comparator = sv_strdup(map, strlen(map)); }
+    if (ae->comparator == NULL) { ae->comparator = libsieve_strdup(map, strlen(map)); }
     if (ae->comptag == -1) { ae->comptag = IS; }
     return ae;
 }
 
 static void free_aetags(struct aetags *ae)
 {
-    sv_free(ae->comparator);
-    sv_free(ae);
+    libsieve_free(ae->comparator);
+    libsieve_free(ae);
 }
 
 static struct htags *new_htags(void)
 {
-    struct htags *r = (struct htags *) sv_malloc(sizeof(struct htags));
+    struct htags *r = (struct htags *) libsieve_malloc(sizeof(struct htags));
 
     r->comptag = -1;
     r->comparator = NULL;
@@ -643,20 +643,20 @@ static struct htags *new_htags(void)
 static struct htags *canon_htags(struct htags *h)
 {
     char *map = "i;ascii-casemap";
-    if (h->comparator == NULL) { h->comparator = sv_strdup(map, strlen(map)); }
+    if (h->comparator == NULL) { h->comparator = libsieve_strdup(map, strlen(map)); }
     if (h->comptag == -1) { h->comptag = IS; }
     return h;
 }
 
 static void free_htags(struct htags *h)
 {
-    sv_free(h->comparator);
-    sv_free(h);
+    libsieve_free(h->comparator);
+    libsieve_free(h);
 }
 
 static struct vtags *new_vtags(void)
 {
-    struct vtags *r = (struct vtags *) sv_malloc(sizeof(struct vtags));
+    struct vtags *r = (struct vtags *) libsieve_malloc(sizeof(struct vtags));
 
     r->days = -1;
     r->addresses = NULL;
@@ -682,14 +682,14 @@ static struct vtags *canon_vtags(struct vtags *v)
 
 static void free_vtags(struct vtags *v)
 {
-    if (v->addresses) { free_sl(v->addresses); }
-    sv_free(v->subject);
-    sv_free(v);
+    if (v->addresses) { libsieve_free_sl(v->addresses); }
+    libsieve_free(v->subject);
+    libsieve_free(v);
 }
 
 static struct ntags *new_ntags(void)
 {
-    struct ntags *r = (struct ntags *) sv_malloc(sizeof(struct ntags));
+    struct ntags *r = (struct ntags *) libsieve_malloc(sizeof(struct ntags));
 
     r->method = NULL;
     r->id = NULL;
@@ -704,23 +704,23 @@ static struct ntags *canon_ntags(struct ntags *n)
 {
     char *from = "$from$: $subject$";
     if (n->priority == NULL) { n->priority = "normal"; }
-    if (n->message == NULL) { n->message = sv_strdup(from, strlen(from)); }
+    if (n->message == NULL) { n->message = libsieve_strdup(from, strlen(from)); }
 
     return n;
 }
 
 static void free_ntags(struct ntags *n)
 {
-    sv_free(n->method);
-    sv_free(n->id);
-    if (n->options) free_sl(n->options);
-    sv_free(n->message);
-    sv_free(n);
+    libsieve_free(n->method);
+    libsieve_free(n->id);
+    if (n->options) libsieve_free_sl(n->options);
+    libsieve_free(n->message);
+    libsieve_free(n);
 }
 
 static struct dtags *new_dtags(void)
 {
-    struct dtags *r = (struct dtags *) sv_malloc(sizeof(struct dtags));
+    struct dtags *r = (struct dtags *) libsieve_malloc(sizeof(struct dtags));
 
     r->comptag = -1;
     r->pattern = NULL;
@@ -731,8 +731,8 @@ static struct dtags *new_dtags(void)
 
 static void free_dtags(struct dtags *d)
 {
-    sv_free(d->pattern);
-    sv_free(d);
+    libsieve_free(d->pattern);
+    libsieve_free(d);
 }
 
 static int verify_stringlist(stringlist_t *sl, int (*verify)(const char *))
@@ -752,10 +752,10 @@ static int verify_address(const char *s)
 
     addr = addr_parse_buffer(&addr, &s, &aerr);
     if (addr == NULL) {
-        serr = sv_strconcat("address '", s, "': ", aerr, NULL);
+        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
         sieveerror(serr);
-        sv_free(serr);
-        sv_free(aerr);
+        libsieve_free(serr);
+        libsieve_free(aerr);
         return 0;
     }
     addrstructfree(addr, CHARSALSO);
@@ -780,9 +780,9 @@ static int verify_header(const char *hdr)
 	   ;  controls, SP, and
 	   ;  ":". */
 	if (!((*h >= 33 && *h <= 57) || (*h >= 59 && *h <= 126))) {
-	    err = sv_strconcat("header '", hdr, "': not a valid header", NULL);
+	    err = libsieve_strconcat("header '", hdr, "': not a valid header", NULL);
 	    sieveerror(err);
-	    sv_free(err);
+	    libsieve_free(err);
 	    return 0;
 	}
 	h++;
@@ -797,29 +797,29 @@ static int verify_flag(const char *flag)
     char *f, *err;
 
     /* Make ourselves a local copy to change the case */
-    f = sv_strdup(flag, strlen(flag));
+    f = libsieve_strdup(flag, strlen(flag));
  
     if (f[0] == '\\') {
-	sv_strtolower(f,strlen(f));
+	libsieve_strtolower(f,strlen(f));
 	if (strcmp(f, "\\seen") && strcmp(f, "\\answered") &&
 	    strcmp(f, "\\flagged") && strcmp(f, "\\draft") &&
 	    strcmp(f, "\\deleted")) {
-            err = sv_strconcat("flag '", f, "': not a system flag", NULL);
+            err = libsieve_strconcat("flag '", f, "': not a system flag", NULL);
 	    sieveerror(err);
-	    sv_free(err);
+	    libsieve_free(err);
 	    ret = 0;
 	}
 	ret = 1;
     }
-    else if (!sv_strisatom(f,strlen(f))) {
-	err = sv_strconcat("flag '", f, "': not a valid keyword", NULL);
+    else if (!libsieve_strisatom(f,strlen(f))) {
+	err = libsieve_strconcat("flag '", f, "': not a valid keyword", NULL);
 	sieveerror(err);
-	sv_free(err);
+	libsieve_free(err);
 	ret = 0;
     }
     ret = 1;
 
-    sv_free(f);
+    libsieve_free(f);
     return ret;
 }
  
@@ -828,12 +828,12 @@ static regex_t *verify_regex(const char *s, int cflags)
 {
     int ret;
     char errbuf[100];
-    regex_t *reg = (regex_t *) sv_malloc(sizeof(regex_t));
+    regex_t *reg = (regex_t *) libsieve_malloc(sizeof(regex_t));
 
     if ((ret = regcomp(reg, s, cflags)) != 0) {
 	(void) regerror(ret, reg, errbuf, sizeof(errbuf));
 	sieveerror(errbuf);
-	sv_free(reg);
+	libsieve_free(reg);
 	return NULL;
     }
     return reg;
@@ -852,13 +852,13 @@ static patternlist_t *verify_regexs(stringlist_t *sl, char *comp)
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
 	if ((reg = verify_regex(sl2->s, cflags)) == NULL) {
-	    free_pl(pl, REGEX);
+	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}
-	pl = new_pl(reg, pl);
+	pl = libsieve_new_pl(reg, pl);
     }
     if (sl2 == NULL) {
-	free_sl(sl);
+	libsieve_free_sl(sl);
 	return pl;
     }
     return NULL;

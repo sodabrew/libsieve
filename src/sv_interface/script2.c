@@ -23,6 +23,7 @@
 #include "interp.h"
 #include "script.h"
 #include "tree.h"
+#include "thread2.h"
 #include "message.h"
 #include "message2.h"
 
@@ -31,7 +32,6 @@
 
 /* sv_parser */
 #include "sieve.h"
-//#include "sieveinc.h"
 
 const char *sieve2_errstr(const int code, char **free)
 {
@@ -41,22 +41,104 @@ const char *sieve2_errstr(const int code, char **free)
     extern char *sieveerr;
     char lineno[50];
     *free = NULL;
+
     if( code == SIEVE2_ERROR_PARSE )
+      {
         /* The caller must free free! */
-        memset(lineno, 0, 50);
+        libsieve_memset(lineno, '\0', 50);
         snprintf(lineno, 49, "%d", sievelineno);
-        ret = sv_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
+        ret = libsieve_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
 	*free = ret;
-	sv_free(sieveerr);
+	libsieve_free(sieveerr);
 	return ret;
+      }
+
     return sieve2_error_text[code];
+}
+
+static unsigned sieve2_thread_count = 0;
+
+int sieve2_thread_alloc(sieve2_thread_t **t)
+{
+    sieve2_thread *thread;
+
+/* If we're not reentrant, then we
+ * can't allocate more than one parser. */
+#ifndef REENTRANT_PARSER
+    if (sieve2_thread_count >= 1)
+      {
+        *t = NULL;
+        return SIEVE2_ERROR_NOTHREADS;
+      }
+#endif
+
+    /* Even if we're not running a threaded parser,
+     * still allocate and return a valid structure.
+     * What we do with it will surely become important
+     * and prematurely assuming that non-threaded should
+     * return NULL will preclude that ability.
+     * */
+    thread = (sieve2_thread *)libsieve_malloc(sizeof(sieve2_thread));
+    if (thread == NULL)
+      {
+        *t = NULL;
+        return SIEVE2_ERROR_NOMEM;
+      }
+
+    *t = (sieve2_thread_t *)thread;
+
+#ifdef REENTRANT_PARSER
+    addr_create(t);
+    sieve_create(t);
+    header_create(t);
+#else
+    addrlexalloc();
+    sievelexalloc();
+    headerlexalloc();
+    headeryaccalloc();
+#endif
+
+    /* FIXME: This is not an atomic operation,
+     * but we're only talking about lost memory,
+     * not corruption of the parsers, so it will
+     * tide us over until we have real threading.
+     * */
+    sieve2_thread_count++;
+
+    return SIEVE2_OK;
+}
+
+int sieve2_thread_free(sieve2_thread_t *t)
+{
+    if (t == NULL)
+        return SIEVE2_ERROR_BADARG;
+
+    if (sieve2_thread_count > 0)
+        sieve2_thread_count--;
+    else
+        /* FIXME: I'm not sure how to handle this. */;
+
+#ifdef REENTRANT_PARSER
+    addr_destroy(t);
+    sieve_destroy(t);
+    header_destroy(t);
+#else
+    addrlexfree();
+    sievelexfree();
+    headerlexfree();
+    headeryaccfree();
+#endif
+
+    libsieve_free(t);
+
+    return SIEVE2_OK;
 }
 
 int sieve2_support_alloc(sieve2_support_t **p)
 {
     sieve2_support_t *support;
 
-    support = (sieve2_support_t *)sv_malloc(sizeof(sieve_support_t));
+    support = (sieve2_support_t *)libsieve_malloc(sizeof(sieve_support_t));
     if(support == NULL)
         return SIEVE2_ERROR_NOMEM;
 
@@ -66,7 +148,7 @@ int sieve2_support_alloc(sieve2_support_t **p)
 
 int sieve2_support_free(sieve2_support_t *p)
 {
-    sv_free((sieve_support_t *)p);
+    libsieve_free((sieve_support_t *)p);
     return SIEVE2_OK;
 }
 
@@ -88,18 +170,25 @@ int sieve2_support_register(sieve2_support_t *p, int support)
     return SIEVE2_OK;
 }
 
-int sieve2_validate(sieve2_support_t *p, sieve2_script_t *s)
+int sieve2_validate(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p)
 {
-    sieve_script_t *t = (sieve_script_t *)s;
-    sieve_support_t *q = (sieve_support_t *)p;
+    sieve_script_t *script = (sieve_script_t *)s;
+    sieve_support_t *support = (sieve_support_t *)p;
+    sieve2_thread *thread = (sieve2_thread *)t;
 
-    t->support = *q; /* Yes, really make a copy */
+    /* The thread should be non-null regardless
+     * of whether we're building reentrant or not. */
+    if (script == NULL || support == NULL || thread == NULL) {
+        return SIEVE2_ERROR_BADARG;
+    }
 
-    t->cmds = sieve_parse_buffer(t, t->char_array);
-    free_tree(t->cmds);
-    t->cmds = NULL;
+    script->support = *support; /* Yes, really make a copy */
 
-    if (t->err > 0) {
+    script->cmds = sieve_parse_buffer(script, script->char_array);
+    libsieve_free_tree(script->cmds);
+    script->cmds = NULL;
+
+    if (script->err > 0) {
         return SIEVE2_ERROR_PARSE;
     }
 
@@ -114,31 +203,39 @@ int sieve2_validate(sieve2_support_t *p, sieve2_script_t *s)
  * SIEVE2_ERROR_PARSE for script parse errors
  * SIEVE2_ERROR_EXEC for script evaluation errors
  */
-int sieve2_execute(sieve2_script_t *s, sieve2_message_t *m, sieve2_support_t *p, sieve2_action_t *a)
+int sieve2_execute(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p,
+		sieve2_message_t *m, sieve2_action_t *a)
 {
     int ret;
     const char *errmsg = NULL;
-    sieve_script_t *t = (sieve_script_t *)s;
-    action_list_t *b = (action_list_t *)a;
-    sieve_support_t *q = (sieve_support_t *)p;
+    sieve_script_t *script = (sieve_script_t *)s;
+    sieve2_message *message = (sieve2_message *)m;
+    sieve2_thread *thread = (sieve2_thread *)t;
+    sieve_support_t *support = (sieve_support_t *)p;
+    action_list_t *action = (action_list_t *)a;
 
-    if (s == NULL || m == NULL ||
-        p == NULL || a == NULL) {
+    if (script == NULL || message == NULL ||
+        support == NULL || action == NULL || thread == NULL) {
         return SIEVE2_ERROR_BADARG;
     }
 
-    t->support = *q; /* Yes, really make a copy */
+    /* Generate a hash cache
+     * There is a call to header_parse_buffer()
+     * a bit further down the stack from here. */
+    message2_headercache(message);
 
-    t->cmds = sieve_parse_buffer(t, t->char_array);
-    if (t->err > 0) {
-        if (t->cmds) {
-            free_tree(t->cmds);
+    script->support = *support; /* Yes, really make a copy */
+
+    script->cmds = sieve_parse_buffer(script, script->char_array);
+    if (script->err > 0) {
+        if (script->cmds) {
+            libsieve_free_tree(script->cmds);
         }
-        t->cmds = NULL;
+        script->cmds = NULL;
         return SIEVE2_ERROR_PARSE;
     }
 
-    if (eval(&t->interp, t->cmds, m, b, &errmsg) < 0)
+    if (eval(&script->interp, script->cmds, message, action, &errmsg) < 0)
         ret = SIEVE2_ERROR_EXEC;
 
     ret = SIEVE2_OK;
@@ -151,7 +248,7 @@ int sieve2_action_alloc(sieve2_action_t **in)
     action_list_t **a = (action_list_t **)in;
     action_list_t *actions;
 
-    actions = new_action_list();
+    actions = libsieve_new_action_list();
     if (actions == NULL)
         return SIEVE2_ERROR_NOMEM;
 
@@ -173,24 +270,24 @@ int sieve2_action_free(sieve2_action_t *in)
                 {
                 sieve2_reject_context_t *c = (sieve2_reject_context_t *)(a->u);
                 /* This is free()'d for us by free_tree */
-                // sv_free(c->msg);
-                sv_free(c);
+                // libsieve_free(c->msg);
+                libsieve_free(c);
                 break;
                 }
             case ACTION_FILEINTO:
                 {
                 sieve2_fileinto_context_t *c = (sieve2_fileinto_context_t *)(a->u);
                 /* This is free()'d for us by free_tree */
-                // sv_free(c->mailbox);
-                sv_free(c);
+                // libsieve_free(c->mailbox);
+                libsieve_free(c);
                 break;
                 }
             case ACTION_REDIRECT:
                 {
                 sieve2_redirect_context_t *c = (sieve2_redirect_context_t *)(a->u);
                 /* This is free()'d for us by free_tree */
-                // sv_free(c->addr);
-                sv_free(c);
+                // libsieve_free(c->addr);
+                libsieve_free(c);
                 break;
                 }
             case ACTION_VACATION:
@@ -209,9 +306,9 @@ int sieve2_action_free(sieve2_action_t *in)
                 {
                 notify_list_t *c = (notify_list_t *)(a->u);
                 /* This won't free the top, which is fine */
-                free_notify_list(c);
+                libsieve_free_notify_list(c);
                 /* Since we'll just free it right here */
-                sv_free(c);
+                libsieve_free(c);
                 break;
                 }
             default:
@@ -224,7 +321,7 @@ int sieve2_action_free(sieve2_action_t *in)
                 break;
         }
         a = b->next;
-        sv_free(b);
+        libsieve_free(b);
     }
 
     return SIEVE2_OK;
@@ -301,18 +398,15 @@ int sieve2_script_alloc(sieve2_script_t **s)
 {
     sieve_script_t *script;
 
-    script = (sieve_script_t *)sv_malloc(sizeof(sieve_script_t));
+    script = (sieve_script_t *)libsieve_malloc(sizeof(sieve_script_t));
     if(script == NULL)
         return SIEVE2_ERROR_NOMEM;
 
     /* Be sure to NULL the interpreter, otherwise some of
      * the internals will start calling random addresses! */
-    interp_reset(&script->interp, NULL);
+    libsieve_interp_reset(&script->interp, NULL);
 
     /* These used to be in sieve.y, but needed to be higher */
-    addrlexalloc();
-    sievelexalloc();
-
     *(sieve_script_t **)s = script;
     return SIEVE2_OK;
 }
@@ -323,15 +417,12 @@ int sieve2_script_free(sieve2_script_t *s)
 
     if (t) {
 	if (t->cmds) {
-	    free_tree(t->cmds);
+	    libsieve_free_tree(t->cmds);
 	}
-	sv_free(t);
+	libsieve_free(t);
     }
 
     /* These used to be in sieve.y, but needed to be higher */
-    addrlexfree();
-    sievelexfree();
-
     return SIEVE2_OK;
 }
 
@@ -371,14 +462,14 @@ int sieve2_message_alloc(sieve2_message_t **m)
     int i;
     sieve2_message *n = NULL;
 
-    n = (sieve2_message *)sv_malloc(sizeof(sieve2_message));
+    n = (sieve2_message *)libsieve_malloc(sizeof(sieve2_message));
     if (n == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    n->hash = (header_t **)sv_malloc(sizeof(header_t) * HEADERHASHSIZE);
+    n->hash = (header_t **)libsieve_malloc(sizeof(header_t) * HEADERHASHSIZE);
     if (n->hash == NULL) {
         /* No leaking just because there's no memory! */
-        sv_free(n);
+        libsieve_free(n);
         return SIEVE2_ERROR_NOMEM;
     }
     n->hashfull = 0;
@@ -387,18 +478,12 @@ int sieve2_message_alloc(sieve2_message_t **m)
         n->hash[i] = NULL;
     }
 
-    headerlexalloc();
-    headeryaccalloc();
-
     *(sieve2_message **)m = n;
     return SIEVE2_OK;
 }
 
 int sieve2_message_free(sieve2_message_t *m)
 {
-    headerlexfree();
-    headeryaccfree();
-
     return message2_freecache((sieve2_message *)m);
 }
 
@@ -416,8 +501,6 @@ int sieve2_message_register(sieve2_message_t *m, void *thing, int type)
             break;
         case SIEVE2_MESSAGE_HEADER:
             n->header = (char *)thing;
-            /* Generate a hash cache */
-            message2_headercache(n);
             break;
         case SIEVE2_MESSAGE_ENVELOPE:
             n->envelope = (char *)thing;
@@ -437,39 +520,48 @@ const char *sieve2_listextensions(void)
     return sieve_extensions;
 }
 
+#if (MSDOS || WIN32)
+#define NL "\r\n"
+#else
+#define NL "\n"
+#endif
+
 const char *sieve2_credits(void)
 {
-    return "libSieve is written and maintained by Aaron Stone
-with many thanks to those who have helped to debug
-and to secure this fine piece of software.
-Portions of libSieve are based on the Sieve support
-of the Cyrus Email Server by Carnegie Mellon University."
-           ;
+    return "libSieve is written and maintained by Aaron Stone"
+        " with many thanks to those who have helped to debug"
+        " and to secure this fine piece of software."
+     NL " " NL
+	" Specific thanks to:"
+     NL " " NL
+        " Portions of libSieve are based on the Sieve support"
+        " of the Cyrus Email Server by Carnegie Mellon University."
+        ;
 }
 
 const char *sieve2_license(void)
 {
-    return "libSieve is Copyright 2002, 2003 Aaron Stone, CA, USA
-and is licensed under the GNU General Public License,
-version 2 and (at the author's option, not yours)
-any later version. A copy of the license should have
-been distributed with libSieve, and if not, may be
-obtained by writing to the Free Software Foundation:
-Free Software Foundation, Inc.
-59 Temple Place, Suite 330
-Boston, MA  02111-1307  USA
-
-Portions based on the Sieve support of the
-Cyrus Email Server by Carnegie Mellon University
-are Copyright 1994, 1995, 1996 CMU, PA, USA.
-While CMU's license is not the GPL, it does not preclude such
-combination in a larger work, such as libSieve, in a manner
-which places the work as a whole under the GNU GPL.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details."
-           ;
+    return "libSieve is Copyright 2002, 2003 Aaron Stone, CA, USA"
+        " and is licensed under the GNU General Public License,"
+        " version 2 and (at the author's option, not yours)"
+        " any later version. A copy of the license should have"
+        " been distributed with libSieve, and if not, may be"
+        " obtained by writing to the Free Software Foundation:"
+     NL " Free Software Foundation, Inc.    " NL
+        " 59 Temple Place, Suite 330        " NL
+        " Boston, MA  02111-1307  USA       " NL
+     NL " " NL
+        " Portions based on the Sieve support of the"
+        " Cyrus Email Server by Carnegie Mellon University"
+        " are Copyright 1994, 1995, 1996 CMU, PA, USA."
+        " While CMU's license is not the GPL, it does not preclude such"
+        " combination in a larger work, such as libSieve, in a manner"
+        " which places the work as a whole under the GNU GPL."
+     NL " " NL
+        " This program is distributed in the hope that it will be useful,"
+        " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+        " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+        " GNU General Public License for more details."
+        ;
 }
 

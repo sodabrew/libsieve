@@ -47,7 +47,7 @@ void sievefatalerror(const char msg[]);
 
 %}
 
-%option prefix="sieve"
+%option prefix="libsieve_sieve"
 %option yylineno
 %option noyywrap
 %option nounput
@@ -62,18 +62,18 @@ CRLF		(\r\n|\r|\n)
 %%
 <MULTILINE>^\.{CRLF}	{ BEGIN INITIAL; }
 <MULTILINE>^\.\.	{ /* dot stuffing! we want one . */ yyless(1); }
-<MULTILINE>([^\.{CRLF}]|\n)+ { sievelval.sval = sv_strdup(yytext, strlen(yytext));
+<MULTILINE>([^\.{CRLF}]|\n)+ { sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
 			  return STRING; }
 <MULTILINE><<EOF>>	{ sieveerror("unexpected end of file in string"); 
 			  yyterminate(); }
 
 <QSTRING>\"		{ BEGIN INITIAL; }
-<QSTRING>([^\"]|\\\"|\n)+ { sievelval.sval = sv_strdup(yytext, strlen(yytext));
+<QSTRING>([^\"]|\\\"|\n)+ { sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
 			  return STRING; }
 
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ BEGIN MULTILINE; }
 <INITIAL>\"		{ BEGIN QSTRING; }
-<INITIAL>[0-9]+[KMG]?	{ sievelval.nval = sv_strtonum(yytext); return NUMBER; }
+<INITIAL>[0-9]+[KMG]?	{ sievelval.nval = libsieve_strtonum(yytext); return NUMBER; }
 <INITIAL>if		return IF;
 <INITIAL>elsif		return ELSIF;
 <INITIAL>else		return ELSE;

@@ -36,5 +36,7 @@ typedef struct header_list {
 header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err);
 void headerlexfree(void);
 void headerlexalloc(void);
+void headeryaccfree(void);
+void headeryaccalloc(void);
 
 #endif /* PARSER_H */

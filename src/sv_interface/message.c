@@ -51,7 +51,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * incompatible with: fileinto, redirect
  */
-int do_reject(action_list_t *a, char *msg)
+int libsieve_do_reject(action_list_t *a, char *msg)
 {
     action_list_t *b = NULL;
     sieve_reject_context_t *u;
@@ -75,11 +75,11 @@ int do_reject(action_list_t *a, char *msg)
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_REJECT;
-    a->u = (sieve_reject_context_t *) sv_malloc(sizeof(sieve_reject_context_t));
+    a->u = (sieve_reject_context_t *) libsieve_malloc(sizeof(sieve_reject_context_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_reject_context_t *)(a->u);
@@ -93,7 +93,7 @@ int do_reject(action_list_t *a, char *msg)
  *
  * incompatible with: reject
  */
-int do_fileinto(action_list_t *a, char *mbox, sieve_imapflags_t *imapflags)
+int libsieve_do_fileinto(action_list_t *a, char *mbox, sieve_imapflags_t *imapflags)
 {
     action_list_t *b = NULL;
     sieve_fileinto_context_t *u;
@@ -107,11 +107,11 @@ int do_fileinto(action_list_t *a, char *mbox, sieve_imapflags_t *imapflags)
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_FILEINTO;
-    a->u = (sieve_fileinto_context_t *) sv_malloc(sizeof(sieve_fileinto_context_t));
+    a->u = (sieve_fileinto_context_t *) libsieve_malloc(sizeof(sieve_fileinto_context_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_fileinto_context_t *)(a->u);
@@ -126,7 +126,7 @@ int do_fileinto(action_list_t *a, char *mbox, sieve_imapflags_t *imapflags)
  *
  * incompatible with: reject
  */
-int do_redirect(action_list_t *a, char *addr)
+int libsieve_do_redirect(action_list_t *a, char *addr)
 {
     action_list_t *b = NULL;
     sieve_redirect_context_t *u;
@@ -142,15 +142,15 @@ int do_redirect(action_list_t *a, char *addr)
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_REDIRECT;
-    a->u = (sieve_redirect_context_t *) sv_malloc(sizeof(sieve_redirect_context_t));
+    a->u = (sieve_redirect_context_t *) libsieve_malloc(sizeof(sieve_redirect_context_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_redirect_context_t *)(a->u);
-//    u->addr = sv_strdup(addr, strlen(addr));
+//    u->addr = libsieve_strdup(addr, strlen(addr));
     u->addr = addr;
     a->next = NULL;
     b->next = a;
@@ -161,7 +161,7 @@ int do_redirect(action_list_t *a, char *addr)
  *
  * incompatible with: reject
  */
-int do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
+int libsieve_do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
 {
     action_list_t *b = NULL;
     sieve_keep_context_t *u;
@@ -177,11 +177,11 @@ int do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_KEEP;
-    a->u = (sieve_keep_context_t *) sv_malloc(sizeof(sieve_keep_context_t));
+    a->u = (sieve_keep_context_t *) libsieve_malloc(sizeof(sieve_keep_context_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_keep_context_t *)(a->u);
@@ -195,7 +195,7 @@ int do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
  *
  * incompatible with: nothing---it doesn't cancel any actions
  */
-int do_discard(action_list_t *a)
+int libsieve_do_discard(action_list_t *a)
 {
     action_list_t *b = NULL;
 
@@ -208,8 +208,8 @@ int do_discard(action_list_t *a)
     }
 
     /* add to the action list */
-    // a = (action_list_t *) sv_malloc(sizeof(action_list_t));
-    a = new_action_list();
+    // a = (action_list_t *) libsieve_malloc(sizeof(action_list_t));
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_DISCARD;
@@ -218,7 +218,7 @@ int do_discard(action_list_t *a)
     return SIEVE_OK;
 }
 
-int do_vacation(action_list_t *a, char *addr, char *fromaddr,
+int libsieve_do_vacation(action_list_t *a, char *addr, char *fromaddr,
 		char *subj, char *msg, int days,
 		int mime)
 {
@@ -235,11 +235,11 @@ int do_vacation(action_list_t *a, char *addr, char *fromaddr,
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_VACATION;
-    a->u = (sieve2_vacation_context_t *) sv_malloc(sizeof(sieve2_vacation_context_t));
+    a->u = (sieve2_vacation_context_t *) libsieve_malloc(sizeof(sieve2_vacation_context_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve2_vacation_context_t *)(a->u);
@@ -258,7 +258,7 @@ int do_vacation(action_list_t *a, char *addr, char *fromaddr,
  *
  * incompatible with: reject
  */
-int do_setflag(action_list_t *a, char *flag)
+int libsieve_do_setflag(action_list_t *a, char *flag)
 {
     action_list_t *b = NULL;
     sieve_imaponeflag_t *u;
@@ -272,11 +272,11 @@ int do_setflag(action_list_t *a, char *flag)
     }
  
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_SETFLAG;
-    a->u = (sieve_imaponeflag_t *) sv_malloc(sizeof(sieve_imaponeflag_t));
+    a->u = (sieve_imaponeflag_t *) libsieve_malloc(sizeof(sieve_imaponeflag_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_imaponeflag_t *)(a->u);
@@ -290,7 +290,7 @@ int do_setflag(action_list_t *a, char *flag)
  *
  * incompatible with: reject
  */
-int do_addflag(action_list_t *a, char *flag)
+int libsieve_do_addflag(action_list_t *a, char *flag)
 {
     action_list_t *b = NULL;
     sieve_imaponeflag_t *u;
@@ -304,11 +304,11 @@ int do_addflag(action_list_t *a, char *flag)
     }
  
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_ADDFLAG;
-    a->u = (sieve_imaponeflag_t *) sv_malloc(sizeof(sieve_imaponeflag_t));
+    a->u = (sieve_imaponeflag_t *) libsieve_malloc(sizeof(sieve_imaponeflag_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_imaponeflag_t *)(a->u);
@@ -322,7 +322,7 @@ int do_addflag(action_list_t *a, char *flag)
  *
  * incompatible with: reject
  */
-int do_removeflag(action_list_t *a, char *flag)
+int libsieve_do_removeflag(action_list_t *a, char *flag)
 {
     action_list_t *b = NULL;
     sieve_imaponeflag_t *u;
@@ -336,11 +336,11 @@ int do_removeflag(action_list_t *a, char *flag)
     }
  
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_REMOVEFLAG;
-    a->u = (sieve_imaponeflag_t *) sv_malloc(sizeof(sieve_imaponeflag_t));
+    a->u = (sieve_imaponeflag_t *) libsieve_malloc(sizeof(sieve_imaponeflag_t));
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_imaponeflag_t *)(a->u);
@@ -355,7 +355,7 @@ int do_removeflag(action_list_t *a, char *flag)
  *
  * incompatible with: reject
  */
-int do_mark(action_list_t *a)
+int libsieve_do_mark(action_list_t *a)
 {
     action_list_t *b = NULL;
  
@@ -368,7 +368,7 @@ int do_mark(action_list_t *a)
     }
  
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_MARK;
@@ -382,7 +382,7 @@ int do_mark(action_list_t *a)
  *
  * incompatible with: reject
  */
-int do_unmark(action_list_t *a)
+int libsieve_do_unmark(action_list_t *a)
 {
     action_list_t *b = NULL;
  
@@ -395,7 +395,7 @@ int do_unmark(action_list_t *a)
     }
  
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_UNMARK;
@@ -408,7 +408,7 @@ int do_unmark(action_list_t *a)
  *
  * incompatible with: none
  */
-int do_notify(action_list_t *a, char *id,
+int libsieve_do_notify(action_list_t *a, char *id,
 	      char *method, stringlist_t *options,
 	      const char *priority, char *message)
 {
@@ -426,7 +426,7 @@ int do_notify(action_list_t *a, char *id,
 
     /* Add to the action list */
     if(a == NULL) {
-        a = new_action_list();
+        a = libsieve_new_action_list();
         if (a == NULL)
             return SIEVE_NOMEM;
         a->a = ACTION_NOTIFY;
@@ -435,7 +435,7 @@ int do_notify(action_list_t *a, char *id,
         a->next = NULL;
 
         /* Create the notify list */
-        n = a->u = new_notify_list();
+        n = a->u = libsieve_new_notify_list();
         if (a->u == NULL)
             return SIEVE_NOMEM;
 
@@ -452,7 +452,7 @@ int do_notify(action_list_t *a, char *id,
         }
  
         /* Add to the notify list */
-        m->next = n = new_notify_list();
+        m->next = n = libsieve_new_notify_list();
         if (n == NULL)
             return SIEVE_NOMEM;
 
@@ -473,7 +473,7 @@ int do_notify(action_list_t *a, char *id,
     }
 
     / * Create / Add to the notify list * /
-    n = (notify_list_t *) sv_malloc(sizeof(notify_list_t));
+    n = (notify_list_t *) libsieve_malloc(sizeof(notify_list_t));
     if (n == NULL)
 	return SIEVE_NOMEM;
 */
@@ -493,7 +493,7 @@ int do_notify(action_list_t *a, char *id,
  *
  * incomaptible with: none
  */
-int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
+int libsieve_do_denotify(action_list_t *a, comparator_t *comp, void *pat,
 		const char *priority)
 {
     action_list_t *b = NULL;
@@ -530,7 +530,7 @@ int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
  *
  * Incompatible with: nothing
  */
-int do_error(action_list_t *a)
+int libsieve_do_error(action_list_t *a)
 {
     action_list_t *b = NULL;
 
@@ -543,7 +543,7 @@ int do_error(action_list_t *a)
     }
 
     /* add to the action list */
-    a = new_action_list();
+    a = libsieve_new_action_list();
     if (a == NULL)
 	return SIEVE_NOMEM;
     a->a = ACTION_DISCARD;
@@ -555,7 +555,7 @@ int do_error(action_list_t *a)
 /* given a header, extract an address out of it.  if marker points to NULL,
    extract the first address.  otherwise, it's an index into the header to
    say where to start extracting */
-int parse_address(const char *header, struct address **data, struct addr_marker **marker)
+int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker)
 {
     char *err;
     struct addr_marker *am;
@@ -565,14 +565,14 @@ int parse_address(const char *header, struct address **data, struct addr_marker 
     if( newdata == NULL )
         return SIEVE_RUN_ERROR;
 
-    am = (struct addr_marker *)sv_malloc(sizeof(struct addr_marker));
+    am = (struct addr_marker *)libsieve_malloc(sizeof(struct addr_marker));
     am->where = newdata;
     am->freeme = NULL;
     *marker = am;
     return SIEVE_OK;
 }
 
-char *get_address(address_part_t addrpart,
+char *libsieve_get_address(address_part_t addrpart,
 		  struct address **data __attribute__((unused)),
 		  struct addr_marker **marker,
 		  int canon_domain)
@@ -583,7 +583,7 @@ char *get_address(address_part_t addrpart,
 
     a = am->where;
     if (am->freeme) {
-	sv_free(am->freeme);
+	libsieve_free(am->freeme);
 	am->freeme = NULL;
     }
 
@@ -591,7 +591,7 @@ char *get_address(address_part_t addrpart,
 	ret = NULL;
     } else {
 	if (canon_domain && a->domain)
-	    sv_strtolower(a->domain,strlen(a->domain));
+	    libsieve_strtolower(a->domain,strlen(a->domain));
 
 	switch (addrpart) { 
 	case ADDRESS_ALL:
@@ -600,7 +600,7 @@ char *get_address(address_part_t addrpart,
 	    if (a->mailbox || a->domain) {
 		char *m = a->mailbox ? a->mailbox : U_USER;
 		char *d = a->domain ? a->domain : U_DOMAIN;
-		am->freeme = sv_strconcat(m, "@", d, NULL);
+		am->freeme = libsieve_strconcat(m, "@", d, NULL);
 		ret = am->freeme;
 	    } else {
 		ret = NULL;
@@ -620,9 +620,9 @@ char *get_address(address_part_t addrpart,
 		char *p = strchr(a->mailbox, '+');
 		int len = p ? p - a->mailbox : strlen(a->mailbox);
 
-		am->freeme = sv_strdup(a->mailbox, len);
+		am->freeme = libsieve_strdup(a->mailbox, len);
 		/* FIXME: Confirm this works then delete.
-		am->freeme = (char *) sv_malloc(len + 1);
+		am->freeme = (char *) libsieve_malloc(len + 1);
 		strncpy(am->freeme, a->mailbox, len);
 		am->freeme[len] = '\0';
 		*/
@@ -648,31 +648,31 @@ char *get_address(address_part_t addrpart,
     return ret;
 }
 
-int free_address(struct address **data, struct addr_marker **marker)
+int libsieve_free_address(struct address **data, struct addr_marker **marker)
 {
     struct addr_marker *am = *marker;
     struct address *freedata;
 
     while( *data ) {
         freedata = (*data)->next;
-        sv_free((*data)->mailbox);
-        sv_free((*data)->domain);
-        sv_free((*data)->route);
-        sv_free((*data)->name);
-        sv_free(*data);
+        libsieve_free((*data)->mailbox);
+        libsieve_free((*data)->domain);
+        libsieve_free((*data)->route);
+        libsieve_free((*data)->name);
+        libsieve_free(*data);
         *data = freedata;
     }
 
     *data = NULL;
-    sv_free(am->freeme);
-    sv_free(am);
+    libsieve_free(am->freeme);
+    libsieve_free(am);
     *marker = NULL;
     return SIEVE_OK;
 }
 
-notify_list_t *new_notify_list(void)    
+notify_list_t *libsieve_new_notify_list(void)    
 {
-    notify_list_t *ret = sv_malloc(sizeof(notify_list_t));
+    notify_list_t *ret = libsieve_malloc(sizeof(notify_list_t));
 
     if (ret != NULL) {
 	ret->isactive = 0;
@@ -686,22 +686,22 @@ notify_list_t *new_notify_list(void)
     return ret;
 }
 
-void free_notify_list(notify_list_t *n)
+void libsieve_free_notify_list(notify_list_t *n)
 {
     /* Don't free the very top of the list */
-    sv_free(n->options); // FIXME: Why aren't we freeing the top?
+    libsieve_free(n->options); // FIXME: Why aren't we freeing the top?
     n = n->next;
     while (n != NULL) {
         notify_list_t *b = n->next;
-        sv_free(n->options);
-        sv_free(n);
+        libsieve_free(n->options);
+        libsieve_free(n);
         n = b;
     }
 }
 
-action_list_t *new_action_list(void)
+action_list_t *libsieve_new_action_list(void)
 {
-    action_list_t *ret = sv_malloc(sizeof(action_list_t));
+    action_list_t *ret = libsieve_malloc(sizeof(action_list_t));
 
     if (ret != NULL) {
         ret->a = ACTION_NONE;
@@ -712,21 +712,21 @@ action_list_t *new_action_list(void)
     return ret;
 }
 
-void free_action_list(action_list_t *a)
+void libsieve_free_action_list(action_list_t *a)
 {
     while (a) {
 	action_list_t *b = a->next;
 	switch (a->a) {
 	case ACTION_VACATION:
-	    sv_free(((sieve2_vacation_context_t *)(a->u))->send.addr);
-	    sv_free(((sieve2_vacation_context_t *)(a->u))->send.fromaddr);
-	    sv_free(((sieve2_vacation_context_t *)(a->u))->send.subj);
+	    libsieve_free(((sieve2_vacation_context_t *)(a->u))->send.addr);
+	    libsieve_free(((sieve2_vacation_context_t *)(a->u))->send.fromaddr);
+	    libsieve_free(((sieve2_vacation_context_t *)(a->u))->send.subj);
 	    break;
 
 	default:
 	    break;
 	}
-	sv_free(a);
+	libsieve_free(a);
 	a = b;
     }
 }

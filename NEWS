@@ -3,7 +3,7 @@ libSieve 2.2.0
 
 - Sieve 2 API is implemented.
 
-- All later CMU code removed and/or replaced;
+- All later-CMU code removed and/or replaced;
   original licensing is now entirely old-CMU
   style and augmented by the GNU GPL as it is
   placed on all new code and applies to the 
@@ -20,6 +20,9 @@ libSieve 2.2.0
 
 - Many more changes, amounting to perhaps a
   70% rewrite of all code.
+
+- Namespace cleanups: internal global functions
+  prefixed with "libsieve_" for consistency.
 
 libSieve 2.1.3
 --------------

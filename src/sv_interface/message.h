@@ -65,16 +65,16 @@ typedef struct notify_list_s {
 */
 typedef struct sieve_notify_context notify_list_t;
 
-notify_list_t *new_notify_list(void);
-void free_notify_list(notify_list_t *n);
+notify_list_t *libsieve_new_notify_list(void);
+void libsieve_free_notify_list(notify_list_t *n);
 
-action_list_t *new_action_list(void);
-void free_action_list(action_list_t *actions);
+action_list_t *libsieve_new_action_list(void);
+void libsieve_free_action_list(action_list_t *actions);
 
 /* invariant: always have a dummy element when free_action_list, param
    and vac_subj are freed.  none of the others are automatically freed.
 
-   the do_action() functions should copy param */
+   the libsieve_do_action() functions should copy param */
 struct Action {
     action_t a;		// action code, enumerated
     void *u;		// pointer to context structure
@@ -112,31 +112,31 @@ typedef enum {
     ADDRESS_DETAIL
 } address_part_t;
 
-int parse_address(const char *header, struct address **data, struct addr_marker **marker);
-char *get_address(address_part_t addrpart, struct address **data, struct addr_marker **marker,
+int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker);
+char *libsieve_get_address(address_part_t addrpart, struct address **data, struct addr_marker **marker,
 		  int canon_domain);
-int free_address(struct address **data, struct addr_marker **marker);
+int libsieve_free_address(struct address **data, struct addr_marker **marker);
 
 /* actions; return negative on failure.
  * these don't actually perform the actions, they just add it to the
  * action list */
-int do_reject(action_list_t *m, char *msg);
-int do_fileinto(action_list_t *m, char *mbox, sieve_imapflags_t *imapflags);
-int do_redirect(action_list_t *m, char *addr);
-int do_keep(action_list_t *m, sieve_imapflags_t *imapflags);
-int do_discard(action_list_t *m);
-int do_vacation(action_list_t *m, char *addr, char *fromaddr,
+int libsieve_do_reject(action_list_t *m, char *msg);
+int libsieve_do_fileinto(action_list_t *m, char *mbox, sieve_imapflags_t *imapflags);
+int libsieve_do_redirect(action_list_t *m, char *addr);
+int libsieve_do_keep(action_list_t *m, sieve_imapflags_t *imapflags);
+int libsieve_do_discard(action_list_t *m);
+int libsieve_do_vacation(action_list_t *m, char *addr, char *fromaddr,
 		char *subj, char *msg, 
 		int days, int mime);
-int do_setflag(action_list_t *m, char *flag);
-int do_addflag(action_list_t *m, char *flag);
-int do_removeflag(action_list_t *m, char *flag);
-int do_mark(action_list_t *m);
-int do_unmark(action_list_t *m);
-int do_notify(action_list_t *a, char *id,
+int libsieve_do_setflag(action_list_t *m, char *flag);
+int libsieve_do_addflag(action_list_t *m, char *flag);
+int libsieve_do_removeflag(action_list_t *m, char *flag);
+int libsieve_do_mark(action_list_t *m);
+int libsieve_do_unmark(action_list_t *m);
+int libsieve_do_notify(action_list_t *a, char *id,
 	      char *method, stringlist_t *options,
 	      const char *priority, char *message);
-int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
+int libsieve_do_denotify(action_list_t *a, comparator_t *comp, void *pat,
 		const char *priority);
 
 

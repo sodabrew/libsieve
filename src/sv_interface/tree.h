@@ -132,19 +132,19 @@ struct Commandlist {
     struct Commandlist *next;
 };
 
-stringlist_t *new_sl(char *s, stringlist_t *n);
-patternlist_t *new_pl(regex_t *pat, patternlist_t *n);
-tag_t *new_tag(int type, char *s);
-taglist_t *new_taglist(tag_t *t, taglist_t *n);
-test_t *new_test(int type);
-testlist_t *new_testlist(test_t *t, testlist_t *n);
-commandlist_t *new_command(int type);
-commandlist_t *new_if(test_t *t, commandlist_t *y, commandlist_t *n);
+stringlist_t *libsieve_new_sl(char *s, stringlist_t *n);
+patternlist_t *libsieve_new_pl(regex_t *pat, patternlist_t *n);
+tag_t *libsieve_new_tag(int type, char *s);
+taglist_t *libsieve_new_taglist(tag_t *t, taglist_t *n);
+test_t *libsieve_new_test(int type);
+testlist_t *libsieve_new_testlist(test_t *t, testlist_t *n);
+commandlist_t *libsieve_new_command(int type);
+commandlist_t *libsieve_new_if(test_t *t, commandlist_t *y, commandlist_t *n);
 
-void free_sl(stringlist_t *sl);
-void free_pl(patternlist_t *pl, int comptag);
-void free_test(test_t *t);
-void free_tree(commandlist_t *cl);
+void libsieve_free_sl(stringlist_t *sl);
+void libsieve_free_pl(patternlist_t *pl, int comptag);
+void libsieve_free_test(test_t *t);
+void libsieve_free_tree(commandlist_t *cl);
 
 char **stringlist_to_chararray(stringlist_t *list);
 

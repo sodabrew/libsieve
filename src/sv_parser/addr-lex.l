@@ -29,9 +29,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* This only works in C99 and higher... */
 #ifdef DEBUG
-#define sv_debugf(...) printf(__VA_ARGS__)
+#define libsieve_debugf(...) printf(__VA_ARGS__)
 #else
-#define sv_debugf(...) 
+#define libsieve_debugf(...) 
 #endif /* ifdef DEBUG */
 
 /* Must be defined before addr.h */
@@ -49,22 +49,22 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 static int ncom = 0;	/* number of open comments */
 static struct mlbuf *ml = NULL;
 
-#define YY_FATAL_ERROR addrfatalerror
-void addrfatalerror(const char msg[]);
+#define YY_FATAL_ERROR libsieve_addrfatalerror
+void libsieve_addrfatalerror(const char msg[]);
 
 %}
 
 %option noyywrap
 %option nounput
-%option prefix="addr"
+%option prefix="libsieve_addr"
 
 %x QSTRING DOMAINLIT COMMENT
 
 %%
 
-\"				{ BEGIN QSTRING; sv_debugf( "Begin QSTRING\n" ); return QUOTE; }
-\[				{ BEGIN DOMAINLIT; sv_debugf( "Begin DOMAINLIT\n" ); return yytext[0]; }
-\(				{ ncom = 1; sv_debugf( "Begin COMMENT\n" ); BEGIN COMMENT; }
+\"				{ BEGIN QSTRING; libsieve_debugf( "Begin QSTRING\n" ); return QUOTE; }
+\[				{ BEGIN DOMAINLIT; libsieve_debugf( "Begin DOMAINLIT\n" ); return yytext[0]; }
+\(				{ ncom = 1; libsieve_debugf( "Begin COMMENT\n" ); BEGIN COMMENT; }
 \)				{ addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
@@ -75,31 +75,31 @@ void addrfatalerror(const char msg[]);
 		return yytext[0];
 				}
 ([ \t\n\r])+			{
-		sv_debugf( "Whitespace silently murdered.\n" );
+		libsieve_debugf( "Whitespace silently murdered.\n" );
 		/* Ignore whitespace by not returning */
 				}
 ([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
 		/* Match any set of non-special-characters */
-		addrlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return ATOM;
 				}
 
 <QSTRING>([^\"]|\\\")+		{
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
-		addrlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return QTEXT;
 				}
 <QSTRING>\"			{
 		BEGIN INITIAL;
-		sv_debugf( "End QSTRING\n" );
+		libsieve_debugf( "End QSTRING\n" );
 		return QUOTE;
 				}
 
 <DOMAINLIT>([^\[\]\n\r\\]|\\.)*	return DTEXT;
 <DOMAINLIT>\]			{
 		BEGIN INITIAL;
-		sv_debugf( "End DOMAINLIT\n" );
+		libsieve_debugf( "End DOMAINLIT\n" );
 		return yytext[0];
 		};
 
@@ -114,39 +114,39 @@ void addrfatalerror(const char msg[]);
 %%
 
 /* take input from address string provided by sieve parser */
-int addrinput(char *buf, int max)
+int libsieve_addrinput(char *buf, int max)
 {
-    extern char *addrptr;	/* current position in address string */
+    extern char *libsieve_addrptr;	/* current position in address string */
     size_t n;			/* number of characters to read from string */
     size_t max_size = (size_t)max;
 
-    if(addrptr == NULL)
+    if(libsieve_addrptr == NULL)
         n = 0;
     else
-        n = strlen(addrptr) < max_size ? strlen(addrptr) : max_size;
+        n = strlen(libsieve_addrptr) < max_size ? strlen(libsieve_addrptr) : max_size;
     if (n > 0) {
-	memcpy(buf, addrptr, n);
-	addrptr += n;
+	memcpy(buf, libsieve_addrptr, n);
+	libsieve_addrptr += n;
     }
     return n;
 }
 
 /* Clean up after ourselves by free()ing the current buffer */
-void addrlexfree()
+void libsieve_addrlexfree()
 {
-    sv_strbuffree(&ml, FREEME);
+    libsieve_strbuffree(&ml, FREEME);
     addr_delete_buffer( YY_CURRENT_BUFFER );
 }
 
 /* Kind of a hack, but this sets up the file statics */
-void addrlexalloc()
+void libsieve_addrlexalloc()
 {
-    sv_strbufalloc(&ml);
+    libsieve_strbufalloc(&ml);
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
-void addrfatalerror(const char msg[])
+void libsieve_addrfatalerror(const char msg[])
 {
     /* Basically stop and don't do anything */
 }

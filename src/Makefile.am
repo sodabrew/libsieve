@@ -4,6 +4,8 @@ SUBDIRS			= sv_parser sv_rsamd5 sv_interface sv_util . sv_test sv_include
 
 if DEBUG
 DEBUG			= -DDEBUG
+else
+DEBUG			= 
 endif
 
 CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g $(DEBUG)

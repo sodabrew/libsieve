@@ -5,10 +5,9 @@ included here or elsewhere within the libSieve code (and if it should appear,
 must be considered a typo). Should a later version of the GPL be deemed
 favorable for use, a notice will be made to that effect.
 
-New portions of code are copyrighted by the libSieve team, and contributions
-are assumed to have thier copyrights assigned to the libSieve team unless
-specifically stated otherwise. At this time, the 'libSieve team' is defined
-to be persons with CVS commit rights to the libSieve source code repository.
+New portions of code are copyrighted by the libSieve author and maintainer,
+Aaron Stone, and contributions are assumed to have thier copyrights assigned
+to the libSieve author unless specifically stated and agreed to otherwise.
 
 As of verison 2.2.0 of libSieve, all code previously held under a larger,
 "advertising," license from CMU has been removed or replaced. As the new
