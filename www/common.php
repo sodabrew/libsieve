@@ -15,7 +15,7 @@
 
  $smarty->assign( 'toplinks', array(
  	array( 'home', 'index.php' ), 
-	array( 'example', 'example1.php' ), 
+	array( 'api docs', 'functions.php' ), 
  	array( 'scripts', 'script1.php' ), 
  	array( 'license', 'license.php' ), 
 	array( 'download', 'http://sf.net/project/showfiles.php?group_id=66233' ), 

@@ -1,0 +1,180 @@
+#include "template.txt"
+<?php
+
+ include( '../Smarty/libs/Smarty.class.php' );
+ $smarty = new Smarty;
+ include( 'common.php' );
+
+ $smarty->assign( 'lefttitle', 'example.' );
+ $smarty->assign( 'leftcontent', array(
+ 	array( '',
+	<<<ENDOFPRE
+
+H1(Sieve 2 API: Structures)
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_action) C_TYPE(sieve2_action_t);
+BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error) C_TYPE(sieve2_error_t);
+BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_message) C_TYPE(sieve2_message_t);
+BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_script) C_TYPE(sieve2_script_t);
+BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_support) C_TYPE(sieve2_support_t);
+BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_interp) C_TYPE(sieve2_interp_t);
+	)
+These are the opaque types representing internal libSieve structures.
+Naturally, you shouldn&#39;t think too hard about these because they just are.
+Do be sure to use these types in your declarations and not simply void
+pointers, because you will lose type checking on your arguments.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_vacation_context) {
+BR	TAB    C_TYPE(int) C_ARG(min_response);		/* 0 -> defaults to 3 */
+BR	TAB    C_TYPE(int) C_ARG(max_response);		/* 0 -> defaults to 90 */
+BR      TAB
+BR	TAB    /* In Sieve 2, send_response is right here */
+BR	TAB    C_QUAL(struct) {
+BR	TAB    TAB    C_TYPE(char) *C_ARG(addr);
+BR	TAB    TAB    C_TYPE(char) *C_ARG(fromaddr);
+BR	TAB    TAB    C_TYPE(char) *C_ARG(subj);
+BR	TAB    TAB    C_TYPE(char) *C_ARG(msg);
+BR	TAB    TAB    C_TYPE(int) C_ARG(mime);
+BR	TAB    } C_ARG(send);
+BR
+BR	TAB    /* In Sieve 2, check_response is right here */
+BR	TAB    C_QUAL(struct) {
+BR	TAB    TAB    C_QUAL(unsigned) C_TYPE(char) *C_ARG(hash);
+BR	TAB    TAB    C_TYPE(int) C_ARG(len);
+BR	TAB    TAB    C_TYPE(int) C_ARG(days);
+BR	TAB    } C_ARG(check);
+BR	} C_TYPE(sieve2_vacation_context_t);
+	)
+
+The vacation structure is used to reply to a message to let the sender 
+know that the recipient is out of town for a while. The client application
+needs to check to see if the particular sender has already been sent a 
+vacation reply within the time frame indicated by vacation.check.days.
+If yes, give up. If not, the members of vacation.send should be used to
+build up a message. The members of vacation.send are pretty self-explanatory,
+except for the mime number. I have no idea what that is.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_imapflags_context) {
+BR	TAB    C_TYPE(char) **C_ARG(flag);		/* NULL -> defaults to \flagged */
+BR	TAB    C_TYPE(int) C_ARG(nflags);
+BR	} C_TYPE(sieve2_imapflags_context_t);
+	)
+
+The imapflags structure holds a list of imap flag strings. Each carries
+the format \Flag and comforms to recent revisions of the IMAP standard.
+Probably the easiest thing to do is loop through the flags, compare them
+to the known flags that your application supports, and mark those that
+match up.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_redirect_context) {
+BR	TAB    C_TYPE(char) *C_ARG(addr);
+BR	} C_TYPE(sieve2_redirect_context_t);
+	)
+
+The redirect structure indicates where the message should be sent to next.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_reject_context) {
+BR	TAB    C_TYPE(char) *C_ARG(msg);
+BR	} C_TYPE(sieve2_reject_context_t);
+	)
+
+The reject structure gives a message to return to the message sender,
+generally indicating why the message was rejected. The message itself
+may or may not be included as an attachment; it is generally recommended
+to send just the headers, if not only the subject line.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_fileinto_context) {
+BR	TAB    C_TYPE(char) *C_ARG(mailbox);
+BR	TAB    C_TYPE(sieve2_imapflags_context_t) *C_ARG(imapflags);
+BR	} C_TYPE(sieve2_fileinto_context_t);
+	)
+
+The fileinto structure indicates the mailbox into which the message should
+be filed. In general, the mailbox should be created if it does not already
+exist, but this behavior is up to the client application, possibly user
+preferences or system policy, or whatever else.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_keep_context) {
+BR	TAB    C_TYPE(sieve2_imapflags_context_t) *C_ARG(imapflags);
+BR	} C_TYPE(sieve2_keep_context_t);
+	)
+
+The keep structure itself indicates that the message should be kept. It
+further contains an imapflags structure that indicates the flags that
+that should be set on the kept message. See the imapflags section above.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_notify_context) {
+BR	TAB    C_TYPE(int) C_ARG(isactive);
+BR	TAB    C_TYPE(char) *C_ARG(id);
+BR	TAB    C_TYPE(char) *C_ARG(method);
+BR	TAB    C_TYPE(char) **C_ARG(options);
+BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(priority);
+BR	TAB    C_TYPE(char) *C_ARG(message);
+BR	TAB    C_QUAL(struct) C_TYPE(sieve2_notify_context) *C_ARG(next);
+BR	} C_TYPE(sieve2_notify_context_t);
+	)
+
+The notify structure is in fact a linked list of notify structures. It is
+up to the client application to traverse the list. The next member will
+be NULL when the end has been reached; just a typical linked list. The
+notification extension is fairly involved, so rather than trying to explain
+it all here, do please read the latest draft of the extension.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error_parse_context) {
+BR	TAB    C_TYPE(int) C_ARG(lineno);
+BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(msg);
+BR	} C_TYPE(sieve2_error_parse_context_t);
+	)
+
+The parse error structure contains a descriptive error message indicating
+what went wrong while parsing the script, headers and email addresses
+therein. If the parse error was in the script or the headers, the line
+number member will be non-zero.
+
+At this time, no translation facility is in place, so the message
+will be in English.
+
+CODE	(
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error_execute_context) {
+BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(msg);
+BR	} C_TYPE(sieve2_error_execute_context_t);
+	)
+
+The execution error structure contains a descriptive error message
+indicating what went wrong during execution of the script. At this time,
+no translation facility is in place, so the message will be in English.
+
+ENDOFPRE
+ 	) ) );
+
+ $smarty->assign( 'righttitle', 'notes.' );
+ $smarty->assign( 'rightcontent', array(
+ 	array(
+	<<<ENDOFPRE
+The Sieve 2 API is an extensible API designed to ride through revisions
+in the underlying implementation and through updates to the Sieve RFC
+and various extensions, as they move from drafts towards full RFC&#39;s.
+
+The API has three main parts: the incomplete opaque internal types, the
+complete and user accessible external structures and the function calls.
+ENDOFPRE
+	) ) );
+ $smarty->assign( 'rightlinks', array(
+ 	array( 'API Functions', 'functions.php' ),
+ 	array( 'API Structures', 'structures.php' ),
+ 	array( 'Usage Example 1', 'example1.php' ),
+ 	array( 'Usage Example 2', 'example2.php' ),
+	) );
+
+ $smarty->display( 'tweedy.tpl' );
+
+?>

@@ -1,41 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 
 <!-- $title =) -->
-<head><title>
-	{$title}
-</title></head>
+<head>
+<title>{$title}</title>
+<link rel="stylesheet" title="code" href="code.css">
+</head>
 
-<basefont face=lucida>
-<body bgcolor=#ffffff link=#0050a0 vlink=#0050a0 alink=#000000 marginheight=0 marginwidth=0>
+<basefont face="lucida">
+<body bgcolor="#ffffff" link="#0050a0" vlink="#0050a0" alink="#000000" marginheight="0" marginwidth="0">
 
-<table width=100% border=0 cellspacing=0 cellpadding=0>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
 	<tr>
-	<td bgcolor=#000000>
-		<table width=100% border=0 cellspacing=2 cellpadding=0>
+	<td bgcolor="#000000">
+		<table width="100%" border=0 cellspacing=2 cellpadding=0>
 			<tr>
-			<td bgcolor=#305080>
-				<font color=#ffffff size=+4><b>
+			<td bgcolor="#305080">
+				<font color="#ffffff" size="+4"><b>
 				&nbsp;{$lefthead}&nbsp;
 				</b></font>
 			</td>
-			<td width=100% bgcolor=#d0d0d0>
-				<font size=+4><b>
+			<td width="100%" bgcolor="#d0d0d0">
+				<font size="+4"><b>
 				&nbsp;{$righthead|spacify}
 				</b></font>
 			</td>
 			</tr>
 			<tr>
-			<td bgcolor=#000000 colspan=2>
-				<font color=#808080><small><b>
+			<td bgcolor="#000000" colspan=2>
+				<font color="#808080"><small><b>
 				&nbsp;&nbsp;
 				{assign var=i value=0}
 				{foreach from=$toplinks item=link}
 					{if $i != 0} &nbsp;&nbsp;|&nbsp;&nbsp;
 					{else} {assign var=i value=1} {/if}
 					{if $link[1] == $thispage}
-						<font color=#ffffff>{$link[0]|spacify}</font>
+						<font color="#ffffff">{$link[0]|spacify}</font>
 					{else}
-						<a href="{$link[1]}"><font color=#c0c0c0>{$link[0]|spacify}</font></a>
+						<a href="{$link[1]}"><font color="#c0c0c0">{$link[0]|spacify}</font></a>
 					{/if}
 				{/foreach}
 				</b></small></font>
@@ -47,18 +49,18 @@
 	<tr>
 	<td valign=top colspan=2>
 
-		<table width=100% border=0 cellspacing=4 cellpadding=0>
+		<table width="100%" border=0 cellspacing=4 cellpadding=0>
 			<tr>
-			<td width=100%>
+			<td width="100%">
 
-				<table width=100% border=0 cellspacing=0 cellpadding=4>
+				<table width="100%" border=0 cellspacing=0 cellpadding=4>
 					<tr>
-					<td width=66% valign=top>
+					<td width="66%" valign=top>
 
-					<table width=100% border=0 cellspacing=0 cellpadding=0>
+					<table width="100%" border=0 cellspacing=0 cellpadding=0>
 					<tr><td bgcolor=#000000>
 
-						<table width=100% border=0 cellspacing=2 cellpadding=2 cols=2>
+						<table width="100%" border=0 cellspacing=2 cellpadding=2 cols=2>
 							<tr>
 							<td bgcolor=#305080 nowrap>
 								<b><font color=#ffffff>
@@ -72,8 +74,10 @@
 							<tr>
 							<td colspan=2 bgcolor=#d0d0d0>
 							{foreach from=$leftcontent item=content}
-								<b>{$content[0]}</b>
-								<br>
+								{if $content[0] != ""}
+									<b>{$content[0]}</b>
+									<br>
+								{/if}
 								<small>
 								{$content[1]}
 								</small>
@@ -86,12 +90,12 @@
 						</table>
 
 					</td>
-					<td width=33% valign=top>
+					<td width="33%" valign=top>
 
-						<table width=100% border=0 cellspacing=0 cellpadding=0>
+						<table width="100%" border=0 cellspacing=0 cellpadding=0>
 						<tr><td bgcolor=#000000>
 
-						<table width=100% border=0 cellspacing=2 cellpadding=2 cols=2>
+						<table width="100%" border=0 cellspacing=2 cellpadding=2 cols=2>
 							<tr>
 							<td bgcolor=#305080 nowrap>
 								<b><font color=#ffffff>
@@ -105,8 +109,10 @@
 							<tr>
 							<td bgcolor=#d0d0d0 colspan=2>
 							{foreach from=$rightcontent item=content}
-								<b>{$content[0]}</b>
-								<br>
+								{if $content[0] != ""}
+									<b>{$content[0]}</b>
+									<br>
+								{/if}
 								<small>
 								{$content[1]}
 								</small>
@@ -122,6 +128,7 @@
 									<b><a href="{$link[1]}">{$link[0]}</a></b> {$link[2]}
 								{/if}
 							{/foreach}
+							<br>
 							</td>
 						</table>
 
@@ -130,10 +137,10 @@
 
 						<br>
 
-						<table width=100% border=0 cellspacing=0 cellpadding=0>
+						<table width="100%" border=0 cellspacing=0 cellpadding=0>
 						<tr><td bgcolor=#000000>
 
-						<table width=100% border=0 cellspacing=2 cellpadding=2 cols=2>
+						<table width="100%" border=0 cellspacing=2 cellpadding=2 cols=2>
 							<tr>
 							<td bgcolor=#305080 nowrap>
 								<b><font color=#ffffff>

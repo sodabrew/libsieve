@@ -14,6 +14,24 @@
 	'Sieve was developed by Carnegie Mellon University, in Pittsburgh, PA. Since they wanted to write a complete mail server based entirely on Internet RFC standards, they started with SMTP, then POP and IMAP, and so on. One day, someone asked if they could sort their mail automatically. But there were no RFC\'s for mail sorting languages. So they wrote one! And then a library to make it work, and then nestled it tightly into the Cyrus project and nobody else wanted to bother trying to get that library out of there and available for public consumption. And that\'s where libSieve fits in :-)' ),
 	) );
 
+ $smarty->assign( 'righttitle', 'news.' );
+ $smarty->assign( 'rightcontent', array(
+ 	array( 'December 2003: 2.2.0pre4',
+	'I\'m proud to announce that libSieve 2.2.0pre4 has been released!
+Some minor API changes are still expected before the final 2.2.0 release, but we\'re
+now making them in much more controlled ways than during the heddy days of full
+overhauls just a few months ago.' ),
+	array( 'December 2003: DBMail 2.0 alpha 2',
+	'Well, I\'m pre-announcing it, but the DBMail 2.0 development
+has been progressing nicely, and libSieve support is soon to be added to CVS. After
+some work on stabilizing the source base, another pre-release will be made which
+may likely include much of the libSieve interface code.' ),
+	) );
+ $smarty->assign( 'rightlinks', array(
+ 	array( 'DBMail', 'http://dbmail.org/' ),
+	) );
+
+
  $smarty->display( 'tweedy.tpl' );
 
 ?>
