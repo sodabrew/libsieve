@@ -9,7 +9,8 @@ all:
 	@echo "This is the top level Makefile, which does two things:"
 	@echo
 	@echo "1. Makes releases, with the command 'make snapshot'"
-	@echo "2. Tells you to 'cd src/ && make' to actually compile something"
+	@echo "2. Explains that to actually compile something, do this:"
+	@echo "   cd src && ./configure && make"
 	@echo
 	@echo
 	@echo "Please read over the documentation in the top level, too!"
