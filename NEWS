@@ -24,6 +24,12 @@ libSieve 2.2.0
 - Namespace cleanups: internal global functions
   prefixed with "libsieve_" for consistency.
 
+- Local regex library, borrowed from GNU glibc
+  2.3.2. Used under LGPL license version 2.1.
+
+- Compiles under Win32 with Visual C++, with
+  many thanks to Brandon Knitter.
+
 libSieve 2.1.3
 --------------
 
