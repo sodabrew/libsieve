@@ -29,6 +29,7 @@
 
 static struct mlbuf *ml = NULL;
 
+#define YY_NO_UNISTD_H 1
 #define YY_FATAL_ERROR libsieve_headerfatalerror
 void libsieve_headerfatalerror(const char msg[]);
 
@@ -37,6 +38,7 @@ void libsieve_headerfatalerror(const char msg[]);
 
 %option noyywrap
 %option prefix="libsieve_header"
+%option never-interactive
 
 %x S_NAME S_TEXT S_WRAP
 

@@ -47,10 +47,11 @@ void libsieve_sievefatalerror(const char msg[]);
 
 %}
 
-%option prefix="libsieve_sieve"
 %option yylineno
 %option noyywrap
 %option nounput
+%option prefix="libsieve_sieve"
+%option never-interactive
 
 ws		[ \t]+
 ident		[a-zA-Z_][a-zA-Z_0-9]*

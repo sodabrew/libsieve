@@ -57,6 +57,7 @@ void libsieve_addrfatalerror(const char msg[]);
 %option noyywrap
 %option nounput
 %option prefix="libsieve_addr"
+%option never-interactive
 
 %x QSTRING DOMAINLIT COMMENT
 

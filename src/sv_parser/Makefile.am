@@ -9,7 +9,7 @@ REGEX			= -DENABLE_REGEX
 endif
 
 CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g $(DEBUG) $(REGEX)
-LFLAGS			= -olex.yy.c
+LFLAGS			= -s -olex.yy.c
 YFLAGS			= -d -p$*
 
 noinst_LTLIBRARIES      = libparser.la
