@@ -85,12 +85,11 @@ void libsieve_headererror(const char *s)
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
- */
+ * */
 header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
-    extern struct mlbuf *ml;
 
     hl = NULL;
     if (libsieve_headerappend(&hl) != SIEVE2_OK)
@@ -99,8 +98,10 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     (const char *)libsieve_headerptr = *ptr;
 
     if(libsieve_headerparse()) {
-	libsieve_strbuffree(&ml, FREEME);
-	libsieve_debugf( "Parser ERROR: %s\n", libsieve_headererr );
+	libsieve_debugf( "Header parse error: %s\n", libsieve_headererr );
+        libsieve_free(hl->h->contents);
+        libsieve_free(hl->h);
+        libsieve_free(hl);
 	return NULL;
     }
 
@@ -167,7 +168,7 @@ void libsieve_headerentry(header_t *h, char *name, char *body)
 
     /* This function is NOT designed for general purpose
      * entries, but only for making the very first entry!
-     */
+     * */
 }
 
 void libsieve_headeryaccalloc()
@@ -179,7 +180,7 @@ void libsieve_headeryaccfree()
 {
     /* This must correspond to sieve2_messagecache
      * knowing not to free its contents[] entries.
-     */
+     * */
     libsieve_strbuffree(&ml, FREEME);
 }
 

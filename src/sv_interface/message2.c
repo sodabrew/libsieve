@@ -137,9 +137,12 @@ int libsieve_message2_headercache(sieve2_message *m)
 {
     size_t c, cl;
     char *err = NULL;
+    extern char *libsieve_headererr;
     header_list_t *hl = NULL, *hlfree;
 
     if ((hl = libsieve_header_parse_buffer(&hl, &m->header, &err)) == NULL) {
+        /* TODO: Deglobalize this! FIXME: Do something useful with it! */
+        libsieve_free(libsieve_headererr);
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_EXEC;
     }

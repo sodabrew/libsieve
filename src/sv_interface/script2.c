@@ -212,7 +212,6 @@ int sieve2_validate(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p)
 int sieve2_execute(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p,
 		sieve2_message_t *m, sieve2_action_t *a)
 {
-    int ret;
     const char *errmsg = NULL;
     sieve_script_t *script = (sieve_script_t *)s;
     sieve2_message *message = (sieve2_message *)m;
@@ -228,7 +227,9 @@ int sieve2_execute(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p,
     /* Generate a hash cache
      * There is a call to header_parse_buffer()
      * a bit further down the stack from here. */
-    libsieve_message2_headercache(message);
+    if (libsieve_message2_headercache(message) != SIEVE2_OK) {
+        return SIEVE2_ERROR_HEADER;
+    }
 
     script->support = *support; /* Yes, really make a copy */
 
@@ -242,11 +243,9 @@ int sieve2_execute(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p,
     }
 
     if (libsieve_eval(&script->interp, script->cmds, message, action, &errmsg) < 0)
-        ret = SIEVE2_ERROR_EXEC;
+        return SIEVE2_ERROR_EXEC;
 
-    ret = SIEVE2_OK;
-
-    return ret;
+    return SIEVE2_OK;
 }
 
 int sieve2_action_alloc(sieve2_action_t **in)

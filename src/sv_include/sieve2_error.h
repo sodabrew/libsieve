@@ -25,6 +25,7 @@
 #define SIEVE2_ERROR_UNSUPPORTED       8
 #define SIEVE2_ERROR_BADARG	       9
 #define SIEVE2_ERROR_NOINTERPS         10
+#define SIEVE2_ERROR_HEADER            11
 
 static const char * const sieve2_error_text[] = {
     "Sieve OK: no trouble at all",
@@ -38,6 +39,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: unsupported feature",
     "Sieve Error: incorrect argument passed",
     "Sieve Error: no more interpreters available",
+    "Sieve Error: header could not be parsed",
     NULL
 };
 
