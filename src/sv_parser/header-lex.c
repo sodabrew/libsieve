@@ -303,13 +303,13 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 8
-#define YY_END_OF_BUFFER 9
-static yyconst short int yy_accept[26] =
+#define YY_NUM_RULES 9
+#define YY_END_OF_BUFFER 10
+static yyconst short int yy_accept[28] =
     {   0,
-        0,    0,    0,    0,    0,    0,    0,    0,    9,    8,
-        8,    4,    1,    2,    1,    5,    6,    7,    0,    4,
-        5,    6,    7,    3,    0
+        0,    0,    0,    0,    0,    0,    0,    0,   10,    9,
+        5,    5,    4,    1,    2,    1,    6,    7,    8,    5,
+        5,    4,    6,    7,    8,    3,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -346,45 +346,43 @@ static yyconst int yy_ec[256] =
 
 static yyconst int yy_meta[6] =
     {   0,
-        1,    2,    3,    4,    5
+        1,    2,    3,    3,    4
     } ;
 
-static yyconst short int yy_base[36] =
+static yyconst short int yy_base[35] =
     {   0,
-        0,    5,   48,   44,    8,   10,   12,   14,   48,   56,
-        0,    0,   56,   56,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,   56,   56,   18,   23,   28,   33,    0,
-       37,   41,   45,   50,    0
+        0,    5,   43,   42,    8,   10,   12,   14,   46,   49,
+       16,   41,    0,   49,   49,    0,    0,    0,    0,    0,
+       38,    0,    0,    0,    0,   49,   49,   20,   24,   28,
+       31,   34,   37,   41
     } ;
 
-static yyconst short int yy_def[36] =
+static yyconst short int yy_def[35] =
     {   0,
-       26,   25,   27,   27,   28,   28,   29,   29,   25,   25,
-       30,   31,   25,   25,   31,   32,   33,   34,   35,   31,
-       32,   33,   34,   25,    0,   25,   25,   25,   25,   25,
-       25,   25,   25,   25,   25
+       27,   27,   28,   28,   29,   29,   30,   30,   27,   27,
+       27,   11,   31,   27,   27,   31,   32,   33,   34,   11,
+       11,   31,   32,   33,   34,   27,    0,   27,   27,   27,
+       27,   27,   27,   27
     } ;
 
-static yyconst short int yy_nxt[62] =
+static yyconst short int yy_nxt[55] =
     {   0,
-       25,   24,   19,   11,   12,   13,   14,   10,   11,   15,
-       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
-       10,   10,   10,   16,   16,   16,   16,   16,   17,   17,
-       17,   17,   17,   18,   18,   18,   18,   18,   20,   20,
-       20,   21,   21,   21,   21,   22,   22,   25,   10,   22,
-       23,   23,   10,   25,   23,    9,   25,   25,   25,   25,
-       25
+       10,   10,   11,   12,   13,   14,   15,   11,   12,   16,
+       10,   10,   10,   10,   10,   10,   10,   10,   20,   20,
+       17,   17,   17,   17,   18,   18,   18,   18,   19,   19,
+       19,   19,   22,   22,   23,   23,   23,   24,   24,   26,
+       24,   25,   25,   21,   25,   27,   10,   10,    9,   27,
+       27,   27,   27,   27
     } ;
 
-static yyconst short int yy_chk[62] =
+static yyconst short int yy_chk[55] =
     {   0,
-        0,   35,   30,    1,    1,    2,    2,    2,    2,    2,
-        5,    5,    6,    6,    7,    7,    8,    8,   26,   26,
-       26,   26,   26,   27,   27,   27,   27,   27,   28,   28,
-       28,   28,   28,   29,   29,   29,   29,   29,   31,   31,
-       31,   32,   32,   32,   32,   33,   33,    9,    4,   33,
-       34,   34,    3,    0,   34,   25,   25,   25,   25,   25,
-       25
+        1,    1,    1,    1,    1,    2,    2,    2,    2,    2,
+        5,    5,    6,    6,    7,    7,    8,    8,   11,   11,
+       28,   28,   28,   28,   29,   29,   29,   29,   30,   30,
+       30,   30,   31,   31,   32,   32,   32,   33,   33,   21,
+       33,   34,   34,   12,   34,    9,    4,    3,   27,   27,
+       27,   27,   27,   27
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -422,6 +420,7 @@ char *yytext;
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = headerinput(b, ms))
 
+#include <string.h>
 /* sv_util */
 #include "util.h"
 /* sv_parser */
@@ -438,7 +437,7 @@ void headerfatalerror(const char msg[]);
 #define S_TEXT 2
 #define S_WRAP 3
 
-#line 442 "lex.yy.c"
+#line 441 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -592,10 +591,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 42 "header-lex.l"
+#line 43 "header-lex.l"
 
 
-#line 599 "lex.yy.c"
+#line 598 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -647,13 +646,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 26 )
+				if ( yy_current_state >= 28 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 56 );
+		while ( yy_base[yy_current_state] != 49 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -681,7 +680,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 44 "header-lex.l"
+#line 45 "header-lex.l"
 {
                 BEGIN S_NAME;
                 sv_debugf( "Begin NAME\n" );
@@ -690,7 +689,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 49 "header-lex.l"
+#line 50 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 sv_debugf( "Begin WRAP (line started with whitespace)\n" );
@@ -699,7 +698,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 54 "header-lex.l"
+#line 55 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 sv_debugf( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" );
@@ -710,7 +709,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 61 "header-lex.l"
+#line 62 "header-lex.l"
 {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
@@ -721,6 +720,13 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 #line 68 "header-lex.l"
+{
+                /* Eat stray newlines, such as those at the end of every line... */
+                }
+	YY_BREAK
+case 6:
+YY_RULE_SETUP
+#line 72 "header-lex.l"
 {
                 /* FIXME: Should be something like [!-9;-~]... */
                 /* Field names must be in these ASCII ranges:
@@ -733,9 +739,9 @@ YY_RULE_SETUP
                 return NAME;
                 }
 	YY_BREAK
-case 6:
+case 7:
 YY_RULE_SETUP
-#line 80 "header-lex.l"
+#line 84 "header-lex.l"
 {
                 sv_debugf( "TEXT: %s\n", yytext );
 		headerlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
@@ -743,9 +749,9 @@ YY_RULE_SETUP
                 return TEXT;
                 }
 	YY_BREAK
-case 7:
+case 8:
 YY_RULE_SETUP
-#line 87 "header-lex.l"
+#line 91 "header-lex.l"
 {
                 sv_debugf( "WRAP: %s\n", yytext );
 		headerlval = sv_strbuf(ml, yytext, strlen(yytext), NOFREE);
@@ -753,12 +759,12 @@ YY_RULE_SETUP
                 return WRAP;
                 }
 	YY_BREAK
-case 8:
+case 9:
 YY_RULE_SETUP
-#line 94 "header-lex.l"
+#line 98 "header-lex.l"
 ECHO;
 	YY_BREAK
-#line 762 "lex.yy.c"
+#line 768 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(S_NAME):
 case YY_STATE_EOF(S_TEXT):
@@ -1054,7 +1060,7 @@ static yy_state_type yy_get_previous_state()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 26 )
+			if ( yy_current_state >= 28 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1089,11 +1095,11 @@ yy_state_type yy_current_state;
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 26 )
+		if ( yy_current_state >= 28 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 25);
+	yy_is_jam = (yy_current_state == 27);
 
 	return yy_is_jam ? 0 : yy_current_state;
 	}
@@ -1644,7 +1650,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 94 "header-lex.l"
+#line 98 "header-lex.l"
 
 
 /* take input from header string provided by sieve parser */

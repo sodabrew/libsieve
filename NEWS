@@ -15,6 +15,9 @@ libSieve 2.2.0
 - Extensive Valgrinding performed to identify
   memory leaks; no known leaks remain.
 
+- CFLAGS now includes -Wall and compiles very
+  cleanly. Messages from lex/yacc are benign.
+
 - Many more changes, amounting to perhaps a
   70% rewrite of all code.
 

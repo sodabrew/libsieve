@@ -38,11 +38,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_interface */
 #include "sieve_interface.h"
 #include "sieve2_interface.h"
+#include "tree.h"
 #include "interp.h"
+#include "script.h"
 #include "message.h"
 /* sv_parser */
-#include "addrinc.h"
-#include "sieveinc.h"
+#include "parser.h"
 /* sv_util */
 #include "util.h"
 
@@ -85,7 +86,7 @@ int do_reject(action_list_t *a, char *msg)
     u->msg = msg;
     b->next = a;
     a->next =  NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* fileinto message m into mailbox 
@@ -118,7 +119,7 @@ int do_fileinto(action_list_t *a, char *mbox, sieve_imapflags_t *imapflags)
     u->imapflags = imapflags;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* redirect message m to to addr
@@ -153,7 +154,7 @@ int do_redirect(action_list_t *a, char *addr)
     u->addr = addr;
     a->next = NULL;
     b->next = a;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* keep message
@@ -171,7 +172,7 @@ int do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
 	if (a->a == ACTION_REJECT)
 	    return SIEVE_RUN_ERROR;
 	if (a->a == ACTION_KEEP) /* don't bother doing it twice */
-	    return 0;
+	    return SIEVE_OK;
 	a = a->next;
     }
 
@@ -187,7 +188,7 @@ int do_keep(action_list_t *a, sieve_imapflags_t *imapflags)
     u->imapflags = imapflags;
     a->next = NULL;
     b->next = a;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* discard message m
@@ -202,7 +203,7 @@ int do_discard(action_list_t *a)
     while (a != NULL) {
 	b = a;
 	if (a->a == ACTION_DISCARD) /* don't bother doing twice */
-	    return 0;
+	    return SIEVE_OK;
 	a = a->next;
     }
 
@@ -214,7 +215,7 @@ int do_discard(action_list_t *a)
     a->a = ACTION_DISCARD;
     a->next = NULL;
     b->next = a;
-    return 0;
+    return SIEVE_OK;
 }
 
 int do_vacation(action_list_t *a, char *addr, char *fromaddr,
@@ -250,7 +251,7 @@ int do_vacation(action_list_t *a, char *addr, char *fromaddr,
     u->check.days = days;
     a->next = NULL;
     b->next = a;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* setflag f on message m
@@ -282,7 +283,7 @@ int do_setflag(action_list_t *a, char *flag)
     u->flag = flag;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* addflag f on message m
@@ -314,7 +315,7 @@ int do_addflag(action_list_t *a, char *flag)
     u->flag = flag;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* removeflag f on message m
@@ -343,10 +344,10 @@ int do_removeflag(action_list_t *a, char *flag)
     if (a->u == NULL)
 	return SIEVE_NOMEM;
     u = (sieve_imaponeflag_t *)(a->u);
-    u->flag = &flag;
+    u->flag = flag;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 
@@ -373,7 +374,7 @@ int do_mark(action_list_t *a)
     a->a = ACTION_MARK;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 
@@ -400,7 +401,7 @@ int do_unmark(action_list_t *a)
     a->a = ACTION_UNMARK;
     b->next = a;
     a->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* notify
@@ -408,7 +409,7 @@ int do_unmark(action_list_t *a)
  * incompatible with: none
  */
 int do_notify(action_list_t *a, char *id,
-	      char *method, stringlist_t **options,
+	      char *method, stringlist_t *options,
 	      const char *priority, char *message)
 {
     action_list_t *b = NULL;
@@ -481,11 +482,11 @@ int do_notify(action_list_t *a, char *id,
     n->isactive = 1;
     n->id = id;
     n->method = method;
-    n->options = (char **)options;
+    n->options = stringlist_to_chararray(options);
     n->priority = priority;
     n->message = message;
     n->next = NULL;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* denotify
@@ -508,7 +509,7 @@ int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
 
     /* If there isn't any notify in the action list, give up */
     if(a == NULL)
-        return 0;
+        return SIEVE_OK;
 
     n = (notify_list_t *)(a->u);
 
@@ -521,7 +522,7 @@ int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
 	n = n->next;
     }
 
-    return 0;
+    return SIEVE_OK;
 }
 
 
@@ -537,7 +538,7 @@ int do_error(action_list_t *a)
     while (a != NULL) {
 	b = a;
 	if (a->a == ACTION_DISCARD) /* don't bother doing twice */
-	    return 0;
+	    return SIEVE_OK;
 	a = a->next;
     }
 
@@ -548,7 +549,7 @@ int do_error(action_list_t *a)
     a->a = ACTION_DISCARD;
     a->next = NULL;
     b->next = a;
-    return 0;
+    return SIEVE_OK;
 }
 
 /* given a header, extract an address out of it.  if marker points to NULL,
@@ -688,9 +689,11 @@ notify_list_t *new_notify_list(void)
 void free_notify_list(notify_list_t *n)
 {
     /* Don't free the very top of the list */
+    sv_free(n->options); // FIXME: Why aren't we freeing the top?
     n = n->next;
     while (n != NULL) {
         notify_list_t *b = n->next;
+        sv_free(n->options);
         sv_free(n);
         n = b;
     }

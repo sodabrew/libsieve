@@ -31,7 +31,7 @@
 
 /* sv_parser */
 #include "sieve.h"
-#include "sieveinc.h"
+//#include "sieveinc.h"
 
 const char *sieve2_errstr(const int code)
 {
@@ -42,7 +42,8 @@ const char *sieve2_errstr(const int code)
     if( code == SIEVE2_ERROR_PARSE )
         /* FIXME: this is a memory leak since
          * the caller likely won't free it */
-        snprintf(lineno, 50, "%d\0", sievelineno);
+        memset(lineno, 0, 50);
+        snprintf(lineno, 49, "%d", sievelineno);
         return sv_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
     return sieve2_error_text[code];
 }
@@ -120,8 +121,9 @@ int sieve2_notify_alloc(notify_list_t **n)
     return SIEVE2_OK;
 }
 
-int sieve2_action_alloc(action_list_t **a)
+int sieve2_action_alloc(sieve2_action_t **in)
 {
+    action_list_t **a = (action_list_t **)in;
     action_list_t *actions;
 
     actions = new_action_list();
@@ -134,8 +136,9 @@ int sieve2_action_alloc(action_list_t **a)
 
 /* Free the action list, and also free any
  * action contexts that have been allocated. */
-int sieve2_action_free(action_list_t *a)
+int sieve2_action_free(sieve2_action_t *in)
 {
+    action_list_t *a = (action_list_t *)in;
     action_list_t *b;
 
     while(a) {
@@ -201,8 +204,9 @@ int sieve2_action_free(action_list_t *a)
 
 /* Grab the current call code and action context,
  * then advance the list pointer to the next action */
-int sieve2_action_next(action_list_t **a, int *code, void **action_context)
+int sieve2_action_next(sieve2_action_t **in, int *code, void **action_context)
 {
+    action_list_t **a = (action_list_t **)in;
     action_list_t *b = *a;
 
     if(b != NULL) {

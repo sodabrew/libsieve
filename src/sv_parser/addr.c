@@ -1381,7 +1381,7 @@ struct address *addr_parse_buffer(struct address **data, const char **ptr, char 
 
     sv_strbufalloc(&ml);
 
-    (const)addrptr = *ptr;
+    (const char *)addrptr = *ptr;
 
     /* This is now done higher up the call chain...
      * addrlexalloc();

@@ -10,6 +10,10 @@
 #include "config.h"
 #endif
 
+/* isnctrl() */
+#include <ctype.h>
+/* strlen() */
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -55,16 +59,18 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
 
     head = sv_strtolower(head, strlen(head));
 
-    /* check the hash */
+    /* Get a hash number of the header name */
     cl = c = message2_hashheader(head, m->hashsize);
     while (m->hash[c] != NULL) {
         if (strcmp(head, m->hash[c]->name) == 0) {
             *body = (const char **) m->hash[c]->contents;
             break;
         }
-        c++; /* try next hash bin */
+        c++;
         c %= m->hashsize;
-        if (c == cl) break; /* gone all the way around */
+        /* If we've skipped back to the beginning,
+         * give up and we'll just realloc a larger space */
+        if (c == cl) break;
     }
 
     sv_free(head);
@@ -131,9 +137,12 @@ int message2_headercache(sieve2_message *m)
 
         if (m->hash[c]) {
             /* Looks like someone's already home */
-            if(m->hash[c]->count >= m->hash[c]->space)
+            if(m->hash[c]->count < m->hash[c]->space) {
+                /* We have room for one more header */
                 m->hash[c]->contents[m->hash[c]->count++] = hl->h->contents[0];
-            else {
+                /* Followed by a terminating NULL */
+                m->hash[c]->contents[m->hash[c]->count] = NULL;
+            } else {
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = sv_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
@@ -143,6 +152,8 @@ int message2_headercache(sieve2_message *m)
                     m->hash[c]->contents = tmp;
                 /* OK, now we can put that body in here */
                 m->hash[c]->contents[m->hash[c]->count++] = hl->h->contents[0];
+                /* Followed by a terminating NULL */
+                m->hash[c]->contents[m->hash[c]->count] = NULL;
             }
         } else {
             /* Make of copy of the pointer */
@@ -159,7 +170,7 @@ int message2_headercache(sieve2_message *m)
     return SIEVE2_OK;
 }
 
-static int message2_hashheader(char *header, int hashsize)
+int message2_hashheader(char *header, int hashsize)
 {
     int x = 0;
 

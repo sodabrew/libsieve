@@ -180,50 +180,6 @@ int sieve_script_parse(sieve_interp_t *interp, FILE *script,
     return res;
 }
 
-char **stringlist_to_chararray(stringlist_t **list)
-{
-    int size = 0;
-    stringlist_t *tmp; 
-    stringlist_t *tofree;
-    char **ret;
-    int lup;
-
-    assert(list != NULL);
-
-    tmp = *list;
-    while (tmp != NULL) {
-	size++;
-	tmp = tmp->next;
-    }
-
-    ret = malloc( sizeof(char *) * (size+1));
-    if (ret == NULL) return NULL;
-
-    tmp = *list;
-
-    for (lup = 0;lup<size;lup++)
-    {
-	ret[lup] = tmp->s;
-	tmp=tmp->next;
-    }
-
-    ret[size]=NULL;
-
-    /* free element holders */
-    tmp = *list;
-
-    while (tmp!=NULL)
-    {
-	tofree = tmp;
-	tmp=tmp->next;
-	sv_free(tofree);
-    }
-
-    *list = NULL;
-
-    return ret;
-}
-
 int sieve_script_free(sieve_script_t **s)
 {
     if (*s) {
@@ -381,7 +337,7 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
 	res = 0;
 	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
 	    const char **val;
-	    int l;
+	    size_t l;
 	    if (call_getheader(i, m, sl->s, &val) != SIEVE_OK)
 		continue;
 	    for (pl = t->u.h.pl; pl != NULL && !res; pl = pl->next) {
@@ -424,6 +380,9 @@ int call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val)
     } else {
         message2_getheader(m, s, val);
     }
+    if(*val == NULL)
+        return SIEVE_DONE;
+    return SIEVE_OK;
 }
 
 /* If i is a version 1 interpreter, call the getsize callback
@@ -437,6 +396,9 @@ int call_getsize(sieve_interp_t *i, void *m, int *sz)
     } else {
         message2_getsize(m, sz);
     }
+    if(sz < 0)
+        return SIEVE_DONE;
+    return SIEVE_OK;
 }
 
 /* If i is a version 1 interpreter, call the getenvelope callback
@@ -450,6 +412,9 @@ int call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c)
     } else {
         message2_getenvelope(m, f, c);
     }
+    if(*c == NULL)
+        return SIEVE_DONE;
+    return SIEVE_OK;
 }
 
 /* evaluate the script c.  returns negative if error was encountered,
@@ -679,7 +644,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 	    break;
 	case NOTIFY:
 	    res = do_notify(actions, c->u.n.id, c->u.n.method,
-			    &c->u.n.options, c->u.n.priority, c->u.n.message);
+			    c->u.n.options, c->u.n.priority, c->u.n.message);
 			    
 	    break;
 	case DENOTIFY:
@@ -840,8 +805,7 @@ static int send_notify_callback(sieve_script_t *s, void *message_context,
     assert(notify->isactive);
 
     nc.method = notify->method;
-    nc.options = notify->options ? 
-	stringlist_to_chararray((stringlist_t **)notify->options) : NULL;
+    nc.options = notify->options;
     nc.priority = notify->priority;
 
     fillin_headers(&(s->interp), notify->message, message_context, 
@@ -861,6 +825,7 @@ static int send_notify_callback(sieve_script_t *s, void *message_context,
 			   message_context,
 			   errmsg);    
 
+    /* Not to worry, free_notify_list() does this for us.
     if (nc.options) {
 	char **opts = nc.options;
 	while (opts && *opts) {
@@ -869,6 +834,7 @@ static int send_notify_callback(sieve_script_t *s, void *message_context,
 	}
 	sv_free(nc.options);
     }
+    */
     sv_free(nc.message);
 
     return ret;

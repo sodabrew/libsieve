@@ -1208,7 +1208,7 @@ header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err)
 
     sv_strbufalloc(&ml);
 
-    (const)headerptr = *ptr;
+    (const char *)headerptr = *ptr;
 
     if(headerparse()) {
 	sv_strbuffree(&ml);

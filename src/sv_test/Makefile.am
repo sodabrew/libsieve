@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS	= foreign
 
-CFLAGS			= -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g
+CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g
 
 bin_PROGRAMS            = test test2 testbuf
 test_SOURCES    	= test.c

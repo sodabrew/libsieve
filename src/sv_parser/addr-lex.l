@@ -39,6 +39,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = addrinput(b, ms))
 
+#include <string.h>
 /* sv_util */
 #include "util.h"
 /* sv_parser */

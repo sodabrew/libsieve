@@ -134,7 +134,7 @@ int do_removeflag(action_list_t *m, char *flag);
 int do_mark(action_list_t *m);
 int do_unmark(action_list_t *m);
 int do_notify(action_list_t *a, char *id,
-	      char *method, stringlist_t **options,
+	      char *method, stringlist_t *options,
 	      const char *priority, char *message);
 int do_denotify(action_list_t *a, comparator_t *comp, void *pat,
 		const char *priority);

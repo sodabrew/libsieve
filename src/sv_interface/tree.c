@@ -243,3 +243,30 @@ void free_tree(commandlist_t *cl)
 	cl = cl2;
     }
 }
+
+char **stringlist_to_chararray(stringlist_t *list)
+{
+    size_t space = 0, count = 0;
+    char **tmp = NULL, **ret = NULL;
+
+    while(list != NULL) {
+        if(count < space) {
+            ret[count++] = list->s;
+            ret[count] = NULL;
+        } else {
+            tmp = (char **)sv_realloc(ret, (space+=4) * sizeof(char *));
+            if(tmp == NULL) {
+                sv_free(ret);
+                return NULL;
+            } else {
+                ret = tmp;
+            }
+            ret[count++] = list->s;
+            ret[count] = NULL;
+        }
+        list = list->next;
+    }
+
+    return ret;
+}
+

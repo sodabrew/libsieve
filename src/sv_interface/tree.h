@@ -146,4 +146,6 @@ void free_pl(patternlist_t *pl, int comptag);
 void free_test(test_t *t);
 void free_tree(commandlist_t *cl);
 
+char **stringlist_to_chararray(stringlist_t *list);
+
 #endif

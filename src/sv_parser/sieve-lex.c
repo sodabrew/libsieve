@@ -625,8 +625,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "config.h"
 #endif
 
+#include <string.h>
+/* sv_util */
 #include "util.h"
-
+/* sv_interface */
 #include "tree.h"
 #include "sieve.h"
 
@@ -644,7 +646,7 @@ void sievefatalerror(const char msg[]);
 
 #define QSTRING 2
 
-#line 648 "lex.yy.c"
+#line 650 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -798,9 +800,9 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 60 "sieve-lex.l"
+#line 62 "sieve-lex.l"
 
-#line 804 "lex.yy.c"
+#line 806 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -894,327 +896,327 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 61 "sieve-lex.l"
+#line 63 "sieve-lex.l"
 { BEGIN INITIAL; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 62 "sieve-lex.l"
+#line 64 "sieve-lex.l"
 { /* dot stuffing! we want one . */ yyless(1); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 63 "sieve-lex.l"
+#line 65 "sieve-lex.l"
 { sievelval.sval = sv_strdup(yytext, strlen(yytext));
 			  return STRING; }
 	YY_BREAK
 case YY_STATE_EOF(MULTILINE):
-#line 65 "sieve-lex.l"
+#line 67 "sieve-lex.l"
 { sieveerror("unexpected end of file in string"); 
 			  yyterminate(); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 68 "sieve-lex.l"
+#line 70 "sieve-lex.l"
 { BEGIN INITIAL; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 69 "sieve-lex.l"
+#line 71 "sieve-lex.l"
 { sievelval.sval = sv_strdup(yytext, strlen(yytext));
 			  return STRING; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 72 "sieve-lex.l"
+#line 74 "sieve-lex.l"
 { BEGIN MULTILINE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 73 "sieve-lex.l"
+#line 75 "sieve-lex.l"
 { BEGIN QSTRING; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 74 "sieve-lex.l"
+#line 76 "sieve-lex.l"
 { sievelval.nval = sv_strtonum(yytext); return NUMBER; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 75 "sieve-lex.l"
+#line 77 "sieve-lex.l"
 return IF;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 76 "sieve-lex.l"
+#line 78 "sieve-lex.l"
 return ELSIF;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 77 "sieve-lex.l"
+#line 79 "sieve-lex.l"
 return ELSE;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 78 "sieve-lex.l"
+#line 80 "sieve-lex.l"
 return ANYOF;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 79 "sieve-lex.l"
+#line 81 "sieve-lex.l"
 return ALLOF;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 80 "sieve-lex.l"
+#line 82 "sieve-lex.l"
 return EXISTS;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 81 "sieve-lex.l"
+#line 83 "sieve-lex.l"
 return SFALSE;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 82 "sieve-lex.l"
+#line 84 "sieve-lex.l"
 return STRUE;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 83 "sieve-lex.l"
+#line 85 "sieve-lex.l"
 return ADDRESS;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 84 "sieve-lex.l"
+#line 86 "sieve-lex.l"
 return ENVELOPE;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 85 "sieve-lex.l"
+#line 87 "sieve-lex.l"
 return HEADER;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 86 "sieve-lex.l"
+#line 88 "sieve-lex.l"
 return NOT;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 87 "sieve-lex.l"
+#line 89 "sieve-lex.l"
 return SIZE;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 88 "sieve-lex.l"
+#line 90 "sieve-lex.l"
 return REJCT;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 89 "sieve-lex.l"
+#line 91 "sieve-lex.l"
 return FILEINTO;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 90 "sieve-lex.l"
+#line 92 "sieve-lex.l"
 return REDIRECT;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 91 "sieve-lex.l"
+#line 93 "sieve-lex.l"
 return KEEP;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 92 "sieve-lex.l"
+#line 94 "sieve-lex.l"
 return REQUIRE;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 93 "sieve-lex.l"
+#line 95 "sieve-lex.l"
 return STOP;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 94 "sieve-lex.l"
+#line 96 "sieve-lex.l"
 return DISCARD;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 95 "sieve-lex.l"
+#line 97 "sieve-lex.l"
 return SETFLAG;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 96 "sieve-lex.l"
+#line 98 "sieve-lex.l"
 return ADDFLAG;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 97 "sieve-lex.l"
+#line 99 "sieve-lex.l"
 return REMOVEFLAG;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 98 "sieve-lex.l"
+#line 100 "sieve-lex.l"
 return MARK;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 99 "sieve-lex.l"
+#line 101 "sieve-lex.l"
 return UNMARK;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 100 "sieve-lex.l"
+#line 102 "sieve-lex.l"
 return NOTIFY;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 101 "sieve-lex.l"
+#line 103 "sieve-lex.l"
 return DENOTIFY;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 102 "sieve-lex.l"
+#line 104 "sieve-lex.l"
 return ID;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 103 "sieve-lex.l"
+#line 105 "sieve-lex.l"
 return METHOD;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 104 "sieve-lex.l"
+#line 106 "sieve-lex.l"
 return OPTIONS;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 105 "sieve-lex.l"
+#line 107 "sieve-lex.l"
 return LOW;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 106 "sieve-lex.l"
+#line 108 "sieve-lex.l"
 return NORMAL;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 107 "sieve-lex.l"
+#line 109 "sieve-lex.l"
 return HIGH;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 108 "sieve-lex.l"
+#line 110 "sieve-lex.l"
 return MESSAGE;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 109 "sieve-lex.l"
+#line 111 "sieve-lex.l"
 return VACATION;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 110 "sieve-lex.l"
+#line 112 "sieve-lex.l"
 return DAYS;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 111 "sieve-lex.l"
+#line 113 "sieve-lex.l"
 return ADDRESSES;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 112 "sieve-lex.l"
+#line 114 "sieve-lex.l"
 return SUBJECT;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 113 "sieve-lex.l"
+#line 115 "sieve-lex.l"
 return MIME;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 114 "sieve-lex.l"
+#line 116 "sieve-lex.l"
 return COMPARATOR;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 115 "sieve-lex.l"
+#line 117 "sieve-lex.l"
 return IS;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 116 "sieve-lex.l"
+#line 118 "sieve-lex.l"
 return CONTAINS;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 117 "sieve-lex.l"
+#line 119 "sieve-lex.l"
 return MATCHES;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 118 "sieve-lex.l"
+#line 120 "sieve-lex.l"
 return REGEX;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 119 "sieve-lex.l"
+#line 121 "sieve-lex.l"
 return OVER;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 120 "sieve-lex.l"
+#line 122 "sieve-lex.l"
 return UNDER;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 121 "sieve-lex.l"
+#line 123 "sieve-lex.l"
 return ALL;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 122 "sieve-lex.l"
+#line 124 "sieve-lex.l"
 return LOCALPART;
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 123 "sieve-lex.l"
+#line 125 "sieve-lex.l"
 return DOMAIN;
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 124 "sieve-lex.l"
+#line 126 "sieve-lex.l"
 return USER;
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 125 "sieve-lex.l"
+#line 127 "sieve-lex.l"
 return DETAIL;
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 126 "sieve-lex.l"
+#line 128 "sieve-lex.l"
 ;	/* ignore whitespace */
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 127 "sieve-lex.l"
+#line 129 "sieve-lex.l"
 ;		/* ignore comments */
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 128 "sieve-lex.l"
+#line 130 "sieve-lex.l"
 return yytext[0];
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 130 "sieve-lex.l"
+#line 132 "sieve-lex.l"
 ECHO;
 	YY_BREAK
-#line 1218 "lex.yy.c"
+#line 1220 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(QSTRING):
 				yyterminate();
@@ -2096,7 +2098,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 130 "sieve-lex.l"
+#line 132 "sieve-lex.l"
 
 /* take input from sieve string provided by sieve parser */
 int sieveinput(char *buf, int max_size)

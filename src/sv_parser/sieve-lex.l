@@ -29,8 +29,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "config.h"
 #endif
 
+#include <string.h>
+/* sv_util */
 #include "util.h"
-
+/* sv_interface */
 #include "tree.h"
 #include "sieve.h"
 

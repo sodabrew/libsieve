@@ -66,8 +66,10 @@ static int verify_mailbox(const char *s);
 static int verify_address(const char *s);
 static int verify_header(const char *s);
 static int verify_flag(const char *s);
+#ifdef ENABLE_REGEX
 static regex_t *verify_regex(const char *s, int cflags);
 static patternlist_t *verify_regexs(stringlist_t *sl, char *comp);
+#endif
 static int ok_header(char *s);
 
 #endif /* SIEVEINC_H */

@@ -13,14 +13,17 @@
 
 #include <config.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "util.h"
 
 /* Wrapper around memset() */
 void *sv_memset(void *ptr, int c, size_t len)
 {
-    if(ptr && c >= 0 && c < 254 && len > 0)
+    if(ptr != NULL && c >= 0 && c < 254 && len > 0)
         return memset(ptr, c, len);
     return NULL;
 }
@@ -140,7 +143,7 @@ char *sv_strdup(const char *str, size_t len)
   {
     char *p = NULL;
     
-    if (p = sv_memset((char *)sv_malloc(len+1), 0, len+1)) {
+    if ((p = sv_memset((char *)sv_malloc(len+1), 0, len+1)) != NULL) {
         /* The NULL is not be copied */
         strncpy(p, str, len);
         /* A new NULL is thus added */

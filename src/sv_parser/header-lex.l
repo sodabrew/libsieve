@@ -20,6 +20,7 @@
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = headerinput(b, ms))
 
+#include <string.h>
 /* sv_util */
 #include "util.h"
 /* sv_parser */
