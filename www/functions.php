@@ -50,6 +50,17 @@ is violated, the client should not attempt to "guess" the format of the returned
 structure. The returned structures should not be freed by the client; they are all
 freed by sieve2_action_free().
 
+<div class="code"><br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_error_alloc</font>(<font class="type">sieve2_error_t</font> **<font class="arg">e</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_error_free</font>(<font class="type">sieve2_error_t</font> *<font class="arg">e</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_error_next</font>(<font class="type">sieve2_error_t</font> **<font class="arg">e</font>, <font class="type">int</font> *<font class="arg">code</font>, <font class="type">void</font> **<font class="arg">context</font>);</div>
+
+
+
+
+
+<p> The error functions are used to retrieve error codes resulting from mistakes
+in a script found either during validation with sieve2_validate or execution
+with sieve2_execute.
+
+
 <div class="code"> #define SIEVE2_SCRIPT_SIZE <br> #define SIEVE2_SCRIPT_CALLBACK <br> #define SIEVE2_SCRIPT_CHAR_ARRAY <br> #define SIEVE2_SCRIPT_FILE_POINTER <br> #define SIEVE2_SCRIPT_INCLUDE_CALLBACK <br> <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_script_alloc</font>(<font class="type">sieve2_script_t</font> **<font class="arg">s</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_script_free</font>(<font class="type">sieve2_script_t</font> *<font class="arg">s</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_script_register</font>(<font class="type">sieve2_script_t</font> *<font class="arg">s</font>, <font class="type">void</font> *<font class="arg">thing</font>, <font class="type">int</font> <font class="arg">type</font>);</div>
 <div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_interp_alloc</font>(<font class="type">sieve2_interp_t</font> **<font class="arg">t</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_interp_free</font>(<font class="type">sieve2_interp_t</font> *<font class="arg">t</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_interp_register</font>(<font class="type">sieve2_interp_t</font> *<font class="arg">t</font>, <font class="type">void</font> *<font class="arg">thing</font>, <font class="type">int</font> <font class="arg">type</font>);</div>
 
@@ -60,11 +71,12 @@ freed by sieve2_action_free().
 Allocate an interp struct to hold parser/scanner state.
 Once flex provides reentrantcy, all builds will use it.
 
-<div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_validate</font>( <br> &nbsp; &nbsp; <font class="type">sieve2_interp_t</font> *<font class="arg">t</font>, <font class="type">sieve2_script_t</font> *<font class="arg">s</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_support_t</font> *<font class="arg">p</font>, <font class="type">sieve2_error_t</font> *<font class="arg">e</font>); <br> <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_execute</font>( <br> &nbsp; &nbsp; <font class="type">sieve2_interp_t</font> *<font class="arg">t</font>, <font class="type">sieve2_script_t</font> *<font class="arg">s</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_support_t</font> *<font class="arg">p</font>, <font class="type">sieve2_error_t</font> *<font class="arg">e</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_action_t</font> *<font class="arg">a</font>, <font class="type">sieve2_message_t</font> *<font class="arg">m</font>);</div>
+<div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_validate</font>( <br> &nbsp; &nbsp; <font class="type">sieve2_interp_t</font> *<font class="arg">t</font>, <font class="type">sieve2_script_t</font> *<font class="arg">s</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_support_t</font> *<font class="arg">p</font>, <font class="type">sieve2_error_t</font> *<font class="arg">e</font>); <br> <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_execute</font>( <br> &nbsp; &nbsp; <font class="type">sieve2_interp_t</font> *<font class="arg">t</font>, <font class="type">sieve2_script_t</font> *<font class="arg">s</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_support_t</font> *<font class="arg">p</font>, <font class="type">sieve2_error_t</font> *<font class="arg">e</font>, <br> &nbsp; &nbsp; <font class="type">sieve2_message_t</font> *<font class="arg">m</font>, <font class="type">sieve2_action_t</font> *<font class="arg">a</font>);</div>
 Validate a script for syntax and feature support.
 Execute a script on a message, producing an action list.
 
-<div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_listextensions</font>(<font class="type">char</font> **<font class="arg">extensions</font>, <font class="type">sieve2_support_t</font> *<font class="arg">p</font>);</div>
+<div class="code"><br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_extensions_listconst</font>(<font class="type">char</font> **<font class="arg">extensions</font>); <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_extensions_listsupport</font>(<font class="type">sieve2_support_t</font> *<font class="arg">p</font>, <font class="type">char</font> **<font class="arg">extensions</font>);</div>
+
 
 
 

@@ -1,5 +1,9 @@
 #! /bin/sh
 
+WANT_AUTOCONF=1.7
+WANT_AUTOMAKE=1.7
+WANT_ACLOCAL=1.7
+
 libtoolize --force
 aclocal
 autoheader

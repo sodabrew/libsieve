@@ -85,6 +85,17 @@ structure. The returned structures should not be freed by the client; they are a
 freed by sieve2_action_free().
 
 CODE	(
+BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_error_alloc)(C_TYPE(sieve2_error_t) **C_ARG(e));
+BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_error_free)(C_TYPE(sieve2_error_t) *C_ARG(e));
+BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_error_next)(C_TYPE(sieve2_error_t) **C_ARG(e), C_TYPE(int) *C_ARG(code), C_TYPE(void) **C_ARG(context));
+	)
+
+P The error functions are used to retrieve error codes resulting from mistakes
+in a script found either during validation with sieve2_validate or execution
+with sieve2_execute.
+
+
+CODE	(
 NO	#define SIEVE2_SCRIPT_SIZE
 BR	#define SIEVE2_SCRIPT_CALLBACK
 BR	#define SIEVE2_SCRIPT_CHAR_ARRAY
@@ -113,14 +124,15 @@ BR
 BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_execute)(
 BR	TAB	C_TYPE(sieve2_interp_t) *C_ARG(t), C_TYPE(sieve2_script_t) *C_ARG(s),
 BR	TAB	C_TYPE(sieve2_support_t) *C_ARG(p), C_TYPE(sieve2_error_t) *C_ARG(e),
-BR	TAB	C_TYPE(sieve2_action_t) *C_ARG(a), C_TYPE(sieve2_message_t) *C_ARG(m));
+BR	TAB	C_TYPE(sieve2_message_t) *C_ARG(m), C_TYPE(sieve2_action_t) *C_ARG(a));
 	)
 
 Validate a script for syntax and feature support.
 Execute a script on a message, producing an action list.
 
 CODE	(
-NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_listextensions)(C_TYPE(char) **C_ARG(extensions), C_TYPE(sieve2_support_t) *C_ARG(p));
+BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_extensions_listconst)(C_TYPE(char) **C_ARG(extensions));
+NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_extensions_listsupport)(C_TYPE(sieve2_support_t) *C_ARG(p), C_TYPE(char) **C_ARG(extensions));
 	)
 
 Get a space separated list of supported extensions.

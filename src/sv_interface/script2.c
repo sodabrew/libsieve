@@ -176,7 +176,10 @@ int sieve2_support_register(sieve2_support_t *p, void *thing, int type)
     return SIEVE2_OK;
 }
 
-int sieve2_validate(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p)
+int sieve2_validate(sieve2_interp_t  *t,
+                    sieve2_script_t  *s,
+                    sieve2_support_t *p,
+                    sieve2_error_t   *e)
 {
     sieve_script_t *script = (sieve_script_t *)s;
     sieve_support_t *support = (sieve_support_t *)p;
@@ -209,8 +212,12 @@ int sieve2_validate(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p)
  * SIEVE2_ERROR_PARSE for script parse errors
  * SIEVE2_ERROR_EXEC for script evaluation errors
  */
-int sieve2_execute(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p,
-		sieve2_message_t *m, sieve2_action_t *a)
+int sieve2_execute(sieve2_interp_t  *t,
+                   sieve2_script_t  *s,
+                   sieve2_support_t *p,
+                   sieve2_error_t   *e,
+                   sieve2_message_t *m,
+                   sieve2_action_t  *a)
 {
     const char *errmsg = NULL;
     sieve_script_t *script = (sieve_script_t *)s;
