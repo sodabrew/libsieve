@@ -27,6 +27,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -68,13 +69,13 @@ group: phrase ':' ';'			{ sv_debugf( "group: phrase: %s\n", $1 ); }
 mailboxes: mailbox			{
 	 	/* Each new address is allocated here and back-linked */
 		sv_debugf( "mailboxes: mailbox: %s\n", $1 );
-		sv_debugf( "allocating newaddr %s\n" );
+		sv_debugf( "allocating newaddr\n" );
 		addrappend(&addr);
 		}
 	| mailboxes ',' mailbox		{
 	 	/* Each new address is allocated here and back-linked */
 		sv_debugf( "mailboxes: mailboxes mailbox: %s %s\n", $1, $3 );
-		sv_debugf( "allocating newaddr %s\n" );
+		sv_debugf( "allocating newaddr\n" );
 		addrappend(&addr);
 		};
 
@@ -90,7 +91,7 @@ mailbox:
 
 routeaddr: '<' addrspec '>'		{ sv_debugf( "routeaddr: addrspec: %s\n", $2 ); }
 	| '<' route ':' addrspec '>'	{
-		sv_debugf( "routeaddr: route addrspec: %s\n", $2, $4 );
+		sv_debugf( "routeaddr: route addrspec: %s:%s\n", $2, $4 );
 		// This is a "top terminal" state...
 		sv_debugf( "addr->route: %s\n", $2 );
 		addr->route = sv_strdup( $2, strlen($2) );

@@ -8,6 +8,7 @@
         FIXME: Needs Copyright
  **********************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -53,7 +54,11 @@ headers: header                 {
                     /* Problems... */;
                 };
 
-header: NAME COLON body         {
+header: NAME COLON              {
+                sv_debugf( "header: NAME COLON: %s:\n", $1 );
+                headerentry(hl->h, $1, NULL);
+                }
+        | NAME COLON body       {
                 sv_debugf( "header: NAME COLON body: %s:%s\n", $1, $3 );
                 headerentry(hl->h, $1, $3);
                 };

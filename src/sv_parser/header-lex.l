@@ -59,7 +59,12 @@ void headerfatalerror(const char msg[]);
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
-:([\ \t\r\n])*          {
+:([\ \t])+(\r|\n)+      {
+                /* Special case of an empty header: whitespace followed by newlines */
+                sv_debugf( "Eat some whitespace and return COLON, forget TEXT\n" );
+                return COLON;
+                }
+:([\ \t])+              {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
                 sv_debugf( "Begin TEXT, eat some whitespace and return COLON\n" );
