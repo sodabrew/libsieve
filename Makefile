@@ -22,15 +22,15 @@ snapshot: $(SOURCES) $(DOCS) $(OTHERS)
 	@echo
 	@echo "->Copying all release files to the directory: " $(PACKAGE)-$(VERSION)
 	@echo
--	mkdir $(PACKAGE)-$(VERSION)
--	cp -pr $(SOURCES) $(DOCS) $(OTHERS) $(PACKAGE)-$(VERSION)
+	-mkdir $(PACKAGE)-$(VERSION)
+	-cp -pr $(SOURCES) $(DOCS) $(OTHERS) $(PACKAGE)-$(VERSION)
 	@echo
 	@echo "->Making the compressed tar file " $(PACKAGE)-$(VERSION).tar.gz
 	@echo
--	tar cf - $(PACKAGE)-$(VERSION) | gzip > $(PACKAGE)-$(VERSION).tar.gz
+	-tar cf - $(PACKAGE)-$(VERSION) | gzip > $(PACKAGE)-$(VERSION).tar.gz
 	@echo
 	@echo "->Removing the temporary directory: " $(PACKAGE)-$(VERSION)
 	@echo
--	rm -rf $(PACKAGE)-$(VERSION)
+	-rm -rf $(PACKAGE)-$(VERSION)
 	@echo
 
