@@ -244,7 +244,7 @@ void libsieve_free_tree(commandlist_t *cl)
     }
 }
 
-char **stringlist_to_chararray(stringlist_t *list)
+char **libsieve_stringlist_to_chararray(stringlist_t *list)
 {
     size_t space = 0, count = 0;
     char **tmp = NULL, **ret = NULL;

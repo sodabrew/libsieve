@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS	= foreign
 
-if DEBUG
+if ENABLE_DEBUG
 DEBUG			= -DDEBUG
 endif
 

@@ -24,7 +24,7 @@
 #define SIEVE2_ERROR_NOMEM             7
 #define SIEVE2_ERROR_UNSUPPORTED       8
 #define SIEVE2_ERROR_BADARG	       9
-#define SIEVE2_ERROR_NOTHREADS         10
+#define SIEVE2_ERROR_NOINTERPS         10
 
 static const char * const sieve2_error_text[] = {
     "Sieve OK: no trouble at all",
@@ -37,7 +37,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: out of memory",
     "Sieve Error: unsupported feature",
     "Sieve Error: incorrect argument passed",
-    "Sieve Error: no more threads available",
+    "Sieve Error: no more interpreters available",
     NULL
 };
 

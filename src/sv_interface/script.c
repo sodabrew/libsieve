@@ -56,55 +56,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_parser */
 #include "parser.h"
 
-/* Sieve 2 update: allow support to be filled directly
- * without requiring interp to contain anything valid
- * */
-/* Checks if interpreter supports specified action */
-int script_require(sieve_script_t *s, char *req)
-{
-    if (0 == strcmp("fileinto", req)) {
-        if (s->interp.fileinto)
-	    s->support.fileinto = 1;
-        return s->support.fileinto;
-    } else if (0 == strcmp("reject", req)) {
-        if (s->interp.reject)
-	    s->support.reject = 1;
-        return s->support.reject;
-    } else if (!strcmp("envelope", req)) {
-	if (s->interp.getenvelope)
-	    s->support.envelope = 1;
-        return s->support.reject;
-    } else if (!strcmp("vacation", req)) {
-	if (s->interp.vacation)
-	    s->support.vacation = 1;
-        return s->support.vacation;
-    } else if (!strcmp("imapflags", req)) {
-	if (s->interp.markflags->flag)
-	    s->support.imapflags = 1;
-        return s->support.imapflags;
-    } else if (!strcmp("notify",req)) {
-	if (s->interp.notify)
-	    s->support.notify = 1;
-        return s->support.notify;
-#ifdef ENABLE_REGEX
-    /* If regex is enabled then it is supported! */
-    } else if (!strcmp("regex", req)) {
-	s->support.regex = 1;
-	return 1;
-#endif
-    /* Subaddress support is built into the parser! */
-    } else if (!strcmp("subaddress", req)) {
-	s->support.subaddress = 1;
-	return 1;
-    } else if (!strcmp("comparator-i;octet", req)) {
-	return 1;
-    } else if (!strcmp("comparator-i;ascii-casemap", req)) {
-	return 1;
-    }
-    /* If we don't recognize it, then we don't support it! */
-    return 0;
-}
-
 /* given an interpretor and a script, produce an executable script */
 /* this one takes the script in as a char array rather than a FILE */
 int sieve_script_buffer(sieve_interp_t *interp, char *script,
@@ -263,7 +214,7 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 
 /* evaluates the test t. returns 1 if true, 0 if false.
  */
-static int evaltest(sieve_interp_t *i, test_t *t, void *m)
+static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
 {
     testlist_t *tl;
     stringlist_t *sl;
@@ -288,8 +239,8 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
 
 	    /* use getheader for address, getenvelope for envelope */
 	    if (((t->type == ADDRESS) ? 
-		   call_getheader(i, m, sl->s, &body) :
-		   call_getenvelope(i, m, sl->s, &body)) != SIEVE_OK) {
+		   libsieve_call_getheader(i, m, sl->s, &body) :
+		   libsieve_call_getenvelope(i, m, sl->s, &body)) != SIEVE_OK) {
 		continue; /* try next header */
 	    }
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
@@ -314,20 +265,20 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
     case ANYOF:
 	res = 0;
 	for (tl = t->u.tl; tl != NULL && !res; tl = tl->next) {
-	    res |= evaltest(i, tl->t, m);
+	    res |= static_evaltest(i, tl->t, m);
 	}
 	break;
     case ALLOF:
 	res = 1;
 	for (tl = t->u.tl; tl != NULL && res; tl = tl->next) {
-	    res &= evaltest(i, tl->t, m);
+	    res &= static_evaltest(i, tl->t, m);
 	}
 	break;
     case EXISTS:
 	res = 1;
 	for (sl = t->u.sl; sl != NULL && res; sl = sl->next) {
 	    const char **headbody = NULL;
-	    res &= (call_getheader(i, m, sl->s, &headbody) == SIEVE_OK);
+	    res &= (libsieve_call_getheader(i, m, sl->s, &headbody) == SIEVE_OK);
 	}
 	break;
     case SFALSE:
@@ -341,7 +292,7 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
 	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
 	    const char **val;
 	    size_t l;
-	    if (call_getheader(i, m, sl->s, &val) != SIEVE_OK)
+	    if (libsieve_call_getheader(i, m, sl->s, &val) != SIEVE_OK)
 		continue;
 	    for (pl = t->u.h.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; val[l] != NULL && !res; l++) {
@@ -351,13 +302,13 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
 	}
 	break;
     case NOT:
-	res = !evaltest(i, t->u.t, m);
+	res = !static_evaltest(i, t->u.t, m);
 	break;
     case SIZE:
     {
 	int sz;
 
-	if (call_getsize(i, m, &sz) != SIEVE_OK)
+	if (libsieve_call_getsize(i, m, &sz) != SIEVE_OK)
 	    break;
 
 	if (t->u.sz.t == OVER) {
@@ -376,12 +327,12 @@ static int evaltest(sieve_interp_t *i, test_t *t, void *m)
  * otherwise find the header information in the message struct */
 /* call to this function used to be...
  * if (i->getheader(m, sl->s, &val) != SIEVE_OK) */
-int call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val)
+int libsieve_call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val)
 {
     if(i->getheader != NULL) {
         i->getheader(m, s, val);
     } else {
-        message2_getheader(m, s, val);
+        libsieve_message2_getheader(m, s, val);
     }
     if(*val == NULL)
         return SIEVE_DONE;
@@ -392,12 +343,12 @@ int call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val)
  * otherwise find the size information in the message struct */
 /* calls to this function used to be...
  * if (i->getsize(m, &sz) != SIEVE_OK) */
-int call_getsize(sieve_interp_t *i, void *m, int *sz)
+int libsieve_call_getsize(sieve_interp_t *i, void *m, int *sz)
 {
     if(i->getsize != NULL) {
         i->getsize(m, sz);
     } else {
-        message2_getsize(m, sz);
+        libsieve_message2_getsize(m, sz);
     }
     if(sz < 0)
         return SIEVE_DONE;
@@ -408,12 +359,12 @@ int call_getsize(sieve_interp_t *i, void *m, int *sz)
  * otherwise find the envelope information in the message struct */
 /* calls to this function used to be...
  * if (i->getenvelope(m, f, &c) != SIEVE_OK) */
-int call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c)
+int libsieve_call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c)
 {
     if(i->getenvelope != NULL) {
         i->getenvelope(m, f, c);
     } else {
-        message2_getenvelope(m, f, c);
+        libsieve_message2_getenvelope(m, f, c);
     }
     if(*c == NULL)
         return SIEVE_DONE;
@@ -426,7 +377,7 @@ int call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c)
    note that this is very stack hungry; we just evaluate the AST in
    the naivest way.  if we implement some sort of depth limit, we'll
    be ok here; otherwise we'd want to transform it a little smarter */
-int eval(sieve_interp_t *i, commandlist_t *c, 
+int libsieve_eval(sieve_interp_t *i, commandlist_t *c, 
 		void *m, action_list_t *actions,
 		const char **errmsg)
 {
@@ -436,10 +387,10 @@ int eval(sieve_interp_t *i, commandlist_t *c,
     while (c != NULL) {
 	switch (c->type) {
 	case IF:
-	    if (evaltest(i, c->u.i.t, m))
-		res = eval(i, c->u.i.do_then, m, actions, errmsg);
+	    if (static_evaltest(i, c->u.i.t, m))
+		res = libsieve_eval(i, c->u.i.do_then, m, actions, errmsg);
 	    else
-		res = eval(i, c->u.i.do_else, m, actions, errmsg);
+		res = libsieve_eval(i, c->u.i.do_else, m, actions, errmsg);
 	    break;
 	case REJCT:
 	    res = libsieve_do_reject(actions, c->u.str);
@@ -475,7 +426,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 
 		/* is there an Auto-Submitted keyword other than "no"? */
 		strcpy(buf, "auto-submitted");
-		if (call_getheader(i, m, buf, &body) == SIEVE_OK) {
+		if (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (*body[0] && isspace((int) *body[0])) body[0]++;
@@ -484,7 +435,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 
 		/* is there a Precedence keyword of "junk | bulk | list"? */
 		strcpy(buf, "precedence");
-		if (call_getheader(i, m, buf, &body) == SIEVE_OK) {
+		if (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (*body[0] && isspace((int) *body[0])) body[0]++;
@@ -499,7 +450,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		/* grab my address from the envelope */
 		if (l == SIEVE_OK) {
 		    strcpy(buf, "to");
-		    l = call_getenvelope(i, m, buf, &body);
+		    l = libsieve_call_getenvelope(i, m, buf, &body);
 		    if (body[0]) {
 			libsieve_parse_address(body[0], &data, &marker);
 			tmp = libsieve_get_address(ADDRESS_ALL, &data, &marker, 1);
@@ -509,7 +460,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		}
 		if (l == SIEVE_OK) {
 		    strcpy(buf, "from");
-		    l = call_getenvelope(i, m, buf, &body);
+		    l = libsieve_call_getenvelope(i, m, buf, &body);
 		}
 		if (l == SIEVE_OK && body[0]) {
 		    /* we have to parse this address & decide whether we
@@ -547,15 +498,15 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 		       but is this message to me?  that is, is my address
 		       in the TO, CC or BCC fields? */
 		    if (strcpy(buf, "to"), 
-			call_getheader(i, m, buf, &body) == SIEVE_OK)
+			libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found && (strcpy(buf, "cc"),
-				   (call_getheader(i, m, buf, &body) == SIEVE_OK)))
+				   (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found && (strcpy(buf, "bcc"),
-				   (call_getheader(i, m, buf, &body) == SIEVE_OK)))
+				   (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found)
@@ -570,7 +521,7 @@ int eval(sieve_interp_t *i, commandlist_t *c,
 			const char **s;
 		    
 			strcpy(buf, "subject");
-			if (call_getheader(i, m, buf, &s) != SIEVE_OK ||
+			if (libsieve_call_getheader(i, m, buf, &s) != SIEVE_OK ||
 			    s[0] == NULL) {
 			    strcpy(buf, "Automated reply");
 			} else {
@@ -677,9 +628,9 @@ static void add_header(sieve_interp_t *i, int isenv, char *header,
     int addlen;
     /* get header value */
     if (isenv)
-	call_getenvelope(i, message_context, header, &h);	
+	libsieve_call_getenvelope(i, message_context, header, &h);	
     else
-	call_getheader(i, message_context, header, &h);	
+	libsieve_call_getheader(i, message_context, header, &h);	
 
     if (!h || !h[0])
 	return;
@@ -914,7 +865,7 @@ int sieve_execute_script(sieve_script_t *s, void *message_context)
 	goto error;
     }
  
-    if (eval(&s->interp, s->cmds, message_context, actions, &errmsg) < 0)
+    if (libsieve_eval(&s->interp, s->cmds, message_context, actions, &errmsg) < 0)
 	return SIEVE_RUN_ERROR;
   
     strcpy(actions_string,"Action(s) taken:\n");

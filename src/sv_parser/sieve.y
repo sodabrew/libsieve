@@ -104,10 +104,40 @@ reqs: /* empty */
 	| require reqs
 	;
 
-require: REQUIRE stringlist ';'	{ if (!static_check_reqs($2)) {
-                                    libsieve_sieveerror("unsupported feature");
-				    YYERROR; 
-                                  } }
+require: REQUIRE stringlist ';'	{
+                                    int i = 1;
+                                    char *msg;
+                                    char *freemsg;
+                                    stringlist_t *s;
+                                    stringlist_t *sl = $2;
+
+                                    msg = libsieve_strconcat("unsupported feature:", NULL);
+
+                                    while (sl != NULL) {
+                                        s = sl;
+                                        sl = sl->next;
+
+                                        i &= static_check_reqs(parse_script, s->s);
+                                        if (!i) {
+                                            freemsg = msg;
+                                            msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
+                                            libsieve_free(freemsg);
+                                        }
+
+                                        libsieve_free(s->s);
+                                        libsieve_free(s);
+                                    }
+
+                                    if (!i) {
+                                        libsieve_sieveerror(msg);
+                                        libsieve_free(msg);
+                                        YYERROR; 
+                                    }
+
+                                    /* This needs to be free'd regardless of error */
+                                    libsieve_free(msg);
+
+                                }
 	;
 
 commands: command		{ $$ = $1; }
@@ -240,7 +270,7 @@ dtags: /* empty */		 { $$ = static_new_dtags(); }
 					   int cflags = REG_EXTENDED |
 					       REG_NOSUB | REG_ICASE;
 					   $$->pattern =
-					       (void*) verify_regex($3, cflags);
+					       (void*) static_verify_regex($3, cflags);
 					   if (!$$->pattern) { YYERROR; }
 				       }
 				       else
@@ -304,7 +334,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 				   $2 = static_canon_htags($2);
 #ifdef ENABLE_REGEX
 				   if ($2->comptag == REGEX) {
-				     pl = verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs($4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -322,7 +352,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 				   $2 = static_canon_aetags($2);
 #ifdef ENABLE_REGEX
 				   if ($2->comptag == REGEX) {
-				     pl = verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs($4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -424,9 +454,9 @@ commandlist_t *libsieve_sieve_parse_buffer(sieve_script_t *script, char *b)
     // sievelexalloc();
     if (libsieve_sieveparse()) {
     /*
-        err = libsieve_strconcat("address '", s, "': ", addrerr, NULL);
+        err = libsieve_strconcat("address '", s, "': ", libsieve_addrerr, NULL);
         sieveerror(err);
-        libsieve_free(addrerr);
+        libsieve_free(libsieve_addrerr);
         libsieve_free(err);
     */
         t = NULL;
@@ -495,23 +525,6 @@ int libsieve_sieveerror(char *msg)
     }
 
     return 0;
-}
-
-static int static_check_reqs(stringlist_t *sl)
-{
-    int i = 1;
-    stringlist_t *s;
-    
-    while (sl != NULL) {
-	s = sl;
-	sl = sl->next;
-
-	i &= script_require(parse_script, s->s);
-
-	libsieve_free(s->s);
-	libsieve_free(s);
-    }
-    return i;
 }
 
 static test_t *static_build_address(int t, struct aetags *ae,
@@ -743,8 +756,8 @@ static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *
     return (sl == NULL);
 }
 
-char *addrptr;		/* pointer to sieve string for address lexer */
-char *addrerr;		/* buffer for sieve parser error messages */
+char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
+char *libsieve_addrerr;		/* buffer for sieve parser error messages */
 
 static int static_verify_address(const char *s)
 {
@@ -853,7 +866,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = verify_regex(sl2->s, cflags)) == NULL) {
+	if ((reg = static_verify_regex(sl2->s, cflags)) == NULL) {
 	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}
@@ -872,3 +885,54 @@ static int static_ok_header(char *s __attribute__((unused)))
 {
     return 1;
 }
+
+/* Sieve 2 update: allow support to be filled directly
+ * without requiring interp to contain anything valid
+ *
+ * Checks if interpreter supports specified action
+ * */
+static int static_check_reqs(sieve_script_t *s, char *req)
+{
+    if (0 == strcmp("fileinto", req)) {
+        if (s->interp.fileinto)
+	    s->support.fileinto = 1;
+        return s->support.fileinto;
+    } else if (0 == strcmp("reject", req)) {
+        if (s->interp.reject)
+	    s->support.reject = 1;
+        return s->support.reject;
+    } else if (!strcmp("envelope", req)) {
+	if (s->interp.getenvelope)
+	    s->support.envelope = 1;
+        return s->support.reject;
+    } else if (!strcmp("vacation", req)) {
+	if (s->interp.vacation)
+	    s->support.vacation = 1;
+        return s->support.vacation;
+    } else if (!strcmp("imapflags", req)) {
+	if (s->interp.markflags->flag)
+	    s->support.imapflags = 1;
+        return s->support.imapflags;
+    } else if (!strcmp("notify",req)) {
+	if (s->interp.notify)
+	    s->support.notify = 1;
+        return s->support.notify;
+#ifdef ENABLE_REGEX
+    /* If regex is enabled then it is supported! */
+    } else if (!strcmp("regex", req)) {
+	s->support.regex = 1;
+	return 1;
+#endif
+    /* Subaddress support is built into the parser! */
+    } else if (!strcmp("subaddress", req)) {
+	s->support.subaddress = 1;
+	return 1;
+    } else if (!strcmp("comparator-i;octet", req)) {
+	return 1;
+    } else if (!strcmp("comparator-i;ascii-casemap", req)) {
+	return 1;
+    }
+    /* If we don't recognize it, then we don't support it! */
+    return 0;
+}
+

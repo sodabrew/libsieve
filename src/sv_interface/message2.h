@@ -26,12 +26,12 @@ typedef struct message {
     header_list_t *list;
 } sieve2_message;
 
-int message2_getsize(sieve2_message *m, int *sz);
-int message2_getheader(sieve2_message *m, const char *chead, const char ***body);
-int message2_getenvelope(sieve2_message *m, const char *chead, const char ***body);
-int message2_parseheader(sieve2_message *m);
-int message2_hashheader(char *header, int hashsize);
-int message2_freecache(sieve2_message *m);
-int message2_headercache(sieve2_message *m);
+int libsieve_message2_getsize(sieve2_message *m, int *sz);
+int libsieve_message2_getheader(sieve2_message *m, const char *chead, const char ***body);
+int libsieve_message2_getenvelope(sieve2_message *m, const char *chead, const char ***body);
+int libsieve_message2_parseheader(sieve2_message *m);
+int libsieve_message2_hashheader(char *header, int hashsize);
+int libsieve_message2_freecache(sieve2_message *m);
+int libsieve_message2_headercache(sieve2_message *m);
 
 #endif /* MESSAGE2_H */

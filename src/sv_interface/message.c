@@ -29,11 +29,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "config.h"
 #endif
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <string.h>
 /* sv_interface */
 #include "sieve_interface.h"
@@ -482,7 +477,7 @@ int libsieve_do_notify(action_list_t *a, char *id,
     n->isactive = 1;
     n->id = id;
     n->method = method;
-    n->options = stringlist_to_chararray(options);
+    n->options = libsieve_stringlist_to_chararray(options);
     n->priority = priority;
     n->message = message;
     n->next = NULL;

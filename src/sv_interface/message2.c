@@ -14,9 +14,6 @@
 #include <ctype.h>
 /* strlen() */
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 
 /* sv_include */
 #include "sieve2_interface.h"
@@ -44,14 +41,14 @@
  * defined and the functions are internal to libSieve. */
 
 /* Plaes the size of the entire message in sz */
-int message2_getsize(sieve2_message *m, int *sz)
+int libsieve_message2_getsize(sieve2_message *m, int *sz)
 {
     return m->size;
     return SIEVE2_OK;
 }
 
 /* Places the contents of the header specified by chead into body */
-int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
+int libsieve_message2_getheader(sieve2_message *m, const char *chead, const char ***body)
 {
     int c, cl;
     char *head = NULL;
@@ -67,7 +64,7 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
     head = libsieve_strtolower(head, strlen(head));
 
     /* Get a hash number of the header name */
-    cl = c = message2_hashheader(head, m->hashsize);
+    cl = c = libsieve_message2_hashheader(head, m->hashsize);
     while (m->hash[c] != NULL) {
         if (strcmp(head, m->hash[c]->name) == 0) {
             *body = (const char **) m->hash[c]->contents;
@@ -90,20 +87,20 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
 }
 
 /* Get the envelope sender from the message struct and put it into body */
-int message2_getenvelope(sieve2_message *m, const char *chead, const char ***body)
+int libsieve_message2_getenvelope(sieve2_message *m, const char *chead, const char ***body)
 {
     (const char **)body = m->envelope;
     return SIEVE2_OK;
 }
 
-int message2_freecache(sieve2_message *m)
+int libsieve_message2_freecache(sieve2_message *m)
 {
     int i; /*, j; */
 
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            libsieve_debugf( "message2_freecache(): free()ing header: [%s]\n",
+            libsieve_debugf( "libsieve_message2_freecache(): free()ing header: [%s]\n",
                 m->hash[i]->name );
             /*
 	     * This memory is no longer free()d here,
@@ -114,9 +111,9 @@ int message2_freecache(sieve2_message *m)
             for (j = 0; j < m->hash[i]->count; j++)
               {
                 // * Free each used entry in the contents array * /
-                libsieve_debugf( "message2_freecache(): free()ing count: [%d]\n",
+                libsieve_debugf( "libsieve_message2_freecache(): free()ing count: [%d]\n",
                     j );
-                libsieve_debugf( "message2_freecache(): free()ing entry: [%s]\n",
+                libsieve_debugf( "libsieve_message2_freecache(): free()ing entry: [%s]\n",
                     m->hash[i]->contents[j] );
                 libsieve_free(m->hash[i]->contents[j]);
               }
@@ -136,7 +133,7 @@ int message2_freecache(sieve2_message *m)
  * then uses the header parser to work at filling
  * the header hash in m->hash
  */
-int message2_headercache(sieve2_message *m)
+int libsieve_message2_headercache(sieve2_message *m)
 {
     size_t c, cl;
     char *err = NULL;
@@ -149,7 +146,7 @@ int message2_headercache(sieve2_message *m)
 
     while (hl != NULL) {
         /* Get a hash number of the header name */
-        cl = c = message2_hashheader(hl->h->name, m->hashsize);
+        cl = c = libsieve_message2_hashheader(hl->h->name, m->hashsize);
         while (m->hash[c] != NULL && strcmp(hl->h->name, m->hash[c]->name) != 0) {
             c++;
             c %= m->hashsize;
@@ -166,7 +163,7 @@ int message2_headercache(sieve2_message *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                libsieve_debugf("message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
+                libsieve_debugf("libsieve_message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
@@ -199,7 +196,7 @@ int message2_headercache(sieve2_message *m)
     return SIEVE2_OK;
 }
 
-int message2_hashheader(char *header, int hashsize)
+int libsieve_message2_hashheader(char *header, int hashsize)
 {
     int x = 0;
 

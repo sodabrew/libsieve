@@ -146,6 +146,6 @@ void libsieve_free_pl(patternlist_t *pl, int comptag);
 void libsieve_free_test(test_t *t);
 void libsieve_free_tree(commandlist_t *cl);
 
-char **stringlist_to_chararray(stringlist_t *list);
+char **libsieve_stringlist_to_chararray(stringlist_t *list);
 
 #endif

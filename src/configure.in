@@ -36,7 +36,7 @@ AC_ARG_ENABLE(test,
 		no)  test=false ;;
 		*) AC_MSG_ERROR(bad value ${enableval} for --enable-test) ;;
 	esac],[debug=false])
-AM_CONDITIONAL(TEST, test x$test = xtrue)
+AM_CONDITIONAL(ENABLE_TEST, test x$test = xtrue)
 
 AC_ARG_ENABLE(debug,
 	[  --enable-debug, Turn on debugging output],
@@ -45,15 +45,15 @@ AC_ARG_ENABLE(debug,
 		no)  test=false ;;
 		*) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
 	esac],[debug=false])
-AM_CONDITIONAL(DEBUG, test x$test = xtrue)
+AM_CONDITIONAL(ENABLE_DEBUG, test x$test = xtrue)
 
-AC_ARG_ENABLE(threads,
-	[  --enable-threads, Generate threaded parser/scanners],
+AC_ARG_ENABLE(regex,
+	[  --enable-regex, Enable regular expression support],
 	[case "${enableval}" in
 		yes) test=true ;;
 		no)  test=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-thread) ;;
+		*) AC_MSG_ERROR(bad value ${enableval} for --enable-regex) ;;
 	esac],[debug=false])
-AM_CONDITIONAL(REENTRANT_PARSER, test x$test = xtrue)
+AM_CONDITIONAL(ENABLE_REGEX, test x$test = xtrue)
 
-AC_OUTPUT(sv_parser/Makefile sv_rsamd5/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)
+AC_OUTPUT(sv_parser/Makefile sv_rsamd5/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)

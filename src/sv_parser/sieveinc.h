@@ -38,7 +38,6 @@ struct dtags {
 
 static commandlist_t *ret;
 static sieve_script_t *parse_script;
-static int static_check_reqs(stringlist_t *sl);
 static test_t *static_build_address(int t, struct aetags *ae,
 			     stringlist_t *sl, patternlist_t *pl);
 static test_t *static_build_header(int t, struct htags *h,
@@ -71,5 +70,7 @@ static regex_t *static_verify_regex(const char *s, int cflags);
 static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp);
 #endif
 static int static_ok_header(char *s);
+
+static int static_check_reqs(sieve_script_t *s, char *req);
 
 #endif /* SIEVEINC_H */

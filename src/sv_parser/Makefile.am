@@ -1,10 +1,14 @@
 AUTOMAKE_OPTIONS	= foreign
 
-if DEBUG
+if ENABLE_DEBUG
 DEBUG			= -DDEBUG
 endif
 
-CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g $(DEBUG)
+if ENABLE_REGEX
+REGEX			= -DENABLE_REGEX
+endif
+
+CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g $(DEBUG) $(REGEX)
 LFLAGS			= -olex.yy.c
 YFLAGS			= -d -p$*
 

@@ -35,7 +35,7 @@
 /* There are global to this file */
 char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
 char *libsieve_headererr;          /* buffer for sieve parser error messages */
-header_list_t *hl = NULL;
+static header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 %}
 

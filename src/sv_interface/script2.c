@@ -23,7 +23,7 @@
 #include "interp.h"
 #include "script.h"
 #include "tree.h"
-#include "thread2.h"
+#include "interp2.h"
 #include "message.h"
 #include "message2.h"
 
@@ -56,34 +56,22 @@ const char *sieve2_errstr(const int code, char **free)
     return sieve2_error_text[code];
 }
 
-static unsigned sieve2_thread_count = 0;
+/* TODO: As soon as flex is reentrant, remove this. */
+static unsigned static_interp_count = 0;
 
-/* A threaded client absolutely MUST
- * call this function to see if we're compiled threadsafe.
- * */
-int sieve2_thread_safetycheck(void)
+int sieve2_interp_alloc(sieve2_interp_t **t)
 {
-#ifdef REENTRANT_PARSER
-    return 0;
-#else
-    return 0;
-#endif
-}
+    struct sieve2_interp *interp;
 
-int sieve2_thread_alloc(sieve2_thread_t **t)
-{
-    sieve2_thread *thread;
-
-/* If we're not reentrant, then we can't allocate more than one parser.
- * Note that this sanity check isn't reentrant itself!
- * */
-#ifndef REENTRANT_PARSER
-    if (sieve2_thread_count >= 1)
+    /* If we're not reentrant, then we can't allocate more than one parser.
+     * Note that this sanity check isn't reentrant itself!
+     * TODO: As soon as flex is reentrant, remove this.
+     * */
+    if (static_interp_count >= 1)
       {
         *t = NULL;
-        return SIEVE2_ERROR_NOTHREADS;
+        return SIEVE2_ERROR_NOINTERPS;
       }
-#endif
 
     /* Even if we're not running a threaded parser,
      * still allocate and return a valid structure.
@@ -91,59 +79,63 @@ int sieve2_thread_alloc(sieve2_thread_t **t)
      * and prematurely assuming that non-threaded should
      * return NULL will preclude that ability.
      * */
-    thread = (sieve2_thread *)libsieve_malloc(sizeof(sieve2_thread));
-    if (thread == NULL)
+    interp = (struct sieve2_interp *)libsieve_malloc(sizeof(struct sieve2_interp));
+    if (interp == NULL)
       {
         *t = NULL;
         return SIEVE2_ERROR_NOMEM;
       }
 
-    *t = (sieve2_thread_t *)thread;
+    *t = (struct sieve2_interp *)interp;
 
-#ifdef REENTRANT_PARSER
+    /* TODO: As soon as flex supports these, use them.
     libsieve_addr_create(t);
     libsieve_sieve_create(t);
     libsieve_header_create(t);
-#else
+    */
     libsieve_addrlexalloc();
     libsieve_sievelexalloc();
     libsieve_headerlexalloc();
     libsieve_headeryaccalloc();
-#endif
 
     /* FIXME: This is not an atomic operation,
      * but we're only talking about lost memory,
      * not corruption of the parsers, so it will
      * tide us over until we have real threading.
      * */
-    sieve2_thread_count++;
+    static_interp_count++;
 
     return SIEVE2_OK;
 }
 
-int sieve2_thread_free(sieve2_thread_t *t)
+int sieve2_interp_free(sieve2_interp_t *t)
 {
     if (t == NULL)
         return SIEVE2_ERROR_BADARG;
 
-    if (sieve2_thread_count > 0)
-        sieve2_thread_count--;
+    if (static_interp_count > 0)
+        static_interp_count--;
     else
         /* FIXME: I'm not sure how to handle this. */;
 
-#ifdef REENTRANT_PARSER
+    /* TODO: As soon as flex supports these, use them.
     libsieve_addr_destroy(t);
     libsieve_sieve_destroy(t);
     libsieve_header_destroy(t);
-#else
+    */
     libsieve_addrlexfree();
     libsieve_sievelexfree();
     libsieve_headerlexfree();
     libsieve_headeryaccfree();
-#endif
 
     libsieve_free(t);
 
+    return SIEVE2_OK;
+}
+
+/* This function is not implemented yet... no-op. */
+int sieve2_interp_register(sieve2_interp_t *t, void *thing, int type)
+{
     return SIEVE2_OK;
 }
 
@@ -165,33 +157,34 @@ int sieve2_support_free(sieve2_support_t *p)
     return SIEVE2_OK;
 }
 
-int sieve2_support_register(sieve2_support_t *p, int support)
+int sieve2_support_register(sieve2_support_t *p, void *thing, int type)
 {
     sieve_support_t *q = (sieve_support_t *)p;
-    if(!(support & SIEVE2_ACTION_ALL))
+
+    if(!(type & SIEVE2_ACTION_ALL))
         return SIEVE2_ERROR_UNSUPPORTED;
-    if(support & SIEVE2_ACTION_REJECT)
+    if(type & SIEVE2_ACTION_REJECT)
         q->reject = 1;
-    if(support & SIEVE2_ACTION_FILEINTO)
+    if(type & SIEVE2_ACTION_FILEINTO)
         q->fileinto = 1;
-    if(support & SIEVE2_ACTION_VACATION)
+    if(type & SIEVE2_ACTION_VACATION)
         q->vacation = 1;
-    if(support & SIEVE2_ACTION_SETFLAG)
+    if(type & SIEVE2_ACTION_SETFLAG)
         q->imapflags = 1;
-    if(support & SIEVE2_ACTION_NOTIFY)
+    if(type & SIEVE2_ACTION_NOTIFY)
         q->notify= 1;
     return SIEVE2_OK;
 }
 
-int sieve2_validate(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p)
+int sieve2_validate(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p)
 {
     sieve_script_t *script = (sieve_script_t *)s;
     sieve_support_t *support = (sieve_support_t *)p;
-    sieve2_thread *thread = (sieve2_thread *)t;
+    struct sieve2_interp *interp = (struct sieve2_interp *)t;
 
-    /* The thread should be non-null regardless
+    /* The interp should be non-null regardless
      * of whether we're building reentrant or not. */
-    if (script == NULL || support == NULL || thread == NULL) {
+    if (script == NULL || support == NULL || interp == NULL) {
         return SIEVE2_ERROR_BADARG;
     }
 
@@ -216,26 +209,26 @@ int sieve2_validate(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p)
  * SIEVE2_ERROR_PARSE for script parse errors
  * SIEVE2_ERROR_EXEC for script evaluation errors
  */
-int sieve2_execute(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p,
+int sieve2_execute(sieve2_interp_t *t, sieve2_script_t *s, sieve2_support_t *p,
 		sieve2_message_t *m, sieve2_action_t *a)
 {
     int ret;
     const char *errmsg = NULL;
     sieve_script_t *script = (sieve_script_t *)s;
     sieve2_message *message = (sieve2_message *)m;
-    sieve2_thread *thread = (sieve2_thread *)t;
+    struct sieve2_interp *interp = (struct sieve2_interp *)t;
     sieve_support_t *support = (sieve_support_t *)p;
     action_list_t *action = (action_list_t *)a;
 
     if (script == NULL || message == NULL ||
-        support == NULL || action == NULL || thread == NULL) {
+        support == NULL || action == NULL || interp == NULL) {
         return SIEVE2_ERROR_BADARG;
     }
 
     /* Generate a hash cache
      * There is a call to header_parse_buffer()
      * a bit further down the stack from here. */
-    message2_headercache(message);
+    libsieve_message2_headercache(message);
 
     script->support = *support; /* Yes, really make a copy */
 
@@ -248,7 +241,7 @@ int sieve2_execute(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p,
         return SIEVE2_ERROR_PARSE;
     }
 
-    if (eval(&script->interp, script->cmds, message, action, &errmsg) < 0)
+    if (libsieve_eval(&script->interp, script->cmds, message, action, &errmsg) < 0)
         ret = SIEVE2_ERROR_EXEC;
 
     ret = SIEVE2_OK;
@@ -497,7 +490,7 @@ int sieve2_message_alloc(sieve2_message_t **m)
 
 int sieve2_message_free(sieve2_message_t *m)
 {
-    return message2_freecache((sieve2_message *)m);
+    return libsieve_message2_freecache((sieve2_message *)m);
 }
 
 int sieve2_message_register(sieve2_message_t *m, void *thing, int type)
