@@ -56,7 +56,7 @@ struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
 %}
 
-%token ATOM, QTEXT, DTEXT, QUOTE
+%token ATOM QTEXT DTEXT QUOTE
 %start address
 
 %%
@@ -80,8 +80,8 @@ mailboxes: mailbox			{
 		};
 
 mailbox: 
-	routeaddr			{ sv_debugf( "mailbox: routeaddr: %s\n", $1 ); };
-	| addrspec			{ sv_debugf( "mailbox: addrspec: %s\n", $1 ); };
+	routeaddr			{ sv_debugf( "mailbox: routeaddr: %s\n", $1 ); }
+	| addrspec			{ sv_debugf( "mailbox: addrspec: %s\n", $1 ); }
 	| phrase routeaddr		{
 		sv_debugf( "mailbox: phrase routeaddr: %s %s\n", $1, $2 );
 		// This is a "top terminal" state...
@@ -109,19 +109,19 @@ addrspec: localpart '@' domain		{
 route: '@' domain			{
 		sv_debugf( "route: domain: %s\n", $2 );
                 $$ = sv_strbuf(ml, sv_strconcat( "@", $2, NULL ), strlen($2)+1, FREEME);
-		};
+		}
 	| '@' domain ',' route		{
 		sv_debugf( "route: domain route: %s %s\n", $2, $4 );
 		$$ = sv_strbuf(ml, sv_strconcat( "@", $2, ",", $4, NULL ), strlen($2)+strlen($4)+2, FREEME);
 		};
 
-localpart: word				{ sv_debugf( "localpart: word: %s\n", $1 ); };
+localpart: word				{ sv_debugf( "localpart: word: %s\n", $1 ); }
 	| localpart '.' word		{
 		sv_debugf( "localpart: localpart word: %s %s\n", $1, $3 );
 		$$ = sv_strbuf(ml, sv_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);
 		};
 
-domain: subdomain			{ sv_debugf( "domain: subdomain: %s\n", $1 ); };
+domain: subdomain			{ sv_debugf( "domain: subdomain: %s\n", $1 ); }
 	| domain '.' subdomain		{
 		sv_debugf( "domain: domain subdomain: %s %s\n", $1, $3 );
 		$$ = sv_strbuf(ml, sv_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);

@@ -39,7 +39,7 @@ header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 %}
 
-%token NAME, COLON, TEXT, WRAP
+%token NAME COLON TEXT WRAP
 %start headers
 
 %%
@@ -47,7 +47,7 @@ headers: header                 {
                 /* Allocate a new cache block */
                 if (headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
-                };
+                }
         | headers header        {
                 /* Allocate a new cache block */
                 if (headerappend(&hl) != SIEVE2_OK)
