@@ -9,10 +9,11 @@ New portions of code are copyrighted by the libSieve author and maintainer,
 Aaron Stone, and contributions are assumed to have thier copyrights assigned
 to the libSieve author unless specifically stated and agreed to otherwise.
 
-As of verison 2.2.0 of libSieve, all code previously held under a larger,
-"advertising," license from CMU has been removed or replaced. As the new
-code is covered by the GPL, the entire distribution therefore fall under
-the GPL. See section 2.b. of the GNU General Public License for terms.
+As of verison 2.1.4 (formerly 2.2.0_pre1) of libSieve, all code previously
+held under a larger, "advertising," license from CMU has been removed or
+replaced. As the new code is covered by the GPL, the entire distribution
+therefore fall under the GPL. See section 2.b. of the GNU General Public
+License for terms.
 
 The GPL prohibits proprietary distribution and derivation of libSieve;
 those wishing to use libSieve in a proprietary distribution must contact

@@ -8,7 +8,8 @@ the Cyrus Mail Server, as well as a new API which is very well suited to
 be incorporated into other programs and is reasonably extensible.
 
 To get in touch with the usage and development communities for libSieve,
-please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
+please visit http://libsieve.sf.net/ and follow the SourceForge links to
+join the mailing lists.
 
 The documents listed below coincide with those features currently
 implemented in libSieve. Both as these documents progress through the

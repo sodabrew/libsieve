@@ -1,7 +1,8 @@
 libSieve is now maintained by Aaron Stone. Please don't bug anyone else!
 
 To get in touch with the usage and development communities for libSieve,
-please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
+please visit http://libsieve.sf.net/ and follow the SourceForge links to
+join the mailing lists.
 
 The contributors to libSieve include:
 
@@ -11,6 +12,8 @@ The contributors to libSieve include:
   Timo Sirainen <tss@iki.fi> submitted fixes for potential buffer overflows.
   
   Oliver Tappe <zooey@hirschkaefer.de> submitted fixes for BeOS builds.
+
+  Brandon Knitter <knitterb@users.sf.net> submitted fixes for Win32 builds.
 
 Their work builds upon these fine fellows' work at CMU:
 

@@ -10,5 +10,5 @@ CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdi
 
 lib_LTLIBRARIES         = libsieve.la
 libsieve_la_SOURCES     = sv_empty.c
-libsieve_la_LDFLAGS     = -no-undefined -version-info 2:2:0
+libsieve_la_LDFLAGS     = -no-undefined -releasae 2 -version-info 1:5
 libsieve_la_LIBADD      = sv_util/libutil.la  sv_parser/libparser.la  sv_interface/libinterface.la  sv_rsamd5/librsamd5.la sv_regex/libregex.la

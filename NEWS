@@ -1,7 +1,25 @@
-libSieve 2.2.0
+libSieve 2.1.5
 --------------
+(formerly libsieve 2.2.0_pre3)
 
-- Sieve 2 API is implemented.
+- CFLAGS now includes -Wall and compiles very
+  cleanly. Messages from lex/yacc are benign.
+
+- Namespace cleanups: internal global functions
+  prefixed with "libsieve_" for consistency.
+
+- Local regex library, borrowed from GNU glibc
+  2.3.2. Used under LGPL license version 2.1.
+
+- Compiles under Win32 with Visual C++, with
+  many thanks to Brandon Knitter.
+
+libSieve 2.1.4
+--------------
+(formerly libsieve 2.2.0_pre1)
+
+- Sieve 2 API has begun. More changes should
+  be expected during the 2.1 series.
 
 - All later-CMU code removed and/or replaced;
   original licensing is now entirely old-CMU
@@ -15,20 +33,8 @@ libSieve 2.2.0
 - Extensive Valgrinding performed to identify
   memory leaks; no known leaks remain.
 
-- CFLAGS now includes -Wall and compiles very
-  cleanly. Messages from lex/yacc are benign.
-
 - Many more changes, amounting to perhaps a
   70% rewrite of all code.
-
-- Namespace cleanups: internal global functions
-  prefixed with "libsieve_" for consistency.
-
-- Local regex library, borrowed from GNU glibc
-  2.3.2. Used under LGPL license version 2.1.
-
-- Compiles under Win32 with Visual C++, with
-  many thanks to Brandon Knitter.
 
 libSieve 2.1.3
 --------------

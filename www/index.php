@@ -16,16 +16,12 @@
 
  $smarty->assign( 'righttitle', 'news.' );
  $smarty->assign( 'rightcontent', array(
- 	array( 'December 2003: 2.2.0pre4',
-	'I\'m proud to announce that libSieve 2.2.0pre4 has been released!
-Some minor API changes are still expected before the final 2.2.0 release, but we\'re
-now making them in much more controlled ways than during the heddy days of full
-overhauls just a few months ago.' ),
-	array( 'December 2003: DBMail 2.0 alpha 2',
-	'Well, I\'m pre-announcing it, but the DBMail 2.0 development
-has been progressing nicely, and libSieve support is soon to be added to CVS. After
-some work on stabilizing the source base, another pre-release will be made which
-may likely include much of the libSieve interface code.' ),
+ 	array( 'November 2004: libSieve 2.1.5',
+	'In a move to confuse and astound, I am re-releasing libSieve 2.2.0_pre3 as 2.1.5. I dragged my feet for almost a year trying to figure out how I was going to fix the API in one fell swoop, release 2.2.0 final, and save the world. All that is gone now. <b>Version numbers are now staggered in Linux Kernel style, with odd minor numbers denoting experimental / development versions. There will be many more API changes before 2.2.0 is released.</b>
+	' ),
+	array( 'DBMail and libSieve',
+	'Code to interface DBMail with libSieve has been in DBMail\'s CVS tree for quite a while, but it is not stable. The issue is that libSieve\'s API for retrieving the results of a script run are really hairy. That will be fixed in due course. In the mean time, please do not try to use DBMail with libSieve unless you want to work on fixing the API!
+	' ),
 	) );
  $smarty->assign( 'rightlinks', array(
  	array( 'DBMail', 'http://dbmail.org/' ),
