@@ -1,19 +1,10 @@
 AUTOMAKE_OPTIONS	= foreign
 
-SUBDIRS			= lib .
+SUBDIRS			= sv_parser sv_rsamd5 sv_interface sv_util . sv_test sv_include
 
-CFLAGS			= -I$(top_srcdir)/lib
-LFLAGS			= -olex.yy.c
-YFLAGS			= -d -p$*
-
-include_HEADERS		= addr.h config.h interp.h md5.h script.h sieve.h tree.h comparator.h hmac-md5.h md5global.h message.h sieve_interface.h
-
+CFLAGS			= -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_rsamd5 -I$(top_srcdir)/sv_include -g
 
 lib_LTLIBRARIES         = libsieve.la
-libsieve_la_SOURCES     = addr.y addr-lex.l sieve.y sieve-lex.l comparator.c interp.c md5.c message.c script.c tree.c
-libsieve_la_LDFLAGS     = -no-undefined -version-info 0:0:0
-libsieve_la_LIBADD      = lib/libcyrus.la
-
-bin_PROGRAMS            = test
-test_SOURCES    	= test.c
-test_LDADD      	= libsieve.la
+libsieve_la_SOURCES     = sv_empty.c
+libsieve_la_LDFLAGS     = -no-undefined -version-info 2:2:0
+libsieve_la_LIBADD      = sv_util/libutil.la  sv_parser/libparser.la  sv_interface/libinterface.la  sv_rsamd5/librsamd5.la

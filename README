@@ -2,38 +2,18 @@ libSieve: a library for parsing, sorting and filtering your mail
 -----------------------------------------------------------------
 
 This code is a standalone library based upon code which had been distributed
-with the Cyrus Mail Server. API changes will be made to create a more
-extensible interface as this version of the Sieve library evolves.
+with the Cyrus Mail Server. Currently libSieve implements two API's:
+one that is based upon, and compatible with, the Sieve API as built into
+the Cyrus Mail Server, as well as a new API which is very well suited to
+be incorporated into other programs and is reasonably extensible.
 
 To get in touch with the usage and development communities for libSieve,
 please join our mailing lists at http://sourceforge.net/mail/?group_id=66233
 
-Notes on implementation
------------------------
-
-This is an implementation of a simple Sieve API.  This API is
-well-suited for incorporating in other programs, but is not
-extensible.  (If there is interest, we may implement an extensible API
-in the future.)
-
-If you wish to compile Sieve without compiling all of imapd, you'll
-have to create a Makefile for it.  I recommend you use Makefile.in as
-a guide.
-
-It should compile without libcyrus, but then it does not implement the
-"address" test.	 That's just too much work to do when I have a neato
-library to do it for me.
-
-There's a simple "test" application included, which is not built by
-default (type "make test" to build it).  It expects:
-
-test <message> <script>
-
-And prints out the actions taken or errors encountered.  (This
-implementation will attempt all the actions or no actions.)
-
-Questions and comments to:
-Larry Greenfield (leg+sieve@andrew.cmu.edu)
+The documents listed below coincide with those features currently
+implemented in libSieve. Both as these documents progress through the
+standardization process and as libSieve itself matures, additional
+extensions and later revisions of them will be implemented.
 
 References:
 
