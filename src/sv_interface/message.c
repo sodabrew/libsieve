@@ -561,7 +561,7 @@ int libsieve_parse_address(const char *header, struct address **data, struct add
     struct addr_marker *am;
     struct address *newdata = NULL;
 
-    newdata = addr_parse_buffer(data, &header, &err);
+    newdata = libsieve_addr_parse_buffer(data, &header, &err);
     if( newdata == NULL )
         return SIEVE_RUN_ERROR;
 

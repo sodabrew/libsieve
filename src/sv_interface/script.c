@@ -53,6 +53,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_util */
 #include "util.h"
 
+/* sv_parser */
+#include "parser.h"
+
 /* Sieve 2 update: allow support to be filled directly
  * without requiring interp to contain anything valid
  * */
@@ -109,7 +112,7 @@ int sieve_script_buffer(sieve_interp_t *interp, char *script,
 {
     sieve_script_t *s;
     int res = SIEVE_OK;
-    extern int sievelineno;
+    extern int libsieve_sievelineno;
 
     res = libsieve_interp_verify(interp);
     if (res != SIEVE_OK) {
@@ -125,10 +128,10 @@ int sieve_script_buffer(sieve_interp_t *interp, char *script,
     s->err = 0;
 
     /* These used to be in sieve.y, but needed to be higher */
-    addrlexalloc();
-    sievelexalloc();
-    sievelineno = 1;		/* reset line number */
-    s->cmds = sieve_parse_buffer(s, script);
+    libsieve_addrlexalloc();
+    libsieve_sievelexalloc();
+    libsieve_sievelineno = 1;		/* reset line number */
+    s->cmds = libsieve_sieve_parse_buffer(s, script);
     if (s->err > 0) {
 	if (s->cmds) {
 	    libsieve_free_tree(s->cmds);
@@ -148,7 +151,7 @@ int sieve_script_parse(sieve_interp_t *interp, FILE *script,
 {
     sieve_script_t *s;
     int res = SIEVE_OK;
-    extern int sievelineno;
+    extern int libsieve_sievelineno;
 
     res = libsieve_interp_verify(interp);
     if (res != SIEVE_OK) {
@@ -164,10 +167,10 @@ int sieve_script_parse(sieve_interp_t *interp, FILE *script,
     s->err = 0;
 
     /* These used to be in sieve.y, but needed to be higher */
-    addrlexalloc();
-    sievelexalloc();
-    sievelineno = 1;		/* reset line number */
-    s->cmds = sieve_parse(s, script);
+    libsieve_addrlexalloc();
+    libsieve_sievelexalloc();
+    libsieve_sievelineno = 1;		/* reset line number */
+    s->cmds = libsieve_sieve_parse(s, script);
     if (s->err > 0) {
 	if (s->cmds) {
 	    libsieve_free_tree(s->cmds);
@@ -190,8 +193,8 @@ int sieve_script_free(sieve_script_t **s)
     }
     
     /* These used to be in sieve.y, but needed to be higher */
-    addrlexfree();
-    sievelexfree();
+    libsieve_addrlexfree();
+    libsieve_sievelexfree();
 
     return SIEVE_OK;
 }

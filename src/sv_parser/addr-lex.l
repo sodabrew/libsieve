@@ -37,7 +37,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* Must be defined before addr.h */
 #define YYSTYPE char *
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = addrinput(b, ms))
+#define YY_INPUT(b, r, ms) (r = libsieve_addrinput(b, ms))
 
 #include <string.h>
 /* sv_util */
@@ -65,7 +65,7 @@ void libsieve_addrfatalerror(const char msg[]);
 \"				{ BEGIN QSTRING; libsieve_debugf( "Begin QSTRING\n" ); return QUOTE; }
 \[				{ BEGIN DOMAINLIT; libsieve_debugf( "Begin DOMAINLIT\n" ); return yytext[0]; }
 \(				{ ncom = 1; libsieve_debugf( "Begin COMMENT\n" ); BEGIN COMMENT; }
-\)				{ addrerror("address parse error, "
+\)				{ libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
@@ -80,14 +80,14 @@ void libsieve_addrfatalerror(const char msg[]);
 				}
 ([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
 		/* Match any set of non-special-characters */
-		addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return ATOM;
 				}
 
 <QSTRING>([^\"]|\\\")+		{
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
-		addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return QTEXT;
 				}
 <QSTRING>\"			{
@@ -106,7 +106,7 @@ void libsieve_addrfatalerror(const char msg[]);
 <COMMENT>([^\(\)\n\0\\]|\\.)*	/* ignore comments */
 <COMMENT>\(			ncom++;
 <COMMENT>\)			{ ncom--; if (ncom == 0) BEGIN INITIAL; }
-<COMMENT><<EOF>>		{ addrerror("address parse error, "
+<COMMENT><<EOF>>		{ libsieve_addrerror("address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
 				  yyterminate(); }
@@ -135,7 +135,7 @@ int libsieve_addrinput(char *buf, int max)
 void libsieve_addrlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
-    addr_delete_buffer( YY_CURRENT_BUFFER );
+    libsieve_addr_delete_buffer( YY_CURRENT_BUFFER );
 }
 
 /* Kind of a hack, but this sets up the file statics */

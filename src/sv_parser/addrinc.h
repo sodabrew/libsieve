@@ -4,15 +4,15 @@
 /* Structures are here now */
 #include "parser.h"
 
-int addrlex(void);
-int addrparse(void);
-int addrinput(char *buf, int max_size);
-void addrerror(const char *str);
-void addrappend(struct address **a);
+int libsieve_addrlex(void);
+int libsieve_addrparse(void);
+int libsieve_addrinput(char *buf, int max_size);
+void libsieve_addrerror(const char *str);
+void libsieve_addrappend(struct address **a);
 
 #define STRUCTONLY 0
 #define CHARSALSO 1
-void addrstructfree(struct address *addr, int freeall);
-struct address *addrstructcopy(struct address *addr, int copyall);
+void libsieve_addrstructfree(struct address *addr, int freeall);
+struct address *libsieve_addrstructcopy(struct address *addr, int copyall);
 
 #endif /* ADDRINC_H */

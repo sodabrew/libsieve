@@ -18,7 +18,7 @@
 /* Must be defined before header.h */
 #define YYSTYPE char *
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = headerinput(b, ms))
+#define YY_INPUT(b, r, ms) (r = libsieve_headerinput(b, ms))
 
 #include <string.h>
 /* sv_util */
@@ -29,8 +29,8 @@
 
 static struct mlbuf *ml = NULL;
 
-#define YY_FATAL_ERROR headerfatalerror
-void headerfatalerror(const char msg[]);
+#define YY_FATAL_ERROR libsieve_headerfatalerror
+void libsieve_headerfatalerror(const char msg[]);
 
 /* %option nounput */
 %}
@@ -81,21 +81,21 @@ void headerfatalerror(const char msg[]);
                  * 59  ;  to  126 ~
                  * Note that  58  :  is reserved as the field separator */
                 libsieve_debugf( "NAME: %s\n", yytext );
-		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return NAME;
                 }
 
 <S_TEXT>([^\r\n])+      {
                 libsieve_debugf( "TEXT: %s\n", yytext );
-		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return TEXT;
                 }
 
 <S_WRAP>([^\r\n])+      {
                 libsieve_debugf( "WRAP: %s\n", yytext );
-		headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return WRAP;
                 }
@@ -103,39 +103,39 @@ void headerfatalerror(const char msg[]);
 %%
 
 /* take input from header string provided by sieve parser */
-int headerinput(char *buf, int max)
+int libsieve_headerinput(char *buf, int max)
 {
-    extern char *headerptr;	/* current position in header string */
+    extern char *libsieve_headerptr;	/* current position in header string */
     size_t n;			/* number of characters to read from string */
     size_t max_size = (size_t)max;
 
-    if(headerptr == NULL)
+    if(libsieve_headerptr == NULL)
         n = 0;
     else
-        n = strlen(headerptr) < max_size ? strlen(headerptr) : max_size;
+        n = strlen(libsieve_headerptr) < max_size ? strlen(libsieve_headerptr) : max_size;
     if (n > 0) {
-	memcpy(buf, headerptr, n);
-	headerptr += n;
+	memcpy(buf, libsieve_headerptr, n);
+	libsieve_headerptr += n;
     }
     return n;
 }
 
 /* Clean up after ourselves by free()ing the current buffer */
-void headerlexfree()
+void libsieve_headerlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
-    header_delete_buffer( YY_CURRENT_BUFFER );
+    libsieve_header_delete_buffer( YY_CURRENT_BUFFER );
 }
 
 /* Kind of a hack, but this sets up the file statics */
-void headerlexalloc()
+void libsieve_headerlexalloc()
 {
     libsieve_strbufalloc(&ml);
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
-void headerfatalerror(const char msg[])
+void libsieve_headerfatalerror(const char msg[])
 {
     /* Basically stop and don't do anything */
 }

@@ -33,11 +33,13 @@
 #include "sieve2_error.h"
 
 /* There are global to this file */
-char *headerptr;          /* pointer to sieve string for header lexer */
-char *headererr;          /* buffer for sieve parser error messages */
+char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
+char *libsieve_headererr;          /* buffer for sieve parser error messages */
 header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 %}
+
+%name-prefix="libsieve_header"
 
 %token NAME COLON TEXT WRAP
 %start headers
@@ -78,7 +80,7 @@ body: TEXT                      {
 void libsieve_headererror(const char *s)
 {
     extern char *libsieve_headererr;
-    headererr = libsieve_strdup(s, strlen(s));
+    libsieve_headererr = libsieve_strdup(s, strlen(s));
 }
 
 /* Wrapper for headerparse() which sets up the 
@@ -98,7 +100,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
 
     if(libsieve_headerparse()) {
 	libsieve_strbuffree(&ml, FREEME);
-	libsieve_debugf( "Parser ERROR: %s\n", headererr );
+	libsieve_debugf( "Parser ERROR: %s\n", libsieve_headererr );
 	return NULL;
     }
 

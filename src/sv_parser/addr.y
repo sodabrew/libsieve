@@ -56,6 +56,8 @@ static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
 %}
 
+%name-prefix="libsieve_addr"
+
 %token ATOM QTEXT DTEXT QUOTE
 %start address
 
@@ -70,13 +72,13 @@ mailboxes: mailbox			{
 	 	/* Each new address is allocated here and back-linked */
 		libsieve_debugf( "mailboxes: mailbox: %s\n", $1 );
 		libsieve_debugf( "allocating newaddr\n" );
-		addrappend(&addr);
+		libsieve_addrappend(&addr);
 		}
 	| mailboxes ',' mailbox		{
 	 	/* Each new address is allocated here and back-linked */
 		libsieve_debugf( "mailboxes: mailboxes mailbox: %s %s\n", $1, $3 );
 		libsieve_debugf( "allocating newaddr\n" );
-		addrappend(&addr);
+		libsieve_addrappend(&addr);
 		};
 
 mailbox: 
@@ -156,8 +158,8 @@ qstring: QUOTE QTEXT QUOTE	{
 /* copy address error message into buffer provided by sieve parser */
 void libsieve_addrerror(const char *s)
 {
-    extern char *addrerr;
-    addrerr = libsieve_strdup(s, strlen(s));
+    extern char *libsieve_addrerr;
+    libsieve_addrerr = libsieve_strdup(s, strlen(s));
 }
 
 /* Wrapper for addrparse() which sets up the 
@@ -201,7 +203,7 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
      * we notice that addrparse() leaves an extra struct
      * at the top, but at least we can hide that here!
      */
-    newdata = addrstructcopy(addr->next, STRUCTONLY);
+    newdata = libsieve_addrstructcopy(addr->next, STRUCTONLY);
     libsieve_addrstructfree(addr, STRUCTONLY);
     libsieve_strbuffree(&ml, FREEME);
     /* This causes a segfault here...

@@ -31,14 +31,14 @@
 #include "util.h"
 
 /* sv_parser */
-#include "sieve.h"
+#include "parser.h"
 
 const char *sieve2_errstr(const int code, char **free)
 {
     char *ret;
     /* Comes from the Sieve Parser */
-    extern int sievelineno;
-    extern char *sieveerr;
+    extern int libsieve_sievelineno;
+    extern char *libsieve_sieveerr;
     char lineno[50];
     *free = NULL;
 
@@ -46,10 +46,10 @@ const char *sieve2_errstr(const int code, char **free)
       {
         /* The caller must free free! */
         libsieve_memset(lineno, '\0', 50);
-        snprintf(lineno, 49, "%d", sievelineno);
-        ret = libsieve_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
+        snprintf(lineno, 49, "%d", libsieve_sievelineno);
+        ret = libsieve_strconcat(sieve2_error_text[code], ": ", libsieve_sieveerr, " on line ", lineno, NULL);
 	*free = ret;
-	libsieve_free(sieveerr);
+	libsieve_free(libsieve_sieveerr);
 	return ret;
       }
 
@@ -58,12 +58,25 @@ const char *sieve2_errstr(const int code, char **free)
 
 static unsigned sieve2_thread_count = 0;
 
+/* A threaded client absolutely MUST
+ * call this function to see if we're compiled threadsafe.
+ * */
+int sieve2_thread_safetycheck(void)
+{
+#ifdef REENTRANT_PARSER
+    return 0;
+#else
+    return 0;
+#endif
+}
+
 int sieve2_thread_alloc(sieve2_thread_t **t)
 {
     sieve2_thread *thread;
 
-/* If we're not reentrant, then we
- * can't allocate more than one parser. */
+/* If we're not reentrant, then we can't allocate more than one parser.
+ * Note that this sanity check isn't reentrant itself!
+ * */
 #ifndef REENTRANT_PARSER
     if (sieve2_thread_count >= 1)
       {
@@ -88,14 +101,14 @@ int sieve2_thread_alloc(sieve2_thread_t **t)
     *t = (sieve2_thread_t *)thread;
 
 #ifdef REENTRANT_PARSER
-    addr_create(t);
-    sieve_create(t);
-    header_create(t);
+    libsieve_addr_create(t);
+    libsieve_sieve_create(t);
+    libsieve_header_create(t);
 #else
-    addrlexalloc();
-    sievelexalloc();
-    headerlexalloc();
-    headeryaccalloc();
+    libsieve_addrlexalloc();
+    libsieve_sievelexalloc();
+    libsieve_headerlexalloc();
+    libsieve_headeryaccalloc();
 #endif
 
     /* FIXME: This is not an atomic operation,
@@ -119,14 +132,14 @@ int sieve2_thread_free(sieve2_thread_t *t)
         /* FIXME: I'm not sure how to handle this. */;
 
 #ifdef REENTRANT_PARSER
-    addr_destroy(t);
-    sieve_destroy(t);
-    header_destroy(t);
+    libsieve_addr_destroy(t);
+    libsieve_sieve_destroy(t);
+    libsieve_header_destroy(t);
 #else
-    addrlexfree();
-    sievelexfree();
-    headerlexfree();
-    headeryaccfree();
+    libsieve_addrlexfree();
+    libsieve_sievelexfree();
+    libsieve_headerlexfree();
+    libsieve_headeryaccfree();
 #endif
 
     libsieve_free(t);
@@ -184,7 +197,7 @@ int sieve2_validate(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p)
 
     script->support = *support; /* Yes, really make a copy */
 
-    script->cmds = sieve_parse_buffer(script, script->char_array);
+    script->cmds = libsieve_sieve_parse_buffer(script, script->char_array);
     libsieve_free_tree(script->cmds);
     script->cmds = NULL;
 
@@ -226,7 +239,7 @@ int sieve2_execute(sieve2_thread_t *t, sieve2_script_t *s, sieve2_support_t *p,
 
     script->support = *support; /* Yes, really make a copy */
 
-    script->cmds = sieve_parse_buffer(script, script->char_array);
+    script->cmds = libsieve_sieve_parse_buffer(script, script->char_array);
     if (script->err > 0) {
         if (script->cmds) {
             libsieve_free_tree(script->cmds);
@@ -513,7 +526,15 @@ int sieve2_message_register(sieve2_message_t *m, void *thing, int type)
     return SIEVE2_OK;
 }
 
-const char *sieve2_listextensions(void)
+const char *sieve2_extensions_listconst(void)
+{
+    /* This is defined in interp.c */
+    extern const char *sieve_extensions;
+    return sieve_extensions;
+}
+
+/* Caller must free the return pointer */
+char *sieve2_extensions_listsupport(sieve2_support_t *p)
 {
     /* This is defined in interp.c */
     extern const char *sieve_extensions;

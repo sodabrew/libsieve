@@ -142,7 +142,7 @@ int message2_headercache(sieve2_message *m)
     char *err = NULL;
     header_list_t *hl = NULL, *hlfree;
 
-    if ((hl = header_parse_buffer(&hl, &m->header, &err)) == NULL) {
+    if ((hl = libsieve_header_parse_buffer(&hl, &m->header, &err)) == NULL) {
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_EXEC;
     }

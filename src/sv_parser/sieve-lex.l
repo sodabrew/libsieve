@@ -37,13 +37,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "sieve.h"
 
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = sieveinput(b, ms))
+#define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
 
-int sieveinput(char *buf, int max_size);
-extern int sieveerror(char *);
+int libsieve_sieveinput(char *buf, int max_size);
+extern int libsieve_sieveerror(char *);
 
-#define YY_FATAL_ERROR sievefatalerror
-void sievefatalerror(const char msg[]);
+#define YY_FATAL_ERROR libsieve_sievefatalerror
+void libsieve_sievefatalerror(const char msg[]);
 
 %}
 
@@ -62,18 +62,18 @@ CRLF		(\r\n|\r|\n)
 %%
 <MULTILINE>^\.{CRLF}	{ BEGIN INITIAL; }
 <MULTILINE>^\.\.	{ /* dot stuffing! we want one . */ yyless(1); }
-<MULTILINE>([^\.{CRLF}]|\n)+ { sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
+<MULTILINE>([^\.{CRLF}]|\n)+ { libsieve_sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
 			  return STRING; }
-<MULTILINE><<EOF>>	{ sieveerror("unexpected end of file in string"); 
+<MULTILINE><<EOF>>	{ libsieve_sieveerror("unexpected end of file in string"); 
 			  yyterminate(); }
 
 <QSTRING>\"		{ BEGIN INITIAL; }
-<QSTRING>([^\"]|\\\"|\n)+ { sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
+<QSTRING>([^\"]|\\\"|\n)+ { libsieve_sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
 			  return STRING; }
 
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ BEGIN MULTILINE; }
 <INITIAL>\"		{ BEGIN QSTRING; }
-<INITIAL>[0-9]+[KMG]?	{ sievelval.nval = libsieve_strtonum(yytext); return NUMBER; }
+<INITIAL>[0-9]+[KMG]?	{ libsieve_sievelval.nval = libsieve_strtonum(yytext); return NUMBER; }
 <INITIAL>if		return IF;
 <INITIAL>elsif		return ELSIF;
 <INITIAL>else		return ELSE;
@@ -131,34 +131,34 @@ CRLF		(\r\n|\r|\n)
 
 %%
 /* take input from sieve string provided by sieve parser */
-int sieveinput(char *buf, int max_size)
+int libsieve_sieveinput(char *buf, int max_size)
 {
-    extern char *sieveptr;	/* current position in sieve string */
+    extern char *libsieve_sieveptr;	/* current position in sieve string */
     size_t n;			/* number of characters to read from string */
 
-    n = strlen(sieveptr) < (size_t)max_size ? strlen(sieveptr) : max_size;
+    n = strlen(libsieve_sieveptr) < (size_t)max_size ? strlen(libsieve_sieveptr) : max_size;
     if (n > 0) {
-	memcpy(buf, sieveptr, n);
-	sieveptr += n;
+	memcpy(buf, libsieve_sieveptr, n);
+	libsieve_sieveptr += n;
     }
     return n;
 }
 
 /* Clean up after ourselves by free()ing the current buffer */
-void sievelexfree()
+void libsieve_sievelexfree()
 {
-    sieve_delete_buffer( YY_CURRENT_BUFFER );
+    libsieve_sieve_delete_buffer( YY_CURRENT_BUFFER );
 }
 
 /* Kind of a hack, but this sets up the file statics */
-void sievelexalloc()
+void libsieve_sievelexalloc()
 {
     /* Nothing to do here */
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
-void sievefatalerror(const char msg[])
+void libsieve_sievefatalerror(const char msg[])
 {
     /* Basically stop and don't do anything */
 }
