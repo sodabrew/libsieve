@@ -2436,7 +2436,7 @@ static int static_verify_address(const char *s)
     return 1;
 }
 
-static int static_verify_mailbox(const char *s __attribute__((unused)))
+static int static_verify_mailbox(const char *s UNUSED)
 {
     /* xxx if not a mailbox, call sieveerror */
     return 1;
@@ -2540,7 +2540,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
 #endif
 
 /* xxx is it ok to put this in an RFC822 header body? */
-static int static_ok_header(char *s __attribute__((unused)))
+static int static_ok_header(char *s UNUSED)
 {
     return 1;
 }

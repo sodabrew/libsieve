@@ -113,8 +113,7 @@ typedef enum {
 } address_part_t;
 
 int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker);
-char *libsieve_get_address(address_part_t addrpart, struct address **data, struct addr_marker **marker,
-		  int canon_domain);
+char *libsieve_get_address(address_part_t addrpart, struct addr_marker **marker, int canon_domain);
 int libsieve_free_address(struct address **data, struct addr_marker **marker);
 
 /* actions; return negative on failure.

@@ -568,7 +568,6 @@ int libsieve_parse_address(const char *header, struct address **data, struct add
 }
 
 char *libsieve_get_address(address_part_t addrpart,
-		  struct address **data __attribute__((unused)),
 		  struct addr_marker **marker,
 		  int canon_domain)
 {

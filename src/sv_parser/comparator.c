@@ -158,9 +158,9 @@ static int octet_matches(const char *pat, const char *text)
 }
 
 #ifdef ENABLE_REGEX
-static int octet_regex(const regex_t *pat, const char *text)
+static int octet_regex(const char *pat, const char *text)
 {
-    return (!regexec(pat, text, 0, NULL, 0));
+    return (!regexec((const regex_t *)pat, text, 0, NULL, 0));
 }
 #endif
 

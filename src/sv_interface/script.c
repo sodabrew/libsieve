@@ -185,8 +185,7 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 	
 	libsieve_parse_address(body[l], &data, &marker);
 	/* loop through each address in the header */
-	while (!found && ((addr = libsieve_get_address(ADDRESS_ALL, 
-					      &data, &marker, 1)) != NULL)) {
+	while (!found && ((addr = libsieve_get_address(ADDRESS_ALL, &marker, 1)) != NULL)) {
 	    if (!strcasecmp(addr, myaddr)) {
 		found = myaddr;
 		break;
@@ -199,7 +198,7 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 
 		/* is this address one of my addresses? */
 		libsieve_parse_address(sl->s, &altdata, &altmarker);
-		altaddr = libsieve_get_address(ADDRESS_ALL, &altdata, &altmarker, 1);
+		altaddr = libsieve_get_address(ADDRESS_ALL, &altmarker, 1);
 		if (!strcasecmp(addr, altaddr))
 		    found = sl->s;
 
@@ -251,11 +250,11 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
 		    char *val;
 
 		    libsieve_parse_address(body[l], &data, &marker);
-                    val = libsieve_get_address(addrpart, &data, &marker, 0);
+                    val = libsieve_get_address(addrpart, &marker, 0);
 		    while (val != NULL && !res) { 
 			/* loop through each address */
 			res |= t->u.ae.comp(pl->p, val);
-			val = libsieve_get_address(addrpart, &data, &marker, 0);
+			val = libsieve_get_address(addrpart, &marker, 0);
        		    }
 		    libsieve_free_address(&data, &marker);
 		}
@@ -453,7 +452,7 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 		    l = libsieve_call_getenvelope(i, m, buf, &body);
 		    if (body[0]) {
 			libsieve_parse_address(body[0], &data, &marker);
-			tmp = libsieve_get_address(ADDRESS_ALL, &data, &marker, 1);
+			tmp = libsieve_get_address(ADDRESS_ALL, &marker, 1);
 			myaddr = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
 			libsieve_free_address(&data, &marker);
 		    }
@@ -466,7 +465,7 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 		    /* we have to parse this address & decide whether we
 		       want to respond to it */
 		    libsieve_parse_address(body[0], &data, &marker);
-		    tmp = libsieve_get_address(ADDRESS_ALL, &data, &marker, 1);
+		    tmp = libsieve_get_address(ADDRESS_ALL, &marker, 1);
 		    reply_to = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
 		    libsieve_free_address(&data, &marker);
 

@@ -546,7 +546,10 @@ const char *sieve2_credits(void)
         " with many thanks to those who have helped to debug"
         " and to secure this fine piece of software."
      NL " " NL
-	" Specific thanks to:"
+        " Specific thanks to:"
+        " Timo Sirainen,"
+        " Oliver Tappe,"
+        " Brandon Knitter."
      NL " " NL
         " Portions of libSieve are based on the Sieve support"
         " of the Cyrus Email Server by Carnegie Mellon University."

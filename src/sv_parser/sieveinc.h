@@ -4,6 +4,12 @@
 #include "tree.h"
 #include "script.h"
 
+#if !defined(UNUSED) && defined(__GNUC__)
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED 
+#endif
+
 struct vtags {
     int days;
     stringlist_t *addresses;
