@@ -6,8 +6,6 @@
  *      FIXME: Copyright needed                           *
  **********************************************************/
 
-#define DEBUG 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
