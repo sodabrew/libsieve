@@ -1,0 +1,91 @@
+The bulk of code in this distribution is covered by an simple license from CMU.
+Some other parts of code are covered by an "advertising" license. Those parts
+will be replaced over time to create a non-advertised version of libSieve.
+
+New portions of code are copyrighted by the libSieve team, and contributions
+are assumed to have thier copyrights assigned to the libSieve team unless
+specifically stated otherwise. At this time, the 'libSieve team' is defined
+to be persons with CVS commit rights to the libSieve source code repository.
+
+Licensing for this libSieve distribution is currently held to be the union of
+the two licenses below, minus item 4 of the latter license, and with all
+references to CMU (in short or written out) replaced by 'The libSieve Team.'
+
+In the future, a more rigorous license may be adopted to apply to that and any
+later versions. Such a change would not be retroactive to this version at all.
+It should be understood that such a change is not in violation of the CMU
+licensing; to boil compliance with CMU terms to a nutshell:
+
+1. CMU has no fault for anything this software does or is used to do.
+2. The terms may not be removed from the source files unless all original CMU
+   code is also removed or replaced from said files.
+3. The distribution must include the advertising clause so long as any CMU
+   code contained in affected source files is not replaced or removed.
+
+Other than those three conditions, new licensing terms may be applied by the
+maintainers of this particular distribution and compilation of code.
+
+This is the simpler CMU license:
+/***********************************************************
+        Copyright 1998 by Carnegie Mellon University
+
+                      All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Carnegie Mellon
+University not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior
+permission.
+
+CARNEGIE MELLON UNIVERSITY DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL CARNEGIE MELLON UNIVERSITY BE LIABLE FOR
+ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+******************************************************************/
+
+This is the "annoying" CMU license:
+/*****************************************************************
+ * Copyright (c) 1998-2000 Carnegie Mellon University.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The name "Carnegie Mellon University" must not be used to
+ *    endorse or promote products derived from this software without
+ *    prior written permission. For permission or any other legal
+ *    details, please contact  
+ *      Office of Technology Transfer
+ *      Carnegie Mellon University
+ *      5000 Forbes Avenue
+ *      Pittsburgh, PA  15213-3890
+ *      (412) 268-4387, fax: (412) 268-7395
+ *      tech-transfer@andrew.cmu.edu
+ *
+ * 4. Redistributions of any form whatsoever must retain the following
+ *    acknowledgment:
+ *    "This product includes software developed by Computing Services
+ *     at Carnegie Mellon University (http://www.cmu.edu/computing/)."
+ *
+ * CARNEGIE MELLON UNIVERSITY DISCLAIMS ALL WARRANTIES WITH REGARD TO
+ * THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS, IN NO EVENT SHALL CARNEGIE MELLON UNIVERSITY BE LIABLE
+ * FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+ * AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+ * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ ****************************************************************/
