@@ -70,12 +70,6 @@ int sieve2_support_free(sieve2_support_t *p)
     return SIEVE2_OK;
 }
 
-int sieve2_support_bind(sieve2_support_t *p, sieve2_script_t *s)
-{
-    ((sieve_script_t *)s)->support = *(sieve_support_t *)p;
-    return SIEVE2_OK;
-}
-
 int sieve2_support_register(sieve2_support_t *p, int support)
 {
     sieve_support_t *q = (sieve_support_t *)p;
@@ -94,34 +88,62 @@ int sieve2_support_register(sieve2_support_t *p, int support)
     return SIEVE2_OK;
 }
 
+int sieve2_validate(sieve2_support_t *p, sieve2_script_t *s)
+{
+    sieve_script_t *t = (sieve_script_t *)s;
+    sieve_support_t *q = (sieve_support_t *)p;
+
+    t->support = *q; /* Yes, really make a copy */
+
+    t->cmds = sieve_parse_buffer(t, t->char_array);
+    free_tree(t->cmds);
+    t->cmds = NULL;
+
+    if (t->err > 0) {
+        return SIEVE2_ERROR_PARSE;
+    }
+
+    return SIEVE2_OK;
+}
+
 /* This is where we really do it:
  * run a script over a message to produce an action list
+ *
+ * Error codes:
+ * SIEVE2_ERROR_BADARG if any of the arguments are NULL
+ * SIEVE2_ERROR_PARSE for script parse errors
+ * SIEVE2_ERROR_EXEC for script evaluation errors
  */
-int sieve2_execute(sieve2_script_t *s, sieve2_message_t *m, sieve2_action_t *a)
+int sieve2_execute(sieve2_script_t *s, sieve2_message_t *m, sieve2_support_t *p, sieve2_action_t *a)
 {
     int ret;
     const char *errmsg = NULL;
-    sieve_script_t *r = (sieve_script_t *)s;
+    sieve_script_t *t = (sieve_script_t *)s;
     action_list_t *b = (action_list_t *)a;
+    sieve_support_t *q = (sieve_support_t *)p;
 
-    if (eval(&r->interp, r->cmds, m, b, &errmsg) < 0)
+    if (s == NULL || m == NULL ||
+        p == NULL || a == NULL) {
+        return SIEVE2_ERROR_BADARG;
+    }
+
+    t->support = *q; /* Yes, really make a copy */
+
+    t->cmds = sieve_parse_buffer(t, t->char_array);
+    if (t->err > 0) {
+        if (t->cmds) {
+            free_tree(t->cmds);
+        }
+        t->cmds = NULL;
+        return SIEVE2_ERROR_PARSE;
+    }
+
+    if (eval(&t->interp, t->cmds, m, b, &errmsg) < 0)
         ret = SIEVE2_ERROR_EXEC;
 
     ret = SIEVE2_OK;
 
     return ret;
-}
-
-int sieve2_notify_alloc(notify_list_t **n)
-{
-    notify_list_t *notify;
-
-    notify = new_notify_list();
-    if (notify == NULL)
-        return SIEVE2_ERROR_NOMEM;
-
-    *n = notify;
-    return SIEVE2_OK;
 }
 
 int sieve2_action_alloc(sieve2_action_t **in)
@@ -314,26 +336,22 @@ int sieve2_script_free(sieve2_script_t *s)
 }
 
 /* Given a script, produce an opaque struct holding the executable code */
+/* The internal structure to which these items have to be added
+ * is sieve_script in script.h. Make changes in both places!
+ * */
 int sieve2_script_register(sieve2_script_t *s, void *thing, int type)
 {
-    extern int sievelineno;
     sieve_script_t *t = (sieve_script_t *)s;
 
     if (thing == NULL)
         return SIEVE2_ERROR_EXEC;
 
+    t->err = 0;       /* Reset error count */
+    t->lineno = 1;    /* Reset line number */
+
     switch(type) {
         case SIEVE2_SCRIPT_CHAR_ARRAY:
-            t->err = 0;
-            sievelineno = 1;    /* reset line number */
-            t->cmds = sieve_parse_buffer(t, (char *)thing);
-            if (t->err > 0) {
-                if (t->cmds) {
-                    free_tree(t->cmds);
-                }
-                t->cmds = NULL;
-                return SIEVE2_ERROR_PARSE;
-            }
+            t->char_array = (char *)thing;
             break;
         case SIEVE2_SCRIPT_SIZE:
         case SIEVE2_SCRIPT_CALLBACK:

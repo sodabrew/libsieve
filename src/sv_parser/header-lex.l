@@ -45,12 +45,12 @@ void headerfatalerror(const char msg[]);
 ^[^\ \t\r\n]            {
                 BEGIN S_NAME;
                 sv_debugf( "Begin NAME\n" );
-                yyless();
+                yyless(0);
                 }
 ^[\ \t]                 {
                 BEGIN S_WRAP;
                 sv_debugf( "Begin WRAP (line started with whitespace)\n" );
-                yyless();
+                yyless(0);
                 }
 \r\n[\ \t]              {
                 BEGIN S_WRAP;

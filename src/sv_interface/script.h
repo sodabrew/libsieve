@@ -39,6 +39,17 @@ struct sieve_script {
     void *script_context;
     commandlist_t *cmds;
     int err;
+    int lineno;
+
+    /* The following must correspond
+     * to what is set in sieve2_script_register.
+     * Sieve 1 just ignores these variables.
+     * */
+    char *char_array;
+//    size_t size;
+//    void *callback;
+//    void *include_callback;
+//    FILE *file_pointer;
 };
 
 typedef struct sieve_imaponeflag {
