@@ -118,7 +118,7 @@ int headerinput(char *buf, int max)
 /* Clean up after ourselves by free()ing the current buffer */
 void headerlexfree()
 {
-    sv_strbuffree(&ml);
+    sv_strbuffree(&ml, FREEME);
     header_delete_buffer( YY_CURRENT_BUFFER );
 }
 

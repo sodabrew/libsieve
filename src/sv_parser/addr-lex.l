@@ -134,7 +134,7 @@ int addrinput(char *buf, int max)
 /* Clean up after ourselves by free()ing the current buffer */
 void addrlexfree()
 {
-    sv_strbuffree(&ml);
+    sv_strbuffree(&ml, FREEME);
     addr_delete_buffer( YY_CURRENT_BUFFER );
 }
 

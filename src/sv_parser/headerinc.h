@@ -13,4 +13,7 @@ void headererror(const char *str);
 int headerappend(header_list_t **hl);
 void headerentry(header_t *h, char *name, char *body);
 
+void headeryaccalloc(void);
+void headeryaccfree(void);
+
 #endif /* HEADERINC_H */

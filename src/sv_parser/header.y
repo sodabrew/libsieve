@@ -89,17 +89,13 @@ header_list_t *header_parse_buffer(header_list_t **data, char **ptr, char **err)
     if (headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
-    sv_strbufalloc(&ml);
-
     (const char *)headerptr = *ptr;
 
     if(headerparse()) {
-	sv_strbuffree(&ml);
+	sv_strbuffree(&ml, FREEME);
 	sv_debugf( "Parser ERROR: %s\n", headererr );
 	return NULL;
     }
-
-    sv_strbuffree(&ml);
 
     /* Get to the tail end... */
     newdata = *data;
@@ -153,7 +149,7 @@ void headerentry(header_t *h, char *name, char *body)
     sv_debugf( "Entering name and body into header struct\n" );
     if (h == NULL)
         sv_debugf( "Why are you giving me a NULL struct!?\n" );
-	/* Hmm, big big trouble here... */ ;
+	/* Hmm, big big trouble here... */;
 
     h->name = sv_strtolower(sv_strdup(name, strlen(name)), strlen(name));
     /* Looks like we don't need to make a copy here after all
@@ -165,5 +161,18 @@ void headerentry(header_t *h, char *name, char *body)
     /* This function is NOT designed for general purpose
      * entries, but only for making the very first entry!
      */
+}
+
+void headeryaccalloc()
+{
+    sv_strbufalloc(&ml);
+}
+
+void headeryaccfree()
+{
+    /* This must correspond to sieve2_messagecache
+     * knowing not to free its contents[] entries.
+     */
+    sv_strbuffree(&ml, FREEME);
 }
 

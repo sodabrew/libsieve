@@ -186,7 +186,7 @@ struct address *addr_parse_buffer(struct address **data, const char **ptr, char 
         */
         // FIXME: Make sure that this is sufficient cleanup
         addrstructfree(addr, CHARSALSO);
-        sv_strbuffree(&ml);
+        sv_strbuffree(&ml, FREEME);
         return NULL;
     }
 
@@ -202,7 +202,7 @@ struct address *addr_parse_buffer(struct address **data, const char **ptr, char 
      */
     newdata = addrstructcopy(addr->next, STRUCTONLY);
     addrstructfree(addr, STRUCTONLY);
-    sv_strbuffree(&ml);
+    sv_strbuffree(&ml, FREEME);
     /* This causes a segfault here...
      * but now it's been put much higher up and works
      * addrlexfree();

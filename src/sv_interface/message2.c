@@ -6,6 +6,8 @@
  *      FIXME: Copyright needed                           *
  **********************************************************/
 
+#define DEBUG 1
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -29,6 +31,13 @@
 
 /* sv_util */
 #include "util.h"
+
+/* This only works in C99 and higher... */
+#ifdef DEBUG
+#define sv_debugf(...) printf(__VA_ARGS__)
+#else
+#define sv_debugf(...) 
+#endif /* ifdef DEBUG */
 
 /* These functions interact with the Sieve 2 API's 
  * message struct. In the Sieve 1 API, these are all
@@ -54,7 +63,7 @@ int message2_getheader(sieve2_message *m, const char *chead, const char ***body)
 
     /* Make a non-const copy of the header */
     head = sv_strdup(chead, strlen(chead));
-    if( head == NULL )
+    if (head == NULL)
         return SIEVE2_ERROR_NOMEM;
 
     head = sv_strtolower(head, strlen(head));
@@ -91,13 +100,29 @@ int message2_getenvelope(sieve2_message *m, const char *chead, const char ***bod
 
 int message2_freecache(sieve2_message *m)
 {
-    int i;
+    int i, j;
 
-    /* Free the header hash hash entries */
+    /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            for (; m->hash[i]->space > 0; m->hash[i]->space--)
-                sv_free(m->hash[i]->contents[m->hash[i]->space]);
+            sv_debugf( "message2_freecache(): free()ing header: [%s]\n",
+                m->hash[i]->name );
+            /*
+	     * This memory is no longer free()d here,
+	     * but rather in headerlexfree() and headeryaccfree(),
+	     * both of which are called from sieve2_message_free() in script2.c!
+	     *
+            // * Skip the last count, since it is simply a terminating NULL * /
+            for (j = 0; j < m->hash[i]->count; j++)
+              {
+                // * Free each used entry in the contents array * /
+                sv_debugf( "message2_freecache(): free()ing count: [%d]\n",
+                    j );
+                sv_debugf( "message2_freecache(): free()ing entry: [%s]\n",
+                    m->hash[i]->contents[j] );
+                sv_free(m->hash[i]->contents[j]);
+              }
+            */
             sv_free(m->hash[i]->contents);
             sv_free(m->hash[i]->name);
         }
@@ -124,7 +149,7 @@ int message2_headercache(sieve2_message *m)
         return SIEVE2_ERROR_EXEC;
     }
 
-    while(hl != NULL) {
+    while (hl != NULL) {
         /* Get a hash number of the header name */
         cl = c = message2_hashheader(hl->h->name, m->hashsize);
         while (m->hash[c] != NULL && strcmp(hl->h->name, m->hash[c]->name) != 0) {
@@ -137,16 +162,17 @@ int message2_headercache(sieve2_message *m)
 
         if (m->hash[c]) {
             /* Looks like someone's already home */
-            if(m->hash[c]->count < m->hash[c]->space) {
+            if (m->hash[c]->count < m->hash[c]->space) {
                 /* We have room for one more header */
                 m->hash[c]->contents[m->hash[c]->count++] = hl->h->contents[0];
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
+                sv_debugf("message2_headercache(): Expanding hash for [%s]\n", hl->h->name);
                 /* Need to make some more space in here */
                 char **tmp;
-                tmp = sv_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
-                if(tmp == NULL)
+                tmp = (char **)sv_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
+                if (tmp == NULL)
                     return SIEVE2_ERROR_NOMEM;
                 else
                     m->hash[c]->contents = tmp;
@@ -155,6 +181,11 @@ int message2_headercache(sieve2_message *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             }
+          /* Since we're not using this header_t struct, free it.
+           * Note that we're not freeing each of contents, we need those. */
+          sv_free(hl->h->contents);
+          sv_free(hl->h->name);
+          sv_free(hl->h);
         } else {
             /* Make of copy of the pointer */
             m->hash[c] = hl->h;

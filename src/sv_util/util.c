@@ -191,43 +191,64 @@ char *sv_strconcat (const char *str, ...)
  * and in scope and is responsible for freeing mlbuf. */
 char *sv_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
 {
-    while(1 + ml->ce + len >= ml->sz) {
-        /* Loop until there's enough room to fit yytext */
-        ml->tmp = sv_realloc(ml->str, (ml->sz+=1024));
+    char *stmp; /* Temporary for a pointer */
+    char **sstmp; /* Temporary for a pointer to a pointer */
+
+    if (ml->pos + 1 >= ml->siz)
+      {
+        sstmp = (char **)sv_malloc(sizeof(char *) * (ml->siz += 200));
+        /* Point to the new memory */
+        if (sstmp != NULL)
+            ml->buf = sstmp;
         /* Get out of here if there's no memory */
-        if( ml->tmp != NULL )
-            ml->str = ml->tmp;
         else
             return NULL;
-    }
+      }
 
-    /* Advance the beginning cursor */
-    ml->cb = ml->ce;
-    /* Intentionally fail to copy the terminating NULL */
-    strncpy(ml->str + ml->cb, str, len);
-    /* Advance the ending cursor */
-    ml->ce += len + 1;
-    /* Since some strncpy()'s are broken and wouldn't have
-     * added NULL padding even if asked, do it explicitly */
-    *(ml->str + ml->ce) = '\0';
+    stmp = (char *)sv_strdup(str, len);
+    /* Point to the new memory */
+    if (stmp != NULL)
+        ml->buf[ml->pos] = stmp;
+    /* Get out of here if there's no memory */
+    else
+        return NULL;
+
+    /* Advance the pointer to the next free space */
+    ml->pos += 1;
+
+    /* NULL terminate it, too! */
+    ml->buf[ml->pos] = NULL;
 
     /* Free the incoming string, if requested */
-    if(freeme)
+    if (freeme)
         sv_free(str);
 
-    return (ml->str + ml->cb);
+    return ml->buf[ml->pos-1];
 }
 
-void sv_strbuffree(struct mlbuf **ml)
+void sv_strbuffree(struct mlbuf **ml, int freeall)
 {
-    sv_free((*ml)->str);
+    size_t i;
+
+    /* Loop through and free the allocated strings */
+    if (freeall)
+      {
+        for (i = 0; i < (*ml)->pos; i++)
+          {
+            sv_free((*ml)->buf[i]);
+          }
+      }
+    /* Free the buf array */
+    sv_free((*ml)->buf);
+    /* Free the mlbuf itself */
     sv_free((*ml));
+    /* NULLify the free()'d pointer */
     *ml = NULL;
 }
 
 void sv_strbufalloc(struct mlbuf **ml)
 {
     *ml = (struct mlbuf *)sv_malloc(sizeof(struct mlbuf));
-    (*ml)->str = (*ml)->tmp = NULL;
-    (*ml)->sz = (*ml)->ce = (*ml)->cb = 0;
+    (*ml)->buf = NULL;
+    (*ml)->siz = (*ml)->pos = 0;
 }

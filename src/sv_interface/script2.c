@@ -33,18 +33,22 @@
 #include "sieve.h"
 //#include "sieveinc.h"
 
-const char *sieve2_errstr(const int code)
+const char *sieve2_errstr(const int code, char **free)
 {
+    char *ret;
     /* Comes from the Sieve Parser */
     extern int sievelineno;
     extern char *sieveerr;
     char lineno[50];
+    *free = NULL;
     if( code == SIEVE2_ERROR_PARSE )
-        /* FIXME: this is a memory leak since
-         * the caller likely won't free it */
+        /* The caller must free free! */
         memset(lineno, 0, 50);
         snprintf(lineno, 49, "%d", sievelineno);
-        return sv_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
+        ret = sv_strconcat(sieve2_error_text[code], ": ", sieveerr, " on line ", lineno, NULL);
+	*free = ret;
+	sv_free(sieveerr);
+	return ret;
     return sieve2_error_text[code];
 }
 
@@ -348,6 +352,7 @@ int sieve2_message_alloc(sieve2_message_t **m)
     }
 
     headerlexalloc();
+    headeryaccalloc();
 
     *(sieve2_message **)m = n;
     return SIEVE2_OK;
@@ -356,6 +361,8 @@ int sieve2_message_alloc(sieve2_message_t **m)
 int sieve2_message_free(sieve2_message_t *m)
 {
     headerlexfree();
+    headeryaccfree();
+
     return message2_freecache((sieve2_message *)m);
 }
 
@@ -386,5 +393,48 @@ int sieve2_message_register(sieve2_message_t *m, void *thing, int type)
     }
 
     return SIEVE2_OK;
+}
+
+const char *sieve2_listextensions(void)
+{
+    /* This is defined in interp.c */
+    extern const char *sieve_extensions;
+    return sieve_extensions;
+}
+
+const char *sieve2_credits(void)
+{
+    return "libSieve is written and maintained by Aaron Stone
+with many thanks to those who have helped to debug
+and to secure this fine piece of software.
+Portions of libSieve are based on the Sieve support
+of the Cyrus Email Server by Carnegie Mellon University."
+           ;
+}
+
+const char *sieve2_license(void)
+{
+    return "libSieve is Copyright 2002, 2003 Aaron Stone, CA, USA
+and is licensed under the GNU General Public License,
+version 2 and (at the author's option, not yours)
+any later version. A copy of the license should have
+been distributed with libSieve, and if not, may be
+obtained by writing to the Free Software Foundation:
+Free Software Foundation, Inc.
+59 Temple Place, Suite 330
+Boston, MA  02111-1307  USA
+
+Portions based on the Sieve support of the
+Cyrus Email Server by Carnegie Mellon University
+are Copyright 1994, 1995, 1996 CMU, PA, USA.
+While CMU's license is not the GPL, it does not preclude such
+combination in a larger work, such as libSieve, in a manner
+which places the work as a whole under the GNU GPL.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details."
+           ;
 }
 
