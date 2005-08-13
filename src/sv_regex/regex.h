@@ -172,7 +172,7 @@ typedef unsigned long int reg_syntax_t;
    some interfaces).  When a regexp is compiled, the syntax used is
    stored in the pattern buffer, so changing this does not affect
    already-compiled regexps.  */
-extern reg_syntax_t re_syntax_options;
+extern reg_syntax_t libsieve_re_syntax_options;
 
 /* Define combinations of the above bits for the standard possibilities.
    (The [[[ comments delimit what gets put into the Texinfo file, so
@@ -451,7 +451,7 @@ typedef struct
 
 /* Sets the current default syntax to SYNTAX, and return the old syntax.
    You can also simply assign to the `re_syntax_options' variable.  */
-extern reg_syntax_t re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
+extern reg_syntax_t libsieve_re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
 
 /* Compile the regular expression PATTERN, with length LENGTH
    and syntax given by the global `re_syntax_options', into the buffer
@@ -464,7 +464,7 @@ extern const char *re_compile_pattern
 /* Compile a fastmap for the compiled pattern in BUFFER; used to
    accelerate searches.  Return 0 if successful and -2 if was an
    internal error.  */
-extern int re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
+extern int libsieve_re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
 
 
 /* Search in the string STRING (with length LENGTH) for the pattern
@@ -544,19 +544,19 @@ extern int re_exec _RE_ARGS ((const char *));
 #endif
 
 /* POSIX compatibility.  */
-extern int regcomp _RE_ARGS ((regex_t *__restrict __preg,
+extern int libsieve_regcomp _RE_ARGS ((regex_t *__restrict __preg,
 			      const char *__restrict __pattern,
 			      int __cflags));
 
-extern int regexec _RE_ARGS ((const regex_t *__restrict __preg,
+extern int libsieve_regexec _RE_ARGS ((const regex_t *__restrict __preg,
 			      const char *__restrict __string, size_t __nmatch,
 			      regmatch_t __pmatch[__restrict_arr],
 			      int __eflags));
 
-extern size_t regerror _RE_ARGS ((int __errcode, const regex_t *__preg,
+extern size_t libsieve_regerror _RE_ARGS ((int __errcode, const regex_t *__preg,
 				  char *__errbuf, size_t __errbuf_size));
 
-extern void regfree _RE_ARGS ((regex_t *__preg));
+extern void libsieve_regfree _RE_ARGS ((regex_t *__preg));
 
 
 #ifdef __cplusplus

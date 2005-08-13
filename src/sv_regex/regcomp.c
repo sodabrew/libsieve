@@ -212,7 +212,7 @@ const size_t __re_error_msgid_idx[] attribute_hidden =
    are set in BUFP on entry.  */
 
 const char *
-re_compile_pattern (pattern, length, bufp)
+libsieve_re_compile_pattern (pattern, length, bufp)
     const char *pattern;
     size_t length;
     struct re_pattern_buffer *bufp;
@@ -227,7 +227,7 @@ re_compile_pattern (pattern, length, bufp)
   /* Match anchors at newline.  */
   bufp->newline_anchor = 1;
 
-  ret = re_compile_internal (bufp, pattern, length, re_syntax_options);
+  ret = re_compile_internal (bufp, pattern, length, libsieve_re_syntax_options);
 
   if (!ret)
     return NULL;
@@ -242,7 +242,7 @@ weak_alias (__re_compile_pattern, re_compile_pattern)
    syntax, so it can be changed between regex compilations.  */
 /* This has no initializer because initialized variables in Emacs
    become read-only after dumping.  */
-reg_syntax_t re_syntax_options;
+reg_syntax_t libsieve_re_syntax_options;
 
 
 /* Specify the precise syntax of regexps for compilation.  This provides
@@ -253,12 +253,12 @@ reg_syntax_t re_syntax_options;
    defined in regex.h.  We return the old syntax.  */
 
 reg_syntax_t
-re_set_syntax (syntax)
+libsieve_re_set_syntax (syntax)
     reg_syntax_t syntax;
 {
-  reg_syntax_t ret = re_syntax_options;
+  reg_syntax_t ret = libsieve_re_syntax_options;
 
-  re_syntax_options = syntax;
+  libsieve_re_syntax_options = syntax;
   return ret;
 }
 #ifdef _LIBC
@@ -266,7 +266,7 @@ weak_alias (__re_set_syntax, re_set_syntax)
 #endif
 
 int
-re_compile_fastmap (bufp)
+libsieve_re_compile_fastmap (bufp)
     struct re_pattern_buffer *bufp;
 {
   re_dfa_t *dfa = (re_dfa_t *) bufp->buffer;
@@ -411,7 +411,7 @@ re_compile_fastmap_iter (bufp, init_state, fastmap)
    the return codes and their meanings.)  */
 
 int
-regcomp (preg, pattern, cflags)
+libsieve_regcomp (preg, pattern, cflags)
     regex_t *__restrict preg;
     const char *__restrict pattern;
     int cflags;
@@ -455,7 +455,7 @@ regcomp (preg, pattern, cflags)
   if (BE (ret == REG_NOERROR, 1))
     /* Compute the fastmap now, since regexec cannot modify the pattern
        buffer.  This function nevers fails in this implementation.  */
-    (void) re_compile_fastmap (preg);
+    (void) libsieve_re_compile_fastmap (preg);
   else
     {
       /* Some error occurred while compiling the expression.  */
@@ -473,7 +473,7 @@ weak_alias (__regcomp, regcomp)
    from either regcomp or regexec.   We don't use PREG here.  */
 
 size_t
-regerror (errcode, preg, errbuf, errbuf_size)
+libsieve_regerror (errcode, preg, errbuf, errbuf_size)
     int errcode;
     const regex_t *preg;
     char *errbuf;
@@ -575,7 +575,7 @@ free_dfa_content (re_dfa_t *dfa)
 /* Free dynamically allocated space used by PREG.  */
 
 void
-regfree (preg)
+libsieve_regfree (preg)
     regex_t *preg;
 {
   re_dfa_t *dfa = (re_dfa_t *) preg->buffer;
@@ -639,7 +639,7 @@ re_comp (s)
   /* Match anchors at newlines.  */
   re_comp_buf.newline_anchor = 1;
 
-  ret = re_compile_internal (&re_comp_buf, s, strlen (s), re_syntax_options);
+  ret = re_compile_internal (&re_comp_buf, s, strlen (s), libsieve_re_syntax_options);
 
   if (!ret)
     return NULL;

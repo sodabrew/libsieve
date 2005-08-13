@@ -208,7 +208,7 @@ static reg_errcode_t extend_buffers (re_match_context_t *mctx);
    We return 0 if we find a match and REG_NOMATCH if not.  */
 
 int
-regexec (preg, string, nmatch, pmatch, eflags)
+libsieve_regexec (preg, string, nmatch, pmatch, eflags)
     const regex_t *__restrict preg;
     const char *__restrict string;
     size_t nmatch;
@@ -259,7 +259,7 @@ weak_alias (__regexec, regexec)
    match was found and -2 indicates an internal error.  */
 
 int
-re_match (bufp, string, length, start, regs)
+libsieve_re_match (bufp, string, length, start, regs)
     struct re_pattern_buffer *bufp;
     const char *string;
     int length, start;
@@ -272,7 +272,7 @@ weak_alias (__re_match, re_match)
 #endif
 
 int
-re_search (bufp, string, length, start, range, regs)
+libsieve_re_search (bufp, string, length, start, range, regs)
     struct re_pattern_buffer *bufp;
     const char *string;
     int length, start, range;
@@ -285,7 +285,7 @@ weak_alias (__re_search, re_search)
 #endif
 
 int
-re_match_2 (bufp, string1, length1, string2, length2, start, regs, stop)
+libsieve_re_match_2 (bufp, string1, length1, string2, length2, start, regs, stop)
     struct re_pattern_buffer *bufp;
     const char *string1, *string2;
     int length1, length2, start, stop;
@@ -299,7 +299,7 @@ weak_alias (__re_match_2, re_match_2)
 #endif
 
 int
-re_search_2 (bufp, string1, length1, string2, length2, start, range, regs, stop)
+libsieve_re_search_2 (bufp, string1, length1, string2, length2, start, range, regs, stop)
     struct re_pattern_buffer *bufp;
     const char *string1, *string2;
     int length1, length2, start, range, stop;
@@ -383,7 +383,7 @@ re_search_stub (bufp, string, length, start, range, stop, regs, ret_len)
 
   /* Compile fastmap if we haven't yet.  */
   if (range > 0 && bufp->fastmap != NULL && !bufp->fastmap_accurate)
-    re_compile_fastmap (bufp);
+    libsieve_re_compile_fastmap (bufp);
 
   if (BE (bufp->no_sub, 0))
     regs = NULL;
@@ -521,7 +521,7 @@ re_copy_regs (regs, pmatch, nregs, regs_allocated)
    freeing the old data.  */
 
 void
-re_set_registers (bufp, regs, num_regs, starts, ends)
+libsieve_re_set_registers (bufp, regs, num_regs, starts, ends)
     struct re_pattern_buffer *bufp;
     struct re_registers *regs;
     unsigned num_regs;
@@ -553,7 +553,7 @@ int
 # ifdef _LIBC
 weak_function
 # endif
-re_exec (s)
+libsieve_re_exec (s)
      const char *s;
 {
   return 0 == regexec (&re_comp_buf, s, 0, NULL, 0);
