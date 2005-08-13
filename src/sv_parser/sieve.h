@@ -1,7 +1,7 @@
-/* A Bison parser, made by GNU Bison 1.875.  */
+/* A Bison parser, made by GNU Bison 1.875d.  */
 
 /* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 59 "sieve.y"
+#line 62 "sieve.y"
 typedef union YYSTYPE {
     int nval;
     char *sval;
@@ -156,8 +156,8 @@ typedef union YYSTYPE {
     struct ntags *ntag;
     struct dtags *dtag;
 } YYSTYPE;
-/* Line 1240 of yacc.c.  */
-#line 160 "y.tab.h"
+/* Line 1285 of yacc.c.  */
+#line 161 "sieve.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

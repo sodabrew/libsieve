@@ -35,13 +35,16 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 #include <ctype.h>
 
+/* sv_regex */
+#include "regex.h"
+
 /* sv_parser */
 #include "comparator.h"
 #include "sieveinc.h"
 #include "addrinc.h"
 
 /* sv_interface */
-#include "interp.h"
+#include "callbacks2.h"
 #include "script.h"
 #include "tree.h"
 
@@ -117,7 +120,7 @@ require: REQUIRE stringlist ';'	{
                                         s = sl;
                                         sl = sl->next;
 
-                                        i &= static_check_reqs(parse_script, s->s);
+                                        i &= static_check_reqs(parse_context, s->s);
                                         if (!i) {
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -154,12 +157,12 @@ elsif: /* empty */               { $$ = NULL; }
 	| ELSE block             { $$ = $2; }
 	;
 
-action: REJCT STRING             { if (!parse_script->support.reject) {
+action: REJCT STRING             { if (!parse_context->support.reject) {
 				     libsieve_sieveerror("reject not required");
 				     YYERROR;
 				   }
 				   $$ = libsieve_new_command(REJCT); $$->u.str = $2; }
-	| FILEINTO STRING	 { if (!parse_script->support.fileinto) {
+	| FILEINTO STRING	 { if (!parse_context->support.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
                                    }
@@ -176,7 +179,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
 	| KEEP			 { $$ = libsieve_new_command(KEEP); }
 	| STOP			 { $$ = libsieve_new_command(STOP); }
 	| DISCARD		 { $$ = libsieve_new_command(DISCARD); }
-	| VACATION vtags STRING  { if (!parse_script->support.vacation) {
+	| VACATION vtags STRING  { if (!parse_context->support.vacation) {
 				     libsieve_sieveerror("vacation not required");
 				     $$ = libsieve_new_command(VACATION);
 				     YYERROR;
@@ -184,7 +187,8 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
   				     $$ = static_build_vacation(VACATION,
 					    static_canon_vtags($2), $3);
 				   } }
-        | SETFLAG stringlist     { if (!parse_script->support.imapflags) {
+        | SETFLAG stringlist     { if (!parse_context->support.imapflags) {
+	// TODO: imap4flags.
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                    }
@@ -193,7 +197,8 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   }
                                   $$ = libsieve_new_command(SETFLAG);
                                   $$->u.sl = $2; }
-         | ADDFLAG stringlist     { if (!parse_script->support.imapflags) {
+         | ADDFLAG stringlist     { if (!parse_context->support.imapflags) {
+	 // TODO: imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
@@ -202,7 +207,8 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   }
                                   $$ = libsieve_new_command(ADDFLAG);
                                   $$->u.sl = $2; }
-         | REMOVEFLAG stringlist  { if (!parse_script->support.imapflags) {
+         | REMOVEFLAG stringlist  { if (!parse_context->support.imapflags) {
+	 // TODO: imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
@@ -211,18 +217,20 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
                                   }
                                   $$ = libsieve_new_command(REMOVEFLAG);
                                   $$->u.sl = $2; }
-         | MARK                   { if (!parse_script->support.imapflags) {
+         | MARK                   { if (!parse_context->support.imapflags) {
+	 // TODO: this isn't in imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
                                   $$ = libsieve_new_command(MARK); }
-         | UNMARK                 { if (!parse_script->support.imapflags) {
+         | UNMARK                 { if (!parse_context->support.imapflags) {
+	 // TODO: this isn't in imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
                                   $$ = libsieve_new_command(UNMARK); }
 
-         | NOTIFY ntags           { if (!parse_script->support.notify) {
+         | NOTIFY ntags           { if (!parse_context->support.notify) {
 				       libsieve_sieveerror("notify not required");
 				       $$ = libsieve_new_command(NOTIFY); 
 				       YYERROR;
@@ -230,7 +238,7 @@ action: REJCT STRING             { if (!parse_script->support.reject) {
 				      $$ = static_build_notify(NOTIFY,
 				             static_canon_ntags($2));
 				    } }
-         | DENOTIFY dtags         { if (!parse_script->support.notify) {
+         | DENOTIFY dtags         { if (!parse_context->support.notify) {
                                        libsieve_sieveerror("notify not required");
 				       $$ = libsieve_new_command(DENOTIFY);
 				       YYERROR;
@@ -402,12 +410,12 @@ htags: /* empty */		 { $$ = static_new_htags(); }
 addrparttag: ALL                 { $$ = ALL; }
 	| LOCALPART		 { $$ = LOCALPART; }
 	| DOMAIN                 { $$ = DOMAIN; }
-	| USER                   { if (!parse_script->support.subaddress) {
+	| USER                   { if (!parse_context->support.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
 				   $$ = USER; }
-	| DETAIL                { if (!parse_script->support.subaddress) {
+	| DETAIL                { if (!parse_context->support.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
@@ -417,7 +425,7 @@ addrparttag: ALL                 { $$ = ALL; }
 comptag: IS			 { $$ = IS; }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
-	| REGEX			 { if (!parse_script->support.regex) {
+	| REGEX			 { if (!parse_context->support.regex) {
 				     libsieve_sieveerror("regex not required");
 				     YYERROR;
 				   }
@@ -440,16 +448,16 @@ tests: test                      { $$ = libsieve_new_testlist($1, NULL); }
 char *libsieve_sieveptr;         /* pointer to sieve string for address lexer */
 char *libsieve_sieveerr;         /* buffer for sieve parser error messages */
 
-commandlist_t *libsieve_sieve_parse_buffer(sieve_script_t *script, char *b)
+commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
 {
     commandlist_t *t;
 
-    parse_script = script;
+    parse_context = context;
 
-    libsieve_sieveptr = b;
+    libsieve_sieveptr = context->script.script;
     libsieve_sieveerr = NULL;
-
-    /* These are being moved all the way up to script[2].c */
+    
+    /* These are being moved all the way up to script2.c */
     // addrlexalloc();
     // sievelexalloc();
     if (libsieve_sieveparse()) {
@@ -465,64 +473,26 @@ commandlist_t *libsieve_sieve_parse_buffer(sieve_script_t *script, char *b)
     }
 
     /* Free both lexers */
-    /* These are being moved all the way up to script[2].c */
+    /* These are being moved all the way up to script2.c */
     // sievelexfree();
     // addrlexfree();
     ret = NULL;
     return t;
 }
 
-commandlist_t *libsieve_sieve_parse(sieve_script_t *script, FILE *f)
-{
-    commandlist_t *t;
-    size_t f_pos = 0, f_len = 0;
-    char *f_buf;
-    char *tmp_buf;
-
-    f_buf = NULL; // If null, realloc() behaves as malloc()
-    while(!feof(f)) {
-        if( f_pos + 1 >= f_len ) {
-            tmp_buf = libsieve_realloc(f_buf, sizeof(char) * (f_len+=200));
-            if( tmp_buf )
-    	        f_buf = tmp_buf;
-            else
-                // Value may need tweaking to match commandlist_t
-                return 0;
-        }
-        f_buf[f_pos] = fgetc(f);
-        f_pos++;
-    }
-    // This is safe because of the f_pos + 1 above
-    f_buf[f_pos] = '\0';
-
-   t = libsieve_sieve_parse_buffer(script, f_buf);
-   libsieve_free(f_buf);
-
-   return t;
-}
-
 int libsieve_sieveerror(char *msg)
 {
     extern int libsieve_sievelineno;
-    char *tmperr;
-    int ret;
 
-    parse_script->err++;
-    /* We're in the Sieve 1 API */
-    if (parse_script->interp.err) {
-	ret = parse_script->interp.err(libsieve_sievelineno, msg, 
-				       parse_script->interp.interp_context,
-				       parse_script->script_context);
-    } else {
-    /* We're in the Sieve 2 API */
-        if( libsieve_sieveerr )
-            tmperr = libsieve_strconcat(libsieve_sieveerr, ", ", msg, NULL);
-        else
-            tmperr = libsieve_strconcat(msg, NULL);
-        if( tmperr )
-            libsieve_sieveerr = libsieve_strdup(tmperr, strlen(tmperr));
-        libsieve_free(tmperr);
-    }
+    parse_context->parse_errors++;
+
+    libsieve_callback_begin(parse_context, SIEVE2_ERROR_PARSE);
+
+    libsieve_setvalue_int(parse_context, "lineno", libsieve_sievelineno);
+    libsieve_setvalue_string(parse_context, "message", msg);
+
+    libsieve_callback_do(parse_context, SIEVE2_ERROR_PARSE);
+    libsieve_callback_end(parse_context, SIEVE2_ERROR_PARSE);
 
     return 0;
 }
@@ -683,13 +653,21 @@ static struct vtags *static_new_vtags(void)
 
 static struct vtags *static_canon_vtags(struct vtags *v)
 {
-    assert(parse_script->interp.vacation != NULL);
+/* TODO: Rewrite this. The deal here is that the client app
+ * might want to specify min_response and max_response days.
+ * libSieve should respect the client app's requests. For
+ * right now, we're going to just leave these along and let
+ * the script do whatever it wants. Eventually we need a 
+ * context registration for this, though. */
+//    assert(parse_script->interp.vacation != NULL);
 
     if (v->days == -1) { v->days = 7; }
+    /*
     if (v->days < parse_script->interp.vacation->min_response) 
        { v->days = parse_script->interp.vacation->min_response; }
     if (v->days > parse_script->interp.vacation->max_response)
        { v->days = parse_script->interp.vacation->max_response; }
+    */
     if (v->mime == -1) { v->mime = 0; }
 
     return v;
@@ -845,8 +823,8 @@ static regex_t *static_verify_regex(const char *s, int cflags)
     char errbuf[100];
     regex_t *reg = (regex_t *) libsieve_malloc(sizeof(regex_t));
 
-    if ((ret = regcomp(reg, s, cflags)) != 0) {
-	(void) regerror(ret, reg, errbuf, sizeof(errbuf));
+    if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
+	(void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
 	libsieve_sieveerror(errbuf);
 	libsieve_free(reg);
 	return NULL;
@@ -891,41 +869,42 @@ static int static_ok_header(char *s UNUSED)
  *
  * Checks if interpreter supports specified action
  * */
-static int static_check_reqs(sieve_script_t *s, char *req)
+static int static_check_reqs(struct sieve2_context *c, char *req)
 {
     if (0 == strcmp("fileinto", req)) {
-        if (s->interp.fileinto)
-	    s->support.fileinto = 1;
-        return s->support.fileinto;
+        if (c->callbacks.fileinto)
+	    c->support.fileinto = 1;
+        return c->support.fileinto;
     } else if (0 == strcmp("reject", req)) {
-        if (s->interp.reject)
-	    s->support.reject = 1;
-        return s->support.reject;
+        if (c->callbacks.reject)
+	    c->support.reject = 1;
+        return c->support.reject;
     } else if (!strcmp("envelope", req)) {
-	if (s->interp.getenvelope)
-	    s->support.envelope = 1;
-        return s->support.reject;
+	if (c->callbacks.getenvelope)
+	    c->support.envelope = 1;
+        return c->support.reject;
     } else if (!strcmp("vacation", req)) {
-	if (s->interp.vacation)
-	    s->support.vacation = 1;
-        return s->support.vacation;
+	if (c->callbacks.vacation)
+	    c->support.vacation = 1;
+        return c->support.vacation;
     } else if (!strcmp("imapflags", req)) {
-	if (s->interp.markflags->flag)
-	    s->support.imapflags = 1;
-        return s->support.imapflags;
+// TODO: Do this up for both imapflags and imap4flags.
+//	if (c->callbacks.markflags->flag)
+	    c->support.imapflags = 1;
+        return c->support.imapflags;
     } else if (!strcmp("notify",req)) {
-	if (s->interp.notify)
-	    s->support.notify = 1;
-        return s->support.notify;
+	if (c->callbacks.notify)
+	    c->support.notify = 1;
+        return c->support.notify;
 #ifdef ENABLE_REGEX
     /* If regex is enabled then it is supported! */
     } else if (!strcmp("regex", req)) {
-	s->support.regex = 1;
+	c->support.regex = 1;
 	return 1;
 #endif
     /* Subaddress support is built into the parser! */
     } else if (!strcmp("subaddress", req)) {
-	s->support.subaddress = 1;
+	c->support.subaddress = 1;
 	return 1;
     } else if (!strcmp("comparator-i;octet", req)) {
 	return 1;

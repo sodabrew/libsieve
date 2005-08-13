@@ -1,12 +1,15 @@
 %{
-/*
- * header-lex.l -- RFC 2/822 Header Lexer
+/* header-lex.l -- RFC 2/822 Header Lexer
  * Aaron Stone
  * $Id$
  */
-/***********************************************************
- *      FIXME: Needs Copyright                             *
- ***********************************************************/
+/* * * *
+ * Copyright 2005 by Aaron Stone
+ *
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
+
 
 /* Be sure to use double parens when calling! */
 #ifdef DEBUG

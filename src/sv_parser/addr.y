@@ -176,7 +176,7 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
 
     libsieve_strbufalloc(&ml);
 
-    (const char *)libsieve_addrptr = *ptr;
+    libsieve_addrptr = (char *)*ptr;
 
     /* This is now done higher up the call chain...
      * addrlexalloc();

@@ -1,12 +1,14 @@
 %{
-/*
- * header.y -- RFC 2/822 Header Parser
+/* header.y -- RFC 2/822 Header Parser
  * Aaron Stone
  * $Id$
  */
-/**********************************************************
-        FIXME: Needs Copyright
- **********************************************************/
+/* * * *
+ * Copyright 2005 by Aaron Stone
+ *
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,10 +97,11 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
-    (const char *)libsieve_headerptr = *ptr;
+    libsieve_headerptr = *ptr;
 
     if(libsieve_headerparse()) {
-	libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
+        libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
+        *err = libsieve_headererr;
         libsieve_free(hl->h->contents);
         libsieve_free(hl->h);
         libsieve_free(hl);

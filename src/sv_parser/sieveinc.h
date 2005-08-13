@@ -3,6 +3,7 @@
 
 #include "tree.h"
 #include "script.h"
+#include "context2.h"
 
 #if !defined(UNUSED) && defined(__GNUC__)
 #define UNUSED __attribute__((unused))
@@ -43,7 +44,8 @@ struct dtags {
 };
 
 static commandlist_t *ret;
-static sieve_script_t *parse_script;
+static struct sieve2_context *parse_context;
+
 static test_t *static_build_address(int t, struct aetags *ae,
 			     stringlist_t *sl, patternlist_t *pl);
 static test_t *static_build_header(int t, struct htags *h,
@@ -77,6 +79,6 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp);
 #endif
 static int static_ok_header(char *s);
 
-static int static_check_reqs(sieve_script_t *s, char *req);
+static int static_check_reqs(struct sieve2_context *context, char *req);
 
 #endif /* SIEVEINC_H */
