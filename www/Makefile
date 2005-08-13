@@ -14,3 +14,7 @@ structures.php: structures.txt common
 %.php: %.txt
 	$(ENGINE) $< > $@
 
+upload: Makefile code.css common.php example.php functions.php index.php license.php \
+	script1.php script2.php script3.php structures.php tweedy.tpl
+	scp $^ sodabrew@groups.sf.net:/home/groups/l/li/libsieve/htdocs/
+

@@ -24,7 +24,7 @@
 
  $smarty->assign( 'righttitle', 'stuff.' );
  $smarty->assign( 'rightlinks', array(
- 	array( 'example code', 'example1.php', 'Interfacing with your own code.' ),
+ 	array( 'example code', 'example.php', 'Interfacing with your own code.' ),
  	array( 'example scripts', 'script1.php', 'Some sample user scripts.' ),
  	array( 'license', 'license.php', 'Yes, there are license terms...' ),
 	) );

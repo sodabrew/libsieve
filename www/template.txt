@@ -14,6 +14,8 @@
 #define SP		&nbsp;
 #define TAB		SP SP
 #define H1(THE)		<h1>THE</h1>
+#define I(THE)		<i>THE</i>
+#define B(THE)		<b>THE</b>
 
 #define C_(CLASS,THE)	<font class=DQ(CLASS)>THE</font>
 #define C_ARG(THE)	C_(arg,THE)

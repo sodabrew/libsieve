@@ -13,19 +13,90 @@
 H1(Sieve 2 API: Structures)
 
 CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_action) C_TYPE(sieve2_action_t);
-BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error) C_TYPE(sieve2_error_t);
-BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_message) C_TYPE(sieve2_message_t);
-BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_script) C_TYPE(sieve2_script_t);
-BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_support) C_TYPE(sieve2_support_t);
-BR	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_interp) C_TYPE(sieve2_interp_t);
-	)
-These are the opaque types representing internal libSieve structures.
-Naturally, you shouldn&#39;t think too hard about these because they just are.
-Do be sure to use these types in your declarations and not simply void
-pointers, because you will lose type checking on your arguments.
+NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_context) C_TYPE(sieve2_context_t);
+BR TAB	C_QUAL(typedef) C_TYPE(int) C_FUNC((*sieve2_callback_func)) (
+BR TAB	C_QUAL(sieve2_context_t) * C_ARG(sieve2_context),
+BR TAB	C_QUAL(void) * C_ARG(user_data)
+BR	);
+BR
+BR	C_QUAL(typedef) C_QUAL(struct) {
+BR TAB	C_TYPE(sieve2_values_t) C_ARG(value);
+BR TAB	C_TYPE(sieve2_callback_func) C_ARG(func);
+BR	} C_TYPE(sieve2_callback_t);
+)
+
+P There is only one opaque type for you to worry about: sieve2_context_t.
+Everything that happens in an instance of the interpreter is contained
+inside of the context opaque structure.
+
+P There are three user-accessible data types: sieve2_values_t,
+sieve2_callback_func and sieve2_callback_t. These data types allow
+you to specify your callbacks, prototype your callback functions, and
+register your callbacks to their call codes, respectively.
 
 CODE	(
+NO	C_QUAL(typedef) C_TYPE(enum) {
+BR TAB	C_ARG(SIEVE2_VALUE_FIRST)
+BR
+BR TAB	C_ARG(SIEVE2_ACTION_REDIRECT)
+I(address)
+BR TAB	C_ARG(SIEVE2_ACTION_REJECT)
+I(message)
+BR TAB	C_ARG(SIEVE2_ACTION_DISCARD)
+I(none)
+BR TAB	C_ARG(SIEVE2_ACTION_FILEINTO)
+I(mailbox)
+BR TAB	C_ARG(SIEVE2_ACTION_KEEP)
+I(none)
+BR TAB	C_ARG(SIEVE2_ACTION_NOTIFY)
+I(bunch of these...)
+BR TAB	C_ARG(SIEVE2_ACTION_DENOTIFY)
+I(bunch of these...)
+BR TAB	C_ARG(SIEVE2_ACTION_VACATION)
+I(bunch of these...)
+BR TAB	C_ARG(SIEVE2_ACTION_SETFLAG)
+I(imapflags)
+BR TAB	C_ARG(SIEVE2_ACTION_ADDFLAG)
+I(imapflags)
+BR TAB	C_ARG(SIEVE2_ACTION_REMOVEFLAG)
+I(imapflags)
+BR TAB	C_ARG(SIEVE2_ACTION_MARK)
+I(none)
+BR TAB	C_ARG(SIEVE2_ACTION_UNMARK)
+I(none)
+
+BR
+BR TAB	C_ARG(SIEVE2_ERRCALL_RUNTIME)
+BR TAB TAB I(get: message. set: none.)
+BR TAB	C_ARG(SIEVE2_ERRCALL_PARSE)
+BR TAB TAB I(get: message lineno. set: none.)
+BR
+BR TAB	C_ARG(SIEVE2_SCRIPT_GETSCRIPT)
+BR TAB TAB I(get: name path. set: script.)
+BR TAB	C_ARG(SIEVE2_SCRIPT_GETSIZE)
+BR TAB TAB I(get: name path. set: size.)
+BR
+BR TAB	C_ARG(SIEVE2_MESSAGE_GETHEADER)
+BR TAB TAB I(get: header. set: body.)
+BR TAB	C_ARG(SIEVE2_MESSAGE_GETALLHEADERS)
+BR TAB TAB I(get: none. set: allheaders.)
+BR TAB	C_ARG(SIEVE2_MESSAGE_GETENVELOPE)
+BR TAB TAB I(get: env. set: from to.)
+BR TAB	C_ARG(SIEVE2_MESSAGE_GETSIZE)
+BR TAB TAB I(get: none. set: size.)
+BR TAB	C_ARG(SIEVE2_MESSAGE_GETBODY)
+BR TAB TAB I(get: none. set: body.)
+BR
+BR TAB	C_ARG(SIEVE2_VALUE_LAST)
+BR	} C_TYPE(sieve2_values_t);
+)
+
+P Each of these call codes can be registered to a callback function.
+When the callback function is called, it finds out the details of
+what is being asked of it using the functions sieve2_getvalue...()
+and responds with sieve2_setvalue...(). The value key names for
+each callback are listed in italics inlined into the enum above.
+
 NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_vacation_context) {
 BR	TAB    C_TYPE(int) C_ARG(min_response);		/* 0 -> defaults to 3 */
 BR	TAB    C_TYPE(int) C_ARG(max_response);		/* 0 -> defaults to 90 */
@@ -171,8 +242,7 @@ ENDOFPRE
  $smarty->assign( 'rightlinks', array(
  	array( 'API Functions', 'functions.php' ),
  	array( 'API Structures', 'structures.php' ),
- 	array( 'Usage Example 1', 'example1.php' ),
- 	array( 'Usage Example 2', 'example2.php' ),
+ 	array( 'Example App', 'example.php' ),
 	) );
 
  $smarty->display( 'tweedy.tpl' );
