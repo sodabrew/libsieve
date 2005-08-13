@@ -2,14 +2,12 @@
  * $Id$
  */
 
-/***********************************************************
- * Copyright 2003 libSieve Development Team by Aaron Stone
+/* * * *
+ * Copyright 2003, 2005 by Aaron Stone
  *
- * Licensed under LPGL and CMU's "MIT style" license.
- *
- * This is an original work modelled after CMU concepts.
- * It does not contain code written by or derived from CMU.
- ***********************************************************/
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #ifndef SIEVE2_ERROR_H
 #define SIEVE2_ERROR_H
@@ -23,15 +21,17 @@
 #define SIEVE2_ERROR_INTERNAL          6
 #define SIEVE2_ERROR_NOMEM             7
 #define SIEVE2_ERROR_UNSUPPORTED       8
-#define SIEVE2_ERROR_BADARG	       9
+#define SIEVE2_ERROR_BADARGS	       9
 #define SIEVE2_ERROR_NOINTERPS         10
 #define SIEVE2_ERROR_HEADER            11
+#define SIEVE2_ERROR_GETSCRIPT         12
+#define SIEVE2_ERROR_LAST              13
 
 static const char * const sieve2_error_text[] = {
-    "Sieve OK: no trouble at all",
-    "Sieve DONE: did that already",
-    "Sieve Error: generic error",
-    "Sieve Error: interpreter not ready",
+    "Sieve OK",
+    "Sieve DONE",
+    "Sieve Error: unspecified error",
+    "Sieve Error: incomplete callbacks",
     "Sieve Error: parse error",
     "Sieve Error: execution error",
     "Sieve Error: internal error",
@@ -40,6 +40,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: incorrect argument passed",
     "Sieve Error: no more interpreters available",
     "Sieve Error: header could not be parsed",
+    "Sieve Error: script was not retrieved",
     NULL
 };
 
