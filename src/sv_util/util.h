@@ -1,15 +1,12 @@
 /* util.h -- utility routines for useful things
  * $Id$
  */
-
-/***********************************************************
- * Copyright 2003 libSieve Development Team by Aaron Stone
+/* * * *
+ * Copyright 2005 by Aaron Stone
  *
- * Licensed under LPGL and CMU's "MIT style" license.
- *
- * This is an original work modelled after CMU concepts.
- * It does not contain code written by or derived from CMU.
- ***********************************************************/
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #ifndef INCLUDED_UTIL_H
 #define INCLUDED_UTIL_H
