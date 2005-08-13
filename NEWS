@@ -1,3 +1,12 @@
+libSieve 2.1.7
+--------------
+
+- Rewrote the API again. I finally like it.
+
+- Settled on the LGPL for all of my new code.
+
+- Documentation updated for the new API.
+
 libSieve 2.1.6
 --------------
 
