@@ -124,7 +124,7 @@ void libsieve_free_pl(patternlist_t *pl, int comptag)
 	if (pl->p) {
 #ifdef ENABLE_REGEX
 	    if (comptag == REGEX) {
-		regfree((regex_t *) pl->p);
+		libsieve_regfree((regex_t *) pl->p);
 	    }
 #endif
 	    libsieve_free(pl->p);
@@ -231,7 +231,7 @@ void libsieve_free_tree(commandlist_t *cl)
 	    if (cl->u.d.pattern) {
 #ifdef ENABLE_REGEX
 		if (cl->u.d.comptag == REGEX) {
-		    regfree((regex_t *) cl->u.d.pattern);
+		    libsieve_regfree((regex_t *) cl->u.d.pattern);
 		}
 #endif
 		libsieve_free(cl->u.d.pattern);

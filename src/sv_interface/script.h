@@ -28,39 +28,11 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SIEVE_SCRIPT_H
 #define SIEVE_SCRIPT_H
 
-#include "sieve_interface.h"
-#include "message.h"
-#include "interp.h"
 #include "tree.h"
+#include "sieve2.h"
+#include "context2.h"
 
-struct sieve_script {
-    sieve_interp_t interp;
-    sieve_support_t support;
-    void *script_context;
-    commandlist_t *cmds;
-    int err;
-    int lineno;
-
-    /* The following must correspond
-     * to what is set in sieve2_script_register.
-     * Sieve 1 just ignores these variables.
-     * */
-    char *char_array;
-//    size_t size;
-//    void *callback;
-//    void *include_callback;
-//    FILE *file_pointer;
-};
-
-typedef struct sieve_imaponeflag {
-    char *flag;
-} sieve_imaponeflag_t;
-
-int libsieve_call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val);
-int libsieve_call_getsize(sieve_interp_t *i, void *m, int *sz);
-int libsieve_call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c);
-int libsieve_eval(sieve_interp_t *i, commandlist_t *c, 
-		void *m, action_list_t *actions,
-		const char **errmsg);
+int libsieve_eval(struct sieve2_context *context,
+		commandlist_t *c, const char **errmsg);
 
 #endif /* SIEVE_SCRIPT_H */

@@ -2,9 +2,12 @@
  * Aaron Stone
  * $Id$
  */
-/**********************************************************
- *      FIXME: Copyright needed                           *
- **********************************************************/
+/* * * *
+ * Copyright 2003, 2005 by Aaron Stone
+ *
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -15,14 +18,13 @@
 /* strlen() */
 #include <string.h>
 
-/* sv_include */
-#include "sieve2_interface.h"
-
 /* sv_parser */
 #include "headerinc.h"
 
 /* sv_interface */
 #include "message2.h"
+#include "context2.h"
+#include "callbacks2.h"
 
 /* sv_util */
 #include "util.h"
@@ -34,90 +36,32 @@
 #define libsieve_debugf(ARGS) 
 #endif /* ifdef DEBUG */
 
-/* These functions interact with the Sieve 2 API's 
- * message struct. In the Sieve 1 API, these are all
- * callbacks and the client program is free to define
- * the structure any which way. Here, the structure is
- * defined and the functions are internal to libSieve. */
-
-/* Plaes the size of the entire message in sz */
-int libsieve_message2_getsize(sieve2_message *m, int *sz)
+static int hashheader(char *header, int hashsize)
 {
-    return m->size;
-    return SIEVE2_OK;
-}
+    int x = 0;
 
-/* Places the contents of the header specified by chead into body */
-int libsieve_message2_getheader(sieve2_message *m, const char *chead, const char ***body)
-{
-    int c, cl;
-    char *head = NULL;
-
-    /* Make sure there's nothing in the way */
-    *body = NULL;
-
-    /* Make a non-const copy of the header */
-    head = libsieve_strdup(chead, strlen(chead));
-    if (head == NULL)
-        return SIEVE2_ERROR_NOMEM;
-
-    head = libsieve_strtolower(head, strlen(head));
-
-    /* Get a hash number of the header name */
-    cl = c = libsieve_message2_hashheader(head, m->hashsize);
-    while (m->hash[c] != NULL) {
-        if (strcmp(head, m->hash[c]->name) == 0) {
-            *body = (const char **) m->hash[c]->contents;
-            break;
-        }
-        c++;
-        c %= m->hashsize;
-        /* If we've skipped back to the beginning,
-         * give up and we'll just realloc a larger space */
-        if (c == cl) break;
+    /* Any char except ' ', :, or a cntrl char */
+    for (; !iscntrl(*header) && (*header != ' ') && (*header != ':'); header++) {
+        x *= 256;
+        x += *header;
+        x %= hashsize;
     }
 
-    libsieve_free(head);
-
-    if (*body) {
-        return SIEVE2_OK;
-    } else {
-        return SIEVE2_ERROR_FAIL;
-    }
+    return x;
 }
 
-/* Get the envelope sender from the message struct and put it into body */
-int libsieve_message2_getenvelope(sieve2_message *m, const char *chead, const char ***body)
-{
-    (const char **)body = m->envelope;
-    return SIEVE2_OK;
-}
-
-int libsieve_message2_freecache(sieve2_message *m)
+static int freecache(sieve2_message_t *m)
 {
     int i; /*, j; */
 
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            libsieve_debugf(( "libsieve_message2_freecache(): free()ing header: [%s]\n",
+            libsieve_debugf(( "freecache(): free()ing header: [%s]\n",
                 m->hash[i]->name ));
-            /*
-	     * This memory is no longer free()d here,
-	     * but rather in headerlexfree() and headeryaccfree(),
-	     * both of which are called from sieve2_message_free() in script2.c!
-	     *
-            // * Skip the last count, since it is simply a terminating NULL * /
-            for (j = 0; j < m->hash[i]->count; j++)
-              {
-                // * Free each used entry in the contents array * /
-                libsieve_debugf(( "libsieve_message2_freecache(): free()ing count: [%d]\n",
-                    j ));
-                libsieve_debugf(( "libsieve_message2_freecache(): free()ing entry: [%s]\n",
-                    m->hash[i]->contents[j] ));
-                libsieve_free(m->hash[i]->contents[j]);
-              }
-            */
+	    /* The individual contents were allocated by the lex/yacc parser,
+	     * and so they are freed by headerlexfree() and headeryaccfree().
+	     * */
             libsieve_free(m->hash[i]->contents);
             libsieve_free(m->hash[i]->name);
         }
@@ -129,27 +73,62 @@ int libsieve_message2_freecache(sieve2_message *m)
     return SIEVE2_OK;
 }
 
+int libsieve_message2_alloc(sieve2_message_t **m)
+{
+    int i;
+    sieve2_message_t *n = NULL;
+
+    n = (sieve2_message_t *)libsieve_malloc(sizeof(sieve2_message_t));
+    if (n == NULL)
+        return SIEVE2_ERROR_NOMEM;
+
+    n->hash = (header_t **)libsieve_malloc(sizeof(header_t) * HEADERHASHSIZE);
+    if (n->hash == NULL) {
+        /* No leaking just because there's no memory! */
+        libsieve_free(n);
+        return SIEVE2_ERROR_NOMEM;
+    }
+    n->hashfull = 0;
+    n->hashsize = HEADERHASHSIZE;
+    for (i = 0; i < HEADERHASHSIZE; i++) {
+        n->hash[i] = NULL;
+    }
+
+    *(sieve2_message_t **)m = n;
+    return SIEVE2_OK;
+}
+
+int libsieve_message2_free(sieve2_message_t **m)
+{
+    int res;
+
+    if (m) 
+        res = freecache(*m);
+
+    *m = NULL;
+
+    return res;
+}
+
 /* This function takes the header in m->message and 
  * then uses the header parser to work at filling
  * the header hash in m->hash
  */
-int libsieve_message2_headercache(sieve2_message *m)
+int libsieve_message2_parseheader(sieve2_message_t *m)
 {
     size_t c, cl;
     char *err = NULL;
-    extern char *libsieve_headererr;
     header_list_t *hl = NULL, *hlfree;
 
     if ((hl = libsieve_header_parse_buffer(&hl, &m->header, &err)) == NULL) {
-        /* TODO: Deglobalize this! FIXME: Do something useful with it! */
-        libsieve_free(libsieve_headererr);
+        libsieve_free(err);
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_EXEC;
     }
 
     while (hl != NULL) {
         /* Get a hash number of the header name */
-        cl = c = libsieve_message2_hashheader(hl->h->name, m->hashsize);
+        cl = c = hashheader(hl->h->name, m->hashsize);
         while (m->hash[c] != NULL && strcmp(hl->h->name, m->hash[c]->name) != 0) {
             c++;
             c %= m->hashsize;
@@ -166,7 +145,7 @@ int libsieve_message2_headercache(sieve2_message *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                libsieve_debugf(("libsieve_message2_headercache(): Expanding hash for [%s]\n", hl->h->name));
+                libsieve_debugf(("libsieve_message2_parseheader(): Expanding hash for [%s]\n", hl->h->name));
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
@@ -199,17 +178,57 @@ int libsieve_message2_headercache(sieve2_message *m)
     return SIEVE2_OK;
 }
 
-int libsieve_message2_hashheader(char *header, int hashsize)
+/* Places the contents of the header specified by chead into body */
+static int getheader(sieve2_message_t *m, const char *chead, const char ***body)
 {
-    int x = 0;
+    int c, cl;
+    char *head = NULL;
 
-    /* Any char except ' ', :, or a ctrl char */
-    for (; !iscntrl(*header) && (*header != ' ') && (*header != ':'); header++) {
-        x *= 256;
-        x += *header;
-        x %= hashsize;
+    /* Make sure there's nothing in the way */
+    *body = NULL;
+
+    /* Make a local copy of the header */
+    head = libsieve_strdup(chead, strlen(chead));
+    if (head == NULL)
+        return SIEVE2_ERROR_NOMEM;
+
+    head = libsieve_strtolower(head, strlen(head));
+
+    /* Get a hash number of the header name */
+    cl = c = hashheader(head, m->hashsize);
+    while (m->hash[c] != NULL) {
+        if (strcmp(head, m->hash[c]->name) == 0) {
+            *body = (const char **) m->hash[c]->contents;
+            break;
+        }
+        c++;
+        c %= m->hashsize;
+        /* If we've skipped back to the beginning,
+         * give up; we'll throw an error below. */
+        if (c == cl) break;
     }
 
-    return x;
+    libsieve_free(head);
+
+    if (*body) {
+        return SIEVE2_OK;
+    } else {
+        return SIEVE2_ERROR_FAIL;
+    }
+}
+
+/* Emulate the user getheader callback. */
+int libsieve_message2_getheader(struct sieve2_context *c, void *user_data)
+{
+    int res;
+    const char *header, **body;
+
+    header = libsieve_getvalue_string(c, "header");
+
+    res = getheader(c->message, header, &body);
+
+    libsieve_setvalue_stringlist(c, "body", body);
+
+    return res;
 }
 

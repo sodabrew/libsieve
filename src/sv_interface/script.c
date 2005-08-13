@@ -39,13 +39,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "md5.h"
 
 /* sv_include */
-#include "sieve_interface.h"
-#include "sieve2_interface.h"
+#include "sieve2.h"
 
 /* sv_interface */
 #include "message.h"
 #include "message2.h"
-#include "interp.h"
+#include "callbacks2.h"
+#include "context2.h"
 #include "script.h"
 #include "sieve.h"
 #include "tree.h"
@@ -55,100 +55,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* sv_parser */
 #include "parser.h"
-
-/* given an interpretor and a script, produce an executable script */
-/* this one takes the script in as a char array rather than a FILE */
-int sieve_script_buffer(sieve_interp_t *interp, char *script,
-		       void *script_context, sieve_script_t **ret)
-{
-    sieve_script_t *s;
-    int res = SIEVE_OK;
-    extern int libsieve_sievelineno;
-
-    res = libsieve_interp_verify(interp);
-    if (res != SIEVE_OK) {
-	return res;
-    }
-
-    s = (sieve_script_t *) libsieve_malloc(sizeof(sieve_script_t));
-    s->interp = *interp;
-    s->script_context = script_context;
-    /* clear all support bits */
-    memset(&s->support, 0, sizeof(struct sieve_support));
-
-    s->err = 0;
-
-    /* These used to be in sieve.y, but needed to be higher */
-    libsieve_addrlexalloc();
-    libsieve_sievelexalloc();
-    libsieve_sievelineno = 1;		/* reset line number */
-    s->cmds = libsieve_sieve_parse_buffer(s, script);
-    if (s->err > 0) {
-	if (s->cmds) {
-	    libsieve_free_tree(s->cmds);
-	}
-	s->cmds = NULL;
-	res = SIEVE_PARSE_ERROR;
-    }
-
-    *ret = s;
-    return res;
-}
-
-/* given an interpretor and a script, produce an executable script */
-/* this one takes the script in as a FILE rather than a char array */
-int sieve_script_parse(sieve_interp_t *interp, FILE *script,
-		       void *script_context, sieve_script_t **ret)
-{
-    sieve_script_t *s;
-    int res = SIEVE_OK;
-    extern int libsieve_sievelineno;
-
-    res = libsieve_interp_verify(interp);
-    if (res != SIEVE_OK) {
-	return res;
-    }
-
-    s = (sieve_script_t *) libsieve_malloc(sizeof(sieve_script_t));
-    s->interp = *interp;
-    s->script_context = script_context;
-    /* clear all support bits */
-    memset(&s->support, 0, sizeof(struct sieve_support));
-
-    s->err = 0;
-
-    /* These used to be in sieve.y, but needed to be higher */
-    libsieve_addrlexalloc();
-    libsieve_sievelexalloc();
-    libsieve_sievelineno = 1;		/* reset line number */
-    s->cmds = libsieve_sieve_parse(s, script);
-    if (s->err > 0) {
-	if (s->cmds) {
-	    libsieve_free_tree(s->cmds);
-	}
-	s->cmds = NULL;
-	res = SIEVE_PARSE_ERROR;
-    }
-
-    *ret = s;
-    return res;
-}
-
-int sieve_script_free(sieve_script_t **s)
-{
-    if (*s) {
-	if ((*s)->cmds) {
-	    libsieve_free_tree((*s)->cmds);
-	}
-	libsieve_free(*s);
-    }
-    
-    /* These used to be in sieve.y, but needed to be higher */
-    libsieve_addrlexfree();
-    libsieve_sievelexfree();
-
-    return SIEVE_OK;
-}
 
 static int sysaddr(char *addr)
 {
@@ -171,7 +77,7 @@ static int sysaddr(char *addr)
 }
 
 /* look for myaddr and myaddrs in the body of a header - return the match */
-static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
+static char *look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 {
     char *found = NULL;
     int l;
@@ -213,7 +119,7 @@ static char* look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 
 /* evaluates the test t. returns 1 if true, 0 if false.
  */
-static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
+static int static_evaltest(struct sieve2_context *context, test_t *t)
 {
     testlist_t *tl;
     stringlist_t *sl;
@@ -238,10 +144,12 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
 
 	    /* use getheader for address, getenvelope for envelope */
 	    if (((t->type == ADDRESS) ? 
-		   libsieve_call_getheader(i, m, sl->s, &body) :
-		   libsieve_call_getenvelope(i, m, sl->s, &body)) != SIEVE_OK) {
+		   libsieve_do_getheader(context, sl->s, &body) :
+		   libsieve_do_getenvelope(context, sl->s, &body)) != SIEVE2_OK) {
 		continue; /* try next header */
 	    }
+	    /* The header wasn't found? */
+//	    if (!body) continue;
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; body[l] != NULL && !res; l++) {
 		    /* loop through each header */
@@ -264,20 +172,20 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
     case ANYOF:
 	res = 0;
 	for (tl = t->u.tl; tl != NULL && !res; tl = tl->next) {
-	    res |= static_evaltest(i, tl->t, m);
+	    res |= static_evaltest(context, tl->t);
 	}
 	break;
     case ALLOF:
 	res = 1;
 	for (tl = t->u.tl; tl != NULL && res; tl = tl->next) {
-	    res &= static_evaltest(i, tl->t, m);
+	    res &= static_evaltest(context, tl->t);
 	}
 	break;
     case EXISTS:
 	res = 1;
 	for (sl = t->u.sl; sl != NULL && res; sl = sl->next) {
 	    const char **headbody = NULL;
-	    res &= (libsieve_call_getheader(i, m, sl->s, &headbody) == SIEVE_OK);
+	    res &= (libsieve_do_getheader(context, sl->s, &headbody) == SIEVE2_OK);
 	}
 	break;
     case SFALSE:
@@ -291,8 +199,10 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
 	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
 	    const char **val;
 	    size_t l;
-	    if (libsieve_call_getheader(i, m, sl->s, &val) != SIEVE_OK)
+	    if (libsieve_do_getheader(context, sl->s, &val) != SIEVE2_OK)
 		continue;
+	    /* The header wasn't found? */
+//	    if (!val) continue;
 	    for (pl = t->u.h.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; val[l] != NULL && !res; l++) {
 		    res |= t->u.h.comp(pl->p, val[l]);
@@ -301,13 +211,13 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
 	}
 	break;
     case NOT:
-	res = !static_evaltest(i, t->u.t, m);
+	res = !static_evaltest(context, t->u.t);
 	break;
     case SIZE:
     {
 	int sz;
 
-	if (libsieve_call_getsize(i, m, &sz) != SIEVE_OK)
+	if (libsieve_do_getsize(context, &sz) != SIEVE2_OK)
 	    break;
 
 	if (t->u.sz.t == OVER) {
@@ -322,63 +232,13 @@ static int static_evaltest(sieve_interp_t *i, test_t *t, void *m)
     return res;
 }
 
-/* If i is a version 1 interpreter, call the getheader callback
- * otherwise find the header information in the message struct */
-/* call to this function used to be...
- * if (i->getheader(m, sl->s, &val) != SIEVE_OK) */
-int libsieve_call_getheader(sieve_interp_t *i, void *m, const char *s, const char ***val)
-{
-    if(i->getheader != NULL) {
-        i->getheader(m, s, val);
-    } else {
-        libsieve_message2_getheader(m, s, val);
-    }
-    if(*val == NULL)
-        return SIEVE_DONE;
-    return SIEVE_OK;
-}
-
-/* If i is a version 1 interpreter, call the getsize callback
- * otherwise find the size information in the message struct */
-/* calls to this function used to be...
- * if (i->getsize(m, &sz) != SIEVE_OK) */
-int libsieve_call_getsize(sieve_interp_t *i, void *m, int *sz)
-{
-    if(i->getsize != NULL) {
-        i->getsize(m, sz);
-    } else {
-        libsieve_message2_getsize(m, sz);
-    }
-    if(sz < 0)
-        return SIEVE_DONE;
-    return SIEVE_OK;
-}
-
-/* If i is a version 1 interpreter, call the getenvelope callback
- * otherwise find the envelope information in the message struct */
-/* calls to this function used to be...
- * if (i->getenvelope(m, f, &c) != SIEVE_OK) */
-int libsieve_call_getenvelope(sieve_interp_t *i, void *m, const char *f, const char ***c)
-{
-    if(i->getenvelope != NULL) {
-        i->getenvelope(m, f, c);
-    } else {
-        libsieve_message2_getenvelope(m, f, c);
-    }
-    if(*c == NULL)
-        return SIEVE_DONE;
-    return SIEVE_OK;
-}
-
 /* evaluate the script c.  returns negative if error was encountered,
    0 if it exited off the end, or positive if a stop action was encountered.
-
    note that this is very stack hungry; we just evaluate the AST in
    the naivest way.  if we implement some sort of depth limit, we'll
    be ok here; otherwise we'd want to transform it a little smarter */
-int libsieve_eval(sieve_interp_t *i, commandlist_t *c, 
-		void *m, action_list_t *actions,
-		const char **errmsg)
+int libsieve_eval(struct sieve2_context *context,
+                  commandlist_t *c, const char **errmsg)
 {
     int res = 0;
     stringlist_t *sl;
@@ -386,29 +246,29 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
     while (c != NULL) {
 	switch (c->type) {
 	case IF:
-	    if (static_evaltest(i, c->u.i.t, m))
-		res = libsieve_eval(i, c->u.i.do_then, m, actions, errmsg);
+	    if (static_evaltest(context, c->u.i.t))
+		res = libsieve_eval(context, c->u.i.do_then, errmsg);
 	    else
-		res = libsieve_eval(i, c->u.i.do_else, m, actions, errmsg);
+		res = libsieve_eval(context, c->u.i.do_else, errmsg);
 	    break;
 	case REJCT:
-	    res = libsieve_do_reject(actions, c->u.str);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_reject(context, c->u.str);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Reject can not be used with any other action";
 	    break;
 	case FILEINTO:
-	    res = libsieve_do_fileinto(actions, c->u.str, &i->curflags);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_fileinto(context, c->u.str, &context->imapflags);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Fileinto can not be used with Reject";
 	    break;
 	case REDIRECT:
-	    res = libsieve_do_redirect(actions, c->u.str);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_redirect(context, c->u.str);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Redirect can not be used with Reject";
 	    break;
 	case KEEP:
-	    res = libsieve_do_keep(actions, &i->curflags);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_keep(context, &context->imapflags);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Keep can not be used with Reject";
 	    break;
 	case VACATION:
@@ -418,38 +278,38 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 		char *found = NULL;
 		char *myaddr = NULL;
 		char *reply_to = NULL;
-		int l = SIEVE_OK;
+		int l = SIEVE2_OK;
 		struct address *data = NULL;
 		struct addr_marker *marker = NULL;
 		char *tmp;
 
 		/* is there an Auto-Submitted keyword other than "no"? */
 		strcpy(buf, "auto-submitted");
-		if (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK) {
+		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (*body[0] && isspace((int) *body[0])) body[0]++;
-		    if (strcasecmp(body[0], "no")) l = SIEVE_DONE;
+		    if (strcasecmp(body[0], "no")) l = SIEVE2_DONE;
 		}
 
 		/* is there a Precedence keyword of "junk | bulk | list"? */
 		strcpy(buf, "precedence");
-		if (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK) {
+		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (*body[0] && isspace((int) *body[0])) body[0]++;
 		    if (!strcasecmp(body[0], "junk") ||
 			!strcasecmp(body[0], "bulk") ||
 			!strcasecmp(body[0], "list"))
-			l = SIEVE_DONE;
+			l = SIEVE2_DONE;
 		}
 
 		/* Note: the domain-part of all addresses are canonicalized */
 
 		/* grab my address from the envelope */
-		if (l == SIEVE_OK) {
+		if (l == SIEVE2_OK) {
 		    strcpy(buf, "to");
-		    l = libsieve_call_getenvelope(i, m, buf, &body);
+		    l = libsieve_do_getenvelope(context, buf, &body);
 		    if (body[0]) {
 			libsieve_parse_address(body[0], &data, &marker);
 			tmp = libsieve_get_address(ADDRESS_ALL, &marker, 1);
@@ -457,11 +317,11 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 			libsieve_free_address(&data, &marker);
 		    }
 		}
-		if (l == SIEVE_OK) {
+		if (l == SIEVE2_OK) {
 		    strcpy(buf, "from");
-		    l = libsieve_call_getenvelope(i, m, buf, &body);
+		    l = libsieve_do_getenvelope(context, buf, &body);
 		}
-		if (l == SIEVE_OK && body[0]) {
+		if (l == SIEVE2_OK && body[0]) {
 		    /* we have to parse this address & decide whether we
 		       want to respond to it */
 		    libsieve_parse_address(body[0], &data, &marker);
@@ -471,48 +331,48 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 
 		    /* first, is there a reply-to address? */
 		    if (reply_to == NULL) {
-			l = SIEVE_DONE;
+			l = SIEVE2_DONE;
 		    }
 
 		    /* first, is it from me? */
-		    if (l == SIEVE_OK && !strcmp(myaddr, reply_to)) {
-			l = SIEVE_DONE;
+		    if (l == SIEVE2_OK && !strcmp(myaddr, reply_to)) {
+			l = SIEVE2_DONE;
 		    }
 
 		    /* ok, is it any of the other addresses i've
 		       specified? */
-		    if (l == SIEVE_OK)
+		    if (l == SIEVE2_OK)
 			for (sl = c->u.v.addresses; sl != NULL; sl = sl->next)
 			    if (!strcmp(sl->s, reply_to))
-				l = SIEVE_DONE;
+				l = SIEVE2_DONE;
 		
 		    /* ok, is it a system address? */
-		    if (l == SIEVE_OK && sysaddr(reply_to)) {
-			l = SIEVE_DONE;
+		    if (l == SIEVE2_OK && sysaddr(reply_to)) {
+			l = SIEVE2_DONE;
 		    }
 		}
 
-		if (l == SIEVE_OK) {
+		if (l == SIEVE2_OK) {
 		    /* ok, we're willing to respond to the sender.
 		       but is this message to me?  that is, is my address
 		       in the TO, CC or BCC fields? */
 		    if (strcpy(buf, "to"), 
-			libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)
+			libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found && (strcpy(buf, "cc"),
-				   (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)))
+				   (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found && (strcpy(buf, "bcc"),
-				   (libsieve_call_getheader(i, m, buf, &body) == SIEVE_OK)))
+				   (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found)
-			l = SIEVE_DONE;
+			l = SIEVE2_DONE;
 		}
 
-		if (l == SIEVE_OK) {
+		if (l == SIEVE2_OK) {
 		    /* ok, ok, if we got here maybe we should reply */
 		
 		    if (c->u.v.subject == NULL) {
@@ -520,7 +380,7 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 			const char **s;
 		    
 			strcpy(buf, "subject");
-			if (libsieve_call_getheader(i, m, buf, &s) != SIEVE_OK ||
+			if (libsieve_do_getheader(context, buf, &s) != SIEVE2_OK ||
 			    s[0] == NULL) {
 			    strcpy(buf, "Automated reply");
 			} else {
@@ -541,17 +401,17 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 		    /* who do we want the message coming from? */
 		    fromaddr = found;
 		
-		    res = libsieve_do_vacation(actions, reply_to,
+		    res = libsieve_do_vacation(context, reply_to,
 				      libsieve_strdup(fromaddr, strlen(fromaddr)),
 				      libsieve_strdup(buf, strlen(buf)),
 				      c->u.v.message, c->u.v.days, c->u.v.mime);
 		
-		     if (res == SIEVE_RUN_ERROR)
+		     if (res == SIEVE2_ERROR_EXEC)
 			 *errmsg = "Vacation can not be used with Reject or Vacation";
 
 		} else {
                     libsieve_free(reply_to);
-		    if (l != SIEVE_DONE) res = -1; /* something went wrong */
+		    if (l != SIEVE2_DONE) res = -1; /* something went wrong */
 		}
 		libsieve_free(myaddr);
 		break;
@@ -560,48 +420,48 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 	    res = 1;
 	    break;
 	case DISCARD:
-	    res = libsieve_do_discard(actions);
+	    res = libsieve_do_discard(context);
 	    break;
 	case SETFLAG:
 	    sl = c->u.sl;
-	    res = libsieve_do_setflag(actions, sl->s);
+	    res = libsieve_do_setflag(context, sl->s);
 	    for (sl = sl->next; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_addflag(actions, sl->s);
+		res = libsieve_do_addflag(context, sl->s);
 	    }
-	    if (res == SIEVE_RUN_ERROR)
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Setflag can not be used with Reject";
 	    break;
 	case ADDFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_addflag(actions, sl->s);
+		res = libsieve_do_addflag(context, sl->s);
 	    }
-	    if (res == SIEVE_RUN_ERROR)
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Addflag can not be used with Reject";
 	    break;
 	case REMOVEFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_removeflag(actions, sl->s);
+		res = libsieve_do_removeflag(context, sl->s);
 	    }
-	    if (res == SIEVE_RUN_ERROR)
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Removeflag can not be used with Reject";
 	    break;
 	case MARK:
-	    res = libsieve_do_mark(actions);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_mark(context);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Mark can not be used with Reject";
 	    break;
 	case UNMARK:
-	    res = libsieve_do_unmark(actions);
-	    if (res == SIEVE_RUN_ERROR)
+	    res = libsieve_do_unmark(context);
+	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Unmark can not be used with Reject";
 	    break;
 	case NOTIFY:
-	    res = libsieve_do_notify(actions, c->u.n.id, c->u.n.method,
+	    res = libsieve_do_notify(context, c->u.n.id, c->u.n.method,
 			    c->u.n.options, c->u.n.priority, c->u.n.message);
 			    
 	    break;
 	case DENOTIFY:
-	    res = libsieve_do_denotify(actions, c->u.d.comp, c->u.d.pattern,
+	    res = libsieve_do_denotify(context, c->u.d.comp, c->u.d.pattern,
 			      c->u.d.priority);
 	    break;
 
@@ -619,17 +479,16 @@ int libsieve_eval(sieve_interp_t *i, commandlist_t *c,
 
 #define GROW_AMOUNT 100
 
-static void add_header(sieve_interp_t *i, int isenv, char *header, 
-		       void *message_context, char **out, 
-		       size_t *outlen, size_t *outalloc)
+static void add_header(struct sieve2_context *c, int isenv, char *header, 
+		       char **out, size_t *outlen, size_t *outalloc)
 {
     const char **h;
     int addlen;
     /* get header value */
     if (isenv)
-	libsieve_call_getenvelope(i, message_context, header, &h);	
+	libsieve_do_getenvelope(c, header, &h);	
     else
-	libsieve_call_getheader(i, message_context, header, &h);	
+	libsieve_do_getheader(c, header, &h);	
 
     if (!h || !h[0])
 	return;
@@ -649,7 +508,14 @@ static void add_header(sieve_interp_t *i, int isenv, char *header,
     *outlen += addlen;
 }
 
-static int fillin_headers(sieve_interp_t *i, char *msg, 
+    /* This seems to be the only relevant thing to keep 
+     * from this whole mess of notify functions...
+     * But it looks like its tied closely to the message_context,
+     * which is something that was in Cyrus but is gone in libSieve.
+    fillin_headers(context, notify->message, message_context, 
+		   &out_msg, &out_msglen);
+   */
+static int fillin_headers(struct sieve2_context *i, char *msg, 
 			  void *message_context, char **out, size_t *outlen)
 {
     size_t allocsize = GROW_AMOUNT;
@@ -660,22 +526,22 @@ static int fillin_headers(sieve_interp_t *i, char *msg,
     *outlen = 0;
     (*out)[0]='\0';
 
-    if (msg == NULL) return SIEVE_OK;
+    if (msg == NULL) return SIEVE2_OK;
 
     /* construct the message */
     c = msg;
     while (*c) {
 	/* expand variables */
 	if (!strncasecmp(c, "$from$", 6)) {
-	    add_header(i, 0 ,"From", message_context, out, outlen, &allocsize);
+	    add_header(i, 0 ,"From", out, outlen, &allocsize);
 	    c += 6;
 	}
 	else if (!strncasecmp(c, "$env-from$", 10)) {
-	    add_header(i, 1, "From", message_context, out, outlen, &allocsize);
+	    add_header(i, 1, "From", out, outlen, &allocsize);
 	    c += 10;
 	}
 	else if (!strncasecmp(c, "$subject$", 9)) {
-	    add_header(i, 0, "Subject", message_context, out, outlen, &allocsize);
+	    add_header(i, 0, "Subject", out, outlen, &allocsize);
 	    c += 9;
 	}
 	/* XXX need to do $text$ variables */
@@ -695,7 +561,7 @@ static int fillin_headers(sieve_interp_t *i, char *msg,
 	}
     }
 
-    return SIEVE_OK;
+    return SIEVE2_OK;
 }
 
 static int sieve_addflag(sieve_imapflags_t *imapflags, char *flag)
@@ -717,7 +583,7 @@ static int sieve_addflag(sieve_imapflags_t *imapflags, char *flag)
 	imapflags->flag[imapflags->nflags-1] = libsieve_strdup(flag, strlen(flag));
     }
  
-    return SIEVE_OK;
+    return SIEVE2_OK;
 }
 
 static int sieve_removeflag(sieve_imapflags_t *imapflags, char *flag)
@@ -743,54 +609,7 @@ static int sieve_removeflag(sieve_imapflags_t *imapflags, char *flag)
 			       imapflags->nflags*sizeof(char *));
     }
  
-    return SIEVE_OK;
-}
-
-static int send_notify_callback(sieve_script_t *s, void *message_context, 
-				notify_list_t *notify, char *actions_string,
-				const char **errmsg)
-{
-    sieve_notify_context_t nc;
-    char *out_msg;
-    size_t out_msglen;
-    int ret;
-
-    assert(notify->isactive);
-
-    nc.method = notify->method;
-    nc.options = notify->options;
-    nc.priority = notify->priority;
-
-    fillin_headers(&(s->interp), notify->message, message_context, 
-		   &out_msg, &out_msglen);
-
-    nc.message = libsieve_malloc(out_msglen + strlen(actions_string) + 30);
-
-    strcpy(nc.message, out_msg);
-    strcat(nc.message, "\n\n");
-    libsieve_free(out_msg);
-
-    strcat(nc.message,actions_string);
-
-    ret = s->interp.notify(&nc,
-			   s->interp.interp_context,
-			   s->script_context,
-			   message_context,
-			   errmsg);    
-
-    /* Not to worry, libsieve_free_notify_list() does this for us.
-    if (nc.options) {
-	char **opts = nc.options;
-	while (opts && *opts) {
-	    libsieve_free(*opts);
-	    opts++;
-	}
-	libsieve_free(nc.options);
-    }
-    */
-    libsieve_free(nc.message);
-
-    return ret;
+    return SIEVE2_OK;
 }
 
 static char *action_to_string(action_t action)
@@ -816,22 +635,6 @@ static char *action_to_string(action_t action)
     return "Error!";
 }
 
-static char *sieve_errstr(int code)
-{
-    switch (code)
-	{
-	case SIEVE_FAIL: return "Generic Error";
-	case SIEVE_NOT_FINALIZED: return "Sieve not finalized";
-	case SIEVE_PARSE_ERROR: return "Parse error";
-	case SIEVE_RUN_ERROR: return "Run error";
-	case SIEVE_INTERNAL_ERROR: return "Internal Error";
-	case SIEVE_NOMEM: return "No memory";
-	default: return "Unknown error";
-	}
-
-    return "Error!";
-}
-
 #define HASHSIZE 16
 
 static int makehash(unsigned char hash[HASHSIZE], char *s1, char *s2)
@@ -843,290 +646,6 @@ static int makehash(unsigned char hash[HASHSIZE], char *s1, char *s2)
     libsieve_MD5Update(&ctx, s2, strlen(s2));
     libsieve_MD5Final(hash, &ctx);
 
-    return SIEVE_OK;
+    return SIEVE2_OK;
 }
 
-/* execute a script on a message, producing side effects via callbacks.
-   it is the responsibility of the caller to save a message if this
-   returns anything but SIEVE_OK. */
-int sieve_execute_script(sieve_script_t *s, void *message_context)
-{
-    int ret = 0;
-    int implicit_keep = 0;
-    action_list_t *actions = NULL, *a;
-    action_t lastaction = ACTION_NULL;
-    char actions_string[4096] = "";
-    const char *errmsg = NULL;
-
-    actions = libsieve_new_action_list();
-    if (actions == NULL) {
-	ret = SIEVE_NOMEM;
-	goto error;
-    }
- 
-    if (libsieve_eval(&s->interp, s->cmds, message_context, actions, &errmsg) < 0)
-	return SIEVE_RUN_ERROR;
-  
-    strcpy(actions_string,"Action(s) taken:\n");
-  
-    /* now perform actions attached to m */
-    a = actions;
-    implicit_keep = 1;
-    while (a != NULL) {
-	lastaction = a->a;
-	errmsg = NULL;
- 
-	switch (a->a) {
-	case ACTION_REJECT:
-	    implicit_keep = 0;
-	    if (!s->interp.reject)
-		return SIEVE_INTERNAL_ERROR;
-	    ret = s->interp.reject(a->u,
-				   s->interp.interp_context,
-				   s->script_context,
-				   message_context,
-				   &errmsg);
-	    
-	    if (ret == SIEVE_OK)
-		snprintf(actions_string+strlen(actions_string),
-			 sizeof(actions_string)-strlen(actions_string), 
-			 "Rejected with: %s\n", ((sieve_reject_context_t *)(a->u))->msg);
-	    libsieve_free((sieve_reject_context_t *)(a->u));
-	    break;
-
-	case ACTION_FILEINTO:
-	    implicit_keep = 0;
-	    if (!s->interp.fileinto)
-		return SIEVE_INTERNAL_ERROR;
-	    ret = s->interp.fileinto(a->u,
-				     s->interp.interp_context,
-				     s->script_context,
-				     message_context,
-				     &errmsg);
-
-	    if (ret == SIEVE_OK)
-		snprintf(actions_string+strlen(actions_string),
-			 sizeof(actions_string)-strlen(actions_string),
-			 "Filed into: %s\n",((sieve_fileinto_context_t *)(a->u))->mailbox);
-	    libsieve_free((sieve_fileinto_context_t *)(a->u));
-	    break;
-
-	case ACTION_KEEP:
-	    implicit_keep = 0;
-	    if (!s->interp.keep)
-		return SIEVE_INTERNAL_ERROR;
-	    ret = s->interp.keep(a->u,
-				 s->interp.interp_context,
-				 s->script_context,
-				 message_context,
-				 &errmsg);
-	    if (ret == SIEVE_OK)
-		snprintf(actions_string+strlen(actions_string),
-			 sizeof(actions_string)-strlen(actions_string),
-			 "Kept\n");
-	    break;
-
-	case ACTION_REDIRECT:
-	    implicit_keep = 0;
-	    if (!s->interp.redirect)
-		return SIEVE_INTERNAL_ERROR;
-	    ret = s->interp.redirect(a->u,
-				     s->interp.interp_context,
-				     s->script_context,
-				     message_context,
-				     &errmsg);
-	    if (ret == SIEVE_OK)
-		snprintf(actions_string+strlen(actions_string),
-			 sizeof(actions_string)-strlen(actions_string),
-			 "Redirected to %s\n", ((sieve_redirect_context_t *)(a->u))->addr);
-	    libsieve_free((sieve_redirect_context_t *)(a->u));
-	    break;
-
-	case ACTION_DISCARD:
-	    implicit_keep = 0;
-	    if (s->interp.discard) /* discard is optional */
-		ret = s->interp.discard(NULL, s->interp.interp_context,
-					s->script_context,
-					message_context,
-					&errmsg);
-	    if (ret == SIEVE_OK)
-		snprintf(actions_string+strlen(actions_string),
-			 sizeof(actions_string)-strlen(actions_string),
-			 "Discarded\n");
-	    break;
-
-	case ACTION_VACATION:
-	    {
-		unsigned char hash[HASHSIZE];
-
-		if (!s->interp.vacation)
-		    return SIEVE_INTERNAL_ERROR;
-
-		/* first, let's figure out if we should respond to this */
-		ret = makehash(hash, ((sieve2_vacation_context_t *)(a->u))->send.addr,
-			       ((sieve2_vacation_context_t *)(a->u))->send.msg);
-		if (ret == SIEVE_OK) {
-		    ((sieve2_vacation_context_t *)(a->u))->check.hash = hash;
-		    ((sieve2_vacation_context_t *)(a->u))->check.len = HASHSIZE;
-		    ret = s->interp.vacation->autorespond(&((sieve2_vacation_context_t *)(a->u))->check,
-							  s->interp.interp_context,
-							  s->script_context,
-							  message_context,
-							  &errmsg);
-		}
-		if (ret == SIEVE_OK) {
-		    /* send the response */
-		    ret = s->interp.vacation->send_response(&((sieve2_vacation_context_t *)(a->u))->send,
-							    s->interp.interp_context,
-							    s->script_context, 
-							    message_context,
-							    &errmsg);
-
-		    if (ret == SIEVE_OK)
-			snprintf(actions_string+strlen(actions_string),
-				 sizeof(actions_string)-strlen(actions_string),
-				 "Sent vacation reply\n");
-
-		} else if (ret == SIEVE_DONE) {
-		    snprintf(actions_string+strlen(actions_string),
-			     sizeof(actions_string)-strlen(actions_string),
-			     "Vacation reply suppressed\n");
-
-		    ret = SIEVE_OK;
-		}
-	    
-		break;
-	    }
-
- 
-	case ACTION_SETFLAG:
-	    libsieve_free_imapflags(&s->interp.curflags);
-	    ret = sieve_addflag(&s->interp.curflags, ((sieve_imaponeflag_t *)(a->u))->flag);
-	    break;
-	case ACTION_ADDFLAG:
-	    ret = sieve_addflag(&s->interp.curflags, ((sieve_imaponeflag_t *)(a->u))->flag);
-	    break;
-	case ACTION_REMOVEFLAG:
-	    ret = sieve_removeflag(&s->interp.curflags, ((sieve_imaponeflag_t *)(a->u))->flag);
-	    break;
-	case ACTION_MARK:
-	    {
-		int n = s->interp.markflags->nflags;
-
-		ret = SIEVE_OK;
-		while (n && ret == SIEVE_OK) {
-		    ret = sieve_addflag(&s->interp.curflags,
-					s->interp.markflags->flag[--n]);
-		}
-		break;
-	    }
-	case ACTION_UNMARK:
-	    {
-		int n = s->interp.markflags->nflags;
-
-		ret = SIEVE_OK;
-		while (n && ret == SIEVE_OK) {
-		    ret = sieve_removeflag(&s->interp.curflags,
-					   s->interp.markflags->flag[--n]);
-		}
-		break;
-	    }
-        case ACTION_NOTIFY:
-            {
-                /* Process notify actions */
-                if (s->support.notify) {
-                    notify_list_t *n_top = (notify_list_t *)(a->u);
-                    notify_list_t *n = n_top;
-                    int notify_ret = SIEVE_OK;
-      
-                    while (n != NULL) {
-                        if (n->isactive) {
-                    	lastaction = ACTION_NOTIFY;
-                    	notify_ret = send_notify_callback(s, message_context, n,
-                    					  actions_string, &errmsg);
-                    	ret |= notify_ret;
-                        }
-                        n = n->next;
-                    }
-      
-                    libsieve_free_notify_list(n_top);
-		    libsieve_free(n_top);     /* The very top isn't free()ed above.*/
-                    n_top = NULL;       /* Don't try any notifications again */
-      
-                    if (notify_ret != SIEVE_OK) {
-                        goto error;	/* Process the notify error */
-                    }
-                }
-            }
- 
-	case ACTION_NONE:
-	    break;
-
-	default:
-	    ret = SIEVE_INTERNAL_ERROR;
-	    break;
-	}
-
-	a = a->next;
-
-	if (ret != SIEVE_OK) {
-	    /* uh oh! better bail! */
-	    break;
-	}
-    }
-
- error: /* report run-time errors */
- 
-    if (ret != SIEVE_OK) {
-	if (lastaction == ACTION_NULL) /* we never executed an action */
-	    snprintf(actions_string+strlen(actions_string),
-		     sizeof(actions_string)-strlen(actions_string),
-		     "script execution failed: %s\n",
-		     errmsg ? errmsg : sieve_errstr(ret));
-	else
-	    snprintf(actions_string+strlen(actions_string),
-		     sizeof(actions_string)-strlen(actions_string),
-		     "%s action failed: %s\n",
-		     action_to_string(lastaction),
-		     errmsg ? errmsg : sieve_errstr(ret));
-    }
- 
-    if ((ret != SIEVE_OK) && s->interp.err) {
-	char buf[1024];
-	if (lastaction == -1) /* we never executed an action */
-            snprintf(buf, sizeof(buf), "%s",
-                     errmsg ? errmsg : sieve_errstr(ret));
-        else
-	    snprintf(buf, sizeof(buf), "%s: %s", action_to_string(lastaction),
-                     errmsg ? errmsg : sieve_errstr(ret));
- 
-	ret |= s->interp.execute_err(buf, s->interp.interp_context,
-				     s->script_context, message_context);
-    }
-
-    if (implicit_keep) {
-	sieve_keep_context_t keep_context;
-	int keep_ret;
-
-	implicit_keep = 0;	/* don't try an implicit keep again */
-
-	keep_context.imapflags = &s->interp.curflags;
- 
-	lastaction = ACTION_KEEP;
-	keep_ret = s->interp.keep(&keep_context, s->interp.interp_context,
-			     s->script_context, message_context, &errmsg);
-	ret |= keep_ret;
-        if (keep_ret == SIEVE_OK)
-            snprintf(actions_string+strlen(actions_string),
-		     sizeof(actions_string)-strlen(actions_string),
-		     "Kept\n");
-	else {
-	    goto error;		/* process the implicit keep error */
-	}
-    }
-
-    if (actions)
-	libsieve_free_action_list(actions);
-  
-    return ret;
-}
