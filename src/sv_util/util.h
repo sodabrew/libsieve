@@ -44,4 +44,8 @@ char *libsieve_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme);
 void libsieve_strbuffree(struct mlbuf **ml, int freeall);
 void libsieve_strbufalloc(struct mlbuf **ml);
 
+/* The MD5 implementation is in md5.c */
+char *libsieve_makehash(char *s1, char *s2);
+
+
 #endif /* INCLUDED_UTIL_H */
