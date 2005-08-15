@@ -270,7 +270,7 @@ dtags: /* empty */		 { $$ = static_new_dtags(); }
 				libsieve_sieveerror("duplicate priority level"); YYERROR; }
 				   else { $$->priority = $2; } }
 	| dtags comptag STRING 	 { if ($$->comptag != -1) { 
-			libsieve_sieveerror("duplicate comparator type tag"); YYERROR;
+				libsieve_sieveerror("duplicate comparator type tag"); YYERROR;
 				   } else {
 				       $$->comptag = $2;
 #ifdef ENABLE_REGEX
@@ -294,7 +294,8 @@ priority: LOW    { $$ = "low"; }
 
 vtags: /* empty */		 { $$ = static_new_vtags(); }
 	| vtags DAYS NUMBER	 { if ($$->days != -1) { 
-					libsieve_sieveerror("duplicate :days"); YYERROR; }
+					libsieve_sieveerror("duplicate :days");
+					YYERROR; }
 				   else { $$->days = $3; } }
 	| vtags ADDRESSES stringlist { if ($$->addresses != NULL) { 
 					libsieve_sieveerror("duplicate :addresses"); 
@@ -486,13 +487,7 @@ int libsieve_sieveerror(char *msg)
 
     parse_context->parse_errors++;
 
-    libsieve_callback_begin(parse_context, SIEVE2_ERROR_PARSE);
-
-    libsieve_setvalue_int(parse_context, "lineno", libsieve_sievelineno);
-    libsieve_setvalue_string(parse_context, "message", msg);
-
-    libsieve_callback_do(parse_context, SIEVE2_ERROR_PARSE);
-    libsieve_callback_end(parse_context, SIEVE2_ERROR_PARSE);
+    libsieve_do_error_parse(parse_context, libsieve_sievelineno, msg);
 
     return 0;
 }
@@ -888,8 +883,11 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
 	    c->support.vacation = 1;
         return c->support.vacation;
     } else if (!strcmp("imapflags", req)) {
-// TODO: Do this up for both imapflags and imap4flags.
-//	if (c->callbacks.markflags->flag)
+	if (c->callbacks.mark
+	 && c->callbacks.unmark
+	 && c->callbacks.addflag
+	 && c->callbacks.setflag
+	 && c->callbacks.removeflag)
 	    c->support.imapflags = 1;
         return c->support.imapflags;
     } else if (!strcmp("notify",req)) {

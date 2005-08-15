@@ -61,8 +61,10 @@ struct my_context {
 	int m_size;
 	char *m_buf;
 	char *s_buf;
-	int valid;
 	char *scriptfile;
+	int error_runtime;
+	int error_parse;
+	int actiontaken;
 };
 
 static int read_file(char *filename, char **ret_buf,
@@ -72,8 +74,9 @@ static int end_of_header(char *buf, int pos);
 
 int my_notify(sieve2_context_t *s, void *my)
 {
-	int i;
+	struct my_context *m = (struct my_context *)my;
 	const char * const * options;
+	int i;
 
 	printf( "Action is NOTIFY: \n" );
 	printf( "  ID \"%s\" is %s\n",
@@ -93,11 +96,13 @@ int my_notify(sieve2_context_t *s, void *my)
 		printf( "    Options are %s\n", options[i] );
 	}
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_vacation(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
 	int yn;
 
 	/* Ask for the message hash, the days parameters, etc. */
@@ -119,69 +124,100 @@ int my_vacation(sieve2_context_t *s, void *my)
 		sieve2_getvalue_string(s, "address"),
 		sieve2_getvalue_string(s, "name") );
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_redirect(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Action is REDIRECT: \n" );
 	printf( "  Destination is [%s]\n",
 		sieve2_getvalue_string(s, "address"));
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_reject(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Action is REJECT: \n" );
 	printf( "  Message is [%s]\n",
 		sieve2_getvalue_string(s, "message"));
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_discard(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Action is DISCARD\n" );
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_fileinto(sieve2_context_t *s, void *my)
 {
-	printf( "Action is FILEINTO: " );
+	struct my_context *m = (struct my_context *)my;
+	const char * const * flags;
+	int i;
+
+	printf( "Action is FILEINTO: \n" );
 	printf( "  Destination is %s\n",
 		sieve2_getvalue_string(s, "mailbox"));
-	printf( "  Flags are %s\n",
-		sieve2_getvalue_string(s, "imapflags"));
+	flags = sieve2_getvalue_stringlist(s, "imapflags");
+	if (flags) {
+		printf( "  Flags are:");
+		for (i = 0; flags[i]; i++)
+			printf( " %s", flags[i]);
+		printf( ".\n");
+	} else {
+			printf( "  No flags specified.\n");
+	}
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_keep(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Action is KEEP\n" );
 
+	m->actiontaken = 1;
 	return SIEVE2_OK;
 }
 
 int my_errparse(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Error is PARSE: " );
 	printf( "  Line is %d\n",
 		sieve2_getvalue_int(s, "lineno"));
 	printf( "  Message is %s\n",
 		sieve2_getvalue_string(s, "message"));
 
+	m->error_parse = 1;
 	return SIEVE2_OK;
 }
 
 int my_errexec(sieve2_context_t *s, void *my)
 {
+	struct my_context *m = (struct my_context *)my;
+
 	printf( "Error is EXEC: " );
 	printf( "  Message is %s\n",
 		sieve2_getvalue_string(s, "message"));
 
+	m->error_runtime = 1;
 	return SIEVE2_OK;
 }
 
@@ -422,7 +458,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (validate_only) {
-		printf("Validating script: ");
+		printf("Validating script...\n");
 		res = sieve2_validate(sieve2_context, my_context);
 		if (res != SIEVE2_OK) {
 			printf("Error %d when calling sieve2_validate: %s\n",
@@ -430,16 +466,23 @@ int main(int argc, char *argv[])
 			exitcode = 1;
 		}
 	} else {
-		printf("Executing script: ");
+		printf("Executing script...\n");
 		res = sieve2_execute(sieve2_context, my_context);
 		if (res != SIEVE2_OK) {
 			printf("Error %d when calling sieve2_execute: %s\n",
 				res, sieve2_errstr(res));
 			exitcode = 1;
 		}
+		if (!my_context->actiontaken) {
+			printf("  no actions taken; keeping message.\n");
+			my_keep(NULL, my_context);
+		}
 	}
 
 	/* At this point the callbacks are called from within libSieve. */
+
+	exitcode |= my_context->error_parse;
+	exitcode |= my_context->error_runtime;
 
 freesieve:
 	res = sieve2_free(&sieve2_context);

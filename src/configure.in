@@ -21,11 +21,13 @@ AC_CHECK_HEADERS(fcntl.h malloc.h unistd.h)
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T
+AC_C_BIGENDIAN
+AC_CHECK_HEADERS(endian.h)
 
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(regcomp strcspn strstr getopt)
+AC_CHECK_FUNCS(getopt)
 
 AM_CONFIG_HEADER(config.h)
 
@@ -56,4 +58,4 @@ AC_ARG_ENABLE(regex,
 	esac],[debug=false])
 AM_CONDITIONAL(ENABLE_REGEX, test x$test = xtrue)
 
-AC_OUTPUT(sv_parser/Makefile sv_rsamd5/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)
+AC_OUTPUT(sv_parser/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)

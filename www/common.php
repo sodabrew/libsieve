@@ -1,5 +1,5 @@
 <?php
-										       $smarty->template_dir ='../Smarty/templates/';
+ $smarty->template_dir ='../Smarty/templates/';
  $smarty->compile_dir = '../Smarty/templates_c/';
  $smarty->config_dir =  '../Smarty/configs/';
  $smarty->cache_dir =   '../Smarty/cache/';

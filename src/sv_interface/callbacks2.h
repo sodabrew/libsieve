@@ -13,7 +13,6 @@
 #define CALLBACKS2_H
 
 #include "context2.h"
-#include "structs.h"
 
 int libsieve_callback_begin(
     struct sieve2_context *context,
@@ -37,9 +36,9 @@ int libsieve_callback_end(
 /* Callback actions; return negative on failure. */
 /* These have been rewritten and moved into callbacks2.c... */
 int libsieve_do_reject(struct sieve2_context *c, char *msg);
-int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, sieve_imapflags_t *imapflags);
+int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, struct imapflags2 *imapflags);
 int libsieve_do_redirect(struct sieve2_context *c, char *addr);
-int libsieve_do_keep(struct sieve2_context *c, sieve_imapflags_t *imapflags);
+int libsieve_do_keep(struct sieve2_context *c, struct imapflags2 *imapflags);
 int libsieve_do_discard(struct sieve2_context *c);
 int libsieve_do_vacation(struct sieve2_context *c, char *addr, char *fromaddr,
 		char *subj, char *msg, 
@@ -54,6 +53,10 @@ int libsieve_do_notify(struct sieve2_context *c, char *id,
 		char *priority, char *message);
 int libsieve_do_denotify(struct sieve2_context *c, comparator_t *comp, void *pat,
 		char *priority);
+
+/* Reporting parse and runtime errors. */
+int libsieve_do_error_parse(struct sieve2_context *c, int lineno, char *msg);
+int libsieve_do_error_exec(struct sieve2_context *c, char *msg);
 
 /* Ask the user app for information about the script & message. */
 int libsieve_do_getscript(struct sieve2_context *context,

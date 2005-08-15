@@ -61,7 +61,7 @@ int libsieve_do_reject(struct sieve2_context *c, char *msg)
 /* Fileinto is incompatible with: 
  * reject
  */
-int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, sieve_imapflags_t *imapflags)
+int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, struct imapflags2 *imapflags)
 {
     if (c->actions.reject)
         return SIEVE2_ERROR_EXEC;
@@ -71,8 +71,7 @@ int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, sieve_imapflags_t
     libsieve_callback_begin(c, SIEVE2_ACTION_FILEINTO);
 
     libsieve_setvalue_string(c, "mailbox", mbox);
-    // FIXME: Probably needs a conversion routine here.
-    libsieve_setvalue_stringlist(c, "imapflags", imapflags->flag);
+    libsieve_setvalue_stringlist(c, "imapflags", imapflags->flags);
 
     libsieve_callback_do(c, SIEVE2_ACTION_FILEINTO);
     libsieve_callback_end(c, SIEVE2_ACTION_FILEINTO);
@@ -103,7 +102,7 @@ int libsieve_do_redirect(struct sieve2_context *c, char *addr)
 /* Keep is incompatible with:
  * reject
  */
-int libsieve_do_keep(struct sieve2_context *c, sieve_imapflags_t *imapflags)
+int libsieve_do_keep(struct sieve2_context *c, struct imapflags2 *imapflags)
 {
     if (c->actions.reject)
         return SIEVE2_ERROR_EXEC;
@@ -112,8 +111,7 @@ int libsieve_do_keep(struct sieve2_context *c, sieve_imapflags_t *imapflags)
 
     libsieve_callback_begin(c, SIEVE2_ACTION_KEEP);
 
-    // FIXME: Probably needs a conversion routine here.
-    libsieve_setvalue_stringlist(c, "imapflags", imapflags->flag);
+    libsieve_setvalue_stringlist(c, "imapflags", imapflags->flags);
 
     libsieve_callback_do(c, SIEVE2_ACTION_KEEP);
     libsieve_callback_end(c, SIEVE2_ACTION_KEEP);
@@ -240,7 +238,7 @@ int libsieve_do_mark(struct sieve2_context *c)
     libsieve_callback_begin(c, SIEVE2_ACTION_MARK);
 
     // FIXME: We're just hardcoding the most common deal;
-    // this is only for impaflags, not imap4flags anyways.
+    // this is only for imapflags, not imap4flags anyways.
     libsieve_setvalue_stringlist(c, "imapflags", markflags);
 
     libsieve_callback_do(c, SIEVE2_ACTION_MARK);
@@ -315,17 +313,28 @@ int libsieve_do_denotify(struct sieve2_context *c,
 }
 
 
-/* This isn't really an action; the errors are callbacks, too.
- *
- * This is for an execution error, right? Hrmm...
- *
- * FIXME: Shouldn't there have been an error message?
- */
-int libsieve_do_error(struct sieve2_context *c)
+/* This isn't really an action; the errors are callbacks, too. */
+int libsieve_do_error_exec(struct sieve2_context *c, char *msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_RUNTIME);
+
+    libsieve_setvalue_string(c, "message", msg);
+
     libsieve_callback_do(c, SIEVE2_ERRCALL_RUNTIME);
     libsieve_callback_end(c, SIEVE2_ERRCALL_RUNTIME);
+
+    return SIEVE2_OK;
+}
+
+int libsieve_do_error_parse(struct sieve2_context *c, int lineno, char *msg)
+{
+    libsieve_callback_begin(c, SIEVE2_ERRCALL_PARSE);
+
+    libsieve_setvalue_int(c, "lineno", lineno);
+    libsieve_setvalue_string(c, "message", msg);
+
+    libsieve_callback_do(c, SIEVE2_ERRCALL_PARSE);
+    libsieve_callback_end(c, SIEVE2_ERRCALL_PARSE);
 
     return SIEVE2_OK;
 }

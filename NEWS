@@ -1,9 +1,12 @@
 libSieve 2.1.7
 --------------
 
-- Rewrote the API again. I finally like it.
+- Rewrote the API again. I finally like it!
 
 - Settled on the LGPL for all of my new code.
+
+- Replaced the RSA MD5 implementation with
+  a public domain version.
 
 - Documentation updated for the new API.
 

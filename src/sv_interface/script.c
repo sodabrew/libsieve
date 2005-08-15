@@ -34,10 +34,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <ctype.h>
 #include <assert.h>
 
-/* sv_rsamd5 */
-#include "md5global.h"
-#include "md5.h"
-
 /* sv_include */
 #include "sieve2.h"
 
@@ -148,8 +144,6 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 		   libsieve_do_getenvelope(context, sl->s, &body)) != SIEVE2_OK) {
 		continue; /* try next header */
 	    }
-	    /* The header wasn't found? */
-//	    if (!body) continue;
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; body[l] != NULL && !res; l++) {
 		    /* loop through each header */
@@ -201,8 +195,6 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 	    size_t l;
 	    if (libsieve_do_getheader(context, sl->s, &val) != SIEVE2_OK)
 		continue;
-	    /* The header wasn't found? */
-//	    if (!val) continue;
 	    for (pl = t->u.h.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; val[l] != NULL && !res; l++) {
 		    res |= t->u.h.comp(pl->p, val[l]);
@@ -477,6 +469,7 @@ int libsieve_eval(struct sieve2_context *context,
     return res;
 }
 
+#if 0
 #define GROW_AMOUNT 100
 
 static void add_header(struct sieve2_context *c, int isenv, char *header, 
@@ -603,10 +596,6 @@ static int sieve_removeflag(sieve_imapflags_t *imapflags, char *flag)
  
 	for (; n < imapflags->nflags; n++)
 	    imapflags->flag[n] = imapflags->flag[n+1];
- 
-	imapflags->flag =
-	    (char **) libsieve_realloc((char *)imapflags->flag,
-			       imapflags->nflags*sizeof(char *));
     }
  
     return SIEVE2_OK;
@@ -635,17 +624,4 @@ static char *action_to_string(action_t action)
     return "Error!";
 }
 
-#define HASHSIZE 16
-
-static int makehash(unsigned char hash[HASHSIZE], char *s1, char *s2)
-{
-    MD5_CTX ctx;
-
-    libsieve_MD5Init(&ctx);
-    libsieve_MD5Update(&ctx, s1, strlen(s1));
-    libsieve_MD5Update(&ctx, s2, strlen(s2));
-    libsieve_MD5Final(hash, &ctx);
-
-    return SIEVE2_OK;
-}
-
+#endif

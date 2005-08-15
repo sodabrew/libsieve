@@ -16,6 +16,9 @@
 
  $smarty->assign( 'righttitle', 'news.' );
  $smarty->assign( 'rightcontent', array(
+ 	array( 'August 2005: libSieve 2.1.7',
+	'I\'ve rewritten the API, and I really like it this time. Take a look at the documentation pages and see what you think!
+	' ),
  	array( 'November 2004: libSieve 2.1.5',
 	'In a move to confuse and astound, I am re-releasing libSieve 2.2.0_pre3 as 2.1.5. I dragged my feet for almost a year trying to figure out how I was going to fix the API in one fell swoop, release 2.2.0 final, and save the world. All that is gone now. <b>Version numbers are now staggered in Linux Kernel style, with odd minor numbers denoting experimental / development versions. There will be many more API changes before 2.2.0 is released.</b>
 	' ),

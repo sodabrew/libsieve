@@ -13,13 +13,13 @@
 H1(Sieve 2 API: Structures)
 
 CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_context) C_TYPE(sieve2_context_t);
+NO	C_QUAL(typedef) C_TYPE(struct) C_TYPE(sieve2_context) C_TYPE(sieve2_context_t);
 BR TAB	C_QUAL(typedef) C_TYPE(int) C_FUNC((*sieve2_callback_func)) (
 BR TAB	C_QUAL(sieve2_context_t) * C_ARG(sieve2_context),
 BR TAB	C_QUAL(void) * C_ARG(user_data)
 BR	);
 BR
-BR	C_QUAL(typedef) C_QUAL(struct) {
+BR	C_QUAL(typedef) C_TYPE(struct) {
 BR TAB	C_TYPE(sieve2_values_t) C_ARG(value);
 BR TAB	C_TYPE(sieve2_callback_func) C_ARG(func);
 BR	} C_TYPE(sieve2_callback_t);
@@ -39,27 +39,31 @@ NO	C_QUAL(typedef) C_TYPE(enum) {
 BR TAB	C_ARG(SIEVE2_VALUE_FIRST)
 BR
 BR TAB	C_ARG(SIEVE2_ACTION_REDIRECT)
-I(address)
+I(address (string) )
 BR TAB	C_ARG(SIEVE2_ACTION_REJECT)
-I(message)
+I(message (string) )
 BR TAB	C_ARG(SIEVE2_ACTION_DISCARD)
 I(none)
 BR TAB	C_ARG(SIEVE2_ACTION_FILEINTO)
-I(mailbox)
+BR TAB TAB I(get: mailbox (string)  imapflags (stringlist). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_KEEP)
-I(none)
+BR TAB TAB I(get: imapflags (stringlist). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_NOTIFY)
-I(bunch of these...)
+BR TAB TAB I(get: active (int) id (string) method (string) options (stringlist)
+	priority (string) message (string). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_DENOTIFY)
-I(bunch of these...)
+BR TAB TAB I(get: active (int) id (string) method (string) options (stringlist)
+	priority (string) message (string). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_VACATION)
-I(bunch of these...)
+BR TAB TAB I(get: toaddress (string) fromaddress (string) subject (string)
+	message (string) mime (int). hash (string) days (int).
+	min (int) max (int).)
 BR TAB	C_ARG(SIEVE2_ACTION_SETFLAG)
-I(imapflags)
+I(imapflags (stringlist) )
 BR TAB	C_ARG(SIEVE2_ACTION_ADDFLAG)
-I(imapflags)
+I(get: imapflags (stringlist). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_REMOVEFLAG)
-I(imapflags)
+I(get: imapflags (stringlist). set: none.)
 BR TAB	C_ARG(SIEVE2_ACTION_MARK)
 I(none)
 BR TAB	C_ARG(SIEVE2_ACTION_UNMARK)
@@ -69,23 +73,23 @@ BR
 BR TAB	C_ARG(SIEVE2_ERRCALL_RUNTIME)
 BR TAB TAB I(get: message. set: none.)
 BR TAB	C_ARG(SIEVE2_ERRCALL_PARSE)
-BR TAB TAB I(get: message lineno. set: none.)
+BR TAB TAB I(get: message (string) lineno (int). set: none.)
 BR
 BR TAB	C_ARG(SIEVE2_SCRIPT_GETSCRIPT)
-BR TAB TAB I(get: name path. set: script.)
+BR TAB TAB I(get: name (string) path (string). set: script (string).)
 BR TAB	C_ARG(SIEVE2_SCRIPT_GETSIZE)
-BR TAB TAB I(get: name path. set: size.)
+BR TAB TAB I(get: name (string) path (string). set: size (int).)
 BR
 BR TAB	C_ARG(SIEVE2_MESSAGE_GETHEADER)
-BR TAB TAB I(get: header. set: body.)
+BR TAB TAB I(get: header (string). set: body (string).)
 BR TAB	C_ARG(SIEVE2_MESSAGE_GETALLHEADERS)
-BR TAB TAB I(get: none. set: allheaders.)
+BR TAB TAB I(get: none. set: allheaders (string).)
 BR TAB	C_ARG(SIEVE2_MESSAGE_GETENVELOPE)
-BR TAB TAB I(get: env. set: from to.)
+BR TAB TAB I(get: env (string). set: from (string) to (string).)
 BR TAB	C_ARG(SIEVE2_MESSAGE_GETSIZE)
-BR TAB TAB I(get: none. set: size.)
+BR TAB TAB I(get: none. set: size (int).)
 BR TAB	C_ARG(SIEVE2_MESSAGE_GETBODY)
-BR TAB TAB I(get: none. set: body.)
+BR TAB TAB I(get: none. set: body (string).)
 BR
 BR TAB	C_ARG(SIEVE2_VALUE_LAST)
 BR	} C_TYPE(sieve2_values_t);
@@ -96,133 +100,6 @@ When the callback function is called, it finds out the details of
 what is being asked of it using the functions sieve2_getvalue...()
 and responds with sieve2_setvalue...(). The value key names for
 each callback are listed in italics inlined into the enum above.
-
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_vacation_context) {
-BR	TAB    C_TYPE(int) C_ARG(min_response);		/* 0 -> defaults to 3 */
-BR	TAB    C_TYPE(int) C_ARG(max_response);		/* 0 -> defaults to 90 */
-BR      TAB
-BR	TAB    /* In Sieve 2, send_response is right here */
-BR	TAB    C_QUAL(struct) {
-BR	TAB    TAB    C_TYPE(char) *C_ARG(addr);
-BR	TAB    TAB    C_TYPE(char) *C_ARG(fromaddr);
-BR	TAB    TAB    C_TYPE(char) *C_ARG(subj);
-BR	TAB    TAB    C_TYPE(char) *C_ARG(msg);
-BR	TAB    TAB    C_TYPE(int) C_ARG(mime);
-BR	TAB    } C_ARG(send);
-BR
-BR	TAB    /* In Sieve 2, check_response is right here */
-BR	TAB    C_QUAL(struct) {
-BR	TAB    TAB    C_QUAL(unsigned) C_TYPE(char) *C_ARG(hash);
-BR	TAB    TAB    C_TYPE(int) C_ARG(len);
-BR	TAB    TAB    C_TYPE(int) C_ARG(days);
-BR	TAB    } C_ARG(check);
-BR	} C_TYPE(sieve2_vacation_context_t);
-	)
-
-The vacation structure is used to reply to a message to let the sender 
-know that the recipient is out of town for a while. The client application
-needs to check to see if the particular sender has already been sent a 
-vacation reply within the time frame indicated by vacation.check.days.
-If yes, give up. If not, the members of vacation.send should be used to
-build up a message. The members of vacation.send are pretty self-explanatory,
-except for the mime number. I have no idea what that is.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_imapflags_context) {
-BR	TAB    C_TYPE(char) **C_ARG(flag);		/* NULL -> defaults to \flagged */
-BR	TAB    C_TYPE(int) C_ARG(nflags);
-BR	} C_TYPE(sieve2_imapflags_context_t);
-	)
-
-The imapflags structure holds a list of imap flag strings. Each carries
-the format \Flag and comforms to recent revisions of the IMAP standard.
-Probably the easiest thing to do is loop through the flags, compare them
-to the known flags that your application supports, and mark those that
-match up.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_redirect_context) {
-BR	TAB    C_TYPE(char) *C_ARG(addr);
-BR	} C_TYPE(sieve2_redirect_context_t);
-	)
-
-The redirect structure indicates where the message should be sent to next.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_reject_context) {
-BR	TAB    C_TYPE(char) *C_ARG(msg);
-BR	} C_TYPE(sieve2_reject_context_t);
-	)
-
-The reject structure gives a message to return to the message sender,
-generally indicating why the message was rejected. The message itself
-may or may not be included as an attachment; it is generally recommended
-to send just the headers, if not only the subject line.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_fileinto_context) {
-BR	TAB    C_TYPE(char) *C_ARG(mailbox);
-BR	TAB    C_TYPE(sieve2_imapflags_context_t) *C_ARG(imapflags);
-BR	} C_TYPE(sieve2_fileinto_context_t);
-	)
-
-The fileinto structure indicates the mailbox into which the message should
-be filed. In general, the mailbox should be created if it does not already
-exist, but this behavior is up to the client application, possibly user
-preferences or system policy, or whatever else.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_keep_context) {
-BR	TAB    C_TYPE(sieve2_imapflags_context_t) *C_ARG(imapflags);
-BR	} C_TYPE(sieve2_keep_context_t);
-	)
-
-The keep structure itself indicates that the message should be kept. It
-further contains an imapflags structure that indicates the flags that
-that should be set on the kept message. See the imapflags section above.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_notify_context) {
-BR	TAB    C_TYPE(int) C_ARG(isactive);
-BR	TAB    C_TYPE(char) *C_ARG(id);
-BR	TAB    C_TYPE(char) *C_ARG(method);
-BR	TAB    C_TYPE(char) **C_ARG(options);
-BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(priority);
-BR	TAB    C_TYPE(char) *C_ARG(message);
-BR	TAB    C_QUAL(struct) C_TYPE(sieve2_notify_context) *C_ARG(next);
-BR	} C_TYPE(sieve2_notify_context_t);
-	)
-
-The notify structure is in fact a linked list of notify structures. It is
-up to the client application to traverse the list. The next member will
-be NULL when the end has been reached; just a typical linked list. The
-notification extension is fairly involved, so rather than trying to explain
-it all here, do please read the latest draft of the extension.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error_parse_context) {
-BR	TAB    C_TYPE(int) C_ARG(lineno);
-BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(msg);
-BR	} C_TYPE(sieve2_error_parse_context_t);
-	)
-
-The parse error structure contains a descriptive error message indicating
-what went wrong while parsing the script, headers and email addresses
-therein. If the parse error was in the script or the headers, the line
-number member will be non-zero.
-
-At this time, no translation facility is in place, so the message
-will be in English.
-
-CODE	(
-NO	C_QUAL(typedef) C_QUAL(struct) C_TYPE(sieve2_error_execute_context) {
-BR	TAB    C_QUAL(const) C_TYPE(char) *C_ARG(msg);
-BR	} C_TYPE(sieve2_error_execute_context_t);
-	)
-
-The execution error structure contains a descriptive error message
-indicating what went wrong during execution of the script. At this time,
-no translation facility is in place, so the message will be in English.
 
 ENDOFPRE
  	) ) );

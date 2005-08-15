@@ -28,7 +28,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include "structs.h"		/* for imapflags_t */
 #include "tree.h"		/* for stringlist_t */
 #include "addrinc.h"		/* for struct address */
 
@@ -50,17 +49,6 @@ typedef enum {
     ACTION_DENOTIFY
 } action_t;
 
-/*
-typedef struct notify_list_s {
-    int isactive;
-    char *id;
-    char *method;
-    stringlist_t **options;
-    const char *priority;
-    char *message;
-    struct notify_list_s *next;
-} notify_list_t;
-*/
 typedef struct sieve_notify_context notify_list_t;
 
 notify_list_t *libsieve_new_notify_list(void);

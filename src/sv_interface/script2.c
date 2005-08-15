@@ -18,9 +18,6 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "md5global.h"
-#include "md5.h"
-
 /* CMU portions. */
 #include "tree.h"
 #include "script.h"
@@ -193,6 +190,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
     const char *errmsg = NULL;
+    int res;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
@@ -236,6 +234,12 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     if (libsieve_eval(c, c->script.cmds, &errmsg) < 0)
         return SIEVE2_ERROR_EXEC;
 
+    /* If no action was taken, libsieve_eval will have
+     * returned > 0. But we're going to hide that and
+     * just return SIEVE2_OK. It is up to the client app
+     * to notice that no callbacks occurred and therefore
+     * a keep MUST be performed.
+     * */
     return SIEVE2_OK;
 }
 

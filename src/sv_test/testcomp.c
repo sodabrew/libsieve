@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 		printf("Failed %d tests.\n", res);
 		exit(1);
 	} else {
-		printf("Passed all tests.\n", res);
+		printf("Passed all tests.\n");
 		exit(0);
 	}
 

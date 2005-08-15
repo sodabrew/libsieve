@@ -17,21 +17,33 @@ NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_alloc)(C_TYPE(sieve2_context_t) **C_
 BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_free)(C_TYPE(sieve2_context_t) **C_ARG(c));
 	)
 
-P	Foo.
+P	Allocates and frees the basic context which carries through all of the
+functions and callbacks in libSieve. At this time, the core parsers are not
+thread-safe; B(only one instance may be allocated per-process).
 
 CODE	(
 NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_callbacks)(C_TYPE(sieve2_context_t) *C_ARG(c), C_TYPE(sieve2_callback_t) *C_ARG(callbacks));
 BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_listextensions)(C_TYPE(sieve2_context_t) *C_ARG(c));
 	)
 
-P	Foo.
+P	Registers a table of callbacks. See the structures page for details.
+After a table of callbacks is registered, the extensions for which callbacks
+have been registered will be listed by sieve2_listextensions.
 
 CODE	(
 NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_validate)(C_TYPE(sieve2_action_t) *C_ARG(c), C_TYPE(void) *C_ARG(user_data));
 BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_execute)(C_TYPE(sieve2_action_t) *C_ARG(c), C_TYPE(void) *C_ARG(user_data));
 	)
 
-P	Foo.
+P	Validate a script and execute a script over a message. Validation will
+only call the getscript callback, while execution will call getscript and
+either getallheaders or getheader, then call the appropriate action callbacks.
+The user_data you provide here will be passed into each of the callbacks.
+
+P	The way to use this is to set up your own structure which contains
+information the script and message you are currently working with. As the
+callbacks are called, your functions, which know about your structure, can
+figure out what they should be doing.
 
 CODE	(
 NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_getvalue_int)(C_TYPE(sieve2_context_t) *C_ARG(c), C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_ARG(name));
@@ -39,10 +51,12 @@ BR	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_FUNC(sieve2_getva
 BR	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) * C_QUAL(const) C_FUNC(sieve2_getvalue_stringlist)(C_TYPE(sieve2_context_t) *C_ARG(c), C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_ARG(name));
 	)
 
-P The error functions are used to retrieve error codes resulting from mistakes
-in a script found either during validation with sieve2_validate or execution
-with sieve2_execute.
+P	The getvalue family of functions allow you to retrieve information
+about the callback being called. All of the memory returned by these
+functions are managed by libSieve and will be freed by calling sieve2_free.
 
+P	See the structures page for a listing of value names available to each
+callback.
 
 CODE	(
 NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_setvalue_int)(C_TYPE(sieve2_context_t) *C_ARG(c), C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_ARG(name), C_TYPE(int) C_ARG(value));
@@ -50,13 +64,19 @@ BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_setvalue_string)(C_TYPE(sieve2_conte
 BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_setvalue_stringlist)(C_TYPE(sieve2_context_t) *C_ARG(c), C_QUAL(const) C_TYPE( char) * C_QUAL(const) C_ARG(name), C_QUAL(const) C_TYPE(char) * C_QUAL(const) * C_QUAL(const) C_ARG(value));
 	)
 
-P	Foo.
+P	The setvalue family of functions allows you to return values into
+libSieve from your callbacks. This is your memory, and must be freed after
+calling sieve2_free.
+
+P	See the structures page for a listing of value names available to each
+callback.
 
 CODE	(
-NO	C_QUAL(extern) C_QUAL(const) C_TYPE(char) *C_FUNC(sieve2_errstr)(C_QUAL(const) C_TYPE(int) C_ARG(code));
+NO	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_FUNC(sieve2_errstr)(C_QUAL(const) C_TYPE(int) C_ARG(code));
 	)
-P Convert an error code to a generic description of the error.
-Detailed error reports are found in the sieve2_error array.
+P	Convert an error code to a generic description of the error.
+Detailed error reports are found in the sieve2_error array. Do not free the
+returned string, it is static.
 
 CODE	(
 NO	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_FUNC(sieve2_credits)(C_TYPE(void));
@@ -64,7 +84,7 @@ BR	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_FUNC(sieve2_licen
 	)
 P Get a list of Credits about who writes libSieve
 and a brief rundown on the License under which
-libSieve is distributed.
+libSieve is distributed. Do not free the returned string, it is static.
 
 ENDOFPRE
  	) ) );

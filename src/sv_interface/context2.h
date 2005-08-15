@@ -86,6 +86,11 @@ struct script2 {
     commandlist_t *cmds;
 };
 
+struct imapflags2 {
+    char **flags;
+    int flagcount;
+};
+
 /* I don't anticipate needing more
  * than 10 of these; but watch out
  * for overflow if the user tries
@@ -120,7 +125,7 @@ struct sieve2_context {
      * I'd like to do this with all of the context
      * structs -- makes my life easier not to malloc
      * so much separate junk all over the place. */
-    sieve_imapflags_t imapflags;
+    struct imapflags2 imapflags;
     struct callbacks2 callbacks;
     struct support2 support;
     struct actions2 actions;

@@ -18,9 +18,6 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "md5global.h"
-#include "md5.h"
-
 /* CMU portions. */
 #include "tree.h"
 #include "script.h"

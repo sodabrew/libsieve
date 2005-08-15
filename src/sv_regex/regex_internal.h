@@ -106,8 +106,8 @@
 # define attribute_hidden
 #endif /* not _LIBC */
 
-extern const char __re_error_msgid[] attribute_hidden;
-extern const size_t __re_error_msgid_idx[] attribute_hidden;
+//extern const char __re_error_msgid[] attribute_hidden;
+//extern const size_t __re_error_msgid_idx[] attribute_hidden;
 
 /* Number of bits in an unsinged int.  */
 #define UINT_BITS (sizeof (unsigned int) * BYTE_BITS)
