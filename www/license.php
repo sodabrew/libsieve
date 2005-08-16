@@ -55,8 +55,7 @@ those.
 ENDOFPRE
 	) ) );
  $smarty->assign( 'rightlinks', array(
-	 /* Yes, that's right. No right links. */
-	 "FIXME: Add a link to the FSF for the LGPL"
+	array( 'GNU Lesser GPL', 'http://www.fsf.org/licensing/licenses/lgpl.html' )
 	) );
 
 
