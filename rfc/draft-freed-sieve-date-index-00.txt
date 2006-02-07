@@ -1,0 +1,504 @@
+
+
+
+Network Working Group                                           N. Freed
+Internet-Draft                                          Sun Microsystems
+Expires: January 12, 2006                                  July 11, 2005
+
+
+           Sieve Email Filtering:  Date and Index Extensions
+                    draft-freed-sieve-date-index-00
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on January 12, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2005).
+
+Abstract
+
+   This document describes the "date" and "index" extensions to the
+   Sieve email filtering language.  The "date" extension gives Sieve the
+   ability to test date and time values in various ways.  The "index"
+   extension provides a means to limit header and address tests to
+   specific instances of header fields when header fields are repeated.
+
+
+
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 1]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.  Conventions used in this document  . . . . . . . . . . . . . .  3
+   3.  Capability Identifiers . . . . . . . . . . . . . . . . . . . .  3
+   4.  Date Test  . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     4.1   Zone parameter . . . . . . . . . . . . . . . . . . . . . .  4
+     4.2   Part parameter . . . . . . . . . . . . . . . . . . . . . .  4
+   5.  Currentdate test . . . . . . . . . . . . . . . . . . . . . . .  5
+   6.  Index Extension  . . . . . . . . . . . . . . . . . . . . . . .  5
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . .  6
+   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . .  7
+   9.  Normative References . . . . . . . . . . . . . . . . . . . . .  7
+       Author's Address . . . . . . . . . . . . . . . . . . . . . . .  8
+       Intellectual Property and Copyright Statements . . . . . . . .  9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 2]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+1.  Introduction
+
+   Sieve [RFC3028] is a language for filtering email messages at or
+   around the time of final delivery.  It is designed to be
+   implementable on either a mail client or mail server.  It is meant to
+   be extensible, simple, and independent of access protocol, mail
+   architecture, and operating system.  It is suitable for running on a
+   mail server where users may not be allowed to execute arbitrary
+   programs, such as on black box Internet Messages Access Protocol
+   (IMAP4) servers, as it has no loops or the ability to run external
+   programs.
+
+   The "date" extension provides a new date test to extract and match
+   date/time information from structured header fields.  The date test
+   is similar in concept to the address test specified in RFC 3028,
+   which performs similar operations on addresses in header fields.
+
+   The "date" extension also provides a "currentdate" test that operates
+   on the date and time the sieve script is executed.
+
+   Some header fields containing date/time information, e.g.  Received:,
+   naturally occur more than one in a single header.  In such cases it
+   is useful to be able to restrict the date test to some subset of the
+   fields that are present.  For example, it may be useful to apply a
+   date test to the last (earliest) Received: field.  Additionally, it
+   may also be useful to apply similar restrictions to either the header
+   or address tests specified in [RFC3028].
+
+   For this reason this specification also defines an "index" extension.
+   This extension adds two additional tagged arguments :index and :last
+   to the header, address, and date tests.  If present these arguments
+   specifies which occurrence of the named header field is to be tested.
+
+2.  Conventions used in this document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [RFC2119].
+
+   The terms used to describe the various components of the Sieve
+   language are taken from [RFC3028] section 1.1.  Various syntactic
+   elements defined using ABNF notation [RFC2234] in RFC 3028 are also
+   used here.
+
+3.  Capability Identifiers
+
+   The capability strings associated with the two extensions defined in
+   this document are "date" and "index".
+
+
+
+Freed                   Expires January 12, 2006                [Page 3]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+4.  Date Test
+
+   Syntax:   date [":zone" <time-zone: string>] [COMPARATOR]
+                  [MATCH-TYPE] <header-name: string> <part: string>
+                  <key-list: string-list>
+
+   The date test matches date/time information derived from structured
+   headers that contain [RFC2822] date-time values.  The date/time
+   information is extracted from the header, shifted to the specified
+   time zone, and the value of the given part is determined.  The test
+   returns true if the resulting string matches any of the strings
+   specified in the key-list, as modified by the comparator and match
+   keywords.  The date test returns false if the specified header field
+   does not exist, the field exists but does not contain a syntactically
+   valid date-time specification, or the resulting string fails to match
+   any key-list value.
+
+   Unlike the header and address tests, the date test can only be
+   applied to a single header field at a time.  If multiple header
+   fields with the same name are present only the first field that is
+   found is used.  (Note, however, that this behavior can be modified
+   with the "index" extension defined below.)
+
+   Implementations MUST support extraction of date-time information that
+   either makes up the entire header field (e.g., as it does in a
+   standard Date: header field) and date-time information that appears
+   at the end of a header field (e.g., as it does in a standard
+   Received: header field).  Implementations MAY support extraction of
+   date-time information that appears in other positions in the header
+   field content.
+
+4.1  Zone parameter
+
+   The value of time-zone MUST be an offset relative to UTC with the
+   following syntax:
+
+       time-zone  =  ( "+" / "-" ) 4DIGIT
+
+   If the :zone is left out the local time zone MUST be used.
+
+4.2  Part parameter
+
+   The part parameter specifies a particular part of the resulting date/
+   time value to match against the key-list.  Possible values are:
+
+
+
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 4]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+     "year"     => the current year, "0000" .. "9999"
+     "month"    => the current month, "01" .. "12"
+     "day"      => the current day, "01" .. "31"
+     "julian"   => the Julian date, that is, the date expressed
+                   as an integer number of days since
+                   January 1, 4713 BCE (on the Julian calendar).
+     "hour"     => the current hour, "00" .. "23"
+     "minute"   => the current hour, "00" .. "59"
+     "second"   => the current second, "00" .. "59"
+     "iso8601"  => the current date and time in restricted ISO
+                   8601 format.
+     "timezone" => the time zone in use.  If the user specified a
+                   time zone with ":zone", "timezone" will
+                   contain that value.  Otherwise, the value
+                   will be the server's default time zone in offset
+                   format.
+
+   The restricted ISO 8601 format is specfied by the date-time ABNF
+   production given in [RFC3339] section 5.6.
+
+5.  Currentdate test
+
+   Syntax:   currentdate [":zone" <time-zone: string>]
+                         [COMPARATOR] [MATCH-TYPE]
+                         <part-type: string>
+                         <key-list: string-list>
+
+   The currentdate test is similar to the date test, except that it
+   operates on the current date/time rather than a value extracted from
+   the message header.  In particular, the ":zone" and part-type
+   parameters are the same as those in the date test.
+
+   All currentdate tests in a single sieve script MUST refer to the same
+   point in time.
+
+6.  Index Extension
+
+   The "index" extension, if specified, adds optional :index and :last
+   parameters to the header, address, and date tests as follows:
+
+   Syntax:   date [":index" <fieldno: number> [":last"]]
+                  [":zone" <time-zone: string>] [COMPARATOR]
+                  [MATCH-TYPE] <header-name: string> <part: string>
+                  <key-list: string-list>
+
+
+   Syntax:   header [":index" <fieldno: number> [":last"]]
+                    [COMPARATOR] [MATCH-TYPE]
+
+
+
+Freed                   Expires January 12, 2006                [Page 5]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+                    <header-names: string-list> <key-list: string-list>
+
+
+   Syntax:   address [":index" <fieldno: number> [":last"]]
+                     [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE]
+                     <header-list: string-list> <key-list: string-list>
+
+   If :index <fieldno> is specified, the attempts to match a value are
+   limited to the header field fieldno (beginning at 1, the first named
+   header field).  If :last is specified, the count is backwards; 1
+   denotes the last named header field, 2 the second to last, and so on.
+
+   Both header and address allow the specification of more than one
+   header field name.  If more than one header field name is specified
+   all the named header fields are counted in the order specified by the
+   header-list.
+
+7.  Security Considerations
+
+   The facilities defined here, like the facilities in the base Sieve
+   specification, operate on message header information which can easily
+   be forged.
+
+   All of the security considerations given in the base Sieve
+   specification also apply to these extensions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 6]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+8.  IANA Considerations
+
+   The following templates specify the IANA registrations of the two
+   Sieve extensions specified in this document:
+
+      To: iana@iana.org
+      Subject: Registration of new Sieve extensions
+
+      Capability name: DATE
+      Capability keyword: date
+      Capability arguments: N/A
+      Standards Track/IESG-approved experimental RFC number: this RFC
+      Person and email address to contact for further information:
+
+       Ned Freed
+       Sun Microsystems
+       1050 Lakes Drive
+       West Covina, CA 91790
+       Email: ned.freed@mrochek.com
+
+      Capability name: INDEX
+      Capability keyword: index
+      Capability arguments: N/A
+      Standards Track/IESG-approved experimental RFC number: this RFC
+      Person and email address to contact for further information:
+
+       Ned Freed
+       Sun Microsystems
+       1050 Lakes Drive
+       West Covina, CA 91790
+       Email: ned.freed@mrochek.com
+
+      This information should be added to the list of sieve extensions
+      given on http://www.iana.org/assignments/sieve-extensions.
+
+
+9.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC2234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", RFC 2234, November 1997.
+
+   [RFC2822]  Resnick, P., "Internet Message Format", RFC 2822,
+              April 2001.
+
+   [RFC3028]  Showalter, T., "Sieve: A Mail Filtering Language",
+
+
+
+Freed                   Expires January 12, 2006                [Page 7]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+              RFC 3028, January 2001.
+
+   [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
+              Timestamps", RFC 3339, July 2002.
+
+
+Author's Address
+
+   Ned Freed
+   Sun Microsystems
+   3401 Centrelake Drive, Suite 410
+   Ontario, CA  92761-1205
+   USA
+
+   Phone: +1 909 457 4293
+   Email: ned.freed@mrochek.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 8]
+
+Internet-Draft       Sieve date and index extensions           July 2005
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2005).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Freed                   Expires January 12, 2006                [Page 9]
+
