@@ -155,8 +155,7 @@ void libsieve_sievelexfree()
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_sievelexalloc()
 {
-    if ( ! YY_CURRENT_BUFFER )
-        YY_CURRENT_BUFFER = libsieve_sieve_create_buffer( libsieve_sievein, YY_BUF_SIZE );
+    libsieve_sieverestart( YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,

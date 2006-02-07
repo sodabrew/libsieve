@@ -1697,8 +1697,7 @@ void libsieve_headerlexfree()
 void libsieve_headerlexalloc()
 {
     libsieve_strbufalloc(&ml);
-    if ( ! YY_CURRENT_BUFFER )
-        YY_CURRENT_BUFFER = libsieve_header_create_buffer( libsieve_headerin, YY_BUF_SIZE );
+    libsieve_headerrestart( YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,

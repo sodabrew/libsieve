@@ -1742,8 +1742,7 @@ void libsieve_addrlexfree()
 void libsieve_addrlexalloc()
 {
     libsieve_strbufalloc(&ml);
-    if ( ! YY_CURRENT_BUFFER )
-        YY_CURRENT_BUFFER = libsieve_addr_create_buffer( libsieve_addrin, YY_BUF_SIZE );
+    libsieve_addrrestart( YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
