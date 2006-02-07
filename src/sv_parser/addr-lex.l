@@ -138,12 +138,15 @@ void libsieve_addrlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
     libsieve_addr_delete_buffer( YY_CURRENT_BUFFER );
+    YY_CURRENT_BUFFER = 0;
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_addrlexalloc()
 {
     libsieve_strbufalloc(&ml);
+    if ( ! YY_CURRENT_BUFFER )
+        YY_CURRENT_BUFFER = libsieve_addr_create_buffer( libsieve_addrin, YY_BUF_SIZE );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,

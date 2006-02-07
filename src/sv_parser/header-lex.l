@@ -130,12 +130,15 @@ void libsieve_headerlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
     libsieve_header_delete_buffer( YY_CURRENT_BUFFER );
+    YY_CURRENT_BUFFER = 0;
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_headerlexalloc()
 {
     libsieve_strbufalloc(&ml);
+    if ( ! YY_CURRENT_BUFFER )
+        YY_CURRENT_BUFFER = libsieve_header_create_buffer( libsieve_headerin, YY_BUF_SIZE );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,

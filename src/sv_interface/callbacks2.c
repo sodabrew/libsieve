@@ -354,7 +354,10 @@ int libsieve_do_getscript(struct sieve2_context *c,
 
     libsieve_callback_end(c, SIEVE2_SCRIPT_GETSCRIPT);
 
-    return SIEVE2_OK;
+    if (*script)
+        return SIEVE2_OK;
+    else
+        return SIEVE2_ERROR_EXEC;
 }
 
 int libsieve_do_getallheaders(struct sieve2_context *c,

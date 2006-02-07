@@ -30,12 +30,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "comparator.h"
 
-#ifdef HAVE_RX
-#include <rxposix.h>
-#else
-#include <sys/types.h>
-#include <regex.h>
-#endif
+//#include <sys/types.h>
+#include "regex.h"
 
 
 /* abstract syntax tree for sieve */

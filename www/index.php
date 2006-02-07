@@ -16,6 +16,9 @@
 
  $smarty->assign( 'righttitle', 'news.' );
  $smarty->assign( 'rightcontent', array(
+ 	array( 'February 2006: libSieve 2.1.8',
+	'Fixed a memory allocation bug that was preventing the library from being reused after sieve2_free was called.
+	' ),
  	array( 'August 2005: libSieve 2.1.7',
 	'I\'ve rewritten the API, and I really like it this time. Take a look at the documentation pages and see what you think!
 	' ),

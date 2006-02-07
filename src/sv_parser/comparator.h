@@ -28,12 +28,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define COMPARATOR_H
 
 #ifdef ENABLE_REGEX
-#ifdef HAVE_RX
-#include <rxposix.h>
-#else
-#include <sys/types.h>
-#include <regex.h>
-#endif
+//#include <sys/types.h>
+#include "regex.h"
 #endif
 
 /* compares pat to text; returns 1 if it's true, 0 otherwise 

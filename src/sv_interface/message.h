@@ -49,11 +49,6 @@ typedef enum {
     ACTION_DENOTIFY
 } action_t;
 
-typedef struct sieve_notify_context notify_list_t;
-
-notify_list_t *libsieve_new_notify_list(void);
-void libsieve_free_notify_list(notify_list_t *n);
-
 /* header parsing */
 typedef enum {
     ADDRESS_ALL,

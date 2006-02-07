@@ -1,3 +1,13 @@
+libSieve 2.1.8
+--------------
+
+- Created a testsuite of scripts and messages
+  to exercise RFC and Draft comformance.
+
+- Fixed a memory allocation issue that prevented
+  the library from being used again after sieve2_free
+  had been called.
+
 libSieve 2.1.7
 --------------
 
