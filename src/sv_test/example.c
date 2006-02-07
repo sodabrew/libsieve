@@ -241,6 +241,9 @@ int my_getscript(sieve2_context_t *s, void *my)
 			path, name);
 	} else
 	if (!strlen(path) && !strlen(name)) {
+		/* If we're being called again, free what was here before. */
+		if (m->s_buf) free(m->s_buf);
+
 		/* Read the script file given as an argument. */
 		res = read_file(m->scriptfile, &m->s_buf, end_of_nothing);
 		if (res != SIEVE2_OK) {
@@ -341,11 +344,13 @@ static int read_file(char *filename, char **ret_buf,
 
 	fclose(f);
 
-	*ret_buf = f_buf; // Since f_buf is either NULL or valid, we're golden
+	*ret_buf = f_buf;
 	return SIEVE2_OK;
 }
 
 /* END OF EXAMPLE FILE PROCESSING FUNCTIONS */
+
+static int beenhere = 0;
 
 int main(int argc, char *argv[])
 {
@@ -354,7 +359,7 @@ int main(int argc, char *argv[])
 	int res, exitcode = 0;
 	struct my_context *my_context;
 	sieve2_context_t *sieve2_context;
-	char *message, *script;
+	char *message = NULL, *script = NULL;
 
 	while ((c = getopt(argc, argv, "vlc")) != EOF)
 	switch (c) {
@@ -457,15 +462,15 @@ int main(int argc, char *argv[])
 		goto freesieve;
 	}
 
-	if (validate_only) {
-		printf("Validating script...\n");
-		res = sieve2_validate(sieve2_context, my_context);
-		if (res != SIEVE2_OK) {
-			printf("Error %d when calling sieve2_validate: %s\n",
-				res, sieve2_errstr(res));
-			exitcode = 1;
-		}
-	} else {
+	printf("Validating script...\n");
+	res = sieve2_validate(sieve2_context, my_context);
+	if (res != SIEVE2_OK) {
+		printf("Error %d when calling sieve2_validate: %s\n",
+			res, sieve2_errstr(res));
+		exitcode = 1;
+	}
+
+	if (!validate_only) {
 		printf("Executing script...\n");
 		res = sieve2_execute(sieve2_context, my_context);
 		if (res != SIEVE2_OK) {
@@ -498,7 +503,10 @@ freesieve:
 	if (my_context) free(my_context);
 
 endnofree:
-	return exitcode;
+	if (beenhere)
+		return exitcode;
+	beenhere = 1;
+	return main(argc, argv);
 }
 
 /* END OF THE EXAMPLE */
