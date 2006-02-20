@@ -1,0 +1,392 @@
+
+
+
+Sieve Working Group                                       P. Saint-Andre
+Internet-Draft                                Jabber Software Foundation
+Expires: July 21, 2006                                       A. Melnikov
+                                                           Isode Limited
+                                                        January 17, 2006
+
+
+                   Sieve Notification Mechanism: xmpp
+                    draft-ietf-sieve-notify-xmpp-00
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on July 21, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   This document describes a profile of the Sieve extension for
+   notifications, to allow notifications to be sent over the Extensible
+   Messaging and Presence Protocol (XMPP), also known as Jabber.
+
+
+
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 1]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+     1.1   Overview . . . . . . . . . . . . . . . . . . . . . . . . .  3
+     1.2   Terminology  . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.  Definition . . . . . . . . . . . . . . . . . . . . . . . . . .  3
+     2.1   Notify ":method" tag . . . . . . . . . . . . . . . . . . .  3
+     2.2   Notify ":priority" tag . . . . . . . . . . . . . . . . . .  4
+   3.  Example  . . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+   4.  Internationalization Considerations  . . . . . . . . . . . . .  4
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . .  4
+   6.  References . . . . . . . . . . . . . . . . . . . . . . . . . .  5
+     6.1   Normative References . . . . . . . . . . . . . . . . . . .  5
+     6.2   Informative References . . . . . . . . . . . . . . . . . .  5
+       Authors' Addresses . . . . . . . . . . . . . . . . . . . . . .  6
+       Intellectual Property and Copyright Statements . . . . . . . .  7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 2]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+1.  Introduction
+
+1.1  Overview
+
+   The [NOTIFY] extension to the [SIEVE] mail filtering language is a
+   framework for providing notifications by employing URIs to specify
+   the notification mechanism.  This document defines how xmpp URIs (see
+   [XMPP-URI]) are used to generate notifications via the Extensible
+   Messaging and Presence Protocol (see [XMPP]), also known as Jabber.
+
+1.2  Terminology
+
+   This document inherits terminology from [NOTIFY], [SIEVE], and
+   [XMPP].
+
+   The capitalized key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "NOT
+   RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+   interpreted as described in RFC 2119 [TERMS].
+
+2.  Definition
+
+   The xmpp mechanism results in the sending of an XMPP message to
+   notify a recipient about an email message.  The notification MUST be
+   an XMPP <message/> stanza.  The value of the XMPP 'type' attribute
+   MUST be 'headline' or 'normal'.  The value of the XMPP 'from'
+   attribute MUST be the XMPP address of the notification service.  The
+   XMPP <message/> stanza MAY include a <subject/> child element whose
+   value is either the ":subject" tag or, absent that, some configurable
+   text indicating that the message is a Sieve notification.
+
+   The format of the notify action is described in the following
+   sections.
+
+2.1  Notify ":method" tag
+
+   The notify ":method" tag MUST be a URI that conforms to the xmpp URI
+   scheme (as specified in [XMPP-URI]) and that identifies an XMPP
+   account associated with the email inbox.  The URI MAY include the
+   resource identifier portion of an XMPP address but SHOULD NOT include
+   an authority component, query component, or fragment identifier
+   component.  The processing application MUST extract an XMPP address
+   from the URI in accordance with the processing rules specified in
+   [XMPP-URI].  The resulting XMPP address MUST be encapsulated in XMPP
+   syntax as the value of the XMPP 'to' attribute.
+
+
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 3]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+2.2  Notify ":priority" tag
+
+   The notify ":priority" tag has no special meaning for this
+   notification mechanism, and this specification puts no restriction on
+   its use.  The value of the notify ":priority" tag MAY be transformed
+   into XMPP syntax; if so, it SHOULD be encapsulated as the value of an
+   [XMPP-SHIM] header named "Urgency", and the XML character of that
+   header SHOULD be "high", "medium", or "low".
+
+3.  Example
+
+   Consider the following Sieve notify action:
+
+   notify :method "xmpp:romeo@example.com"
+          :id "some-id"
+          :priority "high"
+          :message "<juliet@example.org> Wherefore art thou?";
+
+   The resulting XMPP <message/> stanza might be as follows:
+
+   <message from='notify.example.com'
+            to='romeo@example.com'
+            xml:lang='en'>
+     <subject>A Sieve instant notification!</subject>
+     <body>&lt;juliet@example.org&gt; Wherefore art thou?</body>
+     <headers xmlns='http://jabber.org/protocol/shim'>
+       <header name='Priority'>urgent</header>
+     </headers>
+   </message>
+
+
+4.  Internationalization Considerations
+
+   Although an XMPP address may contain nearly any [UNICODE] character,
+   the value of the ":method" tag MUST be a Uniform Resource Identifier
+   (see [URI]) rather than an Internationalized Resource Identifier (see
+   [IRI]).  The rules specified in [XMPP-URI] MUST be followed when
+   generating XMPP URIs.
+
+5.  Security Considerations
+
+   Detailed security considerations for the relevant protocols profiled
+   in this document are given in [NOTIFY], [SIEVE], and [XMPP]; this
+   document introduces no new security concerns above and beyond those
+   described in the foregoing specifications.
+
+6.  References
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 4]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+6.1  Normative References
+
+   [NOTIFY]   Melnikov, A., "Sieve -- An extension for providing instant
+              notifications", draft-ietf-sieve-notify-01 (work in
+              progress), October 2005.
+
+   [SIEVE]    Showalter, T. and P. Guenther, "Sieve: An Email Filtering
+              Language", draft-ietf-sieve-3028bis-05 (work in progress),
+              November 2005.
+
+   [TERMS]    Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [XMPP]     Saint-Andre, P., "Extensible Messaging and Presence
+              Protocol (XMPP): Core", RFC 3920, October 2004.
+
+   [XMPP-URI]
+              Saint-Andre, P., "Internationalized Resource Identifiers
+              (IRIs) and Uniform Resource  Identifiers (URIs) for the
+              Extensible Messaging and Presence Protocol (XMPP)",
+              draft-saintandre-xmpp-iri-03 (work in progress),
+              December 2005.
+
+6.2  Informative References
+
+   [IRI]      Duerst, M. and M. Suignard, "Internationalized Resource
+              Identifiers (IRIs)", RFC 3987, January 2005.
+
+   [RFC1327]  Hardcastle-Kille, S., "Mapping between X.400(1988) / ISO
+              10021 and RFC 822", RFC 1327, May 1992.
+
+   [UNICODE]  The Unicode Consortium, "The Unicode Standard, Version
+              3.2.0", 2000.
+
+              The Unicode Standard, Version 3.2.0 is defined by The
+              Unicode Standard, Version 3.0 (Reading, MA, Addison-
+              Wesley, 2000.  ISBN 0-201-61633-5), as amended by the
+              Unicode Standard Annex #27: Unicode 3.1
+              (http://www.unicode.org/reports/tr27/) and by the Unicode
+              Standard Annex #28: Unicode 3.2
+              (http://www.unicode.org/reports/tr28/).
+
+   [URI]      Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, January 2005.
+
+   [UTF-8]    Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, RFC 3629, November 2003.
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 5]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+   [XMPP-SHIM]
+              Saint-Andre, P. and J. Hildebrand, "Stanza Headers and
+              Internet Metadata (SHIM)", JSF JEP 0131, August 2005.
+
+
+Authors' Addresses
+
+   Peter Saint-Andre
+   Jabber Software Foundation
+
+   Email: stpeter@jabber.org
+
+
+   Alexey Melnikov
+   Isode Limited
+
+   Email: Alexey.Melnikov@isode.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 6]
+
+Internet-Draft                 SIEVE-XMPP                   January 2006
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2006).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Saint-Andre & Melnikov    Expires July 21, 2006                 [Page 7]
+

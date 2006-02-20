@@ -1,0 +1,728 @@
+
+
+
+Sieve Working Group                                             B. Leiba
+Internet-Draft                           IBM T.J. Watson Research Center
+Expires: June 10, 2006                                         M. Haardt
+                                                           freenet.de AG
+                                                        December 7, 2005
+
+
+                  Sieve Notification Mechanism: mailto
+                   draft-ietf-sieve-notify-mailto-00
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on June 10, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2005).
+
+Abstract
+
+   This document describes a profile of the Sieve extension for
+   notifications, to allow notifications to be sent by electronic mail.
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 1]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   1.1 Overview . . . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   1.2 Conventions used in this document  . . . . . . . . . . . . . .  3
+
+   2.  Definition . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+   2.1 Notify tag ":method" . . . . . . . . . . . . . . . . . . . . .  4
+   2.2 Notify tag ":id" . . . . . . . . . . . . . . . . . . . . . . .  4
+   2.3 Notify tag ":priority" . . . . . . . . . . . . . . . . . . . .  4
+   2.4 Notify tag ":message"  . . . . . . . . . . . . . . . . . . . .  4
+   2.5 Other Definitions  . . . . . . . . . . . . . . . . . . . . . .  5
+
+   3.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . .  6
+
+   4.  Internationalization Considerations  . . . . . . . . . . . . .  8
+
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . .  9
+
+   6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 10
+
+   7.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+   7.1 Normative References . . . . . . . . . . . . . . . . . . . . . 11
+   7.2 Non-Normative References . . . . . . . . . . . . . . . . . . . 11
+
+       Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . 11
+
+       Intellectual Property and Copyright Statements . . . . . . . . 13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 2]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+1.  Introduction
+
+1.1  Overview
+
+   The [Notify] extension to the [Sieve] mail filtering language is a
+   framework for providing notifications by employing URIs to specify
+   the notification mechanism.  This document defines how [mailto] URIs
+   are used to generate notifications by e-mail.
+
+
+1.2  Conventions used in this document
+
+   Conventions for notations are as in [Sieve] section 1.1, including
+   the use of [Kwds] and the use of [ABNF].
+   [[no abnf ref: We don't actually need the ABNF reference...]]
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [Kwds].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 3]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+2.  Definition
+
+   The mailto mechanism results in the sending of a new email message (a
+   "notification message") to notify a recipient about a "triggering
+   message".
+
+2.1  Notify tag ":method"
+
+   The mailto notification mechanism uses standard mailto URIs as
+   specified in [mailto].  URI parameters with hname "from", "subject"
+   and "received" are ignored if specified; all other parameters are
+   accepted.
+
+   [[Barry ignored: Should we ignore them, or should their presence be
+   an error?]]
+
+2.2  Notify tag ":id"
+
+   The :id tag has no special meaning for this notification mechanism,
+   and this specification puts no restriction on its use.
+
+2.3  Notify tag ":priority"
+
+   The :priority tag has no special meaning for this notification
+   mechanism, and this specification puts no restriction on its use.
+   Implementations MAY use the value of :priority to set a priority or
+   importance indication on the notification message.
+
+2.4  Notify tag ":message"
+
+   o  The "From:" header field and the envelope sender of the
+      notification message are set to the envelope "to" field from the
+      triggering message, as used by Sieve.
+
+      [[Barry from: It might be better in some cases for the
+      notification to "come from" the sender of the triggering message.
+      In other cases it might be better for all notifications to come
+      from the "mail system".  I think we should define a way to specify
+      the behaviour here, perhaps with a new notify tag.]]
+
+      [[Barry sender: Should we also provide a mapping or setting for
+      the "Sender:" header field?]]
+
+   o  The "To:" header field and the envelope recipient(s) of the
+      notification message are set to the address(es) specified in URI
+      (including any URI parameters where the hname is "to").
+
+      [[Barry to: I'd like some way to specify that the To: header
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 4]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+      should be retained from the triggering message.  In fact, I'd like
+      a way to say that ALL headers be retained.]]
+
+   o  The "Received:" headers from the triggering message are retained
+      in the notification message, as these may help detect and prevent
+      mail loops.
+
+   o  The "Subject:" header of the notification message contains the
+      value defined by the :message notify tag, as described in
+      [Notify].  If there is no :message tag, the subject is retained
+      from the triggering message.  Note that Sieve variables can be
+      used to advantage here, as shown in the example in Section 3.
+
+   o  All other header fields of the notification message either are as
+      specified in the URI, or have implementation-specific values;
+      their values are not defined here.
+
+   o  If the mailto URI contains a "body" parameter, the value of that
+      parameter is used as the body of the notification message.  If
+      there is no "body" parameter, the body of the notification message
+      is empty.
+
+      [[Barry body: I'd like some way to specify that the body contain
+      the body of the triggering message.]]
+
+
+2.5  Other Definitions
+
+   Because the receipt of an email message is generating another email
+   message, implementations MUST take steps to avoid mail loops.
+
+   [[Barry loops: We should say more about this...]]
+
+   [[comment 1: Mailto URIs focus on the message, not its submission.
+   There is no way to specify envelope parameters, require encryption or
+   authentication.  Sure enough there is more than SMTP, so mailto is
+   fine not to address this specific transport, but should we ever need
+   more, it can not be specified as URI parameter, because there is no
+   room in its namespace.]]
+
+   [[comment 2: Michael tried to get documentation on SMTP-SMS gateways,
+   but everybody operating one keeps the specification like a precious
+   secret.  From experiments made some years ago, we know some gateways
+   ignore all messages with empty envelope senders, some do not
+   implement MIME and some ignore the body.  Using empty envelope
+   senders to avoid loops is not possible and it would not allow to send
+   notifications about bounces.]]
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 5]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+3.  Examples
+
+
+   Triggering message (received by recipient@example.org):
+
+      Return-Path: <knitting-bounces@example.com>
+      Received: from mail.example.com by mail.example.org
+        for <recipient@example.org>; Wed, 7 Dec 2005 05:08:02 -0500
+      Received: from hobbies.example.com by mail.example.com
+        for <knitting@example.com>; Wed, 7 Dec 2005 02:00:26 -0800
+      Message-ID: <1234567.89ABCDEF@example.com>
+      Date: Wed, 07 Dec 2005 10:59:19 +0100
+      Precedence: list
+      List-Id: Knitting Mailing List <knitting.example.com>
+      Sender: knitting-bounces@example.com
+      Errors-To: knitting-bounces@example.com
+      From: "Jeff Smith" <jeff@hobbies.example.com>
+      To: "Knitting Mailing List" <knitting@example.com>
+      Subject: [Knitting] A new sweater
+
+      I just finished a great new sweater!
+
+
+   Sieve script (run on behalf of recipient@example.org):
+
+      require ["notify", "variables"];
+
+      if header :contains "list-id" "knitting.example.com" {
+        if header :matches "Subject" "[*] *" {
+          notify :method "mailto:0123456789@sms.example.net"
+                 :message "From ${1} list: ${2}"
+                 :priority "3";
+        }
+      }
+
+
+   Notification message:
+
+      Received: from mail.example.com by mail.example.org
+        for <recipient@example.org>; Wed, 7 Dec 2005 05:08:02 -0500
+      Received: from hobbies.example.com by mail.example.com
+        for <knitting@example.com>; Wed, 7 Dec 2005 02:00:26 -0800
+      Date: Wed, 7 Dec 2005 05:08:55 -0500
+      Message-ID: <A2299BB.FF7788@example.org>
+      From: <recipient@example.org>
+      To: <0123456789@sms.example.net>
+      Subject: From Knitting list: A new sweater
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 6]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+   Note that:
+
+   o  Fields such as "Message-ID" and "Date" were generated afresh for
+      the notification message, and do not relate to the triggering
+      message.
+
+   o  Additional "Received:" headers will be added to the notification
+      message in transit; the ones shown were copied from the triggering
+      message.
+
+   o  If this message should appear at the mail.example.org server
+      again, the server can use the presence of a "mail.example.org"
+      received line to avoid sending another notification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 7]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+4.  Internationalization Considerations
+
+   [[Internationalization: What do we say here?]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 8]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+5.  Security Considerations
+
+   Sending a notification is comparable with forwarding mail to the
+   notification recipient.  Care must be taken when forwarding mail
+   automatically, to ensure that confidential information is not sent
+   into an insecure environment.
+
+   The automated sending of email messages exposes the system to mail
+   loops, which can cause operational problems.  Implementations of this
+   specification MUST protect themselves against mail loops.
+
+   Additional security considerations are discussed in [Sieve] and in
+   [Notify].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                 [Page 9]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+6.  IANA Considerations
+
+   [[IANA to-do: What do we need to do to actually get this set up with
+   IANA?]]
+   The following template specifies the IANA registration of the Sieve
+   notification mechanism specified in this document:
+
+   To: iana@iana.org
+   Subject: Registration of new Sieve notification mechanism
+   Mechanism name: mailto
+   Mechanism URI: draft-duerst-mailto-bis (change to RFC----)
+   Mechanism-specific tags: none
+   Standards Track/IESG-approved experimental RFC number: this RFC
+   Person and email address to contact for further information:
+       Michael Haardt <michael@freenet-ag.de>
+
+   This information should be added to the list of sieve notification
+   mechanisms given on
+   http://www.iana.org/assignments/sieve-notification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                [Page 10]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+7.  References
+
+7.1  Normative References
+
+   [Kwds]    Bradner, S., "Key words for use in RFCs to Indicate
+             Requirement Levels", RFC 2119, March 1997.
+
+   [Notify]  Melnikov, A., Ed., Leiba, B., Ed., Segmuller, W., and T.
+             Martin, "Sieve Extension: Notifications", work in
+             progress, draft-ietf-sieve-notify, December 2005.
+
+   [Sieve]   Guenther, P., Ed. and T. Showalter, Ed., "Sieve: An Email
+             Filtering Language", work in
+             progress, draft-ietf-sieve-3028bis, November 2005.
+
+   [mailto]  Duerst, M., Masinter, L., and J. Zawinski, "The mailto URI
+             scheme", work in progress, draft-duerst-mailto-bis,
+             February 2005.
+
+7.2  Non-Normative References
+
+   [ABNF]     Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", RFC 4234, October 2005.
+
+   [Variables]
+              Homme, K., "Sieve Extension: Variables", work in
+              progress, draft-ietf-sieve-variables, October 2005.
+
+
+Authors' Addresses
+
+   Barry Leiba
+   IBM T.J. Watson Research Center
+   19 Skyline Drive
+   Hawthorne, NY  10532
+   US
+
+   Phone: +1 914 784 7941
+   Email: leiba@watson.ibm.com
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                [Page 11]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+   Michael Haardt
+   freenet.de AG
+   Willstaetter Str. 13
+   Duesseldorf, NRW  40549
+   Germany
+
+   Phone: +49 241 53087 520
+   Email: michael.haardt@freenet-ag.de
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                [Page 12]
+
+Internet-Draft    Sieve Notification Mechanism: mailto     December 2005
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2005).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Leiba & Haardt            Expires June 10, 2006                [Page 13]
+
