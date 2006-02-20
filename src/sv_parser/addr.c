@@ -111,13 +111,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS)
-#endif /* ifdef DEBUG */
-
 /* Better yacc error messages make me happy */
 #define YYERROR_VERBOSE
 /* Must be defined before addr.h */
@@ -162,7 +155,7 @@ typedef int YYSTYPE;
 
 
 /* Line 214 of yacc.c.  */
-#line 166 "addr.c"
+#line 159 "addr.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -345,9 +338,9 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    65,    65,    66,    68,    69,    71,    77,    85,    86,
-      87,    94,    95,   102,   111,   115,   120,   121,   126,   127,
-     132,   133,   135,   137,   142,   143,   148,   149,   151
+       0,    58,    58,    59,    61,    62,    64,    70,    78,    79,
+      80,    87,    88,    95,   104,   108,   113,   114,   119,   120,
+     125,   126,   128,   130,   135,   136,   141,   142,   144
 };
 #endif
 
@@ -1073,27 +1066,27 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 65 "addr.y"
+#line 58 "addr.y"
     { libsieve_debugf(( "address: mailbox: %s\n", yyvsp[0] )); }
     break;
 
   case 3:
-#line 66 "addr.y"
+#line 59 "addr.y"
     { libsieve_debugf(( "address: group: %s\n", yyvsp[0] )); }
     break;
 
   case 4:
-#line 68 "addr.y"
+#line 61 "addr.y"
     { libsieve_debugf(( "group: phrase: %s\n", yyvsp[-2] )); }
     break;
 
   case 5:
-#line 69 "addr.y"
+#line 62 "addr.y"
     { libsieve_debugf(( "group: phrase mailboxes: %s %s\n", yyvsp[-3], yyvsp[-1] )); }
     break;
 
   case 6:
-#line 71 "addr.y"
+#line 64 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		libsieve_debugf(( "mailboxes: mailbox: %s\n", yyvsp[0] ));
@@ -1103,7 +1096,7 @@ yyreduce:
     break;
 
   case 7:
-#line 77 "addr.y"
+#line 70 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		libsieve_debugf(( "mailboxes: mailboxes mailbox: %s %s\n", yyvsp[-2], yyvsp[0] ));
@@ -1113,17 +1106,17 @@ yyreduce:
     break;
 
   case 8:
-#line 85 "addr.y"
+#line 78 "addr.y"
     { libsieve_debugf(( "mailbox: routeaddr: %s\n", yyvsp[0] )); }
     break;
 
   case 9:
-#line 86 "addr.y"
+#line 79 "addr.y"
     { libsieve_debugf(( "mailbox: addrspec: %s\n", yyvsp[0] )); }
     break;
 
   case 10:
-#line 87 "addr.y"
+#line 80 "addr.y"
     {
 		libsieve_debugf(( "mailbox: phrase routeaddr: %s %s\n", yyvsp[-1], yyvsp[0] ));
 		// This is a "top terminal" state...
@@ -1133,12 +1126,12 @@ yyreduce:
     break;
 
   case 11:
-#line 94 "addr.y"
+#line 87 "addr.y"
     { libsieve_debugf(( "routeaddr: addrspec: %s\n", yyvsp[-1] )); }
     break;
 
   case 12:
-#line 95 "addr.y"
+#line 88 "addr.y"
     {
 		libsieve_debugf(( "routeaddr: route addrspec: %s:%s\n", yyvsp[-3], yyvsp[-1] ));
 		// This is a "top terminal" state...
@@ -1148,7 +1141,7 @@ yyreduce:
     break;
 
   case 13:
-#line 102 "addr.y"
+#line 95 "addr.y"
     {
 		libsieve_debugf(( "addrspec: localpart domain: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		// This is a "top terminal" state...
@@ -1160,7 +1153,7 @@ yyreduce:
     break;
 
   case 14:
-#line 111 "addr.y"
+#line 104 "addr.y"
     {
 		libsieve_debugf(( "route: domain: %s\n", yyvsp[0] ));
                 yyval = libsieve_strbuf(ml, libsieve_strconcat( "@", yyvsp[0], NULL ), strlen(yyvsp[0])+1, FREEME);
@@ -1168,7 +1161,7 @@ yyreduce:
     break;
 
   case 15:
-#line 115 "addr.y"
+#line 108 "addr.y"
     {
 		libsieve_debugf(( "route: domain route: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( "@", yyvsp[-2], ",", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+2, FREEME);
@@ -1176,12 +1169,12 @@ yyreduce:
     break;
 
   case 16:
-#line 120 "addr.y"
+#line 113 "addr.y"
     { libsieve_debugf(( "localpart: word: %s\n", yyvsp[0] )); }
     break;
 
   case 17:
-#line 121 "addr.y"
+#line 114 "addr.y"
     {
 		libsieve_debugf(( "localpart: localpart word: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-2], ".", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+1, FREEME);
@@ -1189,12 +1182,12 @@ yyreduce:
     break;
 
   case 18:
-#line 126 "addr.y"
+#line 119 "addr.y"
     { libsieve_debugf(( "domain: subdomain: %s\n", yyvsp[0] )); }
     break;
 
   case 19:
-#line 127 "addr.y"
+#line 120 "addr.y"
     {
 		libsieve_debugf(( "domain: domain subdomain: %s %s\n", yyvsp[-2], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-2], ".", yyvsp[0], NULL ), strlen(yyvsp[-2])+strlen(yyvsp[0])+1, FREEME);
@@ -1202,22 +1195,22 @@ yyreduce:
     break;
 
   case 20:
-#line 132 "addr.y"
+#line 125 "addr.y"
     { libsieve_debugf(( "subdomain: domainref: %s\n", yyvsp[0] )); }
     break;
 
   case 21:
-#line 133 "addr.y"
+#line 126 "addr.y"
     { libsieve_debugf(( "subdomain: domainlit: %s\n", yyvsp[0] )); }
     break;
 
   case 22:
-#line 135 "addr.y"
+#line 128 "addr.y"
     { libsieve_debugf(( "domainref: ATOM: %s\n", yyvsp[0] )); }
     break;
 
   case 23:
-#line 137 "addr.y"
+#line 130 "addr.y"
     {
 	 	libsieve_debugf(( "domainlit: DTEXT: %s\n", yyvsp[-1] ));
 		yyval = yyvsp[-1];
@@ -1225,12 +1218,12 @@ yyreduce:
     break;
 
   case 24:
-#line 142 "addr.y"
+#line 135 "addr.y"
     { libsieve_debugf(( "phrase: word: %s\n", yyvsp[0] )); }
     break;
 
   case 25:
-#line 143 "addr.y"
+#line 136 "addr.y"
     {
 		libsieve_debugf(( "phrase: phrase word: %s %s\n", yyvsp[-1], yyvsp[0] ));
 		yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-1], " ", yyvsp[0], NULL ), strlen(yyvsp[-1])+strlen(yyvsp[0])+1, FREEME);
@@ -1238,17 +1231,17 @@ yyreduce:
     break;
 
   case 26:
-#line 148 "addr.y"
+#line 141 "addr.y"
     { libsieve_debugf(( "word: ATOM: %s\n", yyvsp[0] )); }
     break;
 
   case 27:
-#line 149 "addr.y"
+#line 142 "addr.y"
     { libsieve_debugf(( "word: qstring: %s\n", yyvsp[0] )); }
     break;
 
   case 28:
-#line 151 "addr.y"
+#line 144 "addr.y"
     {
 		libsieve_debugf(( "qstring: QTEXT: %s\n", yyvsp[-1] ));
 		yyval = yyvsp[-1];
@@ -1259,7 +1252,7 @@ yyreduce:
     }
 
 /* Line 1010 of yacc.c.  */
-#line 1263 "addr.c"
+#line 1256 "addr.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1484,7 +1477,7 @@ yyreturn:
 }
 
 
-#line 156 "addr.y"
+#line 149 "addr.y"
 
 
 /* copy address error message into buffer provided by sieve parser */

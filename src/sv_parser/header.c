@@ -94,13 +94,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
-
 /* Better yacc error messages please */
 #define YYERROR_VERBOSE
 /* Must be defined before header.h */
@@ -147,7 +140,7 @@ typedef int YYSTYPE;
 
 
 /* Line 214 of yacc.c.  */
-#line 151 "header.c"
+#line 144 "header.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -321,7 +314,7 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    50,    50,    55,    61,    65,    70,    74
+       0,    43,    43,    48,    54,    58,    63,    67
 };
 #endif
 
@@ -1015,7 +1008,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 50 "header.y"
+#line 43 "header.y"
     {
                 /* Allocate a new cache block */
                 if (libsieve_headerappend(&hl) != SIEVE2_OK)
@@ -1024,7 +1017,7 @@ yyreduce:
     break;
 
   case 3:
-#line 55 "header.y"
+#line 48 "header.y"
     {
                 /* Allocate a new cache block */
                 if (libsieve_headerappend(&hl) != SIEVE2_OK)
@@ -1033,7 +1026,7 @@ yyreduce:
     break;
 
   case 4:
-#line 61 "header.y"
+#line 54 "header.y"
     {
                 libsieve_debugf(( "header: NAME COLON: %s:\n", yyvsp[-1] ));
                 libsieve_headerentry(hl->h, yyvsp[-1], NULL);
@@ -1041,7 +1034,7 @@ yyreduce:
     break;
 
   case 5:
-#line 65 "header.y"
+#line 58 "header.y"
     {
                 libsieve_debugf(( "header: NAME COLON body: %s:%s\n", yyvsp[-2], yyvsp[0] ));
                 libsieve_headerentry(hl->h, yyvsp[-2], yyvsp[0]);
@@ -1049,7 +1042,7 @@ yyreduce:
     break;
 
   case 6:
-#line 70 "header.y"
+#line 63 "header.y"
     {
                 /* Default action is $$ = $1 */
                 libsieve_debugf(( "body: TEXT: %s\n", yyvsp[0] ));
@@ -1057,7 +1050,7 @@ yyreduce:
     break;
 
   case 7:
-#line 74 "header.y"
+#line 67 "header.y"
     {
                 libsieve_debugf(( "body: body WRAP: %s %s\n", yyvsp[-1], yyvsp[0] ));
                 yyval = libsieve_strbuf(ml, libsieve_strconcat( yyvsp[-1], yyvsp[0], NULL ), strlen(yyvsp[-1])+strlen(yyvsp[0]), FREEME);
@@ -1068,7 +1061,7 @@ yyreduce:
     }
 
 /* Line 1010 of yacc.c.  */
-#line 1072 "header.c"
+#line 1065 "header.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1293,7 +1286,7 @@ yyreturn:
 }
 
 
-#line 79 "header.y"
+#line 72 "header.y"
 
 
 /* copy header error message into buffer provided by sieve parser */

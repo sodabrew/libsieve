@@ -374,7 +374,7 @@ int libsieve_do_getallheaders(struct sieve2_context *c,
     return SIEVE2_OK;
 }
 
-static char * notfound[] = { NULL };
+static char * notfound[] = { "", NULL };
 
 int libsieve_do_getheader(struct sieve2_context *c,
 		const char * const header, char ***body)
@@ -386,9 +386,13 @@ int libsieve_do_getheader(struct sieve2_context *c,
     libsieve_callback_do(c, SIEVE2_MESSAGE_GETHEADER);
 
     *body = libsieve_getvalue_stringlist(c, "body");
-    if (!*body) *body = notfound;
 
     libsieve_callback_end(c, SIEVE2_MESSAGE_GETHEADER);
+
+    if (!*body || !**body) {
+        *body = notfound;
+        return SIEVE2_DONE;
+    }
 
     return SIEVE2_OK;
 }
@@ -404,6 +408,9 @@ int libsieve_do_getsize(struct sieve2_context *c, int *sz)
     return SIEVE2_OK;
 }
 
+static const char * toenclosure[] = { "", NULL };
+static const char * fromenclosure[] = { "", NULL };
+
 int libsieve_do_getenvelope(struct sieve2_context *c, const char * const f, char **e)
 {
     libsieve_callback_begin(c, SIEVE2_MESSAGE_GETENVELOPE);
@@ -415,11 +422,13 @@ int libsieve_do_getenvelope(struct sieve2_context *c, const char * const f, char
     switch (*f) {
     case 'f':
     case 'F':
-        *e = libsieve_getvalue_string(c, "from");
+        fromenclosure[0] = libsieve_getvalue_string(c, "from");
+        *e = fromenclosure;
         break;
     case 't':
     case 'T':
-        *e = libsieve_getvalue_string(c, "to");
+	toenclosure[0] = libsieve_getvalue_string(c, "to");
+        *e = toenclosure;
         break;
     }
 

@@ -27,13 +27,6 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS)
-#endif /* ifdef DEBUG */
-
 
 /* Must be defined before addr.h */
 #define YYSTYPE char *

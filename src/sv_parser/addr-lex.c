@@ -449,13 +449,6 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS)
-#endif /* ifdef DEBUG */
-
 
 /* Must be defined before addr.h */
 #define YYSTYPE char *
@@ -481,7 +474,7 @@ void libsieve_addrfatalerror(const char msg[]);
 #define DOMAINLIT 2
 #define COMMENT 3
 
-#line 485 "addr-lex.c"
+#line 478 "addr-lex.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -632,10 +625,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 65 "addr-lex.l"
+#line 58 "addr-lex.l"
 
 
-#line 639 "addr-lex.c"
+#line 632 "addr-lex.c"
 
 	if ( yy_init )
 		{
@@ -720,22 +713,22 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 67 "addr-lex.l"
+#line 60 "addr-lex.l"
 { BEGIN QSTRING; libsieve_debugf(( "Begin QSTRING\n" )); return QUOTE; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 68 "addr-lex.l"
+#line 61 "addr-lex.l"
 { BEGIN DOMAINLIT; libsieve_debugf(( "Begin DOMAINLIT\n" )); return yytext[0]; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 69 "addr-lex.l"
+#line 62 "addr-lex.l"
 { ncom = 1; libsieve_debugf(( "Begin COMMENT\n" )); BEGIN COMMENT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 70 "addr-lex.l"
+#line 63 "addr-lex.l"
 { libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
@@ -743,7 +736,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 75 "addr-lex.l"
+#line 68 "addr-lex.l"
 {
 		/* Return the special character */
 		return yytext[0];
@@ -751,7 +744,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 79 "addr-lex.l"
+#line 72 "addr-lex.l"
 {
 		libsieve_debugf(( "Whitespace silently murdered.\n" ));
 		/* Ignore whitespace by not returning */
@@ -759,7 +752,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "addr-lex.l"
+#line 76 "addr-lex.l"
 {
 		/* Match any set of non-special-characters */
 		libsieve_addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
@@ -768,7 +761,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 89 "addr-lex.l"
+#line 82 "addr-lex.l"
 {
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
@@ -778,7 +771,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 95 "addr-lex.l"
+#line 88 "addr-lex.l"
 {
 		BEGIN INITIAL;
 		libsieve_debugf(( "End QSTRING\n" ));
@@ -787,12 +780,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 101 "addr-lex.l"
+#line 94 "addr-lex.l"
 return DTEXT;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 102 "addr-lex.l"
+#line 95 "addr-lex.l"
 {
 		BEGIN INITIAL;
 		libsieve_debugf(( "End DOMAINLIT\n" ));
@@ -801,21 +794,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 108 "addr-lex.l"
+#line 101 "addr-lex.l"
 /* ignore comments */
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 109 "addr-lex.l"
+#line 102 "addr-lex.l"
 ncom++;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 110 "addr-lex.l"
+#line 103 "addr-lex.l"
 { ncom--; if (ncom == 0) BEGIN INITIAL; }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 111 "addr-lex.l"
+#line 104 "addr-lex.l"
 { libsieve_addrerror("address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
@@ -823,10 +816,10 @@ case YY_STATE_EOF(COMMENT):
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 116 "addr-lex.l"
+#line 109 "addr-lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 830 "addr-lex.c"
+#line 823 "addr-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(QSTRING):
 case YY_STATE_EOF(DOMAINLIT):
@@ -1709,7 +1702,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 116 "addr-lex.l"
+#line 109 "addr-lex.l"
 
 
 /* take input from address string provided by sieve parser */

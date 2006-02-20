@@ -411,13 +411,6 @@ char *yytext;
  * * * */
 
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
-
 /* Must be defined before header.h */
 #define YYSTYPE char *
 #undef YY_INPUT
@@ -442,7 +435,7 @@ void libsieve_headerfatalerror(const char msg[]);
 #define S_TEXT 2
 #define S_WRAP 3
 
-#line 446 "header-lex.c"
+#line 439 "header-lex.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -596,10 +589,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 48 "header-lex.l"
+#line 41 "header-lex.l"
 
 
-#line 603 "header-lex.c"
+#line 596 "header-lex.c"
 
 	if ( yy_init )
 		{
@@ -685,7 +678,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 50 "header-lex.l"
+#line 43 "header-lex.l"
 {
                 BEGIN S_NAME;
                 libsieve_debugf(( "Begin NAME\n" ));
@@ -694,7 +687,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 55 "header-lex.l"
+#line 48 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 libsieve_debugf(( "Begin WRAP (line started with whitespace)\n" ));
@@ -703,7 +696,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 60 "header-lex.l"
+#line 53 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 libsieve_debugf(( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" ));
@@ -714,7 +707,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 67 "header-lex.l"
+#line 60 "header-lex.l"
 {
                 /* Special case of an empty header: whitespace followed by newlines */
                 libsieve_debugf(( "Eat some whitespace and return COLON, forget TEXT\n" ));
@@ -723,7 +716,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 72 "header-lex.l"
+#line 65 "header-lex.l"
 {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
@@ -733,14 +726,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 78 "header-lex.l"
+#line 71 "header-lex.l"
 {
                 /* Eat stray newlines, such as those at the end of every line... */
                 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 82 "header-lex.l"
+#line 75 "header-lex.l"
 {
                 /* FIXME: Should be something like [!-9;-~]... */
                 /* Field names must be in these ASCII ranges:
@@ -755,7 +748,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 94 "header-lex.l"
+#line 87 "header-lex.l"
 {
                 libsieve_debugf(( "TEXT: %s\n", yytext ));
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
@@ -765,7 +758,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 101 "header-lex.l"
+#line 94 "header-lex.l"
 {
                 libsieve_debugf(( "WRAP: %s\n", yytext ));
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
@@ -775,10 +768,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 108 "header-lex.l"
+#line 101 "header-lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 782 "header-lex.c"
+#line 775 "header-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(S_NAME):
 case YY_STATE_EOF(S_TEXT):
@@ -1664,7 +1657,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 108 "header-lex.l"
+#line 101 "header-lex.l"
 
 
 /* take input from header string provided by sieve parser */

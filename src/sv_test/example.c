@@ -506,7 +506,7 @@ endnofree:
 	if (beenhere)
 		return exitcode;
 	beenhere = 1;
-	return main(argc, argv);
+	return 0;
 }
 
 /* END OF THE EXAMPLE */

@@ -275,26 +275,34 @@ int libsieve_eval(struct sieve2_context *context,
 		struct addr_marker *marker = NULL;
 		char *tmp;
 
+		libsieve_debugf(("Starting into a VACATION action.\n"));
+
 		/* is there an Auto-Submitted keyword other than "no"? */
 		strcpy(buf, "auto-submitted");
 		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
-		    while (*body[0] && isspace((int) *body[0])) body[0]++;
+		    while (body[0] && *body[0] && isspace((int) *body[0])) body[0]++;
 		    if (strcasecmp(body[0], "no")) l = SIEVE2_DONE;
 		}
+
+		if (l == SIEVE2_DONE)
+			libsieve_debugf(("VACATION aborted by Auto-Submitted header.\n"));
 
 		/* is there a Precedence keyword of "junk | bulk | list"? */
 		strcpy(buf, "precedence");
 		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
-		    while (*body[0] && isspace((int) *body[0])) body[0]++;
+		    while (body[0] && *body[0] && isspace((int) *body[0])) body[0]++;
 		    if (!strcasecmp(body[0], "junk") ||
 			!strcasecmp(body[0], "bulk") ||
 			!strcasecmp(body[0], "list"))
 			l = SIEVE2_DONE;
 		}
+
+		if (l == SIEVE2_DONE)
+			libsieve_debugf(("VACATION aborted by Precedence header.\n"));
 
 		/* Note: the domain-part of all addresses are canonicalized */
 
@@ -360,8 +368,10 @@ int libsieve_eval(struct sieve2_context *context,
 				   (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
-		    if (!found)
+		    if (!found) {
+			libsieve_debugf(("Vacation didn't find my address in to, cc or bcc.\n"));
 			l = SIEVE2_DONE;
+		    }
 		}
 
 		if (l == SIEVE2_OK) {

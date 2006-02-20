@@ -31,13 +31,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS)
-#endif /* ifdef DEBUG */
-
 /* Better yacc error messages make me happy */
 #define YYERROR_VERBOSE
 /* Must be defined before addr.h */

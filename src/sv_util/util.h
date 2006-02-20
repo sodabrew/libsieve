@@ -11,6 +11,16 @@
 #ifndef INCLUDED_UTIL_H
 #define INCLUDED_UTIL_H
 
+/* Needed for printf. */
+#include <stdio.h>
+
+/* Be sure to use double parens when calling! */
+#ifdef DEBUG
+#define libsieve_debugf(ARGS) printf ARGS
+#else
+#define libsieve_debugf(ARGS) 
+#endif /* ifdef DEBUG */
+
 /* These are the memory oriented functions */
 
 void libsieve_free(void *ptr);

@@ -78,9 +78,9 @@
 									<b>{$content[0]}</b>
 									<br>
 								{/if}
-								<small>
+								<!--small-->
 								{$content[1]}
-								</small>
+								<!--/small-->
 								<br><br>
 							{/foreach}
 							</td>
@@ -184,7 +184,7 @@
 </table>
 
 <small><center>
-	template &copy; 2002 by foobar of <a href="http://www.oswd.org/">oswd</a> -- contents &copy; 2002, 2003 by aaron stone
+	template &copy; 2002 by artwiz of <a href="http://www.oswd.org/">oswd</a> -- contents &copy; 2002, 2003 by aaron stone
 </center></small>
 
 </body></html>

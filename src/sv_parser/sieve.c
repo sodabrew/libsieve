@@ -2573,9 +2573,10 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
 	    c->support.reject = 1;
         return c->support.reject;
     } else if (!strcmp("envelope", req)) {
+    	// FIXME: There is no require "envelope"...
 	if (c->callbacks.getenvelope)
 	    c->support.envelope = 1;
-        return c->support.reject;
+        return c->support.envelope;
     } else if (!strcmp("vacation", req)) {
 	if (c->callbacks.vacation)
 	    c->support.vacation = 1;
@@ -2600,6 +2601,7 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
 #endif
     /* Subaddress support is built into the parser! */
     } else if (!strcmp("subaddress", req)) {
+    	// FIXME: envelope needs to be registered...
 	c->support.subaddress = 1;
 	return 1;
     } else if (!strcmp("comparator-i;octet", req)) {

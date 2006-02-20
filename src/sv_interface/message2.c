@@ -29,13 +29,6 @@
 /* sv_util */
 #include "util.h"
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
-
 static int hashheader(char *header, int hashsize)
 {
     int x = 0;

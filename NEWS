@@ -1,3 +1,12 @@
+libSieve 2.1.9
+--------------
+
+- Fixed subaddress, getenvelope and vacation.
+
+- Added additional debugging messages.
+
+- Added new and updated draft rfc's.
+
 libSieve 2.1.8
 --------------
 

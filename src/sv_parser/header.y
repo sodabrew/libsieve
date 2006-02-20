@@ -14,13 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
-
 /* Better yacc error messages please */
 #define YYERROR_VERBOSE
 /* Must be defined before header.h */

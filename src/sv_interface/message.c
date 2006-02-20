@@ -74,6 +74,11 @@ char *libsieve_get_address(address_part_t addrpart,
     struct address *a;
     struct addr_marker *am = *marker;
 
+    if (!am) {
+	    libsieve_debugf(("libsieve_get_address: am is null, returning null.\n"));
+	    return NULL;
+    }
+
     a = am->where;
     if (am->freeme) {
 	libsieve_free(am->freeme);

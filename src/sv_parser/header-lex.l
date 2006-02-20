@@ -11,13 +11,6 @@
  * * * */
 
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
-#else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
-
 /* Must be defined before header.h */
 #define YYSTYPE char *
 #undef YY_INPUT
