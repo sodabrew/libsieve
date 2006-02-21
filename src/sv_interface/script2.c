@@ -98,6 +98,33 @@ int sieve2_free(sieve2_context_t **context)
     return SIEVE2_OK;
 }
 
+/* Fill in the support structure based on
+ * the registered callbacks. */
+static void static_check_support(struct sieve2_context *c)
+{
+	if (c->callbacks.fileinto)
+	    c->support.fileinto = 1;
+	
+        if (c->callbacks.reject)
+	    c->support.reject = 1;
+
+	if (c->callbacks.getenvelope)
+	    c->support.envelope = 1;
+
+	if (c->callbacks.vacation)
+	    c->support.vacation = 1;
+
+	if (c->callbacks.mark
+	 && c->callbacks.unmark
+	 && c->callbacks.addflag
+	 && c->callbacks.setflag
+	 && c->callbacks.removeflag)
+	    c->support.imapflags = 1;
+
+	if (c->callbacks.notify)
+	    c->support.notify = 1;
+}
+
 /* Register the user's callback functions into the Sieve context.
  * Also set up the support structure based on which actions have
  * callbacks registered for them. */
@@ -147,6 +174,8 @@ int sieve2_callbacks(sieve2_context_t *context,
               return SIEVE2_ERROR_UNSUPPORTED;
 	  }
       }
+
+    static_check_support(c);
 
     return SIEVE2_OK;
 }
@@ -257,7 +286,8 @@ const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
         ( c->support.envelope   ? "envelope "  : "" ),
         ( c->support.vacation   ? "vacation "  : "" ),
         ( c->support.imapflags  ? "imapflags " : "" ),
-        ( c->support.notify     ? "notify "    : "" ) );
+        ( c->support.notify     ? "notify "    : "" ),
+	NULL );
 
     return libsieve_strbuf(c->strbuf, ext, strlen(ext), FREEME);
 }

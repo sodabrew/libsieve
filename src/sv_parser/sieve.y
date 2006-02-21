@@ -859,52 +859,29 @@ static int static_ok_header(char *s UNUSED)
     return 1;
 }
 
-/* Sieve 2 update: allow support to be filled directly
- * without requiring interp to contain anything valid
- *
- * Checks if interpreter supports specified action
+/* Checks if interpreter supports specified action
  * */
 static int static_check_reqs(struct sieve2_context *c, char *req)
 {
     if (0 == strcmp("fileinto", req)) {
-        if (c->callbacks.fileinto)
-	    c->support.fileinto = 1;
         return c->support.fileinto;
     } else if (0 == strcmp("reject", req)) {
-        if (c->callbacks.reject)
-	    c->support.reject = 1;
         return c->support.reject;
     } else if (!strcmp("envelope", req)) {
-    	// FIXME: There is no require "envelope"...
-	if (c->callbacks.getenvelope)
-	    c->support.envelope = 1;
         return c->support.envelope;
     } else if (!strcmp("vacation", req)) {
-	if (c->callbacks.vacation)
-	    c->support.vacation = 1;
         return c->support.vacation;
     } else if (!strcmp("imapflags", req)) {
-	if (c->callbacks.mark
-	 && c->callbacks.unmark
-	 && c->callbacks.addflag
-	 && c->callbacks.setflag
-	 && c->callbacks.removeflag)
-	    c->support.imapflags = 1;
         return c->support.imapflags;
     } else if (!strcmp("notify",req)) {
-	if (c->callbacks.notify)
-	    c->support.notify = 1;
         return c->support.notify;
 #ifdef ENABLE_REGEX
-    /* If regex is enabled then it is supported! */
+    /* If regex is enabled then it is supported. */
     } else if (!strcmp("regex", req)) {
-	c->support.regex = 1;
 	return 1;
 #endif
-    /* Subaddress support is built into the parser! */
+    /* The rest of these are built into the parser. */
     } else if (!strcmp("subaddress", req)) {
-    	// FIXME: envelope needs to be registered...
-	c->support.subaddress = 1;
 	return 1;
     } else if (!strcmp("comparator-i;octet", req)) {
 	return 1;

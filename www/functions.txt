@@ -23,7 +23,7 @@ thread-safe; B(only one instance may be allocated per-process).
 
 CODE	(
 NO	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_callbacks)(C_TYPE(sieve2_context_t) *C_ARG(c), C_TYPE(sieve2_callback_t) *C_ARG(callbacks));
-BR	C_QUAL(extern) C_TYPE(int) C_FUNC(sieve2_listextensions)(C_TYPE(sieve2_context_t) *C_ARG(c));
+BR	C_QUAL(extern) C_QUAL(const) C_TYPE(char) * C_QUAL(const) C_FUNC(sieve2_listextensions)(C_TYPE(sieve2_context_t) *C_ARG(c));
 	)
 
 P	Registers a table of callbacks. See the structures page for details.

@@ -20,7 +20,7 @@
 functions and callbacks in libSieve. At this time, the core parsers are not
 thread-safe; <b>only one instance may be allocated per-process</b>.
 
-<div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_callbacks</font>(<font class="type">sieve2_context_t</font> *<font class="arg">c</font>, <font class="type">sieve2_callback_t</font> *<font class="arg">callbacks</font>); <br> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_listextensions</font>(<font class="type">sieve2_context_t</font> *<font class="arg">c</font>);</div>
+<div class="code"> <font class="qual">extern</font> <font class="type">int</font> <font class="func">sieve2_callbacks</font>(<font class="type">sieve2_context_t</font> *<font class="arg">c</font>, <font class="type">sieve2_callback_t</font> *<font class="arg">callbacks</font>); <br> <font class="qual">extern</font> <font class="qual">const</font> <font class="type">char</font> * <font class="qual">const</font> <font class="func">sieve2_listextensions</font>(<font class="type">sieve2_context_t</font> *<font class="arg">c</font>);</div>
 
 
 

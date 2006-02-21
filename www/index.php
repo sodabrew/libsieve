@@ -16,6 +16,12 @@
 
  $smarty->assign( 'righttitle', 'news.' );
  $smarty->assign( 'rightcontent', array(
+ 	array( 'February 2006: libSieve 2.1.10',
+	'Fixed sieve2_listextensions.
+	' ),
+ 	array( 'February 2006: libSieve 2.1.9',
+	'Fixed subaddress tests, and the vacation and getenvelope callbacks. Added a few more debugging messages.
+	' ),
  	array( 'February 2006: libSieve 2.1.8',
 	'Fixed a memory allocation bug that was preventing the library from being reused after sieve2_free was called.
 	' ),
