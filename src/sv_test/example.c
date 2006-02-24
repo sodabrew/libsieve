@@ -47,13 +47,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef HAVE_GETOPT
-# include "getopt.h"
-# include "getopt.c"
-#else
-# include <unistd.h>
-#endif
-
 #include "sieve2.h"
 #include "sieve2_error.h"
 
@@ -267,9 +260,14 @@ int my_getheaders(sieve2_context_t *s, void *my)
 	return SIEVE2_OK;
 }
 
+/* Feed back null values as a crash test. */
 int my_getenvelope(sieve2_context_t *s, void *my)
 {
-	return SIEVE2_ERROR_UNSUPPORTED;
+	sieve2_setvalue_string(s, "to", NULL);
+	sieve2_setvalue_string(s, "from", NULL);
+
+	return SIEVE2_OK;
+//	return SIEVE2_ERROR_UNSUPPORTED;
 }
 
 int my_getbody(sieve2_context_t *s, void *my)
@@ -350,56 +348,62 @@ static int read_file(char *filename, char **ret_buf,
 
 /* END OF EXAMPLE FILE PROCESSING FUNCTIONS */
 
+/* CALLBACK REGISTRATION TABLE */
+
+sieve2_callback_t my_callbacks[] = {
+{ SIEVE2_ERRCALL_RUNTIME,       my_errexec     },
+{ SIEVE2_ERRCALL_PARSE,         my_errparse    },
+{ SIEVE2_ACTION_FILEINTO,       my_fileinto    },
+{ SIEVE2_ACTION_REDIRECT,       my_redirect    },
+{ SIEVE2_ACTION_REJECT,         my_reject      },
+{ SIEVE2_ACTION_NOTIFY,         my_notify      },
+{ SIEVE2_ACTION_VACATION,       my_vacation    },
+{ SIEVE2_ACTION_KEEP,           my_keep        },
+{ SIEVE2_SCRIPT_GETSCRIPT,      my_getscript   },
+/* We don't support one header at a time in this example. */
+{ SIEVE2_MESSAGE_GETHEADER,     NULL            },
+/* libSieve can parse headers itself, so we'll use that. */
+{ SIEVE2_MESSAGE_GETALLHEADERS, my_getheaders  },
+{ SIEVE2_MESSAGE_GETENVELOPE,   my_getenvelope },
+{ SIEVE2_MESSAGE_GETBODY,       my_getbody     },
+{ SIEVE2_MESSAGE_GETSIZE,       my_getsize     },
+{ 0 } };
+
 static int beenhere = 0;
 
 int main(int argc, char *argv[])
 {
-	int validate_only = 0;
-	int c, usage_error = 0;
+	int usage_error = 0;
 	int res, exitcode = 0;
 	struct my_context *my_context;
 	sieve2_context_t *sieve2_context;
 	char *message = NULL, *script = NULL;
 
-	while ((c = getopt(argc, argv, "vlc")) != EOF)
-	switch (c) {
-	case 'v':
-		validate_only = 1;
-		break;
-	case 'l':
-		printf("%s", sieve2_license());
-		exitcode = 0;
-		goto endnofree;
-		break;
-	case 'c':
-		printf("%s", sieve2_credits());
-		exitcode = 0;
-		goto endnofree;
-		break;
-	default:
+	if (argc < 2) {
 		usage_error = 1;
-		break;
-	}
-
-	if (validate_only) {
-		if ((argc - optind < 1)) {
-			usage_error = 1;
-		} else {
-			script = argv[optind];
-		}
 	} else {
-		if ((argc - optind) < 2) {
-			usage_error = 1;
+		if (strcmp(argv[1], "-l") == 0) {
+			printf("%s", sieve2_license());
+			exitcode = 0;
+			goto endnofree;
+		} else if (strcmp(argv[1], "-c") == 0) {
+			printf("%s", sieve2_credits());
+			exitcode = 0;
+			goto endnofree;
+		} else if (argc == 2) {
+			script = argv[1];
+		} else if (argc == 3) {
+			script = argv[1];
+			message = argv[2];
 		} else {
-			script = argv[optind];
-			message = argv[optind+1];
+			usage_error = 1;
 		}
 	}
 
 	if (usage_error) {
-		fprintf(stderr, "usage:\n");
-		fprintf(stderr, "%s script message\n", argv[0]);
-		fprintf(stderr, "%s -v script\n", argv[0]);
+		printf("Usage:\n");
+		printf("%s script\n", argv[0]);
+		printf("%s script message\n", argv[0]);
 		exitcode = 1;
 		goto endnofree;
 	}
@@ -427,25 +431,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	sieve2_callback_t my_callbacks[] = {
-	{ SIEVE2_ERRCALL_RUNTIME,       my_errexec     },
-	{ SIEVE2_ERRCALL_PARSE,         my_errparse    },
-	{ SIEVE2_ACTION_FILEINTO,       my_fileinto    },
-	{ SIEVE2_ACTION_REDIRECT,       my_redirect    },
-	{ SIEVE2_ACTION_REJECT,         my_reject      },
-	{ SIEVE2_ACTION_NOTIFY,         my_notify      },
-	{ SIEVE2_ACTION_VACATION,       my_vacation    },
-	{ SIEVE2_ACTION_KEEP,           my_keep        },
-	{ SIEVE2_SCRIPT_GETSCRIPT,      my_getscript   },
-	/* We don't support one header at a time in this example. */
-	{ SIEVE2_MESSAGE_GETHEADER,     NULL            },
-	/* libSieve can parse headers itself, so we'll use that. */
-	{ SIEVE2_MESSAGE_GETALLHEADERS, my_getheaders  },
-	{ SIEVE2_MESSAGE_GETENVELOPE,   my_getenvelope },
-	{ SIEVE2_MESSAGE_GETBODY,       my_getbody     },
-	{ SIEVE2_MESSAGE_GETSIZE,       my_getsize     },
-	{ 0 } };
-
 	res = sieve2_alloc(&sieve2_context);
 	if (res != SIEVE2_OK) {
 		printf("Error %d when calling sieve2_alloc: %s\n",
@@ -470,7 +455,7 @@ int main(int argc, char *argv[])
 		exitcode = 1;
 	}
 
-	if (!validate_only) {
+	if (message) {
 		printf("Executing script...\n");
 		res = sieve2_execute(sieve2_context, my_context);
 		if (res != SIEVE2_OK) {

@@ -128,6 +128,7 @@ struct sieve2_context {
     struct imapflags2 imapflags;
     struct callbacks2 callbacks;
     struct support2 support;
+    struct support2 require;
     struct actions2 actions;
     struct script2 script;
 

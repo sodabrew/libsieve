@@ -157,12 +157,12 @@ elsif: /* empty */               { $$ = NULL; }
 	| ELSE block             { $$ = $2; }
 	;
 
-action: REJCT STRING             { if (!parse_context->support.reject) {
+action: REJCT STRING             { if (!parse_context->require.reject) {
 				     libsieve_sieveerror("reject not required");
 				     YYERROR;
 				   }
 				   $$ = libsieve_new_command(REJCT); $$->u.str = $2; }
-	| FILEINTO STRING	 { if (!parse_context->support.fileinto) {
+	| FILEINTO STRING	 { if (!parse_context->require.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
                                    }
@@ -179,7 +179,7 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
 	| KEEP			 { $$ = libsieve_new_command(KEEP); }
 	| STOP			 { $$ = libsieve_new_command(STOP); }
 	| DISCARD		 { $$ = libsieve_new_command(DISCARD); }
-	| VACATION vtags STRING  { if (!parse_context->support.vacation) {
+	| VACATION vtags STRING  { if (!parse_context->require.vacation) {
 				     libsieve_sieveerror("vacation not required");
 				     $$ = libsieve_new_command(VACATION);
 				     YYERROR;
@@ -187,7 +187,7 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
   				     $$ = static_build_vacation(VACATION,
 					    static_canon_vtags($2), $3);
 				   } }
-        | SETFLAG stringlist     { if (!parse_context->support.imapflags) {
+        | SETFLAG stringlist     { if (!parse_context->require.imapflags) {
 	// TODO: imap4flags.
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
@@ -197,7 +197,7 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
                                   }
                                   $$ = libsieve_new_command(SETFLAG);
                                   $$->u.sl = $2; }
-         | ADDFLAG stringlist     { if (!parse_context->support.imapflags) {
+         | ADDFLAG stringlist     { if (!parse_context->require.imapflags) {
 	 // TODO: imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
@@ -207,7 +207,7 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
                                   }
                                   $$ = libsieve_new_command(ADDFLAG);
                                   $$->u.sl = $2; }
-         | REMOVEFLAG stringlist  { if (!parse_context->support.imapflags) {
+         | REMOVEFLAG stringlist  { if (!parse_context->require.imapflags) {
 	 // TODO: imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
@@ -217,20 +217,20 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
                                   }
                                   $$ = libsieve_new_command(REMOVEFLAG);
                                   $$->u.sl = $2; }
-         | MARK                   { if (!parse_context->support.imapflags) {
+         | MARK                   { if (!parse_context->require.imapflags) {
 	 // TODO: this isn't in imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
                                   $$ = libsieve_new_command(MARK); }
-         | UNMARK                 { if (!parse_context->support.imapflags) {
+         | UNMARK                 { if (!parse_context->require.imapflags) {
 	 // TODO: this isn't in imap4flags
                                     libsieve_sieveerror("imapflags not required");
                                     YYERROR;
                                     }
                                   $$ = libsieve_new_command(UNMARK); }
 
-         | NOTIFY ntags           { if (!parse_context->support.notify) {
+         | NOTIFY ntags           { if (!parse_context->require.notify) {
 				       libsieve_sieveerror("notify not required");
 				       $$ = libsieve_new_command(NOTIFY); 
 				       YYERROR;
@@ -238,7 +238,7 @@ action: REJCT STRING             { if (!parse_context->support.reject) {
 				      $$ = static_build_notify(NOTIFY,
 				             static_canon_ntags($2));
 				    } }
-         | DENOTIFY dtags         { if (!parse_context->support.notify) {
+         | DENOTIFY dtags         { if (!parse_context->require.notify) {
                                        libsieve_sieveerror("notify not required");
 				       $$ = libsieve_new_command(DENOTIFY);
 				       YYERROR;
@@ -411,12 +411,12 @@ htags: /* empty */		 { $$ = static_new_htags(); }
 addrparttag: ALL                 { $$ = ALL; }
 	| LOCALPART		 { $$ = LOCALPART; }
 	| DOMAIN                 { $$ = DOMAIN; }
-	| USER                   { if (!parse_context->support.subaddress) {
+	| USER                   { if (!parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
 				   $$ = USER; }
-	| DETAIL                { if (!parse_context->support.subaddress) {
+	| DETAIL                { if (!parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
@@ -426,7 +426,7 @@ addrparttag: ALL                 { $$ = ALL; }
 comptag: IS			 { $$ = IS; }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
-	| REGEX			 { if (!parse_context->support.regex) {
+	| REGEX			 { if (!parse_context->require.regex) {
 				     libsieve_sieveerror("regex not required");
 				     YYERROR;
 				   }
@@ -864,25 +864,29 @@ static int static_ok_header(char *s UNUSED)
 static int static_check_reqs(struct sieve2_context *c, char *req)
 {
     if (0 == strcmp("fileinto", req)) {
-        return c->support.fileinto;
+        return c->require.fileinto = c->support.fileinto;
     } else if (0 == strcmp("reject", req)) {
-        return c->support.reject;
+        return c->require.reject = c->support.reject;
     } else if (!strcmp("envelope", req)) {
-        return c->support.envelope;
+        return c->require.envelope = c->support.envelope;
     } else if (!strcmp("vacation", req)) {
-        return c->support.vacation;
+        return c->require.vacation = c->support.vacation;
     } else if (!strcmp("imapflags", req)) {
-        return c->support.imapflags;
+        return c->require.imapflags = c->support.imapflags;
     } else if (!strcmp("notify",req)) {
-        return c->support.notify;
+        return c->require.notify = c->support.notify;
 #ifdef ENABLE_REGEX
     /* If regex is enabled then it is supported. */
     } else if (!strcmp("regex", req)) {
-	return 1;
+	return c->require.regex = 1;
 #endif
-    /* The rest of these are built into the parser. */
+    /* TODO: Perhaps add a callback to let the client
+     * perform its own subaddress calculations? Useful
+     * for systems that use something other than the
+     * Cyrus style username+mailbox@domain format.*/
     } else if (!strcmp("subaddress", req)) {
-	return 1;
+	return c->require.subaddress = 1;
+    /* These comparators are built into the parser. */
     } else if (!strcmp("comparator-i;octet", req)) {
 	return 1;
     } else if (!strcmp("comparator-i;ascii-casemap", req)) {

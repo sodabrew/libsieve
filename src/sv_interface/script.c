@@ -127,6 +127,11 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     int res = 0;
     int addrpart = 0;
 
+    if (t == NULL) {
+	    libsieve_debugf(("static_evaltest(): t is null but it shouldn't ever be\n"));
+	    return 0;
+    }
+
     switch (t->type) {
     case ADDRESS:
     case ENVELOPE:

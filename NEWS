@@ -6,6 +6,8 @@ libSieve 2.1.10
 - Fixed segfault when client returns null
   pointers from the getenvelope callback.
 
+- Improved handling of extension require's.
+
 libSieve 2.1.9
 --------------
 
