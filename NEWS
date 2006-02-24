@@ -3,6 +3,9 @@ libSieve 2.1.10
 
 - Fixed sieve2_listextensions.
 
+- Fixed segfault when client returns null
+  pointers from the getenvelope callback.
+
 libSieve 2.1.9
 --------------
 

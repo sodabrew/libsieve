@@ -79,6 +79,10 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
     int l;
     stringlist_t *sl;
 
+    /* Short circuit if myaddr is NULL */
+    if (myaddr == NULL)
+	    return NULL;
+
     /* loop through each TO header */
     for (l = 0; body[l] != NULL && !found; l++) {
 	struct address *data = NULL;

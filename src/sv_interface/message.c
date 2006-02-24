@@ -82,6 +82,7 @@ char *libsieve_get_address(address_part_t addrpart,
     a = am->where;
     if (am->freeme) {
 	libsieve_free(am->freeme);
+	libsieve_debugf(("libsieve_get_address: am->freeme is set, returning null.\n"));
 	am->freeme = NULL;
     }
 
