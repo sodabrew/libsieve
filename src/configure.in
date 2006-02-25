@@ -27,7 +27,6 @@ AC_CHECK_HEADERS(endian.h)
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getopt)
 
 AM_CONFIG_HEADER(config.h)
 

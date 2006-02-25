@@ -17,13 +17,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef HAVE_GETOPT
-# include "getopt.h"
-# include "getopt.c"
-#else
-# include <unistd.h>
-#endif
-
 
 /* THESE ARE INTERNAL HEADERS,
  * DO NOT TRY TO USE THEM IN
