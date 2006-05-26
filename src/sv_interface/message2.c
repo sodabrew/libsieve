@@ -142,10 +142,12 @@ int libsieve_message2_parseheader(sieve2_message_t *m)
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
-                if (tmp == NULL)
+                if (tmp == NULL) {
+                    libsieve_debugf(("%s: Failed to expand hash.\n", __func__));
                     return SIEVE2_ERROR_NOMEM;
-                else
+		} else {
                     m->hash[c]->contents = tmp;
+		}
                 /* OK, now we can put that body in here */
                 m->hash[c]->contents[m->hash[c]->count++] = hl->h->contents[0];
                 /* Followed by a terminating NULL */

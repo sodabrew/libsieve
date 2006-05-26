@@ -92,6 +92,8 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
 
     libsieve_headerptr = *ptr;
 
+    libsieve_headerlexrestart();
+
     if(libsieve_headerparse()) {
         libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
         *err = libsieve_headererr;

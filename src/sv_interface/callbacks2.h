@@ -41,7 +41,7 @@ int libsieve_do_redirect(struct sieve2_context *c, char *addr);
 int libsieve_do_keep(struct sieve2_context *c, struct imapflags2 *imapflags);
 int libsieve_do_discard(struct sieve2_context *c);
 int libsieve_do_vacation(struct sieve2_context *c, char *addr, char *fromaddr,
-		char *subj, char *msg, 
+		char *subj, char *msg, char *handle,
 		int days, int mime);
 int libsieve_do_setflag(struct sieve2_context *c, char *flag);
 int libsieve_do_addflag(struct sieve2_context *c, char *flag);

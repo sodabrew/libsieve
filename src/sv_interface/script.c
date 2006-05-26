@@ -244,7 +244,15 @@ int libsieve_eval(struct sieve2_context *context,
     int res = 0;
     stringlist_t *sl;
 
+    libsieve_debugf(("%s,%s: starting into libsieve_eval\n", __FILE__, __func__));
+    
+    if (c == NULL)
+        libsieve_debugf(("%s,%s: the commandlist is null\n", __FILE__, __func__));
+    else
+        libsieve_debugf(("%s,%s: the commandlist type is [%d]\n", __FILE__, __func__, c->type));
+
     while (c != NULL) {
+        libsieve_debugf(("%s,%s: top of the eval loop\n", __FILE__, __func__));
 	switch (c->type) {
 	case IF:
 	    if (static_evaltest(context, c->u.i.t))
@@ -256,21 +264,25 @@ int libsieve_eval(struct sieve2_context *context,
 	    res = libsieve_do_reject(context, c->u.str);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Reject can not be used with any other action";
+	    libsieve_debugf(("%s,%s: Doing a reject\n", __FILE__, __func__));
 	    break;
 	case FILEINTO:
 	    res = libsieve_do_fileinto(context, c->u.str, &context->imapflags);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Fileinto can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a fileinto\n", __FILE__, __func__));
 	    break;
 	case REDIRECT:
 	    res = libsieve_do_redirect(context, c->u.str);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Redirect can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a redirect\n", __FILE__, __func__));
 	    break;
 	case KEEP:
 	    res = libsieve_do_keep(context, &context->imapflags);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Keep can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a keep\n", __FILE__, __func__));
 	    break;
 	case VACATION:
 	    {
@@ -340,11 +352,13 @@ int libsieve_eval(struct sieve2_context *context,
 
 		    /* first, is there a reply-to address? */
 		    if (reply_to == NULL) {
+			libsieve_debugf(("VACATION aborted by lack of reply-to address.\n"));
 			l = SIEVE2_DONE;
 		    }
 
 		    /* first, is it from me? */
 		    if (l == SIEVE2_OK && !strcmp(myaddr, reply_to)) {
+			libsieve_debugf(("VACATION aborted because the message is from my primary address.\n"));
 			l = SIEVE2_DONE;
 		    }
 
@@ -354,9 +368,13 @@ int libsieve_eval(struct sieve2_context *context,
 			for (sl = c->u.v.addresses; sl != NULL; sl = sl->next)
 			    if (!strcmp(sl->s, reply_to))
 				l = SIEVE2_DONE;
+
+		    if (l == SIEVE2_DONE)
+			libsieve_debugf(("VACATION aborted because the message is from a secondary address.\n"));
 		
 		    /* ok, is it a system address? */
 		    if (l == SIEVE2_OK && sysaddr(reply_to)) {
+			libsieve_debugf(("VACATION aborted because the message is from a system address.\n"));
 			l = SIEVE2_DONE;
 		    }
 		}
@@ -412,10 +430,12 @@ int libsieve_eval(struct sieve2_context *context,
 		    /* who do we want the message coming from? */
 		    fromaddr = found;
 		
+		    // FIXME: From addr might be user specified.
 		    res = libsieve_do_vacation(context, reply_to,
 				      libsieve_strdup(fromaddr, strlen(fromaddr)),
 				      libsieve_strdup(buf, strlen(buf)),
-				      c->u.v.message, c->u.v.days, c->u.v.mime);
+				      c->u.v.message, c->u.v.handle,
+				      c->u.v.days, c->u.v.mime);
 		
 		     if (res == SIEVE2_ERROR_EXEC)
 			 *errmsg = "Vacation can not be used with Reject or Vacation";
@@ -432,6 +452,7 @@ int libsieve_eval(struct sieve2_context *context,
 	    break;
 	case DISCARD:
 	    res = libsieve_do_discard(context);
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case SETFLAG:
 	    sl = c->u.sl;
@@ -441,6 +462,7 @@ int libsieve_eval(struct sieve2_context *context,
 	    }
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Setflag can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case ADDFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
@@ -448,6 +470,7 @@ int libsieve_eval(struct sieve2_context *context,
 	    }
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Addflag can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case REMOVEFLAG:
 	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
@@ -455,25 +478,29 @@ int libsieve_eval(struct sieve2_context *context,
 	    }
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Removeflag can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case MARK:
 	    res = libsieve_do_mark(context);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Mark can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case UNMARK:
 	    res = libsieve_do_unmark(context);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Unmark can not be used with Reject";
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case NOTIFY:
 	    res = libsieve_do_notify(context, c->u.n.id, c->u.n.method,
 			    c->u.n.options, c->u.n.priority, c->u.n.message);
-			    
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case DENOTIFY:
 	    res = libsieve_do_denotify(context, c->u.d.comp, c->u.d.pattern,
 			      c->u.d.priority);
+	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 
 	}

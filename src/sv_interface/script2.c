@@ -252,6 +252,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     }
 
     c->script.cmds = libsieve_sieve_parse_buffer(c);
+    libsieve_debugf(("Executing script turned up [%d] errors.\n", c->script.error_count));
     if (c->script.error_count > 0) {
         if (c->script.cmds) {
             libsieve_free_tree(c->script.cmds);
@@ -277,16 +278,16 @@ const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
     char *ext;
     struct sieve2_context *c = sieve2_context;
 
-    ext = libsieve_strconcat(      "subaddress ",
+    ext = libsieve_strconcat(      "subaddress",
 #ifdef ENABLE_REGEX
-                                   "regex ",
+                                   " regex",
 #endif
-        ( c->support.fileinto   ? "fileinto "  : "" ),
-        ( c->support.reject     ? "reject "    : "" ),
-        ( c->support.envelope   ? "envelope "  : "" ),
-        ( c->support.vacation   ? "vacation "  : "" ),
-        ( c->support.imapflags  ? "imapflags " : "" ),
-        ( c->support.notify     ? "notify "    : "" ),
+        ( c->support.fileinto   ? " fileinto"  : "" ),
+        ( c->support.reject     ? " reject"    : "" ),
+        ( c->support.envelope   ? " envelope"  : "" ),
+        ( c->support.vacation   ? " vacation"  : "" ),
+        ( c->support.imapflags  ? " imapflags" : "" ),
+        ( c->support.notify     ? " notify"    : "" ),
 	NULL );
 
     return libsieve_strbuf(c->strbuf, ext, strlen(ext), FREEME);

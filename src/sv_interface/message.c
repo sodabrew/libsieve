@@ -161,11 +161,14 @@ int libsieve_free_address(struct address **data, struct addr_marker **marker)
         libsieve_free(*data);
         *data = freedata;
     }
-
     *data = NULL;
-    libsieve_free(am->freeme);
-    libsieve_free(am);
+
+    if (am) {
+        libsieve_free(am->freeme);
+        libsieve_free(am);
+    }
     *marker = NULL;
+
     return SIEVE2_OK;
 }
 

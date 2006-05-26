@@ -16,6 +16,8 @@ struct vtags {
     stringlist_t *addresses;
     char *subject;
     int mime;
+    char *from;
+    char *handle;
 };
 
 struct htags {

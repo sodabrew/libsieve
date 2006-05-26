@@ -82,7 +82,7 @@ extern int libsieve_sievelex(void);
 %token ANYOF ALLOF EXISTS SFALSE STRUE HEADER NOT SIZE ADDRESS ENVELOPE
 %token COMPARATOR IS CONTAINS MATCHES REGEX OVER UNDER
 %token ALL LOCALPART DOMAIN USER DETAIL
-%token DAYS ADDRESSES SUBJECT MIME
+%token DAYS ADDRESSES SUBJECT MIME FROM HANDLE
 %token METHOD ID OPTIONS LOW NORMAL HIGH MESSAGE
 
 %type <cl> commands command action elsif block
@@ -311,6 +311,18 @@ vtags: /* empty */		 { $$ = static_new_vtags(); }
 				   } else if (!static_ok_header($3)) {
 					YYERROR;
 				   } else { $$->subject = $3; } }
+	| vtags HANDLE STRING	 { if ($$->handle != NULL) { 
+					libsieve_sieveerror("duplicate :handle"); 
+					YYERROR;
+				   } else if (!static_ok_header($3)) {
+					YYERROR;
+				   } else { $$->handle = $3; } }
+	| vtags FROM STRING	 { if ($$->from != NULL) { 
+					libsieve_sieveerror("duplicate :from"); 
+					YYERROR;
+				   } else if (!static_ok_header($3)) {
+					YYERROR;
+				   } else { $$->from = $3; } }
 	| vtags MIME		 { if ($$->mime != -1) { 
 					libsieve_sieveerror("duplicate :mime"); 
 					YYERROR; }
@@ -452,33 +464,33 @@ char *libsieve_sieveerr;         /* buffer for sieve parser error messages */
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
 {
     commandlist_t *t;
+    extern commandlist_t *ret;
 
     parse_context = context;
 
     libsieve_sieveptr = context->script.script;
     libsieve_sieveerr = NULL;
-    
-    /* These are being moved all the way up to script2.c */
-    // addrlexalloc();
-    // sievelexalloc();
+
+    libsieve_sievelexrestart();
+
     if (libsieve_sieveparse()) {
-    /*
-        err = libsieve_strconcat("address '", s, "': ", libsieve_addrerr, NULL);
-        sieveerror(err);
-        libsieve_free(libsieve_addrerr);
-        libsieve_free(err);
-    */
-        t = NULL;
+	return NULL;
     } else {
         t = ret;
+	ret = NULL;
+	return t;
     }
+}
 
-    /* Free both lexers */
-    /* These are being moved all the way up to script2.c */
-    // sievelexfree();
-    // addrlexfree();
-    ret = NULL;
-    return t;
+/* This gets called by the address parser,
+ * which does not have access to the context. */
+int libsieve_sieveerror_exec(char *msg)
+{
+    parse_context->exec_errors++;
+
+    libsieve_do_error_exec(parse_context, msg);
+
+    return 0;
 }
 
 int libsieve_sieveerror(char *msg)
@@ -543,6 +555,8 @@ static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason
 
     if (ret) {
 	ret->u.v.subject = v->subject; v->subject = NULL;
+	ret->u.v.handle = v->handle; v->handle = NULL;
+	ret->u.v.from = v->from; v->from = NULL;
 	ret->u.v.days = v->days;
 	ret->u.v.mime = v->mime;
 	ret->u.v.addresses = v->addresses; v->addresses = NULL;
@@ -641,6 +655,8 @@ static struct vtags *static_new_vtags(void)
     r->days = -1;
     r->addresses = NULL;
     r->subject = NULL;
+    r->handle = NULL;
+    r->from = NULL;
     r->mime = -1;
 
     return r;
@@ -672,6 +688,8 @@ static void static_free_vtags(struct vtags *v)
 {
     if (v->addresses) { libsieve_free_sl(v->addresses); }
     libsieve_free(v->subject);
+    libsieve_free(v->handle);
+    libsieve_free(v->from);
     libsieve_free(v);
 }
 

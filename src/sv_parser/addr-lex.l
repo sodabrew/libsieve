@@ -130,14 +130,19 @@ int libsieve_addrinput(char *buf, int max)
 void libsieve_addrlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
-    libsieve_addr_delete_buffer( YY_CURRENT_BUFFER );
-    YY_CURRENT_BUFFER = 0;
+    libsieve_addrlex_destroy();
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_addrlexalloc()
 {
     libsieve_strbufalloc(&ml);
+    libsieve_addrrestart( YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_addrlexrestart()
+{
     libsieve_addrrestart( YY_CURRENT_BUFFER );
 }
 

@@ -110,6 +110,8 @@ struct Commandlist {
 	    stringlist_t *addresses;
 	    char *message;
 	    int mime;
+	    char *from;
+	    char *handle;
 	} v;
 	struct { /* it's a notify action */
 	    char *method;

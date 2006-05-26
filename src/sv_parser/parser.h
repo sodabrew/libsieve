@@ -18,6 +18,7 @@ struct addr_marker {
 struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr, char **err);
 void libsieve_addrlexfree(void);
 void libsieve_addrlexalloc(void);
+void libsieve_addrlexrestart(void);
 
 /* SIEVE */
 #include "tree.h"
@@ -25,13 +26,16 @@ void libsieve_addrlexalloc(void);
 #include "message2.h"
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
+int libsieve_sieveerror_exec(char *msg);
 
 void libsieve_sievelexfree(void);
 void libsieve_sievelexalloc(void);
+void libsieve_sievelexrestart(void);
 
 header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err);
 void libsieve_headerlexfree(void);
 void libsieve_headerlexalloc(void);
+void libsieve_headerlexrestart(void);
 void libsieve_headeryaccfree(void);
 void libsieve_headeryaccalloc(void);
 

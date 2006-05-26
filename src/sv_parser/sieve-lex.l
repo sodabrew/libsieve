@@ -114,6 +114,8 @@ CRLF		(\r\n|\r|\n)
 <INITIAL>:addresses	return ADDRESSES;
 <INITIAL>:subject	return SUBJECT;
 <INITIAL>:mime		return MIME;
+<INITIAL>:from		return FROM;
+<INITIAL>:handle	return HANDLE;
 <INITIAL>:comparator	return COMPARATOR;
 <INITIAL>:is		return IS;
 <INITIAL>:contains	return CONTAINS;
@@ -142,18 +144,24 @@ int libsieve_sieveinput(char *buf, int max_size)
 	memcpy(buf, libsieve_sieveptr, n);
 	libsieve_sieveptr += n;
     }
+
     return n;
 }
 
 /* Clean up after ourselves by free()ing the current buffer */
 void libsieve_sievelexfree()
 {
-    libsieve_sieve_delete_buffer( YY_CURRENT_BUFFER );
-    YY_CURRENT_BUFFER = 0;
+    libsieve_sievelex_destroy();
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_sievelexalloc()
+{
+    libsieve_sieverestart( YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_sievelexrestart()
 {
     libsieve_sieverestart( YY_CURRENT_BUFFER );
 }

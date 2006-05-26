@@ -1,3 +1,10 @@
+libSieve 2.1.11
+---------------
+
+- Minor fixes to build with flex 2.5.33.
+
+- Updated to Vacation draft 6.
+
 libSieve 2.1.10
 --------------
 
@@ -7,6 +14,8 @@ libSieve 2.1.10
   pointers from the getenvelope callback.
 
 - Improved handling of extension require's.
+
+- Fixed segfault when parsing zero length address.
 
 libSieve 2.1.9
 --------------

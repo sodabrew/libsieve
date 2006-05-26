@@ -139,8 +139,9 @@ int libsieve_do_discard(struct sieve2_context *c)
  */
 int libsieve_do_vacation(struct sieve2_context *c,
 		char *addr, char *fromaddr,
-		char *subj, char *msg, int days,
-		int mime)
+		char *subj, char *msg,
+		char *handle,
+		int days, int mime)
 {
     if (c->actions.reject)
         return SIEVE2_ERROR_EXEC;
@@ -153,6 +154,7 @@ int libsieve_do_vacation(struct sieve2_context *c,
     libsieve_setvalue_string(c, "fromaddr", fromaddr);
     libsieve_setvalue_string(c, "subject", subj);
     libsieve_setvalue_string(c, "message", msg);
+    libsieve_setvalue_string(c, "hash", handle);
     libsieve_setvalue_int(c, "days", days);
     libsieve_setvalue_int(c, "mime", mime);
 

@@ -13,7 +13,7 @@
 	array( 'History.',
 	'Sieve was developed by Carnegie Mellon University, in Pittsburgh, PA. Since they wanted to write a complete mail server based entirely on Internet RFC standards, they started with SMTP, then POP and IMAP, and so on. One day, someone asked if they could sort their mail automatically. But there were no RFC\'s for mail sorting languages. So they wrote one! And then a library to make it work, and then nestled it tightly into the Cyrus project and nobody else wanted to bother trying to get that library out of there and available for public consumption. And that\'s where libSieve fits in :-)' ),
 	array( 'Downstream.',
-	'DBMail is a mail system based on database storage. DBMail provides IMAP and POP3 access to email, and integrates well with popular SMTP servers. During message delivery, libSieve can be used to sort and filter each user\'s email according to their own Sieve scripts.' ),
+	'<a href="http://dbmail.org/">DBMail</a> is a mail system based on database storage. DBMail provides IMAP and POP3 access to email, and integrates well with popular SMTP servers. During message delivery, libSieve can be used to sort and filter each user\'s email according to their own Sieve scripts.' ),
 	) );
 
 
@@ -36,10 +36,8 @@
 	'In a move to confuse and astound, I am re-releasing libSieve 2.2.0_pre3 as 2.1.5. I dragged my feet for almost a year trying to figure out how I was going to fix the API in one fell swoop, release 2.2.0 final, and save the world. All that is gone now. 
 	' ),
 	) );
- $smarty->assign( 'rightlinks', array(
- 	array( 'DBMail', 'http://dbmail.org/' ),
-	) );
 
+ $smarty->assign( 'rightlinks', '' );
 
  $smarty->display( 'tweedy.tpl' );
 

@@ -29,10 +29,10 @@ static struct mlbuf *ml = NULL;
 #define YY_FATAL_ERROR libsieve_headerfatalerror
 void libsieve_headerfatalerror(const char msg[]);
 
-/* %option nounput */
 %}
 
 %option noyywrap
+%option nounput
 %option prefix="libsieve_header"
 %option never-interactive
 
@@ -122,14 +122,19 @@ int libsieve_headerinput(char *buf, int max)
 void libsieve_headerlexfree()
 {
     libsieve_strbuffree(&ml, FREEME);
-    libsieve_header_delete_buffer( YY_CURRENT_BUFFER );
-    YY_CURRENT_BUFFER = 0;
+    libsieve_headerlex_destroy();
 }
 
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_headerlexalloc()
 {
     libsieve_strbufalloc(&ml);
+    libsieve_headerrestart( YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_headerlexrestart()
+{
     libsieve_headerrestart( YY_CURRENT_BUFFER );
 }
 

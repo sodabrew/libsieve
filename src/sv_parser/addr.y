@@ -38,9 +38,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* sv_util */
 #include "util.h"
+
 /* sv_parser */
 #include "addr.h"
 #include "addrinc.h"
+
+/* sv_interface */
+#include "callbacks2.h"
 
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
@@ -52,9 +56,13 @@ static struct mlbuf *ml = NULL;
 %name-prefix="libsieve_addr"
 
 %token ATOM QTEXT DTEXT QUOTE
-%start address
 
 %%
+
+start:  /* Empty */			{ libsieve_addrappend(&addr); }
+	| address			{ $$ = $1; }
+	;
+
 address: mailboxes			{ libsieve_debugf(( "address: mailbox: %s\n", $1 )); }
 	| group				{ libsieve_debugf(( "address: group: %s\n", $1 )); };
 
@@ -148,11 +156,10 @@ qstring: QUOTE QTEXT QUOTE	{
 
 %%
 
-/* copy address error message into buffer provided by sieve parser */
+/* Run an execution error callback. */
 void libsieve_addrerror(const char *s)
 {
-    extern char *libsieve_addrerr;
-    libsieve_addrerr = libsieve_strdup(s, strlen(s));
+    libsieve_sieveerror_exec(s);
 }
 
 /* Wrapper for addrparse() which sets up the 
@@ -171,15 +178,9 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
 
     libsieve_addrptr = (char *)*ptr;
 
-    /* This is now done higher up the call chain...
-     * addrlexalloc();
-     */
+    libsieve_addrlexrestart();
+
     if(libsieve_addrparse()) {
-        /*
-        *err = libsieve_strdup(addrerr);
-        libsieve_debugf(( "%s\n", err ));
-        libsieve_free(err);
-        */
         // FIXME: Make sure that this is sufficient cleanup
         libsieve_addrstructfree(addr, CHARSALSO);
         libsieve_strbuffree(&ml, FREEME);
@@ -188,7 +189,7 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
 
     /* Get to the tail end... */
     newdata = *data;
-    while(newdata != NULL) {
+    while (newdata != NULL) {
         newdata = newdata->next;
     }
 
@@ -199,12 +200,8 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
     newdata = libsieve_addrstructcopy(addr->next, STRUCTONLY);
     libsieve_addrstructfree(addr, STRUCTONLY);
     libsieve_strbuffree(&ml, FREEME);
-    /* This causes a segfault here...
-     * but now it's been put much higher up and works
-     * addrlexfree();
-     */
 
-    if(*data == NULL)
+    if (*data == NULL)
         *data = newdata;
 
     return *data;
@@ -214,7 +211,7 @@ void libsieve_addrstructfree(struct address *addr, int freeall)
 {
     struct address *bddr;
 
-    while(addr != NULL) {
+    while (addr != NULL) {
         bddr = addr;
         if(freeall) {
             libsieve_debugf(("I'd like to free this: %s\n", bddr->mailbox));
@@ -237,6 +234,10 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     struct address *tmp = addr;
     struct address *top = libsieve_malloc(sizeof(struct address));
 
+    if (!addr) {
+        libsieve_debugf(("Mayday, addr is null in addrstructcopy\n"));
+    }
+
     libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
     top->mailbox = tmp->mailbox;
     libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
@@ -247,7 +248,7 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     top->name = tmp->name;
     tmp = tmp->next;
     new = top;
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         new->next = (struct address *)libsieve_malloc(sizeof(struct address));
         if (new->next == NULL)
             return NULL;   

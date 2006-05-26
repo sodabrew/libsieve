@@ -260,11 +260,24 @@ int my_getheaders(sieve2_context_t *s, void *my)
 	return SIEVE2_OK;
 }
 
+int my_getheader(sieve2_context_t *s, void *my)
+{
+	struct my_context *m = (struct my_context *)my;
+
+	printf( "Requested header [%s], returning NULL\n",
+			sieve2_getvalue_string(s, "header") );
+
+	char ** null = { NULL, NULL };
+	sieve2_setvalue_stringlist(s, "body", null );
+
+	return SIEVE2_OK;
+}
+
 /* Feed back null values as a crash test. */
 int my_getenvelope(sieve2_context_t *s, void *my)
 {
-	sieve2_setvalue_string(s, "to", NULL);
-	sieve2_setvalue_string(s, "from", NULL);
+	sieve2_setvalue_string(s, "to", "foo@bar");
+	sieve2_setvalue_string(s, "from", "" );
 
 	return SIEVE2_OK;
 //	return SIEVE2_ERROR_UNSUPPORTED;
@@ -364,6 +377,7 @@ sieve2_callback_t my_callbacks[] = {
 { SIEVE2_MESSAGE_GETHEADER,     NULL            },
 /* libSieve can parse headers itself, so we'll use that. */
 { SIEVE2_MESSAGE_GETALLHEADERS, my_getheaders  },
+//{ SIEVE2_MESSAGE_GETHEADER,     my_getheader   },
 { SIEVE2_MESSAGE_GETENVELOPE,   my_getenvelope },
 { SIEVE2_MESSAGE_GETBODY,       my_getbody     },
 { SIEVE2_MESSAGE_GETSIZE,       my_getsize     },

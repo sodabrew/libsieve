@@ -6,7 +6,7 @@
 
  $smarty->assign( 'lefttitle', 'example.' );
  $smarty->assign( 'leftcontent', array(
- 	array( '', '<pre>' . read_file( 'example.c' ) . '</pre>' )
+ 	array( '', '<pre>' . file_get_contents( 'example.c' ) . '</pre>' )
 	) );
 
  $smarty->assign( 'righttitle', 'notes.' );
