@@ -1,0 +1,672 @@
+
+
+
+SIEVE Email Filtering Working                                   C. Daboo
+Group                                                   January 20, 2006
+Internet-Draft
+Expires: July 24, 2006
+
+
+        SIEVE Email Filtering: Spamtest and Virustest Extensions
+                    draft-ietf-sieve-spamtestbis-02
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on July 24, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   The SIEVE email filtering language "spamtest", "spamtestplus" and
+   "virustest" extensions permit users to use simple, portable commands
+   for spam and virus tests on email messages.  Each extension provides
+   a new test using matches against numeric 'scores'.  It is the
+   responsibility of the underlying SIEVE implementation to do the
+   actual checks that result in values returned by the tests.
+
+Change History (to be removed prior to publication as an RFC)
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 1]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+   Changes from -01:
+   1.  Changed ACAP reference to i18n-comparators draft.
+   2.  Changed MUST in security section for virus checker updates to
+       plain must.
+   3.  Return string "untested" when :percent is used and no test has
+       been done.
+   4.  Remove MUST NOT for having both spamtestplus and spamtest
+       capabilities present, and instead make it a SHOULD NOT.
+   5.  Add text to state that implementations MUST return an error if
+       spamtestplus is not present when :percent is used.
+   6.  Tweak first para of security considerations to better reflect
+       reality of testing.
+   7.  Syntax -> Usage.
+   8.  Updated references to 3028bis and 3431bis.
+
+   Changes from -00:
+   1.  Added description of how to check for untested when using
+       :percent.
+   2.  Changed requires item to 'spamtestplus'.
+   3.  Changed text describing which requires item needs to be present.
+
+   Changes from RFC3685:
+   1.  Added ':percent' argument to spamtest.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 2]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+Table of Contents
+
+   1.  Introduction and Overview  . . . . . . . . . . . . . . . . . .  4
+   2.  Conventions Used in This Document  . . . . . . . . . . . . . .  4
+   3.  SIEVE Extensions . . . . . . . . . . . . . . . . . . . . . . .  5
+     3.1.  General Considerations . . . . . . . . . . . . . . . . . .  5
+     3.2.  Test spamtest  . . . . . . . . . . . . . . . . . . . . . .  5
+       3.2.1.  spamtest without :percent argument . . . . . . . . . .  6
+       3.2.2.  spamtest with :percent argument  . . . . . . . . . . .  6
+     3.3.  Test virustest . . . . . . . . . . . . . . . . . . . . . .  7
+   4.  Security Considerations  . . . . . . . . . . . . . . . . . . .  9
+   5.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . .  9
+     5.1.  spamtestplus registration  . . . . . . . . . . . . . . . .  9
+   6.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+     6.1.  Normative References . . . . . . . . . . . . . . . . . . . 10
+     6.2.  Informative References . . . . . . . . . . . . . . . . . . 10
+   Appendix A.  Acknowledgments . . . . . . . . . . . . . . . . . . . 10
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 11
+   Intellectual Property and Copyright Statements . . . . . . . . . . 12
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 3]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+1.  Introduction and Overview
+
+   SIEVE scripts are frequently being used to do spam and virus
+   filtering based on either implicit script tests (e.g. tests for
+   'black-listed' senders directly encoded in the SIEVE script), or via
+   testing messages modified by some external spam or virus checker that
+   handled the message prior to SIEVE.  The use of third-party spam and
+   virus checker tools poses a problem since each tool has its own way
+   of indicating the result of its checks.  These usually take the form
+   of a header added to the message, the content of which indicates the
+   status using some syntax defined by the particular tool.  Each user
+   has to then create their own SIEVE scripts to match the contents of
+   these headers to do filtering.  This requires the script to stay in
+   synchronisation with the third party tool as it gets updated or
+   perhaps replaced with another.  Thus scripts become tied to specific
+   environments, and lose portability.
+
+   The purpose of this document is to introduce two SIEVE tests that can
+   be used to implement 'generic' tests for spam and viruses in messages
+   processed via SIEVE scripts.  These tests return a string containing
+   a range of numeric values that indicate the severity of spam or
+   viruses in a message, or a string that indicates the message has not
+   passed through any spam or virus checking tools, or provides a direct
+   indication of whether the message has been tested for spam or not.
+   The spam and virus checks themselves are handled by the underlying
+   SIEVE implementation in whatever manner is appropriate, and the
+   implementation maps the results of these checks into the numeric
+   ranges defined by the new tests.  Thus a SIEVE implementation can
+   have a spam test that implicitly checks for third-party spam tool
+   headers and determines how those map into the spamtest numeric range.
+
+   In order to do numeric comparisons against the returned strings,
+   server implementations MUST also support the SIEVE relational
+   [I-D.ietf-sieve-3431bis] extension, in addition to the extensions
+   described here.  All examples below assume the relational extension
+   is present.
+
+
+2.  Conventions Used in This Document
+
+   Conventions for notations are as in [I-D.ietf-sieve-3028bis] section
+   1.1, including use of [RFC2119].
+
+   The term 'spam' is used in this document to refer to unsolicited or
+   unwanted email messages.  This document does not attempt to define
+   what exactly constitutes spam, or how it should be identified, or
+   what actions should be taken when detected.
+
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 4]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+   The term 'virus' is used in this document to refer to any type of
+   message whose content can cause malicious damage.  This document does
+   not attempt to define what exactly constitutes a virus, or how it
+   should be identified, or what actions should be taken when detected.
+
+
+3.  SIEVE Extensions
+
+3.1.  General Considerations
+
+   The "spamtest" and "virustest" tests described below can both return
+   a string that starts with a numeric value, followed by an optional
+   space (%x20) character and optional arbitrary text.  The numeric
+   value can be compared to specific values using the SIEVE relational
+   [I-D.ietf-sieve-3431bis] extension in conjunction with the "i;ascii-
+   numeric" comparator [I-D.newman-i18n-comparator], which will test for
+   the presence of a numeric value at the start of the string, ignoring
+   any additional text in the string.  The additional text can be used
+   to carry implementation specific details about the tests performed
+   and descriptive comments about the result.  Tests can be done using
+   standard string comparators against this text if it helps to refine
+   behaviour, however this will break portability of the script as the
+   text will likely be specific to a particular implementation.
+
+3.2.  Test spamtest
+
+           Usage:    spamtest [":percent"] [COMPARATOR] [MATCH-TYPE]
+                     <value: string>
+
+
+   SIEVE implementations that implement the "spamtest" test use an
+   identifier of either "spamtest" or "spamtestplus" for use with the
+   capability mechanism.
+
+   If the ":percent" argument is not used with any spamtest test, then
+   one of either the "spamtest" or "spamtestplus" capability identifiers
+   MUST be present.
+
+   If the ":percent" argument is used with any spamtest test, then the
+   "spamtestplus" capability identifier MUST be present.  SIEVE
+   implementations MUST return an error if the ":percent" argument is
+   used and "spamtestplus" is not specified.
+
+   In the interests of brevity and clarity, scripts SHOULD NOT specify
+   both "spamtestplus" and "spamtest" capability identifiers together.
+
+   The "spamtest" test evaluates to true if the spamtest result matches
+   the value.  The type of match is specified by the optional match
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 5]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+   argument, which defaults to ":is" if not specified.
+
+3.2.1.  spamtest without :percent argument
+
+   When the ":percent" argument is not present in the "spamtest" test,
+   the result of the test is a string starting with a numeric value in
+   the range "0" (zero) through "10", with meanings summarised below:
+
+           spamtest    interpretation
+           value
+
+            0          message was not tested for spam
+            1          message was tested and is clear of spam
+            2 - 9      message was tested and has a varying likelihood
+                       of containing spam in increasing order
+            10         message was tested and definitely contains spam
+
+   The underlying SIEVE implementation will map whatever spam check is
+   done into this numeric range, as appropriate.
+
+   Examples:
+
+           require ["spamtest", "fileinto",
+                    "relational", "comparator-i;ascii-numeric"];
+
+           if spamtest :value "eq" :comparator "i;ascii-numeric" "0"
+           {
+               fileinto "INBOX.unclassified";
+           }
+           elsif spamtest :value "ge" :comparator "i;ascii-numeric" "3"
+           {
+               fileinto "INBOX.spam-trap";
+           }
+
+   In this example, any message that has not passed through a spam check
+   tool will be filed into the mailbox "INBOX.unclassified".  Any
+   message with a spamtest value greater than or equal to "3" is filed
+   into a mailbox called "INBOX.spam-trap" in the user's mailstore.
+
+3.2.2.  spamtest with :percent argument
+
+   When the ":percent" argument is present in the "spamtest" test, the
+   result of the test is a string starting with a numeric value in the
+   range "0" (zero) through "100", with meanings summarised below, or
+   the string "untested" for the case where the message was not tested
+   for spam (corresponding to the "0" value returned when the ":percent"
+   argument is not used):
+
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 6]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+           spamtest    interpretation
+           value
+
+           "untested"  message was not tested for spam
+            0          message was tested and is clear of spam
+            1 - 99     message was tested and has a varying likelihood
+                       of containing spam in increasing order
+            100        message was tested and definitely contains spam
+
+   The underlying SIEVE implementation will map whatever spam check is
+   done into the numeric range, as appropriate.
+
+   To determine whether the message was tested for spam or not, the
+   preferred solution is to use the test without the ":percent"
+   argument, testing for the value "0" as described in Section 3.2.1.
+
+   Examples:
+
+           require ["spamtestplus", "fileinto",
+                    "relational", "comparator-i;ascii-numeric"];
+
+           if spamtest :value "eq"
+                       :comparator "i;ascii-numeric" "0"
+           {
+               fileinto "INBOX.unclassified";
+           }
+           elsif spamtest :percent :value "ge"
+                          :comparator "i;ascii-numeric" "30"
+           {
+               fileinto "INBOX.spam-trap";
+           }
+
+   In this example, any message that has not passed through a spam check
+   tool will be filed into the mailbox "INBOX.unclassified".  Any
+   message with a spamtest percentage value greater than or equal to
+   "30" is filed into a mailbox called "INBOX.spam-trap" in the user's
+   mailstore.
+
+3.3.  Test virustest
+
+           Usage:    virustest [COMPARATOR] [MATCH-TYPE]
+                     <value: string>
+
+   SIEVE implementations that implement the "virustest" test have an
+   identifier of "virustest" for use with the capability mechanism.
+
+   The "virustest" test evaluates to true if the virustest result
+   matches the value.  The type of match is specified by the optional
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 7]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+   match argument, which defaults to ":is" if not specified.
+
+   The virustest result is a string starting with a numeric value in the
+   range "0" (zero) through "5", with meanings summarised below:
+
+           virustest   interpretation
+           value
+
+            0          message was not tested for viruses
+            1          message was tested and contains no known viruses
+            2          message was tested and contained a known virus
+                       which was replaced with harmless content
+            3          message was tested and contained a known virus
+                       which was "cured" such that it is now harmless
+            4          message was tested and possibly contains a
+                       known virus
+            5          message was tested and definately contains a
+                       known virus
+
+   The underlying SIEVE implementation will map whatever virus checks
+   are done into this numeric range, as appropriate.  If the message has
+   not been categorised by any virus checking tools, then the virustest
+   result is "0".
+
+   Example:
+
+           require ["virustest", "fileinto",
+                    "relational", "comparator-i;ascii-numeric"];
+
+           if virustest :value "eq" :comparator "i;ascii-numeric" "0"
+           {
+               fileinto "INBOX.unclassified";
+           }
+           if virustest :value "eq" :comparator "i;ascii-numeric" "4"
+           {
+               fileinto "INBOX.quarantine";
+           }
+           elsif virustest :value "eq" :comparator "i;ascii-numeric" "5"
+           {
+               discard;
+           }
+
+   In this example, any message that has not passed through a virus
+   check tool will be filed into the mailbox "INBOX.unclassified".  Any
+   message with a virustest value equal to "4" is filed into a mailbox
+   called "INBOX.quarantine" in the user's mailstore.  Any message with
+   a virustest value equal to "5" is discarded (removed) and not
+   delivered to the user's mailstore.
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 8]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+4.  Security Considerations
+
+   SIEVE implementations SHOULD ensure that "spamtest" and "virustest"
+   tests only report spam and virus test results for messages that
+   actually have gone through a legitimate spam or virus check process.
+   In particular, if such checks rely on the addition and subsequent
+   checking of private header fields, it is the responsibility of the
+   implementation to ensure that such headers cannot be spoofed by the
+   sender or intermediary and thereby prevent the implementation from
+   being tricked into returning the wrong result for the test.
+
+   Server administrators must ensure that the virus checking tools are
+   kept up to date, to provide reasonable protection for users using the
+   "virustest" test.  Users should be made aware of the fact that the
+   "virustest" test does not provide a 100% reliable way to remove all
+   viruses, and they should continue to exercise caution when dealing
+   with messages of unknown content and origin.
+
+   Beyond that, the "spamtest" and "virustest" extensions do not raise
+   any security considerations that are not present in the base
+   [I-D.ietf-sieve-3028bis] protocol, and these issues are discussed in
+   [I-D.ietf-sieve-3028bis].
+
+
+5.  IANA Considerations
+
+   The following template specifies the IANA registration of the Sieve
+   extensions specified in this document, that are not already
+   registered in [RFC3685]:
+
+5.1.  spamtestplus registration
+
+       To: iana@iana.org
+       Subject: Registration of new Sieve extension
+
+       Capability name: spamtestplus
+       Capability keyword: spamtest
+       Capability arguments: :percent
+       Standards Track/IESG-approved experimental RFC number: this RFC
+       Person and email address to contact for further information:
+
+         Cyrus Daboo
+
+         <mailto:cyrus@daboo.name>
+
+   This information should be added to the list of sieve extensions
+   given on http://www.iana.org/assignments/sieve-extensions.
+
+
+
+
+Daboo                     Expires July 24, 2006                 [Page 9]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+6.  References
+
+6.1.  Normative References
+
+   [I-D.ietf-sieve-3028bis]
+              Showalter, T. and P. Guenther, "Sieve: An Email Filtering
+              Language", draft-ietf-sieve-3028bis-05 (work in progress),
+              November 2005.
+
+   [I-D.ietf-sieve-3431bis]
+              Segmuller, W. and B. Leiba, "Sieve Extension: Relational
+              Tests", draft-ietf-sieve-3431bis-04 (work in progress),
+              December 2005.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC3685]  Daboo, C., "SIEVE Email Filtering: Spamtest and VirusTest
+              Extensions", RFC 3685, February 2004.
+
+6.2.  Informative References
+
+   [I-D.newman-i18n-comparator]
+              Newman, C., "Internet Application Protocol Collation
+              Registry", draft-newman-i18n-comparator-05 (work in
+              progress), September 2005.
+
+
+Appendix A.  Acknowledgments
+
+   Thanks to Tony Hansen, Jutta Degener, Ned Freed, Ashish Gawarikar,
+   Alexey Melnikov and Nigel Swinson for comments and corrections.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Daboo                     Expires July 24, 2006                [Page 10]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+Author's Address
+
+   Cyrus Daboo
+
+   Email: cyrus@daboo.name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Daboo                     Expires July 24, 2006                [Page 11]
+
+Internet-Draft        SIEVE Spamtest and Virustest          January 2006
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2006).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Daboo                     Expires July 24, 2006                [Page 12]
+

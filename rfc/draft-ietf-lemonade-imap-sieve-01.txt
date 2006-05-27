@@ -1,0 +1,1176 @@
+
+
+
+Lemonade Working Group                                          B. Leiba
+Internet-Draft                           IBM T.J. Watson Research Center
+Expires: September 7, 2006                                 March 6, 2006
+
+
+     Support for Sieve in Internet Message Access Protocol (IMAP4)
+                   draft-ietf-lemonade-imap-sieve-01
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on September 7, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   Sieve defines an email filtering language that can, in principle,
+   plug into any point in the processing of an email message.  As
+   defined in the base specification, it plugs into mail delivery.  This
+   document defines how Sieve can plug into points in the IMAP protocol
+   where messages are created or changed, adding the option of user-
+   defined or installation-defined filtering (or, with Sieve extensions,
+   features such as notifications).
+
+Note
+
+
+
+Leiba                   Expires September 7, 2006               [Page 1]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+   While this document defines extensions to IMAP and Sieve, it is the
+   work of the Lemonade Working Group (Enhancements to Internet email to
+   support diverse service environments), and discussion of it is on the
+   lemonade mailing list at mailto:lemonade@ietf.org.  Subscription
+   requests can be sent to
+   mailto:lemonade-request@ietf.org?body=subscribe (send an email
+   message with the word "subscribe" in the body).  A WWW archive of
+   back messages is available at
+   http://www.ietf.org/mail-archive/web/lemonade/index.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 2]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+Table of Contents
+
+   1.      Introduction . . . . . . . . . . . . . . . . . . . . . . .  5
+   1.1.    Overview . . . . . . . . . . . . . . . . . . . . . . . . .  5
+   1.2.    Conventions used in this document  . . . . . . . . . . . .  5
+
+   2.      The IMAP "IMAPSieve" Extension . . . . . . . . . . . . . .  6
+   2.1.    The "IMAPSieve" Capability String  . . . . . . . . . . . .  6
+   2.2.    Existing IMAP Functions Affected by IMAPSieve  . . . . . .  6
+   2.2.1.  The IMAP APPEND Command  . . . . . . . . . . . . . . . . .  6
+   2.2.2.  The IMAP MULTIAPPEND Command . . . . . . . . . . . . . . .  6
+   2.2.3.  The IMAP COPY Command  . . . . . . . . . . . . . . . . . .  6
+   2.2.4.  Changes to IMAP Message Flags  . . . . . . . . . . . . . .  6
+   2.2.5.  New or Changed IMAP Message Annotations  . . . . . . . . .  7
+   2.3.    New Functions Defined by IMAPSieve . . . . . . . . . . . .  7
+   2.3.1.  Changes to Manage Sieve  . . . . . . . . . . . . . . . . .  7
+
+   3.      Applicable Sieve Actions and Interactions  . . . . . . . .  8
+   3.1.    The Implicit Keep  . . . . . . . . . . . . . . . . . . . .  8
+   3.2.    The Keep Action  . . . . . . . . . . . . . . . . . . . . .  8
+   3.3.    The Fileinto Action  . . . . . . . . . . . . . . . . . . .  8
+   3.4.    The Redirect Action  . . . . . . . . . . . . . . . . . . .  9
+   3.5.    The Reject Action  . . . . . . . . . . . . . . . . . . . .  9
+   3.6.    The Discard Action . . . . . . . . . . . . . . . . . . . .  9
+   3.7.    The Notify Action  . . . . . . . . . . . . . . . . . . . .  9
+   3.8.    The Addheader and Deleteheader Actions . . . . . . . . . . 10
+   3.9.    The Setflag, Deleteflag, and Removeflag Actions  . . . . . 10
+   3.10.   The Vacation Action  . . . . . . . . . . . . . . . . . . . 10
+   3.11.   New Sieve Variable: IMAPSieve.cause  . . . . . . . . . . . 10
+   3.12.   New Sieve Variable: IMAPSieve.mailbox  . . . . . . . . . . 11
+   3.13.   New Sieve Variable: IMAPSieve.changed.flags  . . . . . . . 11
+   3.14.   New Sieve Variable: IMAPSieve.changed.annotations  . . . . 11
+   3.15.   Interaction With Sieve Tests (Comparisons) . . . . . . . . 12
+
+   4.      Open Issues With This Document . . . . . . . . . . . . . . 13
+
+   5.      Examples . . . . . . . . . . . . . . . . . . . . . . . . . 14
+
+   6.      Formal Syntax  . . . . . . . . . . . . . . . . . . . . . . 15
+
+   7.      Security Considerations  . . . . . . . . . . . . . . . . . 16
+
+   8.      IANA Considerations  . . . . . . . . . . . . . . . . . . . 17
+
+   9.      References . . . . . . . . . . . . . . . . . . . . . . . . 18
+   9.1.    Normative References . . . . . . . . . . . . . . . . . . . 18
+   9.2.    Non-Normative References . . . . . . . . . . . . . . . . . 18
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 3]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+           Author's Address . . . . . . . . . . . . . . . . . . . . . 20
+           Intellectual Property and Copyright Statements . . . . . . 21
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 4]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+1.  Introduction
+
+1.1.  Overview
+
+   Some applications have a need to apply [Sieve] filters in situations
+   other than initial mail delivery.  This is especially true in diverse
+   service environments, such as when the client is sporadically
+   connected, is connected through a high-latency or high-cost channel,
+   or is on a limited-function device.  For such clients, it may be very
+   important, for higher performance and reliability, to take advantage
+   of server capabilities, including those provided by Sieve filtering
+   (and Sieve extensions, such as [Notify]).
+
+   This specification defines extensions to [IMAP] to support the
+   invocation of Sieve scripts at times when the IMAP server creates new
+   messages, or modifies existing ones.  It also defines how Sieve
+   scripts will process these invocations.
+
+1.2.  Conventions used in this document
+
+   In examples, "C:" and "S:" indicate lines sent by the client and
+   server respectively.
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "MAY", and "OPTIONAL" in this document are to
+   be interpreted as described in [Keywds].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 5]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+2.  The IMAP "IMAPSieve" Extension
+
+2.1.  The "IMAPSieve" Capability String
+
+   An IMAP server advertises support for this extension through the
+   capability string "IMAPSieve" (the string is not case-sensitive, and
+   is shown here with this capitalization for readability).  A server
+   that advertises IMAPSieve is claiming to be in compliance with this
+   specification in all aspects.
+
+2.2.  Existing IMAP Functions Affected by IMAPSieve
+
+   The subsections below describe in detail the IMAP commands and
+   situations on which IMAPSieve has an effect.  Not all Sieve actions
+   make sense in the case of messages affected by IMAP commands.  See
+   Section 3 for details.
+
+   If more than one message is affected at the same time, each message
+   triggers the execution of a Sieve script separately.  The scripts MAY
+   be run in parallel.
+
+2.2.1.  The IMAP APPEND Command
+
+   A message may be added to a mailbox through the IMAP APPEND command.
+   In a server that advertises IMAPSieve, new messages added in this way
+   MUST trigger the execution of a Sieve script, subject to the settings
+   defined through Manage Sieve (see Section 2.3.1).
+
+2.2.2.  The IMAP MULTIAPPEND Command
+
+   If the IMAP server supports the IMAP [MultiAppend] extension,
+   messages may be added to a mailbox through the IMAP MULTIAPPEND
+   command.  In a server that advertises IMAPSieve, new messages added
+   in this way MUST trigger the execution of a Sieve script, as with the
+   APPEND command, also subject to the settings defined through Manage
+   Sieve.
+
+2.2.3.  The IMAP COPY Command
+
+   One or more messages may be added to a mailbox through the IMAP COPY
+   command.  In a server that advertises IMAPSieve, new messages added
+   in this way MUST trigger the execution of a Sieve script, subject to
+   the settings defined through Manage Sieve.
+
+2.2.4.  Changes to IMAP Message Flags
+
+   One or more existing messages can have their flags changed in a
+   number of ways, including:
+
+
+
+Leiba                   Expires September 7, 2006               [Page 6]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+   o  The FETCH command (may cause the \Seen flag to be set).
+
+   o  The STORE command (may cause the \Answered, \Deleted, \Draft,
+      \Flagged, and \Seen flags to be set or reset, and may cause
+      keywords to be set or reset).
+
+   o  The invocation of a Sieve script on an existing message, where the
+      Sieve implementation supports the [IMAP4Flags] extension and the
+      script uses one of the actions defined in that extension.
+
+   In a server that advertises IMAPSieve, messages whose flags are
+   changed in any way (except as explained in the next sentence) MUST
+   trigger the execution of a Sieve script, subject to the settings
+   defined through Manage Sieve.  The exception is that in order to
+   avoid script loops, flag changes that are made as a result of a
+   script that was itself invoked because of flag changes SHOULD NOT
+   result in another script invocation.  In any case, implementations
+   MUST take steps to avoid such loops.
+
+2.2.5.  New or Changed IMAP Message Annotations
+
+   [[Annotate?: Do we want this to apply to annotate too?  If so, does
+   that make annotate a normative reference?]]
+
+   If the IMAP server supports the [Annotate] extension, one or more
+   existing messages can have annotations added or changed through the
+   ANNOTATE command.  In a server that advertises IMAPSieve, messages
+   getting new or changed annotations MUST trigger the execution of a
+   Sieve script, subject to the settings defined through Manage Sieve.
+
+2.3.  New Functions Defined by IMAPSieve
+
+2.3.1.  Changes to Manage Sieve
+
+   [[Manage Sieve placeholder: This section is a placeholder right now,
+   for changes to the Manage Sieve protocol.  We'll fill in more detail
+   on the next iteration of this draft.]]
+
+   Manage Sieve [Manage] is a protocol for managing Sieve scripts.  We
+   define here an extension to that protocol to support multiple active
+   scripts, each serving a different function.  The extension here will
+   allow us to tell the IMAP server which script to use for which
+   mailbox(es) for the conditions described in this document.  No Sieve
+   script is invoked for an IMAP condition unless Manage Sieve has
+   defined a script for it, and has "turned on" filtering for a
+   particular mailbox or set of mailboxes.
+
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 7]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+3.  Applicable Sieve Actions and Interactions
+
+   Since some Sieve actions relate specifically to the delivery of mail,
+   not all actions make sense when the messages are created by other
+   means, or when changes are made to data associated with existing
+   messages.  This section describes how actions in the base Sieve
+   specification, and those in extensions known at this writing, relate
+   to this specification.
+
+   In addition to what is specified here, interactions noted in the
+   individual specifications apply, and must be considered.
+
+3.1.  The Implicit Keep
+
+   For all cases that fall under IMAPSieve, the implicit keep means that
+   the message is treated as it would have been if no Sieve script were
+   run.  For APPEND, MULTIAPPEND and COPY, the message is stored into
+   the target mailbox normally.  For flag or annotation changes, the
+   message is left in the mailbox.
+
+3.2.  The Keep Action
+
+   The keep action is applicable in all cases that fall under IMAPSieve.
+   Its behaviour is as described for implicit keep, in Section 3.1.
+
+3.3.  The Fileinto Action
+
+   If the Sieve implementation supports the fileinto action, that action
+   is applicable in all cases that fall under IMAPSieve.  If the [Copy]
+   extension is available and the :copy option is specified, the
+   implicit keep is retained; otherwise, fileinto cancels the implicit
+   keep, as specified in the base Sieve specification.
+
+   For APPEND, MULTIAPPEND, and COPY, the message is stored into the
+   fileinto mailbox IN ADDITION TO the original target mailbox.  For
+   flag or annotation changes, the message is COPIED into the fileinto
+   mailbox, without removing the original.
+
+   If a keep action is NOT also in effect, the original message is then
+   marked with the \Deleted flag (and a flag-change Sieve script is NOT
+   invoked).  The implementation MAY then expunge the original message
+   (WITHOUT expunging other messages in the mailbox), or it MAY choose
+   to have expunges batched, or done by a user.  The effect is as though
+   a client had flagged the message and done a UID EXPUNGE (see
+   [UIDPlus]).  Handling it this way allows clients to handle messages
+   consistently, and avoids hidden changes that might invalidate their
+   message caches.
+
+
+
+
+Leiba                   Expires September 7, 2006               [Page 8]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+3.4.  The Redirect Action
+
+   The redirect action is applicable in all cases that fall under
+   IMAPSieve.  It causes the message to be sent, as specified in the
+   base Sieve specification, to the designated address.  If the [Copy]
+   extension is available and the :copy option is specified, the
+   implicit keep is retained; otherwise, redirect cancels the implicit
+   keep, as specified in the base Sieve specification.
+
+   For APPEND, MULTIAPPEND, and COPY, the message is stored into the
+   target mailbox in addition to being redirected.  For flag or
+   annotation changes, the message remains in its original mailbox.
+
+   If a keep action is NOT also in effect, the original message is then
+   marked with the \Deleted flag (and a flag-change Sieve script is NOT
+   invoked).  The implementation MAY then expunge the original message
+   (WITHOUT expunging other messages in the mailbox), or it MAY choose
+   to have expunges batched, or done by a user.  The effect is as though
+   a client had flagged the message and done a UID EXPUNGE (see
+   [UIDPlus]).  Handling it this way allows clients to handle messages
+   consistently, and avoids hidden changes that might invalidate their
+   message caches.
+
+3.5.  The Reject Action
+
+   The reject action is NOT applicable to any case that falls under
+   IMAPSieve.  Its use MUST result in an error condition that will
+   terminate the Sieve script.
+
+3.6.  The Discard Action
+
+   The discard action is applicable in all cases that fall under
+   IMAPSieve.  For APPEND, MULTIAPPEND, and COPY, the message is first
+   stored into the target mailbox.  If a keep action, implicit or
+   explicit, is also in effect, the discard action now does nothing.
+   Otherwise, the original message is then marked with the \Deleted flag
+   (and a flag-change Sieve script is NOT invoked).  The implementation
+   MAY then expunge the original message (WITHOUT expunging other
+   messages in the mailbox), or it MAY choose to have expunges batched,
+   or done by a user.  The effect is as though a client had flagged the
+   message and done a UID EXPUNGE (see [UIDPlus]).  Handling it this way
+   allows clients to handle messages consistently, and avoids hidden
+   changes that might invalidate their message caches.
+
+3.7.  The Notify Action
+
+   If the [Notify] extension is available, the notify action is
+   applicable in all cases that fall under IMAPSieve.  The result is
+
+
+
+Leiba                   Expires September 7, 2006               [Page 9]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+   that the requested notification is sent, and that the message is
+   otherwise handled as it would normally have been.
+
+3.8.  The Addheader and Deleteheader Actions
+
+   Even if the [EditHeader] extension is available, since messages in
+   IMAP mailboxes are immutable these actions are NOT applicable.  Using
+   them for flag or annotation changes to existing messages would cause
+   the message to be changed.  Using them for APPEND, MULTIAPPEND, and
+   COPY would cause unexpected differences in the stored copy as
+   compared to what the client expected, and would make the client's
+   message cache invalid unexpectedly.  Use of these MUST result in an
+   error condition that will terminate the Sieve script.
+
+3.9.  The Setflag, Deleteflag, and Removeflag Actions
+
+   If the [IMAP4Flags] extension is available, the actions associated
+   with it are all applicable to any case that falls under IMAPSieve.
+   It is worth noting also that the "hasflag" test that is defined in
+   the IMAP4Flags extension might be particularly useful in scripts
+   triggered by flag changes.  The flag changes behave as though a
+   client had made the change.
+
+   As explained above, in order to avoid script loops flag changes that
+   are made as a result of a script that was itself invoked because of
+   flag changes SHOULD NOT result in another script invocation.  In any
+   case, implementations MUST take steps to avoid such loops.
+
+3.10.  The Vacation Action
+
+   Even if the [Vacation] extension is available, the vacation action is
+   NOT applicable to any case that falls under IMAPSieve.  Its use MUST
+   result in an error condition that will terminate the Sieve script.
+
+3.11.  New Sieve Variable: IMAPSieve.cause
+
+   [[var1: This will be replaced in the next draft iteration; we won't
+   make them variables.]]
+
+   Implementations MAY invoke different Sieve scripts for the different
+   conditions described in this document (append, copy, flag changes,
+   annotation changes).  If the actions to be taken are common, and the
+   implementation supports the [Include] extension, the common script
+   code can be included as specified there.
+
+   It may be preferable, though, to use a single script for all these
+   conditions.  To support that, if the [Variables] extension is
+   available, the implementation MUST set the reserved variable
+
+
+
+Leiba                   Expires September 7, 2006              [Page 10]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+   "${IMAPSieve.cause}", which contains the name of the action that
+   caused the script to be invoked.  Its value is one of the following:
+
+   o  APPEND (for invocations resulting from APPEND or MULTIAPPEND)
+
+   o  COPY (for invocations resulting from COPY)
+
+   o  FLAG (for invocations resulting from flag changes)
+
+   o  ANNOTATE (for invocations resulting from new or changed
+      annotations)
+
+3.12.  New Sieve Variable: IMAPSieve.mailbox
+
+   [[var2: This will be replaced in the next draft iteration; we won't
+   make them variables.]]
+
+   If the [Variables] extension is available, the implementation MUST
+   set the reserved variable "${IMAPSieve.mailbox}" to the name of the
+   mailbox that the affected message is in, in the case of existing
+   messages, or is targeted to be stored into, in the case of new
+   messages.  The value of this variable is fixed when the script
+   begins, and, in particular, MUST NOT change as a result of any
+   action, such as "fileinto".
+
+3.13.  New Sieve Variable: IMAPSieve.changed.flags
+
+   [[var3: This will be replaced in the next draft iteration; we won't
+   make them variables.]]
+
+   If the [Variables] extension is available, the [IMAP4Flags] extension
+   is available, AND the script was invoked because of flag changes to
+   an existing message, the implementation MUST set the reserved
+   variable "${IMAPSieve.changed.flags}" to the name(s) of the flag(s)
+   that have changed.  If the script was not invoked because of flag
+   changes, this variable MUST be unknown (and, thus, its value MUST be
+   the empty string).  The script will not know from this variable
+   whether the flags have been set or reset, but it can use the
+   "hasflag" test to determine the current value.  See example 2 in
+   Section 5 for an example of how this might be used.
+
+3.14.  New Sieve Variable: IMAPSieve.changed.annotations
+
+   [[var4: This will be replaced in the next draft iteration; we won't
+   make them variables.]]
+
+   If the [Variables] extension is available, the [Annotate] extension
+   is available, AND the script was invoked because of annotation
+
+
+
+Leiba                   Expires September 7, 2006              [Page 11]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+   changes to an existing message, the implementation MUST set the
+   reserved variable "${IMAPSieve.changed.annotations}" to the name(s)
+   of the annotation(s) that have changed.  If the script was not
+   invoked because of annotation changes, this variable MUST be unknown
+   (and, thus, its value MUST be the empty string).
+
+3.15.  Interaction With Sieve Tests (Comparisons)
+
+   This extension does not affect the operation of any tests or
+   comparisons.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 12]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+4.  Open Issues With This Document
+
+   When this section is empty, I guess we're done....
+
+   1.  The Manage Sieve changes need to be specified.
+
+   2.  The stuff with "new sieve variables" has to be changed, as was
+       extensively discussed on the mailing list.  Next iteration....
+
+   3.  All of the extensions that we describe how to work with: are they
+       normative, or non-normative references?
+
+   4.  Can anyone come up with some examples that use only features from
+       the base Sieve spec?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 13]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+5.  Examples
+
+   Example 1:
+   If a new message is added to the "ActionItems" mailbox, a copy is
+   sent to the address "actionitems@example.com".
+
+     require ["copy", "variables"];
+
+     if anyof (${IMAPSieve.cause} :is "APPEND",
+               ${IMAPSieve.cause} :is "COPY")  {
+         if ${IMAPSieve.mailbox} :is "ActionItems" {
+             redirect :copy "actionitems@example.com";
+         }
+     }
+
+   Example 2:
+   If the script is called for any message with the \Flagged flag set
+   (tested through the [IMAP4Flags] extension), a notification is sent
+   using the [Notify] extension.  No notification will be sent, though,
+   if we're called with an existing message that already had that flag
+   set.
+
+     require ["nofity", "imap4flags", "variables"];
+
+     if allof (hasflag "\\Flagged",
+               not ${IMAPSieve.changed.flags} :contains "\\Flagged") {
+         notify :message "Important message in ${IMAPSieve.mailbox}";
+     }
+
+   Example 3:
+   [[More examples?: Can anyone come up with some examples that use only
+   features from the base Sieve spec?]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 14]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+6.  Formal Syntax
+
+   The following syntax specification uses the augmented Backus-Naur
+   Form (BNF) notation as specified in [ABNF].  Non-terminals referenced
+   but not defined below are as defined by [IMAP].
+
+   [[Maybe...: If we decide we need this command, the syntax goes
+   here.]]
+
+   command_auth  =/  sievefilter
+                     ; Valid only in Authenticated or Selected state
+
+   sievefilter   =   "SIEVEFILTER" to be defined
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 15]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+7.  Security Considerations
+
+   It is possible to introduce script processing loops by having a Sieve
+   script that is triggered by flag changes use the actions defined in
+   the [IMAP4Flags] extension.  Implementations MUST take steps to
+   prevent such loops.  One way to avoid this problem is that if a
+   script is invoked by flag changes, and that script further changes
+   the flags, those flag changes SHOULD NOT trigger a Sieve script
+   invocation.
+
+   Other security considerations are discussed in [IMAP], and [Sieve],
+   as well as in some of the other extension documents.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 16]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+8.  IANA Considerations
+
+   [[IANA?: Do we need this, since there's not actually a Sieve
+   capability defined here?]]
+   The following template specifies the IANA registration of the Sieve
+   extension specified in this document:
+
+   To: iana@iana.org
+   Subject: Registration of new Sieve extension
+   Capability name: imapsieve
+   Capability keyword: imapsieve
+   Capability arguments: N/A
+   Standards Track/IESG-approved experimental RFC number: this RFC
+   Person and email address to contact for further information:
+       Barry Leiba <leiba@watson.ibm.com>
+
+   This information should be added to the list of sieve extensions
+   given on http://www.iana.org/assignments/sieve-extensions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 17]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+9.  References
+
+9.1.  Normative References
+
+   [ABNF]    Crocker, D. and P. Overell, "Augmented BNF for Syntax
+             Specifications: ABNF", RFC 4234, October 2005.
+
+   [IMAP]    Crispin, M., "Internet Message Access Protocol - Version
+             4rev1", RFC 3501, March 2003.
+
+   [Keywds]  Bradner, S., "Key words for use in RFCs to Indicate
+             Requirement Levels", RFC 2119, March 1997.
+
+   [Manage]  Martin, T. and A. Melnikov, Ed., "A Protocol for Remotely
+             Managing Sieve Scripts", work in
+             progress, draft-martin-managesieve, February 2006.
+
+   [Sieve]   Guenther, P., Ed. and T. Showalter, Ed., "Sieve: An Email
+             Filtering Language", work in
+             progress, draft-ietf-sieve-3028bis, November 2005.
+
+9.2.  Non-Normative References
+
+   [Annotate]
+              Daboo, C. and R. Gellens, "IMAP ANNOTATE Extension", work
+              in progress, draft-ietf-imapext-annotate, November 2005.
+
+   [Copy]     Degener, J., "Sieve Extension: Copying Without Side
+              Effects", RFC 3894, October 2004.
+
+   [EditHeader]
+              Degener, J. and P. Guenther, "Sieve Email Filtering:
+              Editheader Extension", work in
+              progress, draft-ietf-sieve-editheader, October 2005.
+
+   [IMAP4Flags]
+              Melnikov, A., "Sieve Mail Filtering Language: IMAP flag
+              Extension", work in progress, draft-ietf-sieve-imapflags,
+              October 2005.
+
+   [Include]  Daboo, C., "SIEVE Email Filtering: Include Extension",
+              work in progress, draft-daboo-sieve-include, August 2005.
+
+   [MultiAppend]
+              Crispin, M., "Internet Message Access Protocol (IMAP) -
+              MULTIAPPEND Extension", RFC 3502, March 2003.
+
+   [Notify]   Melnikov, A., Ed., Leiba, B., Ed., Segmuller, W., and T.
+
+
+
+Leiba                   Expires September 7, 2006              [Page 18]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+              Martin, "Sieve Extension: Notifications", work in
+              progress, draft-ietf-sieve-notify, December 2005.
+
+   [UIDPlus]  Crispin, M., "Internet Message Access Protocol (IMAP) -
+              UIDPLUS Extension", RFC 4315, December 2005.
+
+   [Vacation]
+              Showalter, T. and N. Freed, Ed., "Sieve Email Filtering:
+              Vacation Extension", work in
+              progress, draft-ietf-sieve-vacation, October 2005.
+
+   [Variables]
+              Homme, K., "Sieve Extension: Variables", work in
+              progress, draft-ietf-sieve-variables, October 2005.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 19]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+Author's Address
+
+   Barry Leiba
+   IBM T.J. Watson Research Center
+   19 Skyline Drive
+   Hawthorne, NY  10532
+   US
+
+   Phone: +1 914 784 7941
+   Email: leiba@watson.ibm.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 20]
+
+Internet-Draft               Lemonade-Sieve                   March 2006
+
+
+Full Copyright Statement
+
+   Copyright (C) The Internet Society (2006).
+
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+
+Leiba                   Expires September 7, 2006              [Page 21]
+

@@ -1,0 +1,952 @@
+
+
+
+Sieve Working Group                                     A. Melnikov, Ed.
+Internet-Draft                                             Isode Limited
+Expires: August 8, 2006                                    B. Leiba, Ed.
+                                                            W. Segmuller
+                                         IBM T.J. Watson Research Center
+                                                               T. Martin
+                                                          Mirapoint Inc.
+                                                        February 4, 2006
+
+
+                     Sieve Extension: Notifications
+                       draft-ietf-sieve-notify-02
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on August 8, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   Users go to great lengths to be notified as quickly as possible that
+   they have received new mail.  Most of these methods involve polling
+   to check for new messages periodically.  A push method handled by the
+   final delivery agent gives users quicker notifications and saves
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 1]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+   server resources.  This document does not specify the notification
+   method but is expected that using existing instant messaging
+   infrastructure such as Zephyr, Jabber, or SMS messages will be
+   popular.  This draft describes an extension to the Sieve mail
+   filtering language that allows users to give specific rules for how
+   and when notifications should be sent.
+
+Note
+
+
+Table of Contents
+
+   1.   Introduction . . . . . . . . . . . . . . . . . . . . . . . .   3
+   1.1  Conventions used in this document  . . . . . . . . . . . . .   3
+
+   2.   Capability Identifier  . . . . . . . . . . . . . . . . . . .   4
+
+   3.   Notify Action  . . . . . . . . . . . . . . . . . . . . . . .   5
+   3.1  Notify Action Syntax and Semantics . . . . . . . . . . . . .   5
+   3.2  Notify tag ":method" . . . . . . . . . . . . . . . . . . . .   5
+   3.3  Notify tag ":priority" . . . . . . . . . . . . . . . . . . .   6
+   3.4  Notify tag ":message"  . . . . . . . . . . . . . . . . . . .   6
+   3.5  Examples . . . . . . . . . . . . . . . . . . . . . . . . . .   7
+
+   4.   Test valid_notif_method  . . . . . . . . . . . . . . . . . .   9
+
+   5.   Interactions with Other Sieve Actions  . . . . . . . . . . .  10
+
+   6.   Security Considerations  . . . . . . . . . . . . . . . . . .  11
+
+   7.   Extensions to ManageSieve protocol . . . . . . . . . . . . .  12
+
+   8.   IANA Considerations  . . . . . . . . . . . . . . . . . . . .  13
+
+   9.   Acknowledgements . . . . . . . . . . . . . . . . . . . . . .  14
+
+   10.  References . . . . . . . . . . . . . . . . . . . . . . . . .  15
+   10.1 Normative References . . . . . . . . . . . . . . . . . . . .  15
+   10.2 Non-Normative References . . . . . . . . . . . . . . . . . .  15
+
+        Authors' Addresses . . . . . . . . . . . . . . . . . . . . .  16
+
+        Intellectual Property and Copyright Statements . . . . . . .  17
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 2]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+1.  Introduction
+
+   This is an extension to the Sieve language defined by [Sieve] for
+   providing instant notifications.  It defines the new action "notify".
+
+   This document does not dictate the notification method used.
+   Examples of possible notification methods are Zephyr and Jabber.  The
+   available methods shall be site-defined.
+
+1.1  Conventions used in this document
+
+   Conventions for notations are as in [Sieve] section 1.1, including
+   the use of [Kwds] and the use of [ABNF].
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [Kwds].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 3]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+2.  Capability Identifier
+
+   The capability string associated with the extension defined in this
+   document is "notify".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 4]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+3.  Notify Action
+
+3.1  Notify Action Syntax and Semantics
+
+   Usage:  notify [":method" string]
+           [":priority" <"1" / "2" / "3">]
+           [":message" string]
+
+   The Notify action specifies that a notification should be sent to the
+   user.  The format of the notification is implementation-defined and
+   is also affected by the notification method used (see below).
+   However, all content specified in the notify action SHOULD be
+   included.  It is RECOMMENDED that a timestamp be included in the
+   notification.  Implementations SHOULD NOT include extraneous
+   information.
+
+   If there are errors sending the notification, the Sieve interpreter
+   SHOULD ignore the notification and not retry indefinitely.
+   [[Barry 4: Does this really belong here?  Shouldn't we push the
+   question of error recovery to the individual methods?]]
+
+3.2  Notify tag ":method"
+
+   The :method tag identifies the notification method that will be used;
+   it is a URI.  For example, the notification method can be an SMS URI
+   [SMS-URI] containing a phone number, or an XMPP [XMPP] URI containing
+   a Jabber identifier [XMPP-URI].  If the :method tag is not specified,
+   a default implementation-defined notification method is used, and if
+   there is no default method defined, the notification is ignored.
+   Implementations MUST NOT generate an error condition for lack of a
+   default notification method, and execution of the script MUST
+   continue.
+
+   The supported URI values will be site-specific.  If an URI schema is
+   specified that the implementation does not support, the notification
+   MUST cause an error condition.  Sieve scripts can check the supported
+   methods using the "valid_notif_method" test to be sure that they only
+   use supported ones, to avoid such error conditions.  If the :method
+   tag contains a supported URI schema, then the URI MUST be checked for
+   syntactic validity.  An invalid URI syntax or an unsupported URI
+   extension MUST cause an error.  An implementation MAY enforce other
+   semantic restrictions on URIs -- for example an SMS URI can only
+   contain phone numbers in a particular geographical region.  Violation
+   of such semantic restrictions MUST also cause an error.
+   [[Barry 1: "MUST" seems silly here, since the whole sentence is a
+   "MAY".]]
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 5]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+3.3  Notify tag ":priority"
+
+   The :priority tag specifies the importance of the notification.  The
+   :priority tag is followed by a numeric value represented as a string:
+   "1" (high importance), "2" (normal importance), and "3" (low
+   importance).  If no priority is given, a default priority of "2"
+   SHOULD be assumed.  Some notification methods allow users to specify
+   their state of activity (for example "busy" or "away from keyboard").
+   If the notification method provides this information it SHOULD be
+   used to selectively send notifications.  If, for example, the user
+   marks herself as "busy", a notification method can require that a
+   notification with a priority of "3" is not to be sent, however the
+   user should be notified of a higher priority notifications.  If the
+   notification method allows users to filter messages based upon
+   certain parameters in the message, users SHOULD be able to filter
+   based upon priority.  If the notification method does not support
+   priority, then this parameter MUST be ignored.
+   [[Alexey 1: Should we keep using "high", "normal" and "low"
+   instead?]]
+   [[Barry 3.5: Why do we call this "priority", and then explain it as
+   "importance"?  Shouldn't we just call it "importance"?]]
+
+3.4  Notify tag ":message"
+
+   The :message tag specifies the message data to be included in the
+   notification.  The entirety of the string SHOULD be sent but
+   implementations MAY shorten the message for technical or aesthetic
+   reasons.  If the message parameter is absent, a default message
+   containing the value of the From header field and the value of the
+   Subject header field will be used.  Note that the notification method
+   (the ":method" tag) may affect how this information is formatted.
+
+   The implementation of a notification method MAY modify the final
+   notification text -- for example, truncating it if it exceeds a
+   length limit, or modifying characters that can not be represented in
+   the target character set.  Allowed modifications should be documented
+   in a standards-track or informational document.
+
+   In order to construct more complex messages the notify extension can
+   be used together with the Sieve variables extension [Variables], as
+   shown in the examples below.
+
+   [[Note 2: Open issue:]] The previous version of this draft has
+   defined the two variables that can't be currently represented:
+
+      $text$     - the first text/* part
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 6]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+      $text[n]$  - the first n bytes of the first text/* part
+
+
+
+3.5  Examples
+
+
+   Example 1:
+       require ["notify", "fileinto", "variables"];
+
+       if header :contains "from" "boss@example.org" {
+           notify :priority "1"
+               :message "This is probably very important";
+           # Don't send any further notifications
+           stop;
+       }
+
+       if header :contains "to" "sievemailinglist@example.org" {
+           # :matches is used to get the value of the Subject header
+           if header :matches "Subject" "*" {
+               set "subject" "${1}";
+           }
+
+           # :matches is used to get the value of the From header
+           if header :matches "From" "*" {
+               set "from" "${1}";
+           }
+
+           notify :priority "3"
+               :message "[SIEVE] ${from}: ${subject}";
+           fileinto "INBOX.sieve";
+       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 7]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+   Example 2:
+       require ["notify", "fileinto", "variables", "envelope"];
+
+       if header :matches "from" "*@*.example.org" {
+           # :matches is used to get the MAIL FROM address
+           if envelope :all :matches "from" "*" {
+               set "env_from" " [really: ${1}]";
+           }
+
+           # :matches is used to get the value of the Subject header
+           if header :matches "Subject" "*" {
+               set "subject" "${1}";
+           }
+
+           # :matches is used to get the address from the From header
+           if address :matches :all "from" "*" {
+               set "from_addr" "${1}";
+           }
+
+           notify :message "${from_addr}${env_from}: ${subject}";
+       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 8]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+4.  Test valid_notif_method
+
+   Usage:  valid_notif_method <notification-uris: string-list>
+
+   The "valid_notif_method" test is true if the notification methods
+   listed in the notification-uris argument are supported and they are
+   syntactically and semantically valid.  All of the notification
+   methods must be supported and valid or the test is false.
+
+   [[Alexey 2: The text must be clear that this test performs exactly
+   the same checks as done during notify :method parameter
+   verificiation.]]
+
+
+   Example:  if valid_notif_method ["mailto:",
+                     "http://gw.example.net/notify?test"] {
+                 stop;
+             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                 [Page 9]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+5.  Interactions with Other Sieve Actions
+
+   The notify action is compatible with all other actions, and does not
+   affect the operation of other actions.  In particular, the notify
+   action MUST NOT cancel the implicit keep.
+
+   Multiple executed notify actions are allowed.
+   [[Note 3: Add text about suppression of identical notifications.]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 10]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+6.  Security Considerations
+
+   Security considerations are discussed in [Sieve].  Additionally,
+   implementations must be careful to follow the security considerations
+   of the specific notification methods.
+
+   The notify action is potentially very dangerous.  The path the
+   notification takes through the network may not be secure.  An error
+   in the options string may cause the message to be transmitted to
+   someone it was not intended for, or may expose information to
+   eavesdroppers.
+
+   Just because a notification is received doesn't mean it was sent by
+   the Sieve implementation.  It might be possible to forge
+   notifications with some notification methods.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 11]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+7.  Extensions to ManageSieve protocol
+
+   A ManageSieve [ManageSieve] server that supports the "notify"
+   extension MUST advertise the NOTIFY capability, that has a single
+   mandatory parameter.  The parameter is a string containing space
+   separated list of URI schema parts for supported nofication methods.
+
+   Example:
+   S: "NOTIFY" "xmpp mailto"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 12]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+8.  IANA Considerations
+
+   The following template specifies the IANA registration of the
+   variables Sieve extension specified in this document:
+
+   To: iana@iana.org
+   Subject: Registration of new Sieve extension
+   Capability name: notify
+   Capability keyword: notify
+   Capability arguments: N/A
+   Standards Track/IESG-approved experimental RFC number: this RFC
+   Person and email address to contact for further information:
+       Alexey Melnikov <Alexey.Melnikov@isode.com>
+
+   This information should be added to the list of sieve extensions
+   given on http://www.iana.org/assignments/sieve-extensions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 13]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+9.  Acknowledgements
+
+   Thanks to Larry Greenfield, Sarah Robeson, Tim Showalter, Cyrus
+   Daboo, Nigel Swinson, Kjetil Torgrim Homme, Michael Haardt, Mark E.
+   Mallett and Ned Freed for help with this document.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 14]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+10.  References
+
+10.1  Normative References
+
+   [ABNF]     Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", RFC 4234, October 2005.
+
+   [Kwds]     Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", RFC 2119, March 1997.
+
+   [ManageSieve]
+              Martin, T. and A. Melnikov, "A Protocol for Remotely
+              Managing Sieve Scripts", work in
+              progress, draft-martin-managesieve, February 2006.
+
+   [Sieve]    Guenther, P. and T. Showalter, "Sieve: An Email Filtering
+              Language", work in progress, draft-ietf-sieve-3028bis,
+              July 2005.
+
+10.2  Non-Normative References
+
+   [SMS-URI]  Wilde, E. and A. Vaha-Sipila, "URI scheme for GSM Short
+              Message Service", work in progress, draft-wilde-sms-uri,
+              August 2005.
+
+   [Variables]
+              Homme, K., "Sieve Extension: Variables", work in
+              progress, draft-ietf-sieve-variables, October 2005.
+
+   [XMPP]     Saint-Andre, Ed., P., "Extensible Messaging and Presence
+              Protocol (XMPP): Core", RFC 3920, October 2004.
+
+   [XMPP-URI]
+              Saint-Andre, P., "Internationalized Resource Identifiers
+              (IRIs) and Uniform Resource Identifiers (URIs) for the
+              Extensible Messaging and Presence Protocol (XMPP)", work
+              in progress, draft-saintandre-xmpp-iri, September 2005.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 15]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+Authors' Addresses
+
+   Alexey Melnikov (editor)
+   Isode Limited
+   5 Castle Business Village
+   36 Station Road
+   Hampton, Middlesex  TW12 2BX
+   UK
+
+   Email: Alexey.Melnikov@isode.com
+
+
+   Barry Leiba (editor)
+   IBM T.J. Watson Research Center
+   19 Skyline Drive
+   Hawthorne, NY  10532
+   US
+
+   Phone: +1 914 784 7941
+   Email: leiba@watson.ibm.com
+
+
+   Wolfgang Segmuller
+   IBM T.J. Watson Research Center
+   19 Skyline Drive
+   Hawthorne, NY  10532
+   US
+
+   Phone: +1 914 784 7408
+   Email: werewolf@us.ibm.com
+
+
+   Tim Martin
+   Mirapoint Inc.
+   909 Hermosa Court
+   Sunnyvale, CA  94085
+   US
+
+   Phone: +1 409 720 3835
+   Email: tmartin@mirapoint.com
+
+
+
+
+
+
+
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 16]
+
+Internet-Draft       Sieve Extension: Notifications        February 2006
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2006).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+Melnikov, et al.         Expires August 8, 2006                [Page 17]
+
