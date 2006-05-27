@@ -108,7 +108,10 @@
 							</tr>
 							<tr>
 							<td bgcolor=#d0d0d0 colspan=2>
+							{assign var=i value=0}
 							{foreach from=$rightcontent item=content}
+								{if $i != 0} <br> <br>
+								{else} {assign var=i value=1} {/if}
 								{if $content[0] != ""}
 									<b>{$content[0]}</b>
 									<br>
@@ -116,7 +119,6 @@
 								<small>
 								{$content[1]}
 								</small>
-								<br><br>
 							{/foreach}
 							{assign var=i value=0}
 							{foreach from=$rightlinks item=link}

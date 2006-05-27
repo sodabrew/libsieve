@@ -19,22 +19,11 @@
 
  $smarty->assign( 'righttitle', 'news.' );
  $smarty->assign( 'rightcontent', array(
- 	array( 'Version numbers are staggered with odd minor numbers denoting experimental / development versions. API calls will be frozen along versions 2.x where x is an even number.' ),
- 	array( 'February 2006: libSieve 2.1.10',
-	'Fixed sieve2_listextensions.
-	' ),
- 	array( 'February 2006: libSieve 2.1.9',
-	'Fixed subaddress tests, and the vacation and getenvelope callbacks. Added a few more debugging messages.
-	' ),
- 	array( 'February 2006: libSieve 2.1.8',
-	'Fixed a memory allocation bug that was preventing the library from being reused after sieve2_free was called.
-	' ),
- 	array( 'August 2005: libSieve 2.1.7',
-	'I\'ve rewritten the API, and I really like it this time. Take a look at the documentation pages and see what you think!
-	' ),
- 	array( 'November 2004: libSieve 2.1.5',
-	'In a move to confuse and astound, I am re-releasing libSieve 2.2.0_pre3 as 2.1.5. I dragged my feet for almost a year trying to figure out how I was going to fix the API in one fell swoop, release 2.2.0 final, and save the world. All that is gone now. 
-	' ),
+ 	array( 'Latest stable release: ...',
+	'Well, we\'re almost there!' ),
+ 	array( 'Latest unstable release: <a href="http://prdownloads.sourceforge.net/libsieve/libsieve-2.1.10.tar.gz?download">libSieve 2.1.10</a>.',
+	'Released February, 2006. Changes: '
+		. '<ul><li>Fixed sieve2_listextensions.</li></ul>' ),
 	) );
 
  $smarty->assign( 'rightlinks', '' );
