@@ -30,7 +30,7 @@
 	) );
 
  $smarty->assign( 'links', array(
- 	array( 'Sieve Homepage', 'http://www.cyrusoft.com/sieve/' ),
+ 	array( 'Sieve Homepage', 'http://sieve.info/' ),
  	array( 'Cyrus Project', 'http://asg.web.cmu.edu/cyrus/' ),
 	array( 'GNU Mailutils', 'http://www.gnu.org/software/mailutils/' ),
 	array( 'Network World Chaos article', 'http://www.nwfusion.com/news/2002/0715chaos.html' ),

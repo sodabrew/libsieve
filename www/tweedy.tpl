@@ -186,7 +186,7 @@
 </table>
 
 <small><center>
-	template &copy; 2002 by artwiz of <a href="http://www.oswd.org/">oswd</a> -- contents &copy; 2002, 2003 by aaron stone
+	template &copy; 2002 by artwiz of <a href="http://www.oswd.org/">oswd</a> -- contents &copy; 2002, 2003 by <a href="http://hydricacid.com/">aaron stone</a>
 </center></small>
 
 </body></html>
