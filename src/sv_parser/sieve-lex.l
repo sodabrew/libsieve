@@ -32,9 +32,15 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 /* sv_util */
 #include "util.h"
+
 /* sv_interface */
 #include "tree.h"
 #include "sieve.h"
+
+#include "callbacks2.h"
+extern struct sieve2_context *parse_context;
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
 
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
@@ -44,6 +50,9 @@ extern int libsieve_sieveerror(char *);
 
 #define YY_FATAL_ERROR libsieve_sievefatalerror
 void libsieve_sievefatalerror(const char msg[]);
+
+/* Holds a catbuf for the text: multiline. */
+static struct catbuf *text;
 
 %}
 
@@ -61,20 +70,33 @@ CRLF		(\r\n|\r|\n)
 %state QSTRING
 
 %%
-<MULTILINE>^\.{CRLF}	{ BEGIN INITIAL; }
-<MULTILINE>^\.\.	{ /* dot stuffing! we want one . */ yyless(1); }
-<MULTILINE>([^\.{CRLF}]|\n)+ { libsieve_sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
+<MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
+			  BEGIN INITIAL;
+			  libsieve_sievelval.sval = libsieve_catbuf_free(text);
 			  return STRING; }
+<MULTILINE>^\.\.	{ TRACE_DEBUG("Dot-stuffing - one dot dropped.");
+			  libsieve_catbuf(text, yytext, yyleng - 1); }
+<MULTILINE>\.		{ TRACE_DEBUG("Just a normal dot. Keep it.");
+			  libsieve_catbuf(text, yytext, yyleng); }
+<MULTILINE>{CRLF}	{ TRACE_DEBUG("Multiline newline");
+			  libsieve_catbuf(text, yytext, yyleng); }
+<MULTILINE>[^\.]+	{ TRACE_DEBUG("Multiline line [%s]", yytext);
+			  libsieve_catbuf(text, yytext, yyleng); }
 <MULTILINE><<EOF>>	{ libsieve_sieveerror("unexpected end of file in string"); 
 			  yyterminate(); }
 
 <QSTRING>\"		{ BEGIN INITIAL; }
-<QSTRING>([^\"]|\\\"|\n)+ { libsieve_sievelval.sval = libsieve_strdup(yytext, strlen(yytext));
+<QSTRING>([^\"]|\\\"|{CRLF})+ { libsieve_sievelval.sval = libsieve_strndup(yytext, yyleng);
 			  return STRING; }
 
-<INITIAL>text:{ws}?(#.*)?{CRLF}	{ BEGIN MULTILINE; }
+<INITIAL>text:{ws}?(#.*)?{CRLF}	{ TRACE_DEBUG("Beginning a text: block.");
+			  BEGIN MULTILINE;
+			  text = libsieve_catbuf_alloc(); }
+<INITIAL>\"\"		{ libsieve_sievelval.sval = libsieve_strdup("");
+			  return STRING; }
 <INITIAL>\"		{ BEGIN QSTRING; }
-<INITIAL>[0-9]+[KMG]?	{ libsieve_sievelval.nval = libsieve_strtonum(yytext); return NUMBER; }
+<INITIAL>[0-9]+[KMG]?	{ libsieve_sievelval.nval = libsieve_strtonum(yytext);
+			  return NUMBER; }
 <INITIAL>if		return IF;
 <INITIAL>elsif		return ELSIF;
 <INITIAL>else		return ELSE;
@@ -98,10 +120,12 @@ CRLF		(\r\n|\r|\n)
 <INITIAL>setflag	return SETFLAG;
 <INITIAL>addflag	return ADDFLAG;
 <INITIAL>removeflag	return REMOVEFLAG;
+<INITIAL>hasflag	return HASFLAG;
 <INITIAL>mark		return MARK;
 <INITIAL>unmark		return UNMARK;
+<INITIAL>:flags		return FLAGS;
 <INITIAL>notify		return NOTIFY;
-<INITIAL>denotify	return DENOTIFY;
+<INITIAL>valid_notif_method return VALIDNOTIF;
 <INITIAL>:id		return ID;
 <INITIAL>:method	return METHOD;
 <INITIAL>:options	return OPTIONS;
@@ -157,19 +181,21 @@ void libsieve_sievelexfree()
 /* Kind of a hack, but this sets up the file statics */
 void libsieve_sievelexalloc()
 {
-    libsieve_sieverestart( YY_CURRENT_BUFFER );
+    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Restart the lexer before each invocation of the parser */
 void libsieve_sievelexrestart()
 {
-    libsieve_sieverestart( YY_CURRENT_BUFFER );
+    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
 void libsieve_sievefatalerror(const char msg[])
 {
-    /* Basically stop and don't do anything */
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
 }
 

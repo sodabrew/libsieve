@@ -48,13 +48,4 @@ AC_ARG_ENABLE(debug,
 	esac],[debug=false])
 AM_CONDITIONAL(ENABLE_DEBUG, test x$test = xtrue)
 
-AC_ARG_ENABLE(regex,
-	[  --enable-regex, Enable regular expression support],
-	[case "${enableval}" in
-		yes) test=true ;;
-		no)  test=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-regex) ;;
-	esac],[debug=false])
-AM_CONDITIONAL(ENABLE_REGEX, test x$test = xtrue)
-
 AC_OUTPUT(sv_parser/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)

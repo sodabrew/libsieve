@@ -27,10 +27,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef COMPARATOR_H
 #define COMPARATOR_H
 
-#ifdef ENABLE_REGEX
-//#include <sys/types.h>
 #include "regex.h"
-#endif
 
 /* compares pat to text; returns 1 if it's true, 0 otherwise 
    first arg is pat, second arg is text */

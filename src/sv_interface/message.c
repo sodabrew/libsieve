@@ -39,6 +39,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "tree.h"
 #include "script.h"
 #include "message.h"
+#include "callbacks2.h"
 
 /* sv_parser */
 #include "parser.h"
@@ -66,84 +67,87 @@ int libsieve_parse_address(const char *header, struct address **data, struct add
     return SIEVE2_OK;
 }
 
-char *libsieve_get_address(address_part_t addrpart,
-		  struct addr_marker **marker,
-		  int canon_domain)
+/* Returns the specified part of the current address in the marker array,
+ * frees the address and advances the caller's array pointer. */
+char *libsieve_get_address(struct sieve2_context *context,
+		address_part_t addrpart,
+		struct addr_marker **marker,
+		int canon_domain)
 {
     char *ret = NULL;
     struct address *a;
     struct addr_marker *am = *marker;
+    char *address;
 
     if (!am) {
-	    libsieve_debugf(("libsieve_get_address: am is null, returning null.\n"));
-	    return NULL;
+        return NULL;
     }
 
     a = am->where;
     if (am->freeme) {
 	libsieve_free(am->freeme);
-	libsieve_debugf(("libsieve_get_address: am->freeme is set, returning null.\n"));
 	am->freeme = NULL;
     }
 
     if (a == NULL) {
-	ret = NULL;
-    } else {
-	if (canon_domain && a->domain)
-	    libsieve_strtolower(a->domain,strlen(a->domain));
+        return NULL;
+    }
 
-	switch (addrpart) { 
-	case ADDRESS_ALL:
+    if (canon_domain && a->domain)
+        libsieve_strtolower(a->domain,strlen(a->domain));
+
 #define U_DOMAIN "unspecified-domain"
 #define U_USER "unknown-user"
-	    if (a->mailbox || a->domain) {
-		char *m = a->mailbox ? a->mailbox : U_USER;
-		char *d = a->domain ? a->domain : U_DOMAIN;
-		am->freeme = libsieve_strconcat(m, "@", d, NULL);
-		ret = am->freeme;
-	    } else {
-		ret = NULL;
-	    }
-	    break;
-
-	case ADDRESS_LOCALPART:
-	    ret = a->mailbox;
-	    break;
-	    
-	case ADDRESS_DOMAIN:
-	    ret = a->domain;
-	    break;
-
-	case ADDRESS_USER:
-	    if (a->mailbox) {
-		char *p = strchr(a->mailbox, '+');
-		int len = p ? p - a->mailbox : strlen(a->mailbox);
-
-		am->freeme = libsieve_strdup(a->mailbox, len);
-		/* FIXME: Confirm this works then delete.
-		am->freeme = (char *) libsieve_malloc(len + 1);
-		strncpy(am->freeme, a->mailbox, len);
-		am->freeme[len] = '\0';
-		*/
-		ret = am->freeme;
-	    } else {
-		ret = NULL;
-	    }
-	    break;
-
-	case ADDRESS_DETAIL:
-	    if (a->mailbox) {
-		char *p = strchr(a->mailbox, '+');
-		ret = (p ? p + 1 : NULL);
-	    } else {
-		ret = NULL;
-	    }
-	    break;
-	}
-	a = a->next;
-	am->where = a;
+    if (a->mailbox || a->domain) {
+    	char *m = a->mailbox ? a->mailbox : U_USER;
+    	char *d = a->domain ? a->domain : U_DOMAIN;
+    	address = am->freeme = libsieve_strconcat(m, "@", d, NULL);
+    } else {
+    	ret = NULL;
+	goto got_address;
     }
+
+    if (addrpart == ADDRESS_ALL) {
+	ret = address;
+	goto got_address;
+    }
+
+    char *user, *detail, *localpart, *domain;
+
+    if (libsieve_do_getsubaddress(context, address,
+    	&user, &detail, &localpart, &domain) != SIEVE2_OK) {
+    	// Error of some kind.
+	ret = NULL;
+	goto got_address;
+    }
+
+    switch (addrpart) { 
+    case ADDRESS_LOCALPART:
+        ret = localpart;
+        break;
+        
+    case ADDRESS_DOMAIN:
+        ret = domain;
+        break;
+
+    case ADDRESS_USER:
+        ret = user;
+        break;
+
+    case ADDRESS_DETAIL:
+        ret = detail;
+        break;
+
+    case ADDRESS_ALL:
+	// Shut up, compiler.
+	break;
+    }
+
+got_address:
+    a = a->next;
+    am->where = a;
     *marker = am;
+
     return ret;
 }
 

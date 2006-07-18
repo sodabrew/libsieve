@@ -13,17 +13,31 @@
 
 /* Needed for printf. */
 #include <stdio.h>
+/* Needed for vasprintf. */
+#include "vasprintf.h"
 
-/* Be sure to use double parens when calling! */
-#ifdef DEBUG
-#define libsieve_debugf(ARGS) printf ARGS
+/* Define several macros for GCC specific attributes.
+ * Although the __attribute__ macro can be easily defined
+ * to nothing, these macros make them a little prettier.
+ * */
+#ifdef __GNUC__
+#define UNUSED __attribute__((__unused__))
+#define PRINTF_ARGS(X, Y) __attribute__((format(printf, X, Y)))
 #else
-#define libsieve_debugf(ARGS) 
-#endif /* ifdef DEBUG */
+#define UNUSED
+#define PRINTF_ARGS(X, Y)
+#endif
+
+// I don't know what would be the difference here. Whatever!?
+#define TRACE_DEBUG(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 4, THIS_MODULE, __FILE__, __func__, fmt)
+#define TRACE_ERROR(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 2, THIS_MODULE, __FILE__, __func__, fmt)
+
+#define libsieve_vasprintf vasprintf
 
 /* These are the memory oriented functions */
 
 void libsieve_free(void *ptr);
+void libsieve_freev(void **ptr);
 void *libsieve_malloc(size_t size);
 void *libsieve_realloc(void *ptr, size_t size);
 void *libsieve_memset(void *ptr, int c, size_t len);
@@ -33,7 +47,8 @@ void *libsieve_memset(void *ptr, int c, size_t len);
 char *libsieve_strtolower(char *str, size_t len);
 char *libsieve_strtoupper(char *str, size_t len);
 
-char *libsieve_strdup(const char *str, size_t len);
+char *libsieve_strdup(const char *str);
+char *libsieve_strndup(const char *str, size_t len);
 char *libsieve_strconcat(const char *str, ...);
 
 int libsieve_strisatom(const char *str, size_t len);
@@ -52,7 +67,19 @@ struct mlbuf {
 
 char *libsieve_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme);
 void libsieve_strbuffree(struct mlbuf **ml, int freeall);
-void libsieve_strbufalloc(struct mlbuf **ml);
+int libsieve_strbufalloc(struct mlbuf **ml);
+
+/* This function holds one string built from many calls. */
+
+struct catbuf {
+    char *str;
+    size_t pos;
+    size_t len;
+};
+
+char *libsieve_catbuf(struct catbuf *s, char *str, size_t len);
+struct catbuf *libsieve_catbuf_alloc(void);
+char *libsieve_catbuf_free(struct catbuf *s);
 
 /* The MD5 implementation is in md5.c */
 char *libsieve_makehash(char *s1, char *s2);

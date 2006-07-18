@@ -52,6 +52,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_parser */
 #include "parser.h"
 
+#define THIS_MODULE "sv_interface"
+#define THIS_CONTEXT context
+
 static int sysaddr(char *addr)
 {
     if (!strncasecmp(addr, "MAILER-DAEMON", 13))
@@ -73,7 +76,7 @@ static int sysaddr(char *addr)
 }
 
 /* look for myaddr and myaddrs in the body of a header - return the match */
-static char *look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
+static char *look_for_me(char *myaddr, stringlist_t *myaddrs, char **body)
 {
     char *found = NULL;
     int l;
@@ -91,7 +94,7 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 	
 	libsieve_parse_address(body[l], &data, &marker);
 	/* loop through each address in the header */
-	while (!found && ((addr = libsieve_get_address(ADDRESS_ALL, &marker, 1)) != NULL)) {
+	while (!found && ((addr = libsieve_get_address(NULL, ADDRESS_ALL, &marker, 1)) != NULL)) {
 	    if (!strcasecmp(addr, myaddr)) {
 		found = myaddr;
 		break;
@@ -104,7 +107,7 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, const char **body)
 
 		/* is this address one of my addresses? */
 		libsieve_parse_address(sl->s, &altdata, &altmarker);
-		altaddr = libsieve_get_address(ADDRESS_ALL, &altmarker, 1);
+		altaddr = libsieve_get_address(NULL, ADDRESS_ALL, &altmarker, 1);
 		if (!strcasecmp(addr, altaddr))
 		    found = sl->s;
 
@@ -128,14 +131,13 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     int addrpart = 0;
 
     if (t == NULL) {
-	    libsieve_debugf(("static_evaltest(): t is null but it shouldn't ever be\n"));
+	    TRACE_DEBUG("static_evaltest(): t is null but it shouldn't ever be");
 	    return 0;
     }
 
     switch (t->type) {
     case ADDRESS:
     case ENVELOPE:
-	res = 0;
 	switch (t->u.ae.addrpart) {
 	case ALL: addrpart = ADDRESS_ALL; break;
 	case LOCALPART: addrpart = ADDRESS_LOCALPART; break;
@@ -145,14 +147,15 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 	}
 	for (sl = t->u.ae.sl; sl != NULL && !res; sl = sl->next) {
 	    int l;
-	    const char **body;
+	    char *body[] = { "", NULL };
 
 	    /* use getheader for address, getenvelope for envelope */
 	    if (((t->type == ADDRESS) ? 
-		   libsieve_do_getheader(context, sl->s, &body) :
-		   libsieve_do_getenvelope(context, sl->s, &body)) != SIEVE2_OK) {
+		   libsieve_do_getheader(context, sl->s, (char ***)&body) :
+		   libsieve_do_getenvelope(context, sl->s, body)) != SIEVE2_OK) {
 		continue; /* try next header */
 	    }
+
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; body[l] != NULL && !res; l++) {
 		    /* loop through each header */
@@ -161,11 +164,11 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 		    char *val;
 
 		    libsieve_parse_address(body[l], &data, &marker);
-                    val = libsieve_get_address(addrpart, &marker, 0);
+                    val = libsieve_get_address(context, addrpart, &marker, 0);
 		    while (val != NULL && !res) { 
 			/* loop through each address */
 			res |= t->u.ae.comp(pl->p, val);
-			val = libsieve_get_address(addrpart, &marker, 0);
+			val = libsieve_get_address(context, addrpart, &marker, 0);
        		    }
 		    libsieve_free_address(&data, &marker);
 		}
@@ -187,7 +190,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     case EXISTS:
 	res = 1;
 	for (sl = t->u.sl; sl != NULL && res; sl = sl->next) {
-	    const char **headbody = NULL;
+	    char **headbody = NULL;
 	    res &= (libsieve_do_getheader(context, sl->s, &headbody) == SIEVE2_OK);
 	}
 	break;
@@ -200,7 +203,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     case HEADER:
 	res = 0;
 	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
-	    const char **val;
+	    char **val;
 	    size_t l;
 	    if (libsieve_do_getheader(context, sl->s, &val) != SIEVE2_OK)
 		continue;
@@ -211,6 +214,21 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 	    }
 	}
 	break;
+    case HASFLAG:
+	res = 0;
+	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
+	    stringlist_t *csl;
+            for (csl = context->slflags; csl != NULL; csl = csl->next) {
+    	// FIXME:    res |= t->u.h.comp(pl->p, val[l]);
+    	    if (strcasecmp(csl->s, sl->s) == 0) {
+    		res = 1;
+    		break;
+    	    }
+    	}
+    	if (res)
+    	    break;
+	}
+        break;
     case NOT:
 	res = !static_evaltest(context, t->u.t);
 	break;
@@ -238,21 +256,22 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
    note that this is very stack hungry; we just evaluate the AST in
    the naivest way.  if we implement some sort of depth limit, we'll
    be ok here; otherwise we'd want to transform it a little smarter */
+// TODO: Can we change this to be iterative, or somehow tail-recursive-optimized?
 int libsieve_eval(struct sieve2_context *context,
                   commandlist_t *c, const char **errmsg)
 {
     int res = 0;
     stringlist_t *sl;
 
-    libsieve_debugf(("%s,%s: starting into libsieve_eval\n", __FILE__, __func__));
+    TRACE_DEBUG("starting into libsieve_eval");
     
     if (c == NULL)
-        libsieve_debugf(("%s,%s: the commandlist is null\n", __FILE__, __func__));
+        TRACE_DEBUG("the commandlist is null");
     else
-        libsieve_debugf(("%s,%s: the commandlist type is [%d]\n", __FILE__, __func__, c->type));
+        TRACE_DEBUG("the commandlist type is [%d]", c->type);
 
     while (c != NULL) {
-        libsieve_debugf(("%s,%s: top of the eval loop\n", __FILE__, __func__));
+        TRACE_DEBUG("top of the eval loop");
 	switch (c->type) {
 	case IF:
 	    if (static_evaltest(context, c->u.i.t))
@@ -264,30 +283,30 @@ int libsieve_eval(struct sieve2_context *context,
 	    res = libsieve_do_reject(context, c->u.str);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Reject can not be used with any other action";
-	    libsieve_debugf(("%s,%s: Doing a reject\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a reject");
 	    break;
 	case FILEINTO:
-	    res = libsieve_do_fileinto(context, c->u.str, &context->imapflags);
+	    res = libsieve_do_fileinto(context, c->u.f.mailbox, c->u.f.slflags);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Fileinto can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a fileinto\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a fileinto");
 	    break;
 	case REDIRECT:
 	    res = libsieve_do_redirect(context, c->u.str);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Redirect can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a redirect\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a redirect");
 	    break;
 	case KEEP:
-	    res = libsieve_do_keep(context, &context->imapflags);
+	    res = libsieve_do_keep(context, c->u.f.slflags);
 	    if (res == SIEVE2_ERROR_EXEC)
 		*errmsg = "Keep can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a keep\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a keep");
 	    break;
 	case VACATION:
 	    {
-		const char **body;
-		char buf[128], *fromaddr;
+		char **body;
+		char *fromaddr;
 		char *found = NULL;
 		char *myaddr = NULL;
 		char *reply_to = NULL;
@@ -296,11 +315,10 @@ int libsieve_eval(struct sieve2_context *context,
 		struct addr_marker *marker = NULL;
 		char *tmp;
 
-		libsieve_debugf(("Starting into a VACATION action.\n"));
+		TRACE_DEBUG("Starting into a VACATION action.");
 
 		/* is there an Auto-Submitted keyword other than "no"? */
-		strcpy(buf, "auto-submitted");
-		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
+		if (libsieve_do_getheader(context, "auto-submitted", &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (body[0] && *body[0] && isspace((int) *body[0])) body[0]++;
@@ -308,11 +326,10 @@ int libsieve_eval(struct sieve2_context *context,
 		}
 
 		if (l == SIEVE2_DONE)
-			libsieve_debugf(("VACATION aborted by Auto-Submitted header.\n"));
+			TRACE_DEBUG("VACATION aborted by Auto-Submitted header.");
 
 		/* is there a Precedence keyword of "junk | bulk | list"? */
-		strcpy(buf, "precedence");
-		if (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK) {
+		if (libsieve_do_getheader(context, "precedence", &body) == SIEVE2_OK) {
 		    /* we don't deal with comments, etc. here */
 		    /* skip leading white-space */
 		    while (body[0] && *body[0] && isspace((int) *body[0])) body[0]++;
@@ -323,42 +340,40 @@ int libsieve_eval(struct sieve2_context *context,
 		}
 
 		if (l == SIEVE2_DONE)
-			libsieve_debugf(("VACATION aborted by Precedence header.\n"));
+			TRACE_DEBUG("VACATION aborted by Precedence header.");
 
 		/* Note: the domain-part of all addresses are canonicalized */
 
 		/* grab my address from the envelope */
 		if (l == SIEVE2_OK) {
-		    strcpy(buf, "to");
-		    l = libsieve_do_getenvelope(context, buf, &body);
+		    l = libsieve_do_getenvelope(context, "to", body);
 		    if (body[0]) {
 			libsieve_parse_address(body[0], &data, &marker);
-			tmp = libsieve_get_address(ADDRESS_ALL, &marker, 1);
-			myaddr = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
+			tmp = libsieve_get_address(context, ADDRESS_ALL, &marker, 1);
+			myaddr = (tmp != NULL) ? libsieve_strdup(tmp) : NULL;
 			libsieve_free_address(&data, &marker);
 		    }
 		}
 		if (l == SIEVE2_OK) {
-		    strcpy(buf, "from");
-		    l = libsieve_do_getenvelope(context, buf, &body);
+		    l = libsieve_do_getenvelope(context, "from", body);
 		}
 		if (l == SIEVE2_OK && body[0]) {
 		    /* we have to parse this address & decide whether we
 		       want to respond to it */
 		    libsieve_parse_address(body[0], &data, &marker);
-		    tmp = libsieve_get_address(ADDRESS_ALL, &marker, 1);
-		    reply_to = (tmp != NULL) ? libsieve_strdup(tmp, strlen(tmp)) : NULL;
+		    tmp = libsieve_get_address(context, ADDRESS_ALL, &marker, 1);
+		    reply_to = (tmp != NULL) ? libsieve_strdup(tmp) : NULL;
 		    libsieve_free_address(&data, &marker);
 
 		    /* first, is there a reply-to address? */
 		    if (reply_to == NULL) {
-			libsieve_debugf(("VACATION aborted by lack of reply-to address.\n"));
+			TRACE_DEBUG("VACATION aborted by lack of reply-to address.");
 			l = SIEVE2_DONE;
 		    }
 
 		    /* first, is it from me? */
 		    if (l == SIEVE2_OK && !strcmp(myaddr, reply_to)) {
-			libsieve_debugf(("VACATION aborted because the message is from my primary address.\n"));
+			TRACE_DEBUG("VACATION aborted because the message is from my primary address.");
 			l = SIEVE2_DONE;
 		    }
 
@@ -370,11 +385,11 @@ int libsieve_eval(struct sieve2_context *context,
 				l = SIEVE2_DONE;
 
 		    if (l == SIEVE2_DONE)
-			libsieve_debugf(("VACATION aborted because the message is from a secondary address.\n"));
+			TRACE_DEBUG("VACATION aborted because the message is from a secondary address.");
 		
 		    /* ok, is it a system address? */
 		    if (l == SIEVE2_OK && sysaddr(reply_to)) {
-			libsieve_debugf(("VACATION aborted because the message is from a system address.\n"));
+			TRACE_DEBUG("VACATION aborted because the message is from a system address.");
 			l = SIEVE2_DONE;
 		    }
 		}
@@ -383,33 +398,30 @@ int libsieve_eval(struct sieve2_context *context,
 		    /* ok, we're willing to respond to the sender.
 		       but is this message to me?  that is, is my address
 		       in the TO, CC or BCC fields? */
-		    if (strcpy(buf, "to"), 
-			libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)
+		    if (libsieve_do_getheader(context, "to", &body) == SIEVE2_OK)
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
-		    if (!found && (strcpy(buf, "cc"),
-				   (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)))
+		    if (!found && (libsieve_do_getheader(context, "cc", &body) == SIEVE2_OK))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
-		    if (!found && (strcpy(buf, "bcc"),
-				   (libsieve_do_getheader(context, buf, &body) == SIEVE2_OK)))
+		    if (!found && (libsieve_do_getheader(context, "bcc", &body) == SIEVE2_OK))
 			found = look_for_me(myaddr, c->u.v.addresses, body);
 
 		    if (!found) {
-			libsieve_debugf(("Vacation didn't find my address in to, cc or bcc.\n"));
+			TRACE_DEBUG("Vacation didn't find my address in to, cc or bcc.");
 			l = SIEVE2_DONE;
 		    }
 		}
 
 		if (l == SIEVE2_OK) {
 		    /* ok, ok, if we got here maybe we should reply */
+		    char buf[128];
 		
 		    if (c->u.v.subject == NULL) {
 			/* we have to generate a subject */
-			const char **s;
+			char **s;
 		    
-			strcpy(buf, "subject");
-			if (libsieve_do_getheader(context, buf, &s) != SIEVE2_OK ||
+			if (libsieve_do_getheader(context, "subject", &s) != SIEVE2_OK ||
 			    s[0] == NULL) {
 			    strcpy(buf, "Automated reply");
 			} else {
@@ -432,8 +444,8 @@ int libsieve_eval(struct sieve2_context *context,
 		
 		    // FIXME: From addr might be user specified.
 		    res = libsieve_do_vacation(context, reply_to,
-				      libsieve_strdup(fromaddr, strlen(fromaddr)),
-				      libsieve_strdup(buf, strlen(buf)),
+				      libsieve_strdup(fromaddr),
+				      libsieve_strdup(buf),
 				      c->u.v.message, c->u.v.handle,
 				      c->u.v.days, c->u.v.mime);
 		
@@ -452,57 +464,57 @@ int libsieve_eval(struct sieve2_context *context,
 	    break;
 	case DISCARD:
 	    res = libsieve_do_discard(context);
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a discard");
 	    break;
 	case SETFLAG:
 	    sl = c->u.sl;
-	    res = libsieve_do_setflag(context, sl->s);
-	    for (sl = sl->next; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_addflag(context, sl->s);
-	    }
-	    if (res == SIEVE2_ERROR_EXEC)
-		*errmsg = "Setflag can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
+	    libsieve_free_sl_only(context->slflags);
+	    context->slflags = libsieve_new_sl(sl->s, context->slflags);
+	    TRACE_DEBUG("Doing a setflag");
 	    break;
 	case ADDFLAG:
-	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_addflag(context, sl->s);
+	    for (sl = c->u.sl; sl != NULL; sl = sl->next) {
+		stringlist_t *csl;
+		int found = 0;
+	        for (csl = context->slflags; csl != NULL; csl = csl->next) {
+		    if (strcasecmp(csl->s, sl->s) == 0) {
+			found = 1;
+			break;
+		    }
+		}
+		if (!found) {
+		    context->slflags = libsieve_new_sl(sl->s, context->slflags);
+		    TRACE_DEBUG("Added flag: [%s]", sl->s);
+		}
+	        TRACE_DEBUG("Doing an addflag: [%s]", sl->s);
 	    }
-	    if (res == SIEVE2_ERROR_EXEC)
-		*errmsg = "Addflag can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case REMOVEFLAG:
-	    for (sl = c->u.sl; res == 0 && sl != NULL; sl = sl->next) {
-		res = libsieve_do_removeflag(context, sl->s);
+	    for (sl = c->u.sl; sl != NULL; sl = sl->next) {
+		stringlist_t *csl, *prev = NULL;
+	        for (csl = context->slflags; csl != NULL; csl = csl->next) {
+		    if (strcasecmp(csl->s, sl->s) == 0) {
+			if (prev) {
+			    prev->next = csl->next;
+			    csl->next = NULL;
+			    libsieve_free_sl_only(csl);
+			} else {
+			    libsieve_free_sl_only(context->slflags);
+			    context->slflags = NULL;
+			}
+		        TRACE_DEBUG("Removed flag: [%s]", sl->s);
+			break; // Once we find a flag we can stop looking.
+		    }
+		    prev = csl; // Previous item in the list.
+		}
+	        TRACE_DEBUG("Doing a removeflag [%s]", sl->s);
 	    }
-	    if (res == SIEVE2_ERROR_EXEC)
-		*errmsg = "Removeflag can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
-	    break;
-	case MARK:
-	    res = libsieve_do_mark(context);
-	    if (res == SIEVE2_ERROR_EXEC)
-		*errmsg = "Mark can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
-	    break;
-	case UNMARK:
-	    res = libsieve_do_unmark(context);
-	    if (res == SIEVE2_ERROR_EXEC)
-		*errmsg = "Unmark can not be used with Reject";
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
 	    break;
 	case NOTIFY:
 	    res = libsieve_do_notify(context, c->u.n.id, c->u.n.method,
 			    c->u.n.options, c->u.n.priority, c->u.n.message);
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
+	    TRACE_DEBUG("Doing a notify");
 	    break;
-	case DENOTIFY:
-	    res = libsieve_do_denotify(context, c->u.d.comp, c->u.d.pattern,
-			      c->u.d.priority);
-	    libsieve_debugf(("%s,%s: Doing a discard\n", __FILE__, __func__));
-	    break;
-
 	}
 
 	if (res) /* we've either encountered an error or a stop */
@@ -515,159 +527,5 @@ int libsieve_eval(struct sieve2_context *context,
     return res;
 }
 
-#if 0
-#define GROW_AMOUNT 100
+/* vim: set ex ts=4: */
 
-static void add_header(struct sieve2_context *c, int isenv, char *header, 
-		       char **out, size_t *outlen, size_t *outalloc)
-{
-    const char **h;
-    int addlen;
-    /* get header value */
-    if (isenv)
-	libsieve_do_getenvelope(c, header, &h);	
-    else
-	libsieve_do_getheader(c, header, &h);	
-
-    if (!h || !h[0])
-	return;
-
-    addlen = strlen(h[0]) + 1;
-
-    /* realloc if necessary */
-    if ( (*outlen) + addlen >= *outalloc)
-    {
-	*outalloc = (*outlen) + addlen + GROW_AMOUNT;
-	*out = libsieve_realloc(*out, *outalloc);
-    }
-
-    /* add header value */
-    strcat(*out,h[0]);
-
-    *outlen += addlen;
-}
-
-    /* This seems to be the only relevant thing to keep 
-     * from this whole mess of notify functions...
-     * But it looks like its tied closely to the message_context,
-     * which is something that was in Cyrus but is gone in libSieve.
-    fillin_headers(context, notify->message, message_context, 
-		   &out_msg, &out_msglen);
-   */
-static int fillin_headers(struct sieve2_context *i, char *msg, 
-			  void *message_context, char **out, size_t *outlen)
-{
-    size_t allocsize = GROW_AMOUNT;
-    char *c;
-    size_t n;
-
-    *out = libsieve_malloc(GROW_AMOUNT);
-    *outlen = 0;
-    (*out)[0]='\0';
-
-    if (msg == NULL) return SIEVE2_OK;
-
-    /* construct the message */
-    c = msg;
-    while (*c) {
-	/* expand variables */
-	if (!strncasecmp(c, "$from$", 6)) {
-	    add_header(i, 0 ,"From", out, outlen, &allocsize);
-	    c += 6;
-	}
-	else if (!strncasecmp(c, "$env-from$", 10)) {
-	    add_header(i, 1, "From", out, outlen, &allocsize);
-	    c += 10;
-	}
-	else if (!strncasecmp(c, "$subject$", 9)) {
-	    add_header(i, 0, "Subject", out, outlen, &allocsize);
-	    c += 9;
-	}
-	/* XXX need to do $text$ variables */
-	else {
-	    /* find length of plaintext up to next potential variable */
-	    n = strcspn(c+1, "$") + 1; /* skip opening '$' */
-	    /* realloc if necessary */
-	    if ( (*outlen) + n+1 >= allocsize) {
-		allocsize = (*outlen) + n+1 + GROW_AMOUNT;
-		*out = libsieve_realloc(*out, allocsize);
-	    }
-	    /* copy the plaintext */
-	    strncat(*out, c, n);
-	    (*out)[*outlen+n]='\0';
-	    (*outlen) += n;
-	    c += n;
-	}
-    }
-
-    return SIEVE2_OK;
-}
-
-static int sieve_addflag(sieve_imapflags_t *imapflags, char *flag)
-{
-    int n;
- 
-    /* search for flag already in list */
-    for (n = 0; n < imapflags->nflags; n++) {
-	if (strcmp(imapflags->flag[n], flag) == 0)
-	    break;
-    }
- 
-    /* add flag to list, iff not in list */
-    if (n == imapflags->nflags) {
-	imapflags->nflags++;
-	imapflags->flag =
-	    (char **) libsieve_realloc((char *)imapflags->flag,
-			       imapflags->nflags*sizeof(char *));
-	imapflags->flag[imapflags->nflags-1] = libsieve_strdup(flag, strlen(flag));
-    }
- 
-    return SIEVE2_OK;
-}
-
-static int sieve_removeflag(sieve_imapflags_t *imapflags, char *flag)
-{
-    int n;
- 
-    /* search for flag already in list */
-    for (n = 0; n < imapflags->nflags; n++) {
-	if (!strcmp(imapflags->flag[n], flag))
-	    break;
-    }
- 
-    /* remove flag from list, iff in list */
-    if (n < imapflags->nflags) {
-	libsieve_free(imapflags->flag[n]);
-	imapflags->nflags--;
- 
-	for (; n < imapflags->nflags; n++)
-	    imapflags->flag[n] = imapflags->flag[n+1];
-    }
- 
-    return SIEVE2_OK;
-}
-
-static char *action_to_string(action_t action)
-{
-    switch(action)
-	{
-	case ACTION_REJECT: return "Reject";
-	case ACTION_FILEINTO: return "Fileinto";
-	case ACTION_KEEP: return "Keep";
-	case ACTION_REDIRECT: return "Redirect";
-	case ACTION_DISCARD: return "Discard";
-	case ACTION_VACATION: return "Vacation";
-	case ACTION_SETFLAG: return "Setflag";
-	case ACTION_ADDFLAG: return "Addflag";
-	case ACTION_REMOVEFLAG: return "Removeflag";
-	case ACTION_MARK: return "Mark";
-	case ACTION_UNMARK: return "Unmark";
-	case ACTION_NOTIFY: return "Notify";
-	case ACTION_DENOTIFY: return "Denotify";
-	default: return "Unknown";
-	}
-
-    return "Error!";
-}
-
-#endif

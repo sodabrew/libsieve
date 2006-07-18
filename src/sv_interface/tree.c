@@ -35,6 +35,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "tree.h"
 #include "sieve.h"
 
+#include "context2.h"
+
 /* sv_util */
 #include "util.h"
 
@@ -116,6 +118,18 @@ void libsieve_free_sl(stringlist_t *sl)
     }
 }
 
+void libsieve_free_sl_only(stringlist_t *sl) 
+{
+    stringlist_t *sl2;
+    
+    while (sl != NULL) {
+//	libsieve_free(sl->s); // Otherwise identical to above.
+	sl2 = sl->next;
+	libsieve_free(sl);
+	sl = sl2;
+    }
+}
+
 void libsieve_free_pl(patternlist_t *pl, int comptag) 
 {
     patternlist_t *pl2;
@@ -166,12 +180,18 @@ void libsieve_free_test(test_t *t)
     case STRUE:
 	break;
 
+    case HASFLAG:
+        libsieve_free_sl(t->u.hf.sl);
+	// libsieve_free_pl(t->u.hf.pl, t->u.hf.comptag); // FIXME
+        break;
+
     case HEADER:
 	libsieve_free_sl(t->u.h.sl);
 	libsieve_free_pl(t->u.h.pl, t->u.h.comptag);
 	break;
 
     case ADDRESS:
+    case ENVELOPE:
 	libsieve_free_sl(t->u.ae.sl);
 	libsieve_free_pl(t->u.ae.pl, t->u.ae.comptag);
 	break;
@@ -198,12 +218,19 @@ void libsieve_free_tree(commandlist_t *cl)
 	    break;
 
 	case FILEINTO:
+	case KEEP:
+	    if (cl->u.f.mailbox) libsieve_free(cl->u.f.mailbox);
+	    if (cl->u.f.slflags) libsieve_free_sl(cl->u.f.slflags);
+	    break;
+
 	case REDIRECT:
 	case REJCT:
 	    if (cl->u.str) libsieve_free(cl->u.str);
 	    break;
 
 	case VACATION:
+	    if (cl->u.v.from) libsieve_free(cl->u.v.from);
+	    if (cl->u.v.handle) libsieve_free(cl->u.v.handle);
 	    if (cl->u.v.subject) libsieve_free(cl->u.v.subject);
 	    if (cl->u.v.addresses) libsieve_free_sl(cl->u.v.addresses);
 	    if (cl->u.v.message) libsieve_free(cl->u.v.message);
@@ -215,7 +242,6 @@ void libsieve_free_tree(commandlist_t *cl)
 	    libsieve_free_sl(cl->u.sl);
 	    break;
 
-	case KEEP:
 	case STOP:
 	case DISCARD:
 	    break;
@@ -227,16 +253,6 @@ void libsieve_free_tree(commandlist_t *cl)
 	    if (cl->u.n.message) libsieve_free(cl->u.n.message);
 	    break;
 
-	case DENOTIFY:
-	    if (cl->u.d.pattern) {
-#ifdef ENABLE_REGEX
-		if (cl->u.d.comptag == REGEX) {
-		    libsieve_regfree((regex_t *) cl->u.d.pattern);
-		}
-#endif
-		libsieve_free(cl->u.d.pattern);
-	    }
-	    break;
 	}
 
 	libsieve_free(cl);
@@ -249,13 +265,13 @@ char **libsieve_stringlist_to_chararray(stringlist_t *list)
     size_t space = 0, count = 0;
     char **tmp = NULL, **ret = NULL;
 
-    while(list != NULL) {
-        if(count < space) {
+    while (list != NULL) {
+        if (count + 1 < space) {
             ret[count++] = list->s;
             ret[count] = NULL;
         } else {
             tmp = (char **)libsieve_realloc(ret, (space+=4) * sizeof(char *));
-            if(tmp == NULL) {
+            if (tmp == NULL) {
                 libsieve_free(ret);
                 return NULL;
             } else {

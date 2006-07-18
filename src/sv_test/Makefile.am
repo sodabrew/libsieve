@@ -7,7 +7,8 @@ endif
 CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_include -g $(DEBUG)
 
 if ENABLE_TEST
-bin_PROGRAMS		= example testcomp
+bin_PROGRAMS		= example testcomp check
+check_LDADD		= -lcheck
 example_LDADD      	= ../libsieve.la
 testcomp_LDADD      	= ../libsieve.la
 endif

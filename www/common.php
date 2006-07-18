@@ -22,12 +22,14 @@
 	array( 'sourceforge', 'http://sf.net/projects/libsieve' ), 
 	) );
 
+/*
  $smarty->assign( 'righttitle', 'stuff.' );
  $smarty->assign( 'rightlinks', array(
  	array( 'example code', 'example.php', 'Interfacing with your own code.' ),
  	array( 'example scripts', 'script1.php', 'Some sample user scripts.' ),
  	array( 'license', 'license.php', 'Yes, there are license terms...' ),
 	) );
+*/
 
  $smarty->assign( 'links', array(
  	array( 'Sieve Homepage', 'http://sieve.info/' ),

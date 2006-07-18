@@ -29,6 +29,9 @@
 /* sv_util */
 #include "util.h"
 
+#define THIS_MODULE "sv_interface"
+#define THIS_CONTEXT c
+
 static int hashheader(char *header, int hashsize)
 {
     int x = 0;
@@ -50,8 +53,6 @@ static int freecache(sieve2_message_t *m)
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-            libsieve_debugf(( "freecache(): free()ing header: [%s]\n",
-                m->hash[i]->name ));
 	    /* The individual contents were allocated by the lex/yacc parser,
 	     * and so they are freed by headerlexfree() and headeryaccfree().
 	     * */
@@ -138,12 +139,10 @@ int libsieve_message2_parseheader(sieve2_message_t *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                libsieve_debugf(("libsieve_message2_parseheader(): Expanding hash for [%s]\n", hl->h->name));
                 /* Need to make some more space in here */
                 char **tmp;
                 tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
                 if (tmp == NULL) {
-                    libsieve_debugf(("%s: Failed to expand hash.\n", __func__));
                     return SIEVE2_ERROR_NOMEM;
 		} else {
                     m->hash[c]->contents = tmp;
@@ -183,7 +182,7 @@ static int getheader(sieve2_message_t *m, const char *chead, const char ***body)
     *body = NULL;
 
     /* Make a local copy of the header */
-    head = libsieve_strdup(chead, strlen(chead));
+    head = libsieve_strdup(chead);
     if (head == NULL)
         return SIEVE2_ERROR_NOMEM;
 
@@ -213,7 +212,7 @@ static int getheader(sieve2_message_t *m, const char *chead, const char ***body)
 }
 
 /* Emulate the user getheader callback. */
-int libsieve_message2_getheader(struct sieve2_context *c, void *user_data)
+int libsieve_message2_getheader(struct sieve2_context *c, void *user_data UNUSED)
 {
     int res;
     const char *header, **body;
@@ -222,7 +221,7 @@ int libsieve_message2_getheader(struct sieve2_context *c, void *user_data)
 
     res = getheader(c->message, header, &body);
 
-    libsieve_setvalue_stringlist(c, "body", body);
+    libsieve_setvalue_stringlist(c, "body", (char **)body);
 
     return res;
 }

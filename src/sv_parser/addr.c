@@ -129,9 +129,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_interface */
 #include "callbacks2.h"
 
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
 char *libsieve_addrerr;          /* buffer for sieve parser error messages */
+struct sieve2_context *parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
 
@@ -167,7 +171,7 @@ typedef int YYSTYPE;
 
 
 /* Line 219 of yacc.c.  */
-#line 171 "addr.c"
+#line 175 "addr.c"
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
 # define YYSIZE_T __SIZE_TYPE__
@@ -325,9 +329,9 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals. */
 #define YYNNTS  17
 /* YYNRULES -- Number of rules. */
-#define YYNRULES  30
+#define YYNRULES  31
 /* YYNRULES -- Number of states. */
-#define YYNSTATES  51
+#define YYNSTATES  52
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -373,33 +377,34 @@ static const unsigned char yytranslate[] =
    YYRHS.  */
 static const unsigned char yyprhs[] =
 {
-       0,     0,     3,     4,     6,     8,    10,    14,    19,    21,
-      25,    27,    29,    32,    36,    42,    46,    49,    54,    56,
-      60,    62,    66,    68,    70,    72,    76,    78,    81,    83,
-      85
+       0,     0,     3,     4,     6,     8,    10,    12,    16,    21,
+      23,    27,    29,    31,    34,    38,    44,    48,    51,    56,
+      58,    62,    64,    68,    70,    72,    74,    78,    80,    83,
+      85,    87
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
 static const yysigned_char yyrhs[] =
 {
-      17,     0,    -1,    -1,    18,    -1,    20,    -1,    19,    -1,
-      30,     7,     8,    -1,    30,     7,    20,     8,    -1,    21,
-      -1,    20,     9,    21,    -1,    22,    -1,    23,    -1,    30,
-      22,    -1,    10,    23,    11,    -1,    10,    24,     7,    23,
-      11,    -1,    25,    12,    26,    -1,    12,    26,    -1,    12,
-      26,     9,    24,    -1,    31,    -1,    25,    13,    31,    -1,
-      27,    -1,    26,    13,    27,    -1,    28,    -1,    29,    -1,
-       3,    -1,    14,     5,    15,    -1,    31,    -1,    30,    31,
-      -1,     3,    -1,    32,    -1,     6,     4,     6,    -1
+      17,     0,    -1,    -1,    18,    -1,    31,    -1,    20,    -1,
+      19,    -1,    30,     7,     8,    -1,    30,     7,    20,     8,
+      -1,    21,    -1,    20,     9,    21,    -1,    22,    -1,    23,
+      -1,    30,    22,    -1,    10,    23,    11,    -1,    10,    24,
+       7,    23,    11,    -1,    25,    12,    26,    -1,    12,    26,
+      -1,    12,    26,     9,    24,    -1,    31,    -1,    25,    13,
+      31,    -1,    27,    -1,    26,    13,    27,    -1,    28,    -1,
+      29,    -1,     3,    -1,    14,     5,    15,    -1,    31,    -1,
+      30,    31,    -1,     3,    -1,    32,    -1,     6,     4,     6,
+      -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    62,    62,    63,    66,    67,    69,    70,    72,    78,
-      86,    87,    88,    95,    96,   103,   112,   116,   121,   122,
-     127,   128,   133,   134,   136,   138,   143,   144,   149,   150,
-     152
+       0,    66,    66,    67,    68,    74,    75,    77,    78,    80,
+      86,    94,    95,    96,   103,   104,   111,   120,   124,   129,
+     130,   135,   136,   141,   142,   144,   146,   151,   152,   157,
+     158,   160
 };
 #endif
 
@@ -429,19 +434,19 @@ static const unsigned short int yytoknum[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,    16,    17,    17,    18,    18,    19,    19,    20,    20,
-      21,    21,    21,    22,    22,    23,    24,    24,    25,    25,
-      26,    26,    27,    27,    28,    29,    30,    30,    31,    31,
-      32
+       0,    16,    17,    17,    17,    18,    18,    19,    19,    20,
+      20,    21,    21,    21,    22,    22,    23,    24,    24,    25,
+      25,    26,    26,    27,    27,    28,    29,    30,    30,    31,
+      31,    32
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
-       0,     2,     0,     1,     1,     1,     3,     4,     1,     3,
-       1,     1,     2,     3,     5,     3,     2,     4,     1,     3,
-       1,     3,     1,     1,     1,     3,     1,     2,     1,     1,
-       3
+       0,     2,     0,     1,     1,     1,     1,     3,     4,     1,
+       3,     1,     1,     2,     3,     5,     3,     2,     4,     1,
+       3,     1,     3,     1,     1,     1,     3,     1,     2,     1,
+       1,     3
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -449,19 +454,19 @@ static const unsigned char yyr2[] =
    means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       2,    28,     0,     0,     0,     3,     5,     4,     8,    10,
-      11,     0,     0,    26,    29,     0,     0,     0,     0,    18,
-       1,     0,     0,     0,     0,    12,    27,    30,    24,     0,
-      16,    20,    22,    23,    13,     0,     9,     0,    15,    19,
-       6,     0,     0,     0,     0,     0,     7,    25,    17,    21,
-      14
+       2,    29,     0,     0,     0,     3,     6,     5,     9,    11,
+      12,     0,     0,    27,    30,     0,     0,     0,     0,    19,
+       1,     0,     0,     0,     0,    13,    28,    31,    25,     0,
+      17,    21,    23,    24,    14,     0,    10,     0,    27,    16,
+      20,     7,     0,     0,     0,     0,     0,     8,    26,    18,
+      22,    15
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
 static const yysigned_char yydefgoto[] =
 {
       -1,     4,     5,     6,     7,     8,     9,    10,    18,    11,
-      30,    31,    32,    33,    37,    13,    14
+      30,    31,    32,    33,    37,    19,    14
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -469,44 +474,44 @@ static const yysigned_char yydefgoto[] =
 #define YYPACT_NINF -11
 static const yysigned_char yypact[] =
 {
-      19,   -11,     6,     1,    26,   -11,   -11,    27,   -11,   -11,
-     -11,    -7,     5,    18,   -11,    31,     0,    28,    33,   -11,
-     -11,    19,     0,    32,    13,   -11,   -11,   -11,   -11,    36,
-      15,   -11,   -11,   -11,   -11,    32,   -11,    19,    29,   -11,
-     -11,     9,    30,    34,     0,    37,   -11,   -11,   -11,   -11,
-     -11
+       7,   -11,     5,     2,     6,   -11,   -11,    -5,   -11,   -11,
+     -11,    29,    19,     3,   -11,    22,     4,    21,    23,   -11,
+     -11,     7,     4,    37,    28,   -11,   -11,   -11,   -11,    41,
+      26,   -11,   -11,   -11,   -11,    37,   -11,     7,    32,    34,
+     -11,   -11,    11,    -4,    36,     4,    38,   -11,   -11,   -11,
+     -11,   -11
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yysigned_char yypgoto[] =
 {
-     -11,   -11,   -11,   -11,    20,    22,   -10,    -2,     4,   -11,
-      35,     7,   -11,   -11,    49,    -3,   -11
+     -11,   -11,   -11,   -11,    27,    31,   -10,    -2,     9,   -11,
+      33,    12,   -11,   -11,    50,     0,   -11
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -19
+#define YYTABLE_NINF -20
 static const yysigned_char yytable[] =
 {
-      19,    17,    25,    28,     1,    22,    23,     2,     1,    26,
-      15,     2,    24,    16,    29,     3,     1,    46,    21,     2,
-      39,    40,     1,     3,    43,     2,    20,    25,    44,     3,
-     -18,   -18,    19,    45,    26,     1,    21,    27,     2,    34,
-      35,    42,    44,    36,    41,    47,    16,    48,    50,    12,
-       0,    49,     0,     0,     0,     0,     0,    38
+      13,    17,    25,    -4,    21,     1,    20,    28,     2,    15,
+       1,    48,    26,     2,    16,   -19,   -19,     3,    29,    47,
+      21,    38,     1,    40,    38,     2,    24,    25,    27,     3,
+      35,     1,    34,    46,     2,    44,    41,    26,     3,    45,
+       1,    22,    23,     2,   -19,   -19,    43,    45,    16,    51,
+      12,    42,    36,    49,     0,    39,     0,    50
 };
 
 static const yysigned_char yycheck[] =
 {
-       3,     3,    12,     3,     3,    12,    13,     6,     3,    12,
-       4,     6,     7,    12,    14,    10,     3,     8,     9,     6,
-      23,     8,     3,    10,     9,     6,     0,    37,    13,    10,
-      12,    13,    35,    35,    37,     3,     9,     6,     6,    11,
-       7,     5,    13,    21,    24,    15,    12,    43,    11,     0,
-      -1,    44,    -1,    -1,    -1,    -1,    -1,    22
+       0,     3,    12,     0,     9,     3,     0,     3,     6,     4,
+       3,    15,    12,     6,    12,    12,    13,    10,    14,     8,
+       9,    21,     3,    23,    24,     6,     7,    37,     6,    10,
+       7,     3,    11,    35,     6,     9,     8,    37,    10,    13,
+       3,    12,    13,     6,    12,    13,     5,    13,    12,    11,
+       0,    24,    21,    44,    -1,    22,    -1,    45
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -516,9 +521,9 @@ static const unsigned char yystos[] =
        0,     3,     6,    10,    17,    18,    19,    20,    21,    22,
       23,    25,    30,    31,    32,     4,    12,    23,    24,    31,
        0,     9,    12,    13,     7,    22,    31,     6,     3,    14,
-      26,    27,    28,    29,    11,     7,    21,    30,    26,    31,
-       8,    20,     5,     9,    13,    23,     8,    15,    24,    27,
-      11
+      26,    27,    28,    29,    11,     7,    21,    30,    31,    26,
+      31,     8,    20,     5,     9,    13,    23,     8,    15,    24,
+      27,    11
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1188,194 +1193,203 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 62 "addr.y"
+#line 66 "addr.y"
     { libsieve_addrappend(&addr); }
     break;
 
   case 3:
-#line 63 "addr.y"
+#line 67 "addr.y"
     { (yyval) = (yyvsp[0]); }
     break;
 
   case 4:
-#line 66 "addr.y"
-    { libsieve_debugf(( "address: mailbox: %s\n", (yyvsp[0]) )); }
-    break;
-
-  case 5:
-#line 67 "addr.y"
-    { libsieve_debugf(( "address: group: %s\n", (yyvsp[0]) )); }
-    break;
-
-  case 6:
-#line 69 "addr.y"
-    { libsieve_debugf(( "group: phrase: %s\n", (yyvsp[-2]) )); }
-    break;
-
-  case 7:
-#line 70 "addr.y"
-    { libsieve_debugf(( "group: phrase mailboxes: %s %s\n", (yyvsp[-3]), (yyvsp[-1]) )); }
-    break;
-
-  case 8:
-#line 72 "addr.y"
+#line 68 "addr.y"
     {
-	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf(( "mailboxes: mailbox: %s\n", (yyvsp[0]) ));
-		libsieve_debugf(( "allocating newaddr\n" ));
+		/* Lousy case to catch malformed addresses. */
 		libsieve_addrappend(&addr);
+		addr->name = (yyvsp[0]);
 		}
     break;
 
-  case 9:
+  case 5:
+#line 74 "addr.y"
+    { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[0]) ); }
+    break;
+
+  case 6:
+#line 75 "addr.y"
+    { TRACE_DEBUG( "address: group: %s", (yyvsp[0]) ); }
+    break;
+
+  case 7:
+#line 77 "addr.y"
+    { TRACE_DEBUG( "group: phrase: %s", (yyvsp[-2]) ); }
+    break;
+
+  case 8:
 #line 78 "addr.y"
+    { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[-3]), (yyvsp[-1]) ); }
+    break;
+
+  case 9:
+#line 80 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf(( "mailboxes: mailboxes mailbox: %s %s\n", (yyvsp[-2]), (yyvsp[0]) ));
-		libsieve_debugf(( "allocating newaddr\n" ));
+		TRACE_DEBUG( "mailboxes: mailbox: %s", (yyvsp[0]) );
+		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(&addr);
 		}
     break;
 
   case 10:
 #line 86 "addr.y"
-    { libsieve_debugf(( "mailbox: routeaddr: %s\n", (yyvsp[0]) )); }
+    {
+	 	/* Each new address is allocated here and back-linked */
+		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", (yyvsp[-2]), (yyvsp[0]) );
+		TRACE_DEBUG( "allocating newaddr" );
+		libsieve_addrappend(&addr);
+		}
     break;
 
   case 11:
-#line 87 "addr.y"
-    { libsieve_debugf(( "mailbox: addrspec: %s\n", (yyvsp[0]) )); }
+#line 94 "addr.y"
+    { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[0]) ); }
     break;
 
   case 12:
-#line 88 "addr.y"
-    {
-		libsieve_debugf(( "mailbox: phrase routeaddr: %s %s\n", (yyvsp[-1]), (yyvsp[0]) ));
-		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->name: %s\n", (yyvsp[-1]) ));
-		addr->name = libsieve_strdup( (yyvsp[-1]), strlen((yyvsp[-1])) );
-		}
+#line 95 "addr.y"
+    { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[0]) ); }
     break;
 
   case 13:
-#line 95 "addr.y"
-    { libsieve_debugf(( "routeaddr: addrspec: %s\n", (yyvsp[-1]) )); }
-    break;
-
-  case 14:
 #line 96 "addr.y"
     {
-		libsieve_debugf(( "routeaddr: route addrspec: %s:%s\n", (yyvsp[-3]), (yyvsp[-1]) ));
+		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", (yyvsp[-1]), (yyvsp[0]) );
 		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->route: %s\n", (yyvsp[-3]) ));
-		addr->route = libsieve_strdup( (yyvsp[-3]), strlen((yyvsp[-3])) );
+		TRACE_DEBUG( "addr->name: %s", (yyvsp[-1]) );
+		addr->name = libsieve_strdup( (yyvsp[-1]) );
 		}
     break;
 
-  case 15:
+  case 14:
 #line 103 "addr.y"
+    { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[-1]) ); }
+    break;
+
+  case 15:
+#line 104 "addr.y"
     {
-		libsieve_debugf(( "addrspec: localpart domain: %s %s\n", (yyvsp[-2]), (yyvsp[0]) ));
+		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", (yyvsp[-3]), (yyvsp[-1]) );
 		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->mailbox: %s\n", (yyvsp[-2]) ));
-		addr->mailbox = libsieve_strdup( (yyvsp[-2]), strlen((yyvsp[-2])) );
-		libsieve_debugf(( "addr->domain: %s\n", (yyvsp[0]) ));
-		addr->domain = libsieve_strdup( (yyvsp[0]), strlen((yyvsp[0])) );
+		TRACE_DEBUG( "addr->route: %s", (yyvsp[-3]) );
+		addr->route = libsieve_strdup( (yyvsp[-3]) );
 		}
     break;
 
   case 16:
-#line 112 "addr.y"
+#line 111 "addr.y"
     {
-		libsieve_debugf(( "route: domain: %s\n", (yyvsp[0]) ));
-                (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[0]), NULL ), strlen((yyvsp[0]))+1, FREEME);
+		TRACE_DEBUG( "addrspec: localpart domain: %s %s", (yyvsp[-2]), (yyvsp[0]) );
+		// This is a "top terminal" state...
+		TRACE_DEBUG( "addr->mailbox: %s", (yyvsp[-2]) );
+		addr->mailbox = libsieve_strdup( (yyvsp[-2]) );
+		TRACE_DEBUG( "addr->domain: %s", (yyvsp[0]) );
+		addr->domain = libsieve_strdup( (yyvsp[0]) );
 		}
     break;
 
   case 17:
-#line 116 "addr.y"
+#line 120 "addr.y"
     {
-		libsieve_debugf(( "route: domain route: %s %s\n", (yyvsp[-2]), (yyvsp[0]) ));
-		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[-2]), ",", (yyvsp[0]), NULL ), strlen((yyvsp[-2]))+strlen((yyvsp[0]))+2, FREEME);
+		TRACE_DEBUG( "route: domain: %s", (yyvsp[0]) );
+                (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[0]), NULL ), strlen((yyvsp[0]))+1, FREEME);
 		}
     break;
 
   case 18:
-#line 121 "addr.y"
-    { libsieve_debugf(( "localpart: word: %s\n", (yyvsp[0]) )); }
+#line 124 "addr.y"
+    {
+		TRACE_DEBUG( "route: domain route: %s %s", (yyvsp[-2]), (yyvsp[0]) );
+		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[-2]), ",", (yyvsp[0]), NULL ), strlen((yyvsp[-2]))+strlen((yyvsp[0]))+2, FREEME);
+		}
     break;
 
   case 19:
-#line 122 "addr.y"
-    {
-		libsieve_debugf(( "localpart: localpart word: %s %s\n", (yyvsp[-2]), (yyvsp[0]) ));
-		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[-2]), ".", (yyvsp[0]), NULL ), strlen((yyvsp[-2]))+strlen((yyvsp[0]))+1, FREEME);
-		}
+#line 129 "addr.y"
+    { TRACE_DEBUG( "localpart: word: %s", (yyvsp[0]) ); }
     break;
 
   case 20:
-#line 127 "addr.y"
-    { libsieve_debugf(( "domain: subdomain: %s\n", (yyvsp[0]) )); }
-    break;
-
-  case 21:
-#line 128 "addr.y"
+#line 130 "addr.y"
     {
-		libsieve_debugf(( "domain: domain subdomain: %s %s\n", (yyvsp[-2]), (yyvsp[0]) ));
+		TRACE_DEBUG( "localpart: localpart word: %s %s", (yyvsp[-2]), (yyvsp[0]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[-2]), ".", (yyvsp[0]), NULL ), strlen((yyvsp[-2]))+strlen((yyvsp[0]))+1, FREEME);
 		}
     break;
 
+  case 21:
+#line 135 "addr.y"
+    { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[0]) ); }
+    break;
+
   case 22:
-#line 133 "addr.y"
-    { libsieve_debugf(( "subdomain: domainref: %s\n", (yyvsp[0]) )); }
+#line 136 "addr.y"
+    {
+		TRACE_DEBUG( "domain: domain subdomain: %s %s", (yyvsp[-2]), (yyvsp[0]) );
+		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[-2]), ".", (yyvsp[0]), NULL ), strlen((yyvsp[-2]))+strlen((yyvsp[0]))+1, FREEME);
+		}
     break;
 
   case 23:
-#line 134 "addr.y"
-    { libsieve_debugf(( "subdomain: domainlit: %s\n", (yyvsp[0]) )); }
+#line 141 "addr.y"
+    { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[0]) ); }
     break;
 
   case 24:
-#line 136 "addr.y"
-    { libsieve_debugf(( "domainref: ATOM: %s\n", (yyvsp[0]) )); }
+#line 142 "addr.y"
+    { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[0]) ); }
     break;
 
   case 25:
-#line 138 "addr.y"
+#line 144 "addr.y"
+    { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[0]) ); }
+    break;
+
+  case 26:
+#line 146 "addr.y"
     {
-	 	libsieve_debugf(( "domainlit: DTEXT: %s\n", (yyvsp[-1]) ));
+	 	TRACE_DEBUG( "domainlit: DTEXT: %s", (yyvsp[-1]) );
 		(yyval) = (yyvsp[-1]);
 		}
     break;
 
-  case 26:
-#line 143 "addr.y"
-    { libsieve_debugf(( "phrase: word: %s\n", (yyvsp[0]) )); }
+  case 27:
+#line 151 "addr.y"
+    { TRACE_DEBUG( "phrase: word: %s", (yyvsp[0]) ); }
     break;
 
-  case 27:
-#line 144 "addr.y"
+  case 28:
+#line 152 "addr.y"
     {
-		libsieve_debugf(( "phrase: phrase word: %s %s\n", (yyvsp[-1]), (yyvsp[0]) ));
+		TRACE_DEBUG( "phrase: phrase word: %s %s", (yyvsp[-1]), (yyvsp[0]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[-1]), " ", (yyvsp[0]), NULL ), strlen((yyvsp[-1]))+strlen((yyvsp[0]))+1, FREEME);
 		}
     break;
 
-  case 28:
-#line 149 "addr.y"
-    { libsieve_debugf(( "word: ATOM: %s\n", (yyvsp[0]) )); }
-    break;
-
   case 29:
-#line 150 "addr.y"
-    { libsieve_debugf(( "word: qstring: %s\n", (yyvsp[0]) )); }
+#line 157 "addr.y"
+    { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[0]) ); }
     break;
 
   case 30:
-#line 152 "addr.y"
+#line 158 "addr.y"
+    { TRACE_DEBUG( "word: qstring: %s", (yyvsp[0]) ); }
+    break;
+
+  case 31:
+#line 160 "addr.y"
     {
-		libsieve_debugf(( "qstring: QTEXT: %s\n", (yyvsp[-1]) ));
+		TRACE_DEBUG( "qstring: QTEXT: %s", (yyvsp[-1]) );
 		(yyval) = (yyvsp[-1]);
 		}
     break;
@@ -1385,7 +1399,7 @@ yyreduce:
     }
 
 /* Line 1126 of yacc.c.  */
-#line 1389 "addr.c"
+#line 1403 "addr.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1653,11 +1667,11 @@ yyreturn:
 }
 
 
-#line 157 "addr.y"
+#line 165 "addr.y"
 
 
 /* Run an execution error callback. */
-void libsieve_addrerror(const char *s)
+void libsieve_addrerror(char *s)
 {
     libsieve_sieveerror_exec(s);
 }
@@ -1714,13 +1728,13 @@ void libsieve_addrstructfree(struct address *addr, int freeall)
     while (addr != NULL) {
         bddr = addr;
         if(freeall) {
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->mailbox));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->mailbox);
             libsieve_free(bddr->mailbox);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->domain));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->domain);
             libsieve_free(bddr->domain);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->route));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->route);
             libsieve_free(bddr->route);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->name));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->name);
             libsieve_free(bddr->name);
         }
         addr = bddr->next;
@@ -1735,16 +1749,16 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     struct address *top = libsieve_malloc(sizeof(struct address));
 
     if (!addr) {
-        libsieve_debugf(("Mayday, addr is null in addrstructcopy\n"));
+        TRACE_DEBUG("Mayday, addr is null in addrstructcopy");
     }
 
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
     top->mailbox = tmp->mailbox;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->domain, tmp->domain);
     top->domain = tmp->domain;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->route, tmp->route);
     top->route = tmp->route;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->name, tmp->name);
     top->name = tmp->name;
     tmp = tmp->next;
     new = top;
@@ -1754,13 +1768,13 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
             return NULL;   
         else
             new = new->next;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
         new->mailbox = tmp->mailbox;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->domain, tmp->domain);
         new->domain = tmp->domain;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->route, tmp->route);
         new->route = tmp->route;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->name, tmp->name);
         new->name = tmp->name;
         tmp = tmp->next;
     }
@@ -1772,7 +1786,7 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
 void libsieve_addrappend(struct address **a)
 {
     struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
-    libsieve_debugf(( "Prepending a new addr struct\n" ));
+    TRACE_DEBUG( "Prepending a new addr struct" );
     new->mailbox = NULL;
     new->domain = NULL;
     new->route = NULL;

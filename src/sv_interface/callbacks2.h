@@ -12,6 +12,7 @@
 #ifndef CALLBACKS2_H
 #define CALLBACKS2_H
 
+#include "util.h"
 #include "context2.h"
 
 int libsieve_callback_begin(
@@ -36,27 +37,25 @@ int libsieve_callback_end(
 /* Callback actions; return negative on failure. */
 /* These have been rewritten and moved into callbacks2.c... */
 int libsieve_do_reject(struct sieve2_context *c, char *msg);
-int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, struct imapflags2 *imapflags);
+int libsieve_do_fileinto(struct sieve2_context *c, char *mbox, stringlist_t *slflags);
 int libsieve_do_redirect(struct sieve2_context *c, char *addr);
-int libsieve_do_keep(struct sieve2_context *c, struct imapflags2 *imapflags);
+int libsieve_do_keep(struct sieve2_context *c, stringlist_t *slflags);
 int libsieve_do_discard(struct sieve2_context *c);
 int libsieve_do_vacation(struct sieve2_context *c, char *addr, char *fromaddr,
 		char *subj, char *msg, char *handle,
 		int days, int mime);
-int libsieve_do_setflag(struct sieve2_context *c, char *flag);
-int libsieve_do_addflag(struct sieve2_context *c, char *flag);
-int libsieve_do_removeflag(struct sieve2_context *c, char *flag);
-int libsieve_do_mark(struct sieve2_context *c);
-int libsieve_do_unmark(struct sieve2_context *c);
 int libsieve_do_notify(struct sieve2_context *c, char *id,
 		char *method, stringlist_t *options,
 		char *priority, char *message);
-int libsieve_do_denotify(struct sieve2_context *c, comparator_t *comp, void *pat,
-		char *priority);
 
 /* Reporting parse and runtime errors. */
 int libsieve_do_error_parse(struct sieve2_context *c, int lineno, char *msg);
 int libsieve_do_error_exec(struct sieve2_context *c, char *msg);
+
+/* The TRACE macros are defined in util.h, which is universally included. */
+int libsieve_do_debug_trace(struct sieve2_context *c, int level,
+		const char *module, const char *file, const char *function,
+		const char *formatstring, ...) PRINTF_ARGS(6, 7);
 
 /* Ask the user app for information about the script & message. */
 int libsieve_do_getscript(struct sieve2_context *context,
@@ -70,6 +69,8 @@ int libsieve_do_getenvelope(struct sieve2_context * context,
 		const char * const f, char ** c);
 int libsieve_do_getsize(struct sieve2_context *context,
 		int *sz);
+int libsieve_do_getsubaddress(struct sieve2_context *context, char *address,
+		char **user, char **detail, char **localpart, char **domain);
 
 /* Emulate the user callback; function located in message2.h */
 int libsieve_message2_getheader(struct sieve2_context *c, void *user_data);

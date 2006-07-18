@@ -46,9 +46,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_interface */
 #include "callbacks2.h"
 
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
 char *libsieve_addrerr;          /* buffer for sieve parser error messages */
+struct sieve2_context *parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
 %}
@@ -61,103 +65,107 @@ static struct mlbuf *ml = NULL;
 
 start:  /* Empty */			{ libsieve_addrappend(&addr); }
 	| address			{ $$ = $1; }
-	;
+	| word				{
+		/* Lousy case to catch malformed addresses. */
+		libsieve_addrappend(&addr);
+		addr->name = $1;
+		};
 
-address: mailboxes			{ libsieve_debugf(( "address: mailbox: %s\n", $1 )); }
-	| group				{ libsieve_debugf(( "address: group: %s\n", $1 )); };
+address: mailboxes			{ TRACE_DEBUG( "address: mailbox: %s", $1 ); }
+	| group				{ TRACE_DEBUG( "address: group: %s", $1 ); };
 
-group: phrase ':' ';'			{ libsieve_debugf(( "group: phrase: %s\n", $1 )); }
-	| phrase ':' mailboxes ';'	{ libsieve_debugf(( "group: phrase mailboxes: %s %s\n", $1, $3 )); };
+group: phrase ':' ';'			{ TRACE_DEBUG( "group: phrase: %s", $1 ); }
+	| phrase ':' mailboxes ';'	{ TRACE_DEBUG( "group: phrase mailboxes: %s %s", $1, $3 ); };
 
 mailboxes: mailbox			{
 	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf(( "mailboxes: mailbox: %s\n", $1 ));
-		libsieve_debugf(( "allocating newaddr\n" ));
+		TRACE_DEBUG( "mailboxes: mailbox: %s", $1 );
+		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(&addr);
 		}
 	| mailboxes ',' mailbox		{
 	 	/* Each new address is allocated here and back-linked */
-		libsieve_debugf(( "mailboxes: mailboxes mailbox: %s %s\n", $1, $3 ));
-		libsieve_debugf(( "allocating newaddr\n" ));
+		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", $1, $3 );
+		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(&addr);
 		};
 
 mailbox: 
-	routeaddr			{ libsieve_debugf(( "mailbox: routeaddr: %s\n", $1 )); }
-	| addrspec			{ libsieve_debugf(( "mailbox: addrspec: %s\n", $1 )); }
+	routeaddr			{ TRACE_DEBUG( "mailbox: routeaddr: %s", $1 ); }
+	| addrspec			{ TRACE_DEBUG( "mailbox: addrspec: %s", $1 ); }
 	| phrase routeaddr		{
-		libsieve_debugf(( "mailbox: phrase routeaddr: %s %s\n", $1, $2 ));
+		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", $1, $2 );
 		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->name: %s\n", $1 ));
-		addr->name = libsieve_strdup( $1, strlen($1) );
+		TRACE_DEBUG( "addr->name: %s", $1 );
+		addr->name = libsieve_strdup( $1 );
 		};
 
-routeaddr: '<' addrspec '>'		{ libsieve_debugf(( "routeaddr: addrspec: %s\n", $2 )); }
+routeaddr: '<' addrspec '>'		{ TRACE_DEBUG( "routeaddr: addrspec: %s", $2 ); }
 	| '<' route ':' addrspec '>'	{
-		libsieve_debugf(( "routeaddr: route addrspec: %s:%s\n", $2, $4 ));
+		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", $2, $4 );
 		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->route: %s\n", $2 ));
-		addr->route = libsieve_strdup( $2, strlen($2) );
+		TRACE_DEBUG( "addr->route: %s", $2 );
+		addr->route = libsieve_strdup( $2 );
 		};
 	
 addrspec: localpart '@' domain		{
-		libsieve_debugf(( "addrspec: localpart domain: %s %s\n", $1, $3 ));
+		TRACE_DEBUG( "addrspec: localpart domain: %s %s", $1, $3 );
 		// This is a "top terminal" state...
-		libsieve_debugf(( "addr->mailbox: %s\n", $1 ));
-		addr->mailbox = libsieve_strdup( $1, strlen($1) );
-		libsieve_debugf(( "addr->domain: %s\n", $3 ));
-		addr->domain = libsieve_strdup( $3, strlen($3) );
+		TRACE_DEBUG( "addr->mailbox: %s", $1 );
+		addr->mailbox = libsieve_strdup( $1 );
+		TRACE_DEBUG( "addr->domain: %s", $3 );
+		addr->domain = libsieve_strdup( $3 );
 		};
 
 route: '@' domain			{
-		libsieve_debugf(( "route: domain: %s\n", $2 ));
+		TRACE_DEBUG( "route: domain: %s", $2 );
                 $$ = libsieve_strbuf(ml, libsieve_strconcat( "@", $2, NULL ), strlen($2)+1, FREEME);
 		}
 	| '@' domain ',' route		{
-		libsieve_debugf(( "route: domain route: %s %s\n", $2, $4 ));
+		TRACE_DEBUG( "route: domain route: %s %s", $2, $4 );
 		$$ = libsieve_strbuf(ml, libsieve_strconcat( "@", $2, ",", $4, NULL ), strlen($2)+strlen($4)+2, FREEME);
 		};
 
-localpart: word				{ libsieve_debugf(( "localpart: word: %s\n", $1 )); }
+localpart: word				{ TRACE_DEBUG( "localpart: word: %s", $1 ); }
 	| localpart '.' word		{
-		libsieve_debugf(( "localpart: localpart word: %s %s\n", $1, $3 ));
+		TRACE_DEBUG( "localpart: localpart word: %s %s", $1, $3 );
 		$$ = libsieve_strbuf(ml, libsieve_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);
 		};
 
-domain: subdomain			{ libsieve_debugf(( "domain: subdomain: %s\n", $1 )); }
+domain: subdomain			{ TRACE_DEBUG( "domain: subdomain: %s", $1 ); }
 	| domain '.' subdomain		{
-		libsieve_debugf(( "domain: domain subdomain: %s %s\n", $1, $3 ));
+		TRACE_DEBUG( "domain: domain subdomain: %s %s", $1, $3 );
 		$$ = libsieve_strbuf(ml, libsieve_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);
 		};
 
-subdomain: domainref		{ libsieve_debugf(( "subdomain: domainref: %s\n", $1 )); }
-	| domainlit		{ libsieve_debugf(( "subdomain: domainlit: %s\n", $1 )); };
+subdomain: domainref		{ TRACE_DEBUG( "subdomain: domainref: %s", $1 ); }
+	| domainlit		{ TRACE_DEBUG( "subdomain: domainlit: %s", $1 ); };
 
-domainref: ATOM			{ libsieve_debugf(( "domainref: ATOM: %s\n", $1 )); };
+domainref: ATOM			{ TRACE_DEBUG( "domainref: ATOM: %s", $1 ); };
 
 domainlit: '[' DTEXT ']'	{
-	 	libsieve_debugf(( "domainlit: DTEXT: %s\n", $2 ));
+	 	TRACE_DEBUG( "domainlit: DTEXT: %s", $2 );
 		$$ = $2;
 		};
 
-phrase: word			{ libsieve_debugf(( "phrase: word: %s\n", $1 )); }
+phrase: word			{ TRACE_DEBUG( "phrase: word: %s", $1 ); }
 	| phrase word		{
-		libsieve_debugf(( "phrase: phrase word: %s %s\n", $1, $2 ));
+		TRACE_DEBUG( "phrase: phrase word: %s %s", $1, $2 );
 		$$ = libsieve_strbuf(ml, libsieve_strconcat( $1, " ", $2, NULL ), strlen($1)+strlen($2)+1, FREEME);
 		};
 
-word: ATOM			{ libsieve_debugf(( "word: ATOM: %s\n", $1 )); }
-	| qstring		{ libsieve_debugf(( "word: qstring: %s\n", $1 )); };
+word: ATOM			{ TRACE_DEBUG( "word: ATOM: %s", $1 ); }
+	| qstring		{ TRACE_DEBUG( "word: qstring: %s", $1 ); };
 
 qstring: QUOTE QTEXT QUOTE	{
-		libsieve_debugf(( "qstring: QTEXT: %s\n", $2 ));
+		TRACE_DEBUG( "qstring: QTEXT: %s", $2 );
 		$$ = $2;
 		};
 
 %%
 
 /* Run an execution error callback. */
-void libsieve_addrerror(const char *s)
+void libsieve_addrerror(char *s)
 {
     libsieve_sieveerror_exec(s);
 }
@@ -214,13 +222,13 @@ void libsieve_addrstructfree(struct address *addr, int freeall)
     while (addr != NULL) {
         bddr = addr;
         if(freeall) {
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->mailbox));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->mailbox);
             libsieve_free(bddr->mailbox);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->domain));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->domain);
             libsieve_free(bddr->domain);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->route));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->route);
             libsieve_free(bddr->route);
-            libsieve_debugf(("I'd like to free this: %s\n", bddr->name));
+            TRACE_DEBUG("I'd like to free this: %s", bddr->name);
             libsieve_free(bddr->name);
         }
         addr = bddr->next;
@@ -235,16 +243,16 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     struct address *top = libsieve_malloc(sizeof(struct address));
 
     if (!addr) {
-        libsieve_debugf(("Mayday, addr is null in addrstructcopy\n"));
+        TRACE_DEBUG("Mayday, addr is null in addrstructcopy");
     }
 
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
     top->mailbox = tmp->mailbox;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->domain, tmp->domain);
     top->domain = tmp->domain;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->route, tmp->route);
     top->route = tmp->route;
-    libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
+    TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->name, tmp->name);
     top->name = tmp->name;
     tmp = tmp->next;
     new = top;
@@ -254,13 +262,13 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
             return NULL;   
         else
             new = new->next;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->mailbox, tmp->mailbox));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
         new->mailbox = tmp->mailbox;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->domain, tmp->domain));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->domain, tmp->domain);
         new->domain = tmp->domain;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->route, tmp->route));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->route, tmp->route);
         new->route = tmp->route;
-        libsieve_debugf(("I'd like to copy this pointer: %p: %s\n", tmp->name, tmp->name));
+        TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->name, tmp->name);
         new->name = tmp->name;
         tmp = tmp->next;
     }
@@ -272,7 +280,7 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
 void libsieve_addrappend(struct address **a)
 {
     struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
-    libsieve_debugf(( "Prepending a new addr struct\n" ));
+    TRACE_DEBUG( "Prepending a new addr struct" );
     new->mailbox = NULL;
     new->domain = NULL;
     new->route = NULL;

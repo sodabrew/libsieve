@@ -17,11 +17,20 @@
 #define YY_INPUT(b, r, ms) (r = libsieve_headerinput(b, ms))
 
 #include <string.h>
+
 /* sv_util */
 #include "util.h"
+
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
+
+/* sv_interface */
+#include "callbacks2.h"
+
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+extern struct sieve2_context *parse_context;
 
 static struct mlbuf *ml = NULL;
 
@@ -42,30 +51,30 @@ void libsieve_headerfatalerror(const char msg[]);
 
 ^[^\ \t\r\n]            {
                 BEGIN S_NAME;
-                libsieve_debugf(( "Begin NAME\n" ));
+                TRACE_DEBUG( "Begin NAME" );
                 yyless(0);
                 }
 ^[\ \t]                 {
                 BEGIN S_WRAP;
-                libsieve_debugf(( "Begin WRAP (line started with whitespace)\n" ));
+                TRACE_DEBUG( "Begin WRAP (line started with whitespace)" );
                 yyless(0);
                 }
 \r\n[\ \t]              {
                 BEGIN S_WRAP;
-                libsieve_debugf(( "Begin WRAP (\\r\\n followed either by \\ or \\t\n" ));
+                TRACE_DEBUG( "Begin WRAP (\\r\\n followed either by \\ or \\t" );
                 /* Push back the whitespace but not the CRLF; since the
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
 :([\ \t])+(\r|\n)+      {
                 /* Special case of an empty header: whitespace followed by newlines */
-                libsieve_debugf(( "Eat some whitespace and return COLON, forget TEXT\n" ));
+                TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
                 return COLON;
                 }
 :([\ \t])+              {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
-                libsieve_debugf(( "Begin TEXT, eat some whitespace and return COLON\n" ));
+                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
                 return COLON;
                 }
 (\r|\n)+                {
@@ -78,21 +87,21 @@ void libsieve_headerfatalerror(const char msg[]);
                  * 33  !  to  57  9
                  * 59  ;  to  126 ~
                  * Note that  58  :  is reserved as the field separator */
-                libsieve_debugf(( "NAME: %s\n", yytext ));
+                TRACE_DEBUG( "NAME: %s", yytext );
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return NAME;
                 }
 
 <S_TEXT>([^\r\n])+      {
-                libsieve_debugf(( "TEXT: %s\n", yytext ));
+                TRACE_DEBUG( "TEXT: %s", yytext );
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return TEXT;
                 }
 
 <S_WRAP>([^\r\n])+      {
-                libsieve_debugf(( "WRAP: %s\n", yytext ));
+                TRACE_DEBUG( "WRAP: %s", yytext );
 		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return WRAP;
@@ -129,19 +138,21 @@ void libsieve_headerlexfree()
 void libsieve_headerlexalloc()
 {
     libsieve_strbufalloc(&ml);
-    libsieve_headerrestart( YY_CURRENT_BUFFER );
+    libsieve_headerrestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Restart the lexer before each invocation of the parser */
 void libsieve_headerlexrestart()
 {
-    libsieve_headerrestart( YY_CURRENT_BUFFER );
+    libsieve_headerrestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
 void libsieve_headerfatalerror(const char msg[])
 {
-    /* Basically stop and don't do anything */
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
 }
 

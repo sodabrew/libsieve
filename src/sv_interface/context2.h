@@ -12,36 +12,35 @@
 #ifndef CONTEXT2_H
 #define CONTEXT2_H
 
-/* message.h is for imapflags_t */
-#include "message.h"
+#include "tree.h"		/* for commandlist_t */
 #include "message2.h"
 #include "sieve2.h"
 
 struct callbacks2 {
-    sieve2_callback_func *redirect;
-    sieve2_callback_func *reject;
-    sieve2_callback_func *discard;
-    sieve2_callback_func *fileinto;
-    sieve2_callback_func *keep;
-    sieve2_callback_func *notify;
-    sieve2_callback_func *denotify;
-    sieve2_callback_func *vacation;
-    sieve2_callback_func *setflag;
-    sieve2_callback_func *addflag;
-    sieve2_callback_func *removeflag;
-    sieve2_callback_func *mark;
-    sieve2_callback_func *unmark;
+    sieve2_callback_func redirect;
+    sieve2_callback_func reject;
+    sieve2_callback_func discard;
+    sieve2_callback_func fileinto;
+    sieve2_callback_func keep;
+    sieve2_callback_func notify;
+    sieve2_callback_func denotify;
+    sieve2_callback_func vacation;
+    sieve2_callback_func setflag;
+    sieve2_callback_func addflag;
+    sieve2_callback_func removeflag;
 
-    sieve2_callback_func *err_runtime;
-    sieve2_callback_func *err_parse;
+    sieve2_callback_func err_runtime;
+    sieve2_callback_func err_parse;
+    sieve2_callback_func debug_trace;
 
-    sieve2_callback_func *getscript;
+    sieve2_callback_func getscript;
 
-    sieve2_callback_func *getheader;
-    sieve2_callback_func *getallheaders;
-    sieve2_callback_func *getenvelope;
-    sieve2_callback_func *getsize;
-    sieve2_callback_func *getbody;
+    sieve2_callback_func getheader;
+    sieve2_callback_func getallheaders;
+    sieve2_callback_func getenvelope;
+    sieve2_callback_func getsize;
+    sieve2_callback_func getbody;
+    sieve2_callback_func getsubaddress;
 };
 
 enum boolean { FALSE = 0, TRUE = 1 };
@@ -53,7 +52,6 @@ struct support2 {
     enum boolean          fileinto;
     enum boolean          vacation;
     enum boolean          envelope;
-    enum boolean          imapflags;
     enum boolean          imap4flags;
 
     /* These are more like built-ins. */
@@ -75,8 +73,6 @@ struct actions2 {
     enum boolean          setflag;
     enum boolean          addflag;
     enum boolean          removeflag;
-    enum boolean          mark;
-    enum boolean          unmark;
 };
 
 struct script2 {
@@ -84,11 +80,6 @@ struct script2 {
     int error_lineno;
     const char *script;
     commandlist_t *cmds;
-};
-
-struct imapflags2 {
-    char **flags;
-    int flagcount;
 };
 
 /* I don't anticipate needing more
@@ -114,6 +105,7 @@ struct cur_call {
 
 struct sieve2_context {
     sieve2_message_t *message;
+    stringlist_t *slflags;
     struct mlbuf *strbuf;
 
     int parse_errors;
@@ -125,7 +117,6 @@ struct sieve2_context {
      * I'd like to do this with all of the context
      * structs -- makes my life easier not to malloc
      * so much separate junk all over the place. */
-    struct imapflags2 imapflags;
     struct callbacks2 callbacks;
     struct support2 support;
     struct support2 require;

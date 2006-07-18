@@ -48,42 +48,6 @@ static int octet_is(const char *pat, const char *text)
     return (sl == strlen(text)) && !memcmp(pat, text, sl);
 }
 
-/* we implement boyer-moore for hell of it, since this is probably
- not very useful for sieve */
-#if 0
-int boyer_moore(char *pat, char *text)
-{
-    int i, j; /* indexes */
-    int M = strlen(pat); /* length of pattern */
-    int N = strlen(text); /* length of text */
-    int skip[256]; /* table of how much to skip, based on each character */
-
-    /* initialize skip table */
-    for (i = 0; i < 256; i++)
-	skip[i] = M;
-    for (i = 0; i < M; i++)
-	skip[(int) pat[i]] = M-i-1;
-    
-    /* look for pat in text */
-    i = j = M-1;
-    do {
-	if (pat[j] == text[i]) {
-	    i--;
-	    j--;
-	} else {
-	    if (M-j > skip[(int) text[i]]) {
-		i = i + M - j;
-	    } else {
-		i = i + skip[(int) text[i]];
-	    }
-	    j = M-1;
-	}
-    } while (!((j < 0) || (i >= N)));
-    /* i+1 is the position of the match if i < N */
-    return (i < N) ? 1 : 0;
-}
-#endif
-
 /* we do a brute force attack */
 static int octet_contains(const char *pat, const char *text)
 {
@@ -157,12 +121,10 @@ static int octet_matches(const char *pat, const char *text)
     return octet_matches_(pat, text, 0);
 }
 
-#ifdef ENABLE_REGEX
 static int octet_regex(const char *pat, const char *text)
 {
     return (!libsieve_regexec((const regex_t *)pat, text, 0, NULL, 0));
 }
-#endif
 
 
 /* --- i;ascii-casemap comparators --- */
@@ -231,11 +193,9 @@ comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
 	case MATCHES:
 	    ret = &octet_matches;
 	    break;
-#ifdef ENABLE_REGEX
 	case REGEX:
 	    ret = &octet_regex;
 	    break;
-#endif
 	}
     } else if (!strcmp(comp, "i;ascii-casemap")) {
 	switch (mode) {
@@ -248,13 +208,11 @@ comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
 	case MATCHES:
 	    ret = &ascii_casemap_matches;
 	    break;
-#ifdef ENABLE_REGEX
 	case REGEX:
 	    /* the ascii-casemap destinction is made during
 	       the compilation of the regex in verify_regex() */
 	    ret = &octet_regex;
 	    break;
-#endif
 	}
     } else if (!strcmp(comp, "i;ascii-numeric")) {
 	switch (mode) {

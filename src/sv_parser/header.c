@@ -104,15 +104,20 @@
 
 /* sv_util */
 #include "util.h"
+#include "callbacks2.h"
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
 /* sv_include */
 #include "sieve2_error.h"
 
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+
 /* There are global to this file */
 char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
 char *libsieve_headererr;          /* buffer for sieve parser error messages */
+extern struct sieve2_context *parse_context;
 static header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 
@@ -148,7 +153,7 @@ typedef int YYSTYPE;
 
 
 /* Line 219 of yacc.c.  */
-#line 152 "header.c"
+#line 157 "header.c"
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
 # define YYSIZE_T __SIZE_TYPE__
@@ -367,7 +372,7 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    43,    43,    48,    54,    58,    63,    67
+       0,    48,    48,    53,    59,    63,    68,    72
 };
 #endif
 
@@ -1119,15 +1124,6 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 43 "header.y"
-    {
-                /* Allocate a new cache block */
-                if (libsieve_headerappend(&hl) != SIEVE2_OK)
-                    /* Problems... */;
-                }
-    break;
-
-  case 3:
 #line 48 "header.y"
     {
                 /* Allocate a new cache block */
@@ -1136,34 +1132,43 @@ yyreduce:
                 }
     break;
 
-  case 4:
-#line 54 "header.y"
+  case 3:
+#line 53 "header.y"
     {
-                libsieve_debugf(( "header: NAME COLON: %s:\n", (yyvsp[-1]) ));
+                /* Allocate a new cache block */
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
+                    /* Problems... */;
+                }
+    break;
+
+  case 4:
+#line 59 "header.y"
+    {
+                TRACE_DEBUG( "header: NAME COLON: %s:", (yyvsp[-1]) );
                 libsieve_headerentry(hl->h, (yyvsp[-1]), NULL);
                 }
     break;
 
   case 5:
-#line 58 "header.y"
+#line 63 "header.y"
     {
-                libsieve_debugf(( "header: NAME COLON body: %s:%s\n", (yyvsp[-2]), (yyvsp[0]) ));
+                TRACE_DEBUG( "header: NAME COLON body: %s:%s", (yyvsp[-2]), (yyvsp[0]) );
                 libsieve_headerentry(hl->h, (yyvsp[-2]), (yyvsp[0]));
                 }
     break;
 
   case 6:
-#line 63 "header.y"
+#line 68 "header.y"
     {
                 /* Default action is $$ = $1 */
-                libsieve_debugf(( "body: TEXT: %s\n", (yyvsp[0]) ));
+                TRACE_DEBUG( "body: TEXT: %s", (yyvsp[0]) );
                 }
     break;
 
   case 7:
-#line 67 "header.y"
+#line 72 "header.y"
     {
-                libsieve_debugf(( "body: body WRAP: %s %s\n", (yyvsp[-1]), (yyvsp[0]) ));
+                TRACE_DEBUG( "body: body WRAP: %s %s", (yyvsp[-1]), (yyvsp[0]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[-1]), (yyvsp[0]), NULL ), strlen((yyvsp[-1]))+strlen((yyvsp[0])), FREEME);
                 }
     break;
@@ -1173,7 +1178,7 @@ yyreduce:
     }
 
 /* Line 1126 of yacc.c.  */
-#line 1177 "header.c"
+#line 1182 "header.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1441,14 +1446,14 @@ yyreturn:
 }
 
 
-#line 72 "header.y"
+#line 77 "header.y"
 
 
 /* copy header error message into buffer provided by sieve parser */
 void libsieve_headererror(const char *s)
 {
     extern char *libsieve_headererr;
-    libsieve_headererr = libsieve_strdup(s, strlen(s));
+    libsieve_headererr = libsieve_strdup(s);
 }
 
 /* Wrapper for headerparse() which sets up the 
@@ -1468,7 +1473,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     libsieve_headerlexrestart();
 
     if(libsieve_headerparse()) {
-        libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
+        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
         *err = libsieve_headererr;
         libsieve_free(hl->h->contents);
         libsieve_free(hl->h);
@@ -1510,7 +1515,7 @@ int libsieve_headerappend(header_list_t **hl)
     if (c == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    libsieve_debugf(( "Prepending a new headerlist and header struct\n" ));
+    TRACE_DEBUG( "Prepending a new headerlist and header struct" );
     newhead->count = 0;
     newhead->space = 1;
     newhead->contents = c;
@@ -1525,15 +1530,13 @@ int libsieve_headerappend(header_list_t **hl)
 
 void libsieve_headerentry(header_t *h, char *name, char *body)
 {
-    libsieve_debugf(( "Entering name and body into header struct\n" ));
+    TRACE_DEBUG( "Entering name and body into header struct" );
     if (h == NULL)
-        libsieve_debugf(( "Why are you giving me a NULL struct!?\n" ));
+        TRACE_DEBUG( "Why are you giving me a NULL struct!?" );
 	/* Hmm, big big trouble here... */;
 
-    h->name = libsieve_strtolower(libsieve_strdup(name, strlen(name)), strlen(name));
-    /* Looks like we don't need to make a copy here after all
-    h->contents[0] = libsieve_strdup(body, strlen(body));
-    */
+    size_t namelen = strlen(name);
+    h->name = libsieve_strtolower(libsieve_strndup(name, namelen), namelen);
     h->contents[0] = body;
     h->count = 1;
 

@@ -92,6 +92,10 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_strbuffree(&c->strbuf, FREEME);
 
+    if (c->slflags) {
+	libsieve_free_sl_only(c->slflags);
+    }
+
     libsieve_free(c);
     *context = NULL;
 
@@ -111,15 +115,11 @@ static void static_check_support(struct sieve2_context *c)
 	if (c->callbacks.getenvelope)
 	    c->support.envelope = 1;
 
+	if (c->callbacks.getsubaddress)
+	    c->support.subaddress = 1;
+
 	if (c->callbacks.vacation)
 	    c->support.vacation = 1;
-
-	if (c->callbacks.mark
-	 && c->callbacks.unmark
-	 && c->callbacks.addflag
-	 && c->callbacks.setflag
-	 && c->callbacks.removeflag)
-	    c->support.imapflags = 1;
 
 	if (c->callbacks.notify)
 	    c->support.notify = 1;
@@ -151,21 +151,17 @@ int sieve2_callbacks(sieve2_context_t *context,
           CBCASE(SIEVE2_ACTION_FILEINTO,       fileinto);
           CBCASE(SIEVE2_ACTION_KEEP,           keep);
           CBCASE(SIEVE2_ACTION_NOTIFY,         notify);
-          CBCASE(SIEVE2_ACTION_DENOTIFY,       denotify);
           CBCASE(SIEVE2_ACTION_VACATION,       vacation);
-          CBCASE(SIEVE2_ACTION_SETFLAG,        setflag);
-          CBCASE(SIEVE2_ACTION_ADDFLAG,        addflag);
-          CBCASE(SIEVE2_ACTION_REMOVEFLAG,     removeflag);
-          CBCASE(SIEVE2_ACTION_MARK,           mark);
-          CBCASE(SIEVE2_ACTION_UNMARK,         unmark);
 
           CBCASE(SIEVE2_ERRCALL_RUNTIME,       err_runtime);
           CBCASE(SIEVE2_ERRCALL_PARSE,         err_parse);
+          CBCASE(SIEVE2_DEBUG_TRACE,           debug_trace);
 
           CBCASE(SIEVE2_SCRIPT_GETSCRIPT,      getscript);
 
           CBCASE(SIEVE2_MESSAGE_GETHEADER,     getheader);
           CBCASE(SIEVE2_MESSAGE_GETALLHEADERS, getallheaders);
+          CBCASE(SIEVE2_MESSAGE_GETSUBADDRESS, getsubaddress);
           CBCASE(SIEVE2_MESSAGE_GETENVELOPE,   getenvelope);
           CBCASE(SIEVE2_MESSAGE_GETSIZE,       getsize);
           CBCASE(SIEVE2_MESSAGE_GETBODY,       getbody);
@@ -219,7 +215,6 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
     const char *errmsg = NULL;
-    int res;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
@@ -252,7 +247,6 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     }
 
     c->script.cmds = libsieve_sieve_parse_buffer(c);
-    libsieve_debugf(("Executing script turned up [%d] errors.\n", c->script.error_count));
     if (c->script.error_count > 0) {
         if (c->script.cmds) {
             libsieve_free_tree(c->script.cmds);
@@ -278,16 +272,14 @@ const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
     char *ext;
     struct sieve2_context *c = sieve2_context;
 
-    ext = libsieve_strconcat(      "subaddress",
-#ifdef ENABLE_REGEX
-                                   " regex",
-#endif
-        ( c->support.fileinto   ? " fileinto"  : "" ),
-        ( c->support.reject     ? " reject"    : "" ),
-        ( c->support.envelope   ? " envelope"  : "" ),
-        ( c->support.vacation   ? " vacation"  : "" ),
-        ( c->support.imapflags  ? " imapflags" : "" ),
-        ( c->support.notify     ? " notify"    : "" ),
+    ext = libsieve_strconcat(     "regex ",
+                                  "imap4flags",
+        ( c->support.subaddress ? "subaddress"  : "" ),
+        ( c->support.fileinto   ? "fileinto "  : "" ),
+        ( c->support.reject     ? "reject "    : "" ),
+        ( c->support.envelope   ? "envelope "  : "" ),
+        ( c->support.vacation   ? "vacation "  : "" ),
+        ( c->support.notify     ? "notify "    : "" ),
 	NULL );
 
     return libsieve_strbuf(c->strbuf, ext, strlen(ext), FREEME);

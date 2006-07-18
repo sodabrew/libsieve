@@ -47,43 +47,45 @@
      REMOVEFLAG = 273,
      MARK = 274,
      UNMARK = 275,
-     NOTIFY = 276,
-     DENOTIFY = 277,
-     ANYOF = 278,
-     ALLOF = 279,
-     EXISTS = 280,
-     SFALSE = 281,
-     STRUE = 282,
-     HEADER = 283,
-     NOT = 284,
-     SIZE = 285,
-     ADDRESS = 286,
-     ENVELOPE = 287,
-     COMPARATOR = 288,
-     IS = 289,
-     CONTAINS = 290,
-     MATCHES = 291,
-     REGEX = 292,
-     OVER = 293,
-     UNDER = 294,
-     ALL = 295,
-     LOCALPART = 296,
-     DOMAIN = 297,
-     USER = 298,
-     DETAIL = 299,
-     DAYS = 300,
-     ADDRESSES = 301,
-     SUBJECT = 302,
-     MIME = 303,
-     FROM = 304,
-     HANDLE = 305,
-     METHOD = 306,
-     ID = 307,
-     OPTIONS = 308,
-     LOW = 309,
-     NORMAL = 310,
-     HIGH = 311,
-     MESSAGE = 312
+     FLAGS = 276,
+     HASFLAG = 277,
+     NOTIFY = 278,
+     VALIDNOTIF = 279,
+     ANYOF = 280,
+     ALLOF = 281,
+     EXISTS = 282,
+     SFALSE = 283,
+     STRUE = 284,
+     HEADER = 285,
+     NOT = 286,
+     SIZE = 287,
+     ADDRESS = 288,
+     ENVELOPE = 289,
+     COMPARATOR = 290,
+     IS = 291,
+     CONTAINS = 292,
+     MATCHES = 293,
+     REGEX = 294,
+     OVER = 295,
+     UNDER = 296,
+     ALL = 297,
+     LOCALPART = 298,
+     DOMAIN = 299,
+     USER = 300,
+     DETAIL = 301,
+     DAYS = 302,
+     ADDRESSES = 303,
+     SUBJECT = 304,
+     MIME = 305,
+     FROM = 306,
+     HANDLE = 307,
+     METHOD = 308,
+     ID = 309,
+     OPTIONS = 310,
+     LOW = 311,
+     NORMAL = 312,
+     HIGH = 313,
+     MESSAGE = 314
    };
 #endif
 /* Tokens.  */
@@ -105,49 +107,51 @@
 #define REMOVEFLAG 273
 #define MARK 274
 #define UNMARK 275
-#define NOTIFY 276
-#define DENOTIFY 277
-#define ANYOF 278
-#define ALLOF 279
-#define EXISTS 280
-#define SFALSE 281
-#define STRUE 282
-#define HEADER 283
-#define NOT 284
-#define SIZE 285
-#define ADDRESS 286
-#define ENVELOPE 287
-#define COMPARATOR 288
-#define IS 289
-#define CONTAINS 290
-#define MATCHES 291
-#define REGEX 292
-#define OVER 293
-#define UNDER 294
-#define ALL 295
-#define LOCALPART 296
-#define DOMAIN 297
-#define USER 298
-#define DETAIL 299
-#define DAYS 300
-#define ADDRESSES 301
-#define SUBJECT 302
-#define MIME 303
-#define FROM 304
-#define HANDLE 305
-#define METHOD 306
-#define ID 307
-#define OPTIONS 308
-#define LOW 309
-#define NORMAL 310
-#define HIGH 311
-#define MESSAGE 312
+#define FLAGS 276
+#define HASFLAG 277
+#define NOTIFY 278
+#define VALIDNOTIF 279
+#define ANYOF 280
+#define ALLOF 281
+#define EXISTS 282
+#define SFALSE 283
+#define STRUE 284
+#define HEADER 285
+#define NOT 286
+#define SIZE 287
+#define ADDRESS 288
+#define ENVELOPE 289
+#define COMPARATOR 290
+#define IS 291
+#define CONTAINS 292
+#define MATCHES 293
+#define REGEX 294
+#define OVER 295
+#define UNDER 296
+#define ALL 297
+#define LOCALPART 298
+#define DOMAIN 299
+#define USER 300
+#define DETAIL 301
+#define DAYS 302
+#define ADDRESSES 303
+#define SUBJECT 304
+#define MIME 305
+#define FROM 306
+#define HANDLE 307
+#define METHOD 308
+#define ID 309
+#define OPTIONS 310
+#define LOW 311
+#define NORMAL 312
+#define HIGH 313
+#define MESSAGE 314
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 62 "sieve.y"
+#line 66 "sieve.y"
 typedef union YYSTYPE {
     int nval;
     char *sval;
@@ -158,11 +162,11 @@ typedef union YYSTYPE {
     struct vtags *vtag;
     struct aetags *aetag;
     struct htags *htag;
+    struct hftags *hftag;
     struct ntags *ntag;
-    struct dtags *dtag;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 166 "sieve.h"
+#line 170 "sieve.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

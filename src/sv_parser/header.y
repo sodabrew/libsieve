@@ -21,15 +21,20 @@
 
 /* sv_util */
 #include "util.h"
+#include "callbacks2.h"
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
 /* sv_include */
 #include "sieve2_error.h"
 
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+
 /* There are global to this file */
 char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
 char *libsieve_headererr;          /* buffer for sieve parser error messages */
+extern struct sieve2_context *parse_context;
 static header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 %}
@@ -52,20 +57,20 @@ headers: header                 {
                 };
 
 header: NAME COLON              {
-                libsieve_debugf(( "header: NAME COLON: %s:\n", $1 ));
+                TRACE_DEBUG( "header: NAME COLON: %s:", $1 );
                 libsieve_headerentry(hl->h, $1, NULL);
                 }
         | NAME COLON body       {
-                libsieve_debugf(( "header: NAME COLON body: %s:%s\n", $1, $3 ));
+                TRACE_DEBUG( "header: NAME COLON body: %s:%s", $1, $3 );
                 libsieve_headerentry(hl->h, $1, $3);
                 };
 
 body: TEXT                      {
                 /* Default action is $$ = $1 */
-                libsieve_debugf(( "body: TEXT: %s\n", $1 ));
+                TRACE_DEBUG( "body: TEXT: %s", $1 );
                 }
         | body WRAP             {
-                libsieve_debugf(( "body: body WRAP: %s %s\n", $1, $2 ));
+                TRACE_DEBUG( "body: body WRAP: %s %s", $1, $2 );
                 $$ = libsieve_strbuf(ml, libsieve_strconcat( $1, $2, NULL ), strlen($1)+strlen($2), FREEME);
                 };
 
@@ -75,7 +80,7 @@ body: TEXT                      {
 void libsieve_headererror(const char *s)
 {
     extern char *libsieve_headererr;
-    libsieve_headererr = libsieve_strdup(s, strlen(s));
+    libsieve_headererr = libsieve_strdup(s);
 }
 
 /* Wrapper for headerparse() which sets up the 
@@ -95,7 +100,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     libsieve_headerlexrestart();
 
     if(libsieve_headerparse()) {
-        libsieve_debugf(( "Header parse error: %s\n", libsieve_headererr ));
+        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
         *err = libsieve_headererr;
         libsieve_free(hl->h->contents);
         libsieve_free(hl->h);
@@ -137,7 +142,7 @@ int libsieve_headerappend(header_list_t **hl)
     if (c == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    libsieve_debugf(( "Prepending a new headerlist and header struct\n" ));
+    TRACE_DEBUG( "Prepending a new headerlist and header struct" );
     newhead->count = 0;
     newhead->space = 1;
     newhead->contents = c;
@@ -152,15 +157,13 @@ int libsieve_headerappend(header_list_t **hl)
 
 void libsieve_headerentry(header_t *h, char *name, char *body)
 {
-    libsieve_debugf(( "Entering name and body into header struct\n" ));
+    TRACE_DEBUG( "Entering name and body into header struct" );
     if (h == NULL)
-        libsieve_debugf(( "Why are you giving me a NULL struct!?\n" ));
+        TRACE_DEBUG( "Why are you giving me a NULL struct!?" );
 	/* Hmm, big big trouble here... */;
 
-    h->name = libsieve_strtolower(libsieve_strdup(name, strlen(name)), strlen(name));
-    /* Looks like we don't need to make a copy here after all
-    h->contents[0] = libsieve_strdup(body, strlen(body));
-    */
+    size_t namelen = strlen(name);
+    h->name = libsieve_strtolower(libsieve_strndup(name, namelen), namelen);
     h->contents[0] = body;
     h->count = 1;
 

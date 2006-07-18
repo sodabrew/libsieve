@@ -11,7 +11,7 @@
 	array( 'This is not for end users!',
 	'Up front disclaimer: the \'lib\' part in \'libSieve\' should be an indicator, but if you\'re still looking for a mail sorting program that\'s ready to run, you\'re in the wrong place! libSieve is simply one component of a potential mail sorting system, and it\'s a component that takes a lot of pain away from a developer who\'d like to write his own mail sorting program but doesn\'t want to reinvent a sorting language or write a parsing grammar.' ),
 	array( 'History.',
-	'Sieve was developed by Carnegie Mellon University, in Pittsburgh, PA. Since they wanted to write a complete mail server based entirely on Internet RFC standards, they started with SMTP, then POP and IMAP, and so on. One day, someone asked if they could sort their mail automatically. But there were no RFC\'s for mail sorting languages. So they wrote one! And then a library to make it work, and then nestled it tightly into the Cyrus project and nobody else wanted to bother trying to get that library out of there and available for public consumption. And that\'s where libSieve fits in :-)' ),
+	'Sieve was developed by Project Cyrus at Carnegie Mellon University. Since they wanted to write a complete mail server based entirely on Internet RFC standards, they started with SMTP, then POP and IMAP, and so on. One day, someone asked if they could sort their mail automatically. But there were no RFC\'s for mail sorting languages. So they wrote one! And then a library to make it work, and then nestled it tightly into the Cyrus mail server and nobody else wanted to bother trying to get that library out of there and available for public consumption. That\'s where libSieve fits in :-)' ),
 	array( 'Downstream.',
 	'<a href="http://dbmail.org/">DBMail</a> is a mail system based on database storage. DBMail provides IMAP and POP3 access to email, and integrates well with popular SMTP servers. During message delivery, libSieve can be used to sort and filter each user\'s email according to their own Sieve scripts.' ),
 	) );
@@ -25,8 +25,6 @@
 	'Released February, 2006. Changes: '
 		. '<ul><li>Fixed sieve2_listextensions.</li></ul>' ),
 	) );
-
- $smarty->assign( 'rightlinks', '' );
 
  $smarty->display( 'tweedy.tpl' );
 

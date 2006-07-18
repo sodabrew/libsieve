@@ -86,19 +86,16 @@ int libsieve_callback_do(
           CBCALL(SIEVE2_ACTION_NOTIFY,         notify);
           CBCALL(SIEVE2_ACTION_DENOTIFY,       denotify);
           CBCALL(SIEVE2_ACTION_VACATION,       vacation);
-          CBCALL(SIEVE2_ACTION_SETFLAG,        setflag);
-          CBCALL(SIEVE2_ACTION_ADDFLAG,        addflag);
-          CBCALL(SIEVE2_ACTION_REMOVEFLAG,     removeflag);
-          CBCALL(SIEVE2_ACTION_MARK,           mark);
-          CBCALL(SIEVE2_ACTION_UNMARK,         unmark);
 
           CBCALL(SIEVE2_ERRCALL_RUNTIME,       err_runtime);
           CBCALL(SIEVE2_ERRCALL_PARSE,         err_parse);
+          CBCALL(SIEVE2_DEBUG_TRACE,           debug_trace);
 
           CBCALL(SIEVE2_SCRIPT_GETSCRIPT,      getscript);
 
           CBCALL(SIEVE2_MESSAGE_GETHEADER,     getheader);
           CBCALL(SIEVE2_MESSAGE_GETALLHEADERS, getallheaders);
+          CBCALL(SIEVE2_MESSAGE_GETSUBADDRESS, getsubaddress);
           CBCALL(SIEVE2_MESSAGE_GETENVELOPE,   getenvelope);
           CBCALL(SIEVE2_MESSAGE_GETSIZE,       getsize);
           CBCALL(SIEVE2_MESSAGE_GETBODY,       getbody);
@@ -184,7 +181,7 @@ const char * const * const sieve2_getvalue_stringlist(
         if (c->cur_call.values[i].type == VAL_STRINGLIST
         && c->cur_call.values[i].name && name
         && strcasecmp(c->cur_call.values[i].name, name) == 0) {
-            return c->cur_call.values[i].value.sl;
+            return (const char * const * const) c->cur_call.values[i].value.sl;
         }
     }
 
@@ -220,7 +217,7 @@ int sieve2_setvalue_string(
 
     for (i = 0; i < MAX_VALUES; i++) {
         if (c->cur_call.values[i].name == NULL) {
-            c->cur_call.values[i].name = libsieve_strdup(name, strlen(name));
+            c->cur_call.values[i].name = libsieve_strdup(name);
             c->cur_call.values[i].type = VAL_STRING;
             c->cur_call.values[i].value.s = value;
             return SIEVE2_OK;
@@ -242,7 +239,7 @@ int sieve2_setvalue_stringlist(
 
     for (i = 0; i < MAX_VALUES; i++) {
         if (c->cur_call.values[i].name == NULL) {
-            c->cur_call.values[i].name = libsieve_strdup(name, strlen(name));
+            c->cur_call.values[i].name = libsieve_strdup(name);
             c->cur_call.values[i].type = VAL_STRINGLIST;
             c->cur_call.values[i].value.sl = value;
             return SIEVE2_OK;
@@ -264,7 +261,7 @@ int sieve2_setvalue_int(
 
     for (i = 0; i < MAX_VALUES; i++) {
         if (c->cur_call.values[i].name == NULL) {
-            c->cur_call.values[i].name = libsieve_strdup(name, strlen(name));
+            c->cur_call.values[i].name = libsieve_strdup(name);
             c->cur_call.values[i].type = VAL_INT;
             c->cur_call.values[i].value.i = value;
             return SIEVE2_OK;

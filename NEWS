@@ -5,6 +5,19 @@ libSieve 2.1.11
 
 - Updated to Vacation draft 6.
 
+- Updated to imap4flags.
+
+- Dropped support for imapflags.
+
+- Added callback for subaddress rather than
+  using a hardcoded user+mailbox format.
+
+- Added a callback for debug messages.
+
+- Regex is always built in now.
+
+- Fixed multiline "text: string ." blocks.
+
 libSieve 2.1.10
 --------------
 

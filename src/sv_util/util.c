@@ -17,6 +17,7 @@
 #include <ctype.h>
 
 #include "util.h"
+#include "sieve2_error.h"
 
 /* Wrapper around memset() */
 void *libsieve_memset(void *ptr, int c, size_t len)
@@ -32,6 +33,17 @@ void libsieve_free(void *ptr)
     if(ptr)
         free(ptr);
     ptr = NULL;
+}
+
+/* Repeatedly call libsieve_free. */
+void libsieve_freev(void **ptr)
+{
+    int i;
+
+    for (i = 0; ptr[i] != NULL; i++)
+        libsieve_free(ptr[i]);
+
+    libsieve_free(ptr);
 }
 
 /* Wrapper around malloc() */
@@ -137,8 +149,25 @@ int libsieve_strtonum(const char *str)
     else return val;
   }
 
-/* Self implementation of strdup()... well, strndup() */
-char *libsieve_strdup(const char *str, size_t len)
+/* Self implementation of strdup() */
+char *libsieve_strdup(const char *str)
+  {
+    char *p = NULL;
+    size_t len = strlen(str);
+    
+    p = (char *)libsieve_malloc(sizeof(char) * (len + 1));
+    if (p != NULL) {
+        /* The nul is not copied */
+        strncpy(p, str, len);
+        /* A new nul is added */
+        *(p+len) = '\0';
+    }
+
+    return p;
+  }
+
+/* Self implementation of strndup() */
+char *libsieve_strndup(const char *str, size_t len)
   {
     char *p = NULL;
     
@@ -182,6 +211,40 @@ char *libsieve_strconcat (const char *str, ...)
     return buf;
   }
 
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
+/* This thing is used to build a single string from many pieces. */
+char *libsieve_catbuf(struct catbuf *s, char *str, size_t len)
+{
+	// If the available space is less than what we're putting in,
+	// expand the available space by 256 or len, whichever is more.
+	if (s->len - s->pos < len) {
+		s->str = libsieve_realloc(s->str, sizeof(char) * (s->len += MAX(len, 256)));
+	}
+
+	memcpy(s->str + s->pos, str, len);
+	s->pos += len;
+	s->str[s->pos] = '\0';
+
+	return s->str;
+}
+
+struct catbuf *libsieve_catbuf_alloc(void)
+{
+	struct catbuf *s = libsieve_malloc(sizeof(struct catbuf));
+	memset(s, 0, sizeof(struct catbuf));
+	s->str = libsieve_malloc(sizeof(char) * 256);
+	s->len = 256;
+	return s;
+}
+
+char *libsieve_catbuf_free(struct catbuf *s)
+{
+	char *tmp = s->str;
+	libsieve_free(s);
+	return tmp;
+}
+
 /* This is a spiffy function that helps to maintain
  * a single buffer holding pointers to multiple strings.
  *
@@ -204,7 +267,7 @@ char *libsieve_strbuf(struct mlbuf *ml, char *str, size_t len, int freeme)
             return NULL;
       }
 
-    stmp = (char *)libsieve_strdup(str, len);
+    stmp = (char *)libsieve_strndup(str, len);
     /* Point to the new memory */
     if (stmp != NULL)
         ml->buf[ml->pos] = stmp;
@@ -245,12 +308,22 @@ void libsieve_strbuffree(struct mlbuf **ml, int freeall)
     *ml = NULL;
 }
 
-/* FIXME: This should have a return value, you know, SIEVE2_ERROR_NOMEM... */
-void libsieve_strbufalloc(struct mlbuf **ml)
+int libsieve_strbufalloc(struct mlbuf **ml)
 {
+    if (!ml) {
+	    return SIEVE2_ERROR_NOMEM;
+    }
     *ml = (struct mlbuf *)libsieve_malloc(sizeof(struct mlbuf));
+    if (!*ml) {
+	    return SIEVE2_ERROR_NOMEM;
+    }
     (*ml)->pos = 0; /* Naturally, we start at position zero */
     (*ml)->siz = 256; /* This is the initial number of buffers we can hold */
     (*ml)->buf = (char **)libsieve_malloc(sizeof(char *) * (*ml)->siz);
+    if (!((*ml)->buf)) {
+	    libsieve_free(*ml);
+	    return SIEVE2_ERROR_NOMEM;
+    }
+    return SIEVE2_OK;
 }
 

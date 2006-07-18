@@ -44,9 +44,7 @@ typedef enum {
     ACTION_ADDFLAG,
     ACTION_REMOVEFLAG,
     ACTION_MARK,
-    ACTION_UNMARK,
     ACTION_NOTIFY,
-    ACTION_DENOTIFY
 } action_t;
 
 /* header parsing */
@@ -59,7 +57,7 @@ typedef enum {
 } address_part_t;
 
 int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker);
-char *libsieve_get_address(address_part_t addrpart, struct addr_marker **marker, int canon_domain);
+char *libsieve_get_address(struct sieve2_context *context, address_part_t addrpart, struct addr_marker **marker, int canon_domain);
 int libsieve_free_address(struct address **data, struct addr_marker **marker);
 
 

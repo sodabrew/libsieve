@@ -74,6 +74,11 @@ struct Test {
 	    stringlist_t *sl;
 	    patternlist_t *pl;
 	} h;
+	struct { /* hasflag test */
+	    int comptag;
+	    comparator_t *comp;
+	    stringlist_t *sl;
+	} hf;
 	struct { /* it's an address or envelope test */
 	    int comptag;
 	    comparator_t *comp;
@@ -104,6 +109,10 @@ struct Commandlist {
 	    commandlist_t *do_then;
 	    commandlist_t *do_else;
 	} i;
+	struct { /* it's a fileinto action */
+	    char *mailbox;
+	    stringlist_t *slflags;
+	} f;
 	struct { /* it's a vacation action */
 	    char *subject;
 	    int days;
@@ -117,14 +126,14 @@ struct Commandlist {
 	    char *method;
 	    char *id;
 	    stringlist_t *options;
-	    const char *priority;
+	    char *priority;
 	    char *message;
 	} n;
 	struct { /* it's a denotify action */
 	    int comptag;
 	    comparator_t *comp;
 	    void *pattern;
-	    const char *priority;
+	    char *priority;
 	} d;
     } u;
     struct Commandlist *next;
@@ -140,6 +149,7 @@ commandlist_t *libsieve_new_command(int type);
 commandlist_t *libsieve_new_if(test_t *t, commandlist_t *y, commandlist_t *n);
 
 void libsieve_free_sl(stringlist_t *sl);
+void libsieve_free_sl_only(stringlist_t *sl);
 void libsieve_free_pl(patternlist_t *pl, int comptag);
 void libsieve_free_test(test_t *t);
 void libsieve_free_tree(commandlist_t *cl);

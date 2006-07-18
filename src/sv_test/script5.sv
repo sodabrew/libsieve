@@ -82,7 +82,7 @@ keep;		#this one is important - don't want to miss any bounce messages!
 
 
 } elsif anyof (envelope :all :is ["To", "CC", "BCC"] "Firstname.lastname@fastmail.fm",    #a couple people send to this, but I have have all their addrs in whitelist so OK.
-           header :matches "X-Spam-score"  ["9.?" , "10.?", "9", "10", "11.?", "12.?" ,"13.?", "14.?", "11", "12" ,"13", "14", "15.?", "16.?", "17.?" ,"18.?", "19.?", "15", "16", "17" ,"18", "19", "2?.?", "2?", "3?.?" , "3?", "40"] { 		 #"5.?", "6.?", "5", "6" "7.?" , "8.?" , "7", "8"
+           header :matches "X-Spam-score"  ["9.?" , "10.?", "9", "10", "11.?", "12.?" ,"13.?", "14.?", "11", "12" ,"13", "14", "15.?", "16.?", "17.?" ,"18.?", "19.?", "15", "16", "17" ,"18", "19", "2?.?", "2?", "3?.?" , "3?", "40"]) { 		 #"5.?", "6.?", "5", "6" "7.?" , "8.?" , "7", "8"
   reject text: 
   Hello.  The server content filter/spam detector I use has bounced your message. It appears to be spam. 
 
@@ -127,7 +127,7 @@ header :matches "X-Spam" ["spam", "high"] { if					#optimization idea line 1/2
   fileinto "INBOX.Yale";								#if it made it past all the filters above, it's probably of interest.
       } elsif anyof (header :contains "Subject" ["HR 1910", "viagra", "MLM", "               ","	" ], # common in spam.  (prolly redundant to SpamAssassin.)
       not exists ["From", "Date"], 						#RFC822 violations common in spam.
-      header :contains ["Sender", "X-Sender", "Mailing-List", "X-Apparently-From", "X-Version", "X-Sender-IP", "Received", "Return-Path", "Delivered-To", "List-Post", "Date", "Subject", "To", "Cc", "From", "Reply-to", "X-AntiAbuse", "Content-Type", "Received", "X-LinkName"] ["btamail.net.cn", "@arabia.com" ] {               #spam havens.
+      header :contains ["Sender", "X-Sender", "Mailing-List", "X-Apparently-From", "X-Version", "X-Sender-IP", "Received", "Return-Path", "Delivered-To", "List-Post", "Date", "Subject", "To", "Cc", "From", "Reply-to", "X-AntiAbuse", "Content-Type", "Received", "X-LinkName"] ["btamail.net.cn", "@arabia.com" ]) {               #spam havens.
   fileinto "INBOX.GreyMail";
 } elsif header :contains ["Precedence", "Priority", "X-Priority", "Mailing-List", "Subject", "From", "Received", "X-LinkName"] ["Bulk", "Newsletter"] {
   fileinto "INBOX.Bulk Precedence";

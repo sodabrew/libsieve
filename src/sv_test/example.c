@@ -50,6 +50,11 @@
 #include "sieve2.h"
 #include "sieve2_error.h"
 
+struct freelist {
+	void *free;
+	void *next;
+};
+
 struct my_context {
 	int m_size;
 	char *m_buf;
@@ -58,12 +63,27 @@ struct my_context {
 	int error_runtime;
 	int error_parse;
 	int actiontaken;
+	struct freelist *freelist;
 };
 
 static int read_file(char *filename, char **ret_buf,
 	int (* terminator)(char *buf, int pos) );
 static int end_of_nothing(char *buf, int pos);
 static int end_of_header(char *buf, int pos);
+
+static int debug = 0;
+int my_debug(sieve2_context_t *s, void *my)
+{
+	if (debug) {
+		printf("Debug: level [%d] module [%s] file [%s] function [%s] message [%s]\n",
+			sieve2_getvalue_int(s, "level"),
+			sieve2_getvalue_string(s, "module"),
+			sieve2_getvalue_string(s, "file"),
+			sieve2_getvalue_string(s, "function"),
+			sieve2_getvalue_string(s, "message"));
+	}
+	return SIEVE2_OK;
+}
 
 int my_notify(sieve2_context_t *s, void *my)
 {
@@ -161,10 +181,10 @@ int my_fileinto(sieve2_context_t *s, void *my)
 	const char * const * flags;
 	int i;
 
-	printf( "Action is FILEINTO: \n" );
+	printf( "Action is KEEP or FILEINTO: \n" );
 	printf( "  Destination is %s\n",
 		sieve2_getvalue_string(s, "mailbox"));
-	flags = sieve2_getvalue_stringlist(s, "imapflags");
+	flags = sieve2_getvalue_stringlist(s, "flags");
 	if (flags) {
 		printf( "  Flags are:");
 		for (i = 0; flags[i]; i++)
@@ -262,13 +282,13 @@ int my_getheaders(sieve2_context_t *s, void *my)
 
 int my_getheader(sieve2_context_t *s, void *my)
 {
-	struct my_context *m = (struct my_context *)my;
+	// struct my_context *m = (struct my_context *)my;
 
 	printf( "Requested header [%s], returning NULL\n",
 			sieve2_getvalue_string(s, "header") );
 
-	char ** null = { NULL, NULL };
-	sieve2_setvalue_stringlist(s, "body", null );
+	char * null[] = { NULL, NULL };
+	sieve2_setvalue_stringlist(s, "body", null);
 
 	return SIEVE2_OK;
 }
@@ -276,8 +296,8 @@ int my_getheader(sieve2_context_t *s, void *my)
 /* Feed back null values as a crash test. */
 int my_getenvelope(sieve2_context_t *s, void *my)
 {
-	sieve2_setvalue_string(s, "to", "foo@bar");
-	sieve2_setvalue_string(s, "from", "" );
+	sieve2_setvalue_string(s, "to", "foo+AllowedBox@bar");
+	sieve2_setvalue_string(s, "from", "from@nothing" );
 
 	return SIEVE2_OK;
 //	return SIEVE2_ERROR_UNSUPPORTED;
@@ -297,6 +317,56 @@ int my_getsize(sieve2_context_t *s, void *my)
 	return SIEVE2_OK;
 }
 
+// Calculate the address according to the mail system's specs.
+int my_getsubaddress(sieve2_context_t *s, void *my)
+{
+	struct my_context *m = (struct my_context *)my;
+	const char *address;
+	char *user = NULL, *detail = NULL,
+	     *localpart = NULL, *domain = NULL;
+
+	address = sieve2_getvalue_string(s, "address");
+
+	// In a real system, you have to watch this memory;
+	// the client app owns it, not libSieve! You may
+	// not permute the address parameter, either!
+
+	localpart = strdup(address);
+	domain = strchr(localpart, '@');
+	if (domain) {
+		*domain = '\0';
+		domain++;
+	} else {
+		// Malformed address.
+	}
+
+	user = strdup(localpart);
+	detail = strchr(user, '+');
+	if (detail) {
+		*detail = '\0';
+		detail++;
+	} else {
+		// No detail present.
+	}
+
+	sieve2_setvalue_string(s, "user", user);
+	sieve2_setvalue_string(s, "detail", detail);
+	sieve2_setvalue_string(s, "localpart", localpart);
+	sieve2_setvalue_string(s, "domain", domain);
+
+	struct freelist *tmp = malloc(sizeof(struct freelist));
+	tmp->next = m->freelist;
+	tmp->free = user;
+	m->freelist = tmp;
+
+	tmp = malloc(sizeof(struct freelist));
+	tmp->next = m->freelist;
+	tmp->free = localpart;
+	m->freelist = tmp;
+
+	return SIEVE2_OK;
+}
+
 /* END OF EXAMPLE SIEVE CALLBACKS */
 
 /* little function to check for end of a RFC 822 header. */
@@ -310,7 +380,7 @@ static int end_of_header(char *buf, int pos)
 	);
 }
 
-/* little function to do not muc of anything. */
+/* little function to do not much of anything. */
 static int end_of_nothing(char *buf, int pos)
 {
 	return 0;
@@ -364,31 +434,33 @@ static int read_file(char *filename, char **ret_buf,
 /* CALLBACK REGISTRATION TABLE */
 
 sieve2_callback_t my_callbacks[] = {
-{ SIEVE2_ERRCALL_RUNTIME,       my_errexec     },
-{ SIEVE2_ERRCALL_PARSE,         my_errparse    },
-{ SIEVE2_ACTION_FILEINTO,       my_fileinto    },
-{ SIEVE2_ACTION_REDIRECT,       my_redirect    },
-{ SIEVE2_ACTION_REJECT,         my_reject      },
-{ SIEVE2_ACTION_NOTIFY,         my_notify      },
-{ SIEVE2_ACTION_VACATION,       my_vacation    },
-{ SIEVE2_ACTION_KEEP,           my_keep        },
-{ SIEVE2_SCRIPT_GETSCRIPT,      my_getscript   },
+{ SIEVE2_DEBUG_TRACE,           my_debug         },
+{ SIEVE2_ERRCALL_PARSE,         my_errparse      },
+{ SIEVE2_ERRCALL_RUNTIME,       my_errexec       },
+{ SIEVE2_ERRCALL_PARSE,         my_errparse      },
+{ SIEVE2_ACTION_FILEINTO,       my_fileinto      },
+{ SIEVE2_ACTION_REDIRECT,       my_redirect      },
+{ SIEVE2_ACTION_REJECT,         my_reject        },
+{ SIEVE2_ACTION_NOTIFY,         my_notify        },
+{ SIEVE2_ACTION_VACATION,       my_vacation      },
+/* KEEP is essentially the default case of FILEINTO "INBOX". */
+{ SIEVE2_ACTION_KEEP,           my_fileinto      },
+{ SIEVE2_SCRIPT_GETSCRIPT,      my_getscript     },
 /* We don't support one header at a time in this example. */
-{ SIEVE2_MESSAGE_GETHEADER,     NULL            },
-/* libSieve can parse headers itself, so we'll use that. */
-{ SIEVE2_MESSAGE_GETALLHEADERS, my_getheaders  },
+{ SIEVE2_MESSAGE_GETHEADER,     NULL             },
 //{ SIEVE2_MESSAGE_GETHEADER,     my_getheader   },
-{ SIEVE2_MESSAGE_GETENVELOPE,   my_getenvelope },
-{ SIEVE2_MESSAGE_GETBODY,       my_getbody     },
-{ SIEVE2_MESSAGE_GETSIZE,       my_getsize     },
+/* libSieve can parse headers itself, so we'll use that. */
+{ SIEVE2_MESSAGE_GETALLHEADERS, my_getheaders    },
+{ SIEVE2_MESSAGE_GETSUBADDRESS, my_getsubaddress },
+{ SIEVE2_MESSAGE_GETENVELOPE,   my_getenvelope   },
+{ SIEVE2_MESSAGE_GETBODY,       my_getbody       },
+{ SIEVE2_MESSAGE_GETSIZE,       my_getsize       },
 { 0 } };
-
-static int beenhere = 0;
 
 int main(int argc, char *argv[])
 {
 	int usage_error = 0;
-	int res, exitcode = 0;
+	int res, exitcode = 0, s, m;
 	struct my_context *my_context;
 	sieve2_context_t *sieve2_context;
 	char *message = NULL, *script = NULL;
@@ -396,6 +468,7 @@ int main(int argc, char *argv[])
 	if (argc < 2) {
 		usage_error = 1;
 	} else {
+		s = 1, m = 2; // Where to look in argv
 		if (strcmp(argv[1], "-l") == 0) {
 			printf("%s", sieve2_license());
 			exitcode = 0;
@@ -404,13 +477,19 @@ int main(int argc, char *argv[])
 			printf("%s", sieve2_credits());
 			exitcode = 0;
 			goto endnofree;
-		} else if (argc == 2) {
-			script = argv[1];
-		} else if (argc == 3) {
-			script = argv[1];
-			message = argv[2];
 		} else {
-			usage_error = 1;
+			if (strcmp(argv[1], "-d") == 0) {
+				debug = 1;
+				s++, m++;
+			}
+			if (argc >= m) {
+				script = argv[s];
+				message = argv[m];
+			} else if (argc >= s) {
+				script = argv[s];
+			} else {
+				usage_error = 1;
+			}
 		}
 	}
 
@@ -461,13 +540,15 @@ int main(int argc, char *argv[])
 		goto freesieve;
 	}
 
-	printf("Validating script...\n");
+	printf("Validating script...");
 	res = sieve2_validate(sieve2_context, my_context);
 	if (res != SIEVE2_OK) {
 		printf("Error %d when calling sieve2_validate: %s\n",
 			res, sieve2_errstr(res));
 		exitcode = 1;
 	}
+	if (!my_context->error_parse)
+		printf(" valid.\n");
 
 	if (message) {
 		printf("Executing script...\n");
@@ -480,6 +561,8 @@ int main(int argc, char *argv[])
 		if (!my_context->actiontaken) {
 			printf("  no actions taken; keeping message.\n");
 			my_keep(NULL, my_context);
+		} else {
+			printf("  actions taken; keep is cancelled.\n");
 		}
 	}
 
@@ -496,16 +579,20 @@ freesieve:
 		exitcode = 1;
 	}
 
+endnofree:
 	if (my_context->m_buf) free(my_context->m_buf);
 	if (my_context->s_buf) free(my_context->s_buf);
 
+	while (my_context->freelist) {
+		struct freelist *tmpnext = my_context->freelist->next;
+		free(my_context->freelist->free);
+		free(my_context->freelist);
+		my_context->freelist = tmpnext;
+	}
+
 	if (my_context) free(my_context);
 
-endnofree:
-	if (beenhere)
-		return exitcode;
-	beenhere = 1;
-	return 0;
+	return exitcode;
 }
 
 /* END OF THE EXAMPLE */

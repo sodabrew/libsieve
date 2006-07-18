@@ -36,10 +36,16 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 /* sv_util */
 #include "util.h"
+#include "callbacks2.h"
+
 /* sv_parser */
 #include "addr.h"
 #include "addrinc.h"
 
+#define THIS_MODULE "sv_parser"
+#define THIS_CONTEXT parse_context
+
+extern struct sieve2_context *parse_context;
 static int ncom = 0;	/* number of open comments */
 static struct mlbuf *ml = NULL;
 
@@ -57,9 +63,9 @@ void libsieve_addrfatalerror(const char msg[]);
 
 %%
 
-\"				{ BEGIN QSTRING; libsieve_debugf(( "Begin QSTRING\n" )); return QUOTE; }
-\[				{ BEGIN DOMAINLIT; libsieve_debugf(( "Begin DOMAINLIT\n" )); return yytext[0]; }
-\(				{ ncom = 1; libsieve_debugf(( "Begin COMMENT\n" )); BEGIN COMMENT; }
+\"				{ BEGIN QSTRING; TRACE_DEBUG( "Begin QSTRING" ); return QUOTE; }
+\[				{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return yytext[0]; }
+\(				{ ncom = 1; TRACE_DEBUG( "Begin COMMENT" ); BEGIN COMMENT; }
 \)				{ libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
@@ -70,7 +76,7 @@ void libsieve_addrfatalerror(const char msg[]);
 		return yytext[0];
 				}
 ([ \t\n\r])+			{
-		libsieve_debugf(( "Whitespace silently murdered.\n" ));
+		TRACE_DEBUG( "Whitespace silently murdered." );
 		/* Ignore whitespace by not returning */
 				}
 ([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
@@ -87,14 +93,14 @@ void libsieve_addrfatalerror(const char msg[]);
 				}
 <QSTRING>\"			{
 		BEGIN INITIAL;
-		libsieve_debugf(( "End QSTRING\n" ));
+		TRACE_DEBUG( "End QSTRING" );
 		return QUOTE;
 				}
 
 <DOMAINLIT>([^\[\]\n\r\\]|\\.)*	return DTEXT;
 <DOMAINLIT>\]			{
 		BEGIN INITIAL;
-		libsieve_debugf(( "End DOMAINLIT\n" ));
+		TRACE_DEBUG( "End DOMAINLIT" );
 		return yytext[0];
 		};
 
@@ -137,19 +143,21 @@ void libsieve_addrlexfree()
 void libsieve_addrlexalloc()
 {
     libsieve_strbufalloc(&ml);
-    libsieve_addrrestart( YY_CURRENT_BUFFER );
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Restart the lexer before each invocation of the parser */
 void libsieve_addrlexrestart()
 {
-    libsieve_addrrestart( YY_CURRENT_BUFFER );
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
 }
 
 /* Replacement for the YY_FATAL_ERROR macro,
  * which would print msg to stderr and exit. */
 void libsieve_addrfatalerror(const char msg[])
 {
-    /* Basically stop and don't do anything */
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
 }
 
