@@ -1,3 +1,8 @@
+libSieve 2.1.12
+---------------
+
+- Fixed namespace issue with vasnprintf.
+
 libSieve 2.1.11
 ---------------
 

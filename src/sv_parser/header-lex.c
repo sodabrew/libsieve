@@ -502,8 +502,8 @@ char *libsieve_headertext;
 #include "callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
-extern struct sieve2_context *parse_context;
+#define THIS_CONTEXT libsieve_parse_context
+extern struct sieve2_context *libsieve_parse_context;
 
 static struct mlbuf *ml = NULL;
 

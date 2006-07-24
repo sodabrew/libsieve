@@ -131,6 +131,6 @@ STATIC
 #else
 extern
 #endif
-int printf_fetchargs (va_list args, arguments *a);
+int libsieve_printf_fetchargs (va_list args, arguments *a);
 
 #endif /* _PRINTF_ARGS_H */

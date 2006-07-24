@@ -21,18 +21,18 @@
  $smarty->assign( 'rightcontent', array(
  	array( 'Latest stable release: ...',
 	'It\'s coming Real Soon Now (TM)!' ),
- 	array( 'Latest unstable release: <a href="http://prdownloads.sourceforge.net/libsieve/libsieve-2.1.11.tar.gz?download">libSieve 2.1.11</a>.',
+ 	array( 'Latest unstable release: <a href="http://prdownloads.sourceforge.net/libsieve/libsieve-2.1.12.tar.gz?download">libSieve 2.1.12</a>.',
 	'Released July, 2006. Changes: '
-		. '<ul><li> Minor fixes to build with flex 2.5.33.</li></ul>' ),
-		. '<ul><li> Updated to vacation extension draft 6.</li></ul>' ),
-		. '<ul><li> Updated to the imap4flags version of the flags extension.</li></ul>' ),
-		. '<ul><li> Dropped support for the older imapflags version.</li></ul>' ),
-		. '<ul><li> Added a callback for subaddress calculation rather than a hardcoded user+mailbox format.</li></ul>' ),
-		. '<ul><li> Added a callback for debug messages.</li></ul>' ),
-		. '<ul><li> Regex extension is always built in now.</li></ul>' ),
-		. '<ul><li> Fixed parse failure on multiline "text: string ." blocks.</li></ul>' ),
-		. '<ul><li> Deprecated numerous callback codes that really weren\'t callbacks.</li></ul>' ),
-	) );
+		. '<ul><li> Minor fixes to build with flex 2.5.33.</li></ul>'
+		. '<ul><li> Updated to vacation extension draft 6.</li></ul>'
+		. '<ul><li> Updated to the imap4flags version of the flags extension.</li></ul>'
+		. '<ul><li> Dropped support for the older imapflags version.</li></ul>'
+		. '<ul><li> Added a callback for subaddress calculation rather than a hardcoded user+mailbox format.</li></ul>'
+		. '<ul><li> Added a callback for debug messages.</li></ul>'
+		. '<ul><li> Regex extension is always built in now.</li></ul>'
+		. '<ul><li> Fixed parse failure on multiline "text: string ." blocks.</li></ul>'
+		. '<ul><li> Deprecated numerous callback codes that really weren\'t callbacks.</li></ul>'
+	) ) );
 
  $smarty->display( 'tweedy.tpl' );
 

@@ -43,9 +43,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "addrinc.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
-extern struct sieve2_context *parse_context;
+extern struct sieve2_context *libsieve_parse_context;
 static int ncom = 0;	/* number of open comments */
 static struct mlbuf *ml = NULL;
 

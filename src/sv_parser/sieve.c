@@ -241,9 +241,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
-struct sieve2_context *parse_context;
+struct sieve2_context *libsieve_parse_context;
 extern int libsieve_sieveerror(char *msg);
 extern int libsieve_sievelex(void);
 
@@ -1451,7 +1451,7 @@ yyreduce:
                                         s = sl;
                                         sl = sl->next;
 
-                                        i &= static_check_reqs(parse_context, s->s);
+                                        i &= static_check_reqs(libsieve_parse_context, s->s);
                                         if (!i) {
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -1516,7 +1516,7 @@ yyreduce:
 
   case 15:
 #line 164 "sieve.y"
-    { if (!parse_context->require.reject) {
+    { if (!libsieve_parse_context->require.reject) {
 				     libsieve_sieveerror("reject not required");
 				     YYERROR;
 				   }
@@ -1525,7 +1525,7 @@ yyreduce:
 
   case 16:
 #line 169 "sieve.y"
-    { if (!parse_context->require.imap4flags) {
+    { if (!libsieve_parse_context->require.imap4flags) {
 				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
@@ -1543,10 +1543,10 @@ yyreduce:
 
   case 18:
 #line 179 "sieve.y"
-    { if (!parse_context->require.fileinto) {
+    { if (!libsieve_parse_context->require.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
-                                   } if (!parse_context->require.imap4flags) {
+                                   } if (!libsieve_parse_context->require.imap4flags) {
 				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
@@ -1565,7 +1565,7 @@ yyreduce:
 
   case 19:
 #line 197 "sieve.y"
-    { if (!parse_context->require.fileinto) {
+    { if (!libsieve_parse_context->require.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
                                    }
@@ -1598,7 +1598,7 @@ yyreduce:
 
   case 23:
 #line 214 "sieve.y"
-    { if (!parse_context->require.vacation) {
+    { if (!libsieve_parse_context->require.vacation) {
 				     libsieve_sieveerror("vacation not required");
 				     (yyval.cl) = libsieve_new_command(VACATION);
 				     YYERROR;
@@ -1610,7 +1610,7 @@ yyreduce:
 
   case 24:
 #line 222 "sieve.y"
-    { if (!parse_context->require.imap4flags) {
+    { if (!libsieve_parse_context->require.imap4flags) {
                                     libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
@@ -1623,7 +1623,7 @@ yyreduce:
 
   case 25:
 #line 231 "sieve.y"
-    { if (!parse_context->require.imap4flags) {
+    { if (!libsieve_parse_context->require.imap4flags) {
                                     libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
@@ -1636,7 +1636,7 @@ yyreduce:
 
   case 26:
 #line 240 "sieve.y"
-    { if (!parse_context->require.imap4flags) {
+    { if (!libsieve_parse_context->require.imap4flags) {
                                      libsieve_sieveerror("imap4flags not required");
                                      YYERROR;
                                      }
@@ -1649,7 +1649,7 @@ yyreduce:
 
   case 27:
 #line 249 "sieve.y"
-    { if (!parse_context->require.notify) {
+    { if (!libsieve_parse_context->require.notify) {
 	       		             libsieve_sieveerror("notify not required");
 	       		             (yyval.cl) = libsieve_new_command(NOTIFY); 
 	       		             YYERROR;
@@ -1661,7 +1661,7 @@ yyreduce:
 
   case 28:
 #line 257 "sieve.y"
-    { if (!parse_context->require.notify) {
+    { if (!libsieve_parse_context->require.notify) {
                                      libsieve_sieveerror("notify not required");
 				     (yyval.cl) = libsieve_new_command(VALIDNOTIF);
 				     YYERROR;
@@ -1862,7 +1862,7 @@ yyreduce:
 
   case 59:
 #line 350 "sieve.y"
-    { if (!parse_context->require.imap4flags) {
+    { if (!libsieve_parse_context->require.imap4flags) {
                                        libsieve_sieveerror("imap4flags not required");
                                        YYERROR;
                                     }
@@ -2013,7 +2013,7 @@ yyreduce:
 
   case 77:
 #line 439 "sieve.y"
-    { if (!parse_context->require.subaddress) {
+    { if (!libsieve_parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
@@ -2022,7 +2022,7 @@ yyreduce:
 
   case 78:
 #line 444 "sieve.y"
-    { if (!parse_context->require.subaddress) {
+    { if (!libsieve_parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
@@ -2046,7 +2046,7 @@ yyreduce:
 
   case 82:
 #line 454 "sieve.y"
-    { if (!parse_context->require.regex) {
+    { if (!libsieve_parse_context->require.regex) {
 				     libsieve_sieveerror("regex not required");
 				     YYERROR;
 				     }
@@ -2363,7 +2363,7 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
     extern commandlist_t *ret;
     extern int libsieve_sievelineno;
 
-    parse_context = context;
+    libsieve_parse_context = context;
 
     libsieve_sieveptr = context->script.script;
     libsieve_sieveerr = NULL;
@@ -2384,9 +2384,9 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
  * which does not have access to the context. */
 int libsieve_sieveerror_exec(char *msg)
 {
-    parse_context->exec_errors++;
+    libsieve_parse_context->exec_errors++;
 
-    libsieve_do_error_exec(parse_context, msg);
+    libsieve_do_error_exec(libsieve_parse_context, msg);
 
     return 0;
 }
@@ -2395,9 +2395,9 @@ int libsieve_sieveerror(char *msg)
 {
     extern int libsieve_sievelineno;
 
-    parse_context->parse_errors++;
+    libsieve_parse_context->parse_errors++;
 
-    libsieve_do_error_parse(parse_context, libsieve_sievelineno, msg);
+    libsieve_do_error_parse(libsieve_parse_context, libsieve_sievelineno, msg);
 
     return 0;
 }

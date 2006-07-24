@@ -95,11 +95,11 @@ local_wcslen (const wchar_t *s)
 #  define SNPRINTF swprintf
 # endif
 #else
-# define VASNPRINTF vasnprintf
+# define VASNPRINTF libsieve_vasnprintf
 # define CHAR_T char
 # define DIRECTIVE char_directive
 # define DIRECTIVES char_directives
-# define PRINTF_PARSE printf_parse
+# define PRINTF_PARSE libsieve_printf_parse
 # define USE_SNPRINTF (HAVE_DECL__SNPRINTF || HAVE_SNPRINTF)
 # if HAVE_DECL__SNPRINTF
    /* Windows.  */
@@ -127,7 +127,7 @@ VASNPRINTF (CHAR_T *resultbuf, size_t *lengthp, const CHAR_T *format, va_list ar
   if (a.arg)								\
     free (a.arg);
 
-  if (printf_fetchargs (args, &a) < 0)
+  if (libsieve_printf_fetchargs (args, &a) < 0)
     {
       CLEANUP ();
       errno = EINVAL;

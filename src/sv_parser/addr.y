@@ -47,12 +47,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
 char *libsieve_addrerr;          /* buffer for sieve parser error messages */
-struct sieve2_context *parse_context;
+struct sieve2_context *libsieve_parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
 %}

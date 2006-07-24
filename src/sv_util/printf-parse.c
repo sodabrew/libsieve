@@ -49,7 +49,7 @@
 # define DIRECTIVE wchar_t_directive
 # define DIRECTIVES wchar_t_directives
 #else
-# define PRINTF_PARSE printf_parse
+# define PRINTF_PARSE libsieve_printf_parse
 # define CHAR_T char
 # define DIRECTIVE char_directive
 # define DIRECTIVES char_directives

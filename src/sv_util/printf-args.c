@@ -26,7 +26,7 @@
 STATIC
 #endif
 int
-printf_fetchargs (va_list args, arguments *a)
+libsieve_printf_fetchargs (va_list args, arguments *a)
 {
   size_t i;
   argument *ap;

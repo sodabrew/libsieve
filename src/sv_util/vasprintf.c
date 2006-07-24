@@ -27,10 +27,10 @@
 #include "vasnprintf.h"
 
 int
-vasprintf (char **resultp, const char *format, va_list args)
+libsieve_vasprintf (char **resultp, const char *format, va_list args)
 {
   size_t length;
-  char *result = vasnprintf (NULL, &length, format, args);
+  char *result = libsieve_vasnprintf (NULL, &length, format, args);
   if (result == NULL)
     return -1;
 

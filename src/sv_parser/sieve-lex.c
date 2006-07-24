@@ -719,9 +719,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "sieve.h"
 
 #include "callbacks2.h"
-extern struct sieve2_context *parse_context;
+extern struct sieve2_context *libsieve_parse_context;
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))

@@ -52,9 +52,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
-struct sieve2_context *parse_context;
+struct sieve2_context *libsieve_parse_context;
 extern int libsieve_sieveerror(char *msg);
 extern int libsieve_sievelex(void);
 
@@ -124,7 +124,7 @@ require: REQUIRE stringlist ';'	{
                                         s = sl;
                                         sl = sl->next;
 
-                                        i &= static_check_reqs(parse_context, s->s);
+                                        i &= static_check_reqs(libsieve_parse_context, s->s);
                                         if (!i) {
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -161,12 +161,12 @@ elsif: /* empty */               { $$ = NULL; }
 	| ELSE block             { $$ = $2; }
 	;
 
-action: REJCT STRING             { if (!parse_context->require.reject) {
+action: REJCT STRING             { if (!libsieve_parse_context->require.reject) {
 				     libsieve_sieveerror("reject not required");
 				     YYERROR;
 				   }
 				   $$ = libsieve_new_command(REJCT); $$->u.str = $2; }
-	| KEEP FLAGS stringlist	 { if (!parse_context->require.imap4flags) {
+	| KEEP FLAGS stringlist	 { if (!libsieve_parse_context->require.imap4flags) {
 				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
@@ -176,10 +176,10 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
 	| KEEP			 { $$ = libsieve_new_command(KEEP);
 	                           $$->u.f.mailbox = NULL;
 				   $$->u.f.slflags = NULL; }
-	| FILEINTO FLAGS stringlist STRING	 { if (!parse_context->require.fileinto) {
+	| FILEINTO FLAGS stringlist STRING	 { if (!libsieve_parse_context->require.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
-                                   } if (!parse_context->require.imap4flags) {
+                                   } if (!libsieve_parse_context->require.imap4flags) {
 				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
@@ -194,7 +194,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
 	                           $$ = libsieve_new_command(FILEINTO);
 				   $$->u.f.slflags = $3;
 				   $$->u.f.mailbox = $4; }
-	| FILEINTO STRING	 { if (!parse_context->require.fileinto) {
+	| FILEINTO STRING	 { if (!libsieve_parse_context->require.fileinto) {
 				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
                                    }
@@ -211,7 +211,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
 				   $$->u.str = $2; }
 	| STOP			 { $$ = libsieve_new_command(STOP); }
 	| DISCARD		 { $$ = libsieve_new_command(DISCARD); }
-	| VACATION vtags STRING  { if (!parse_context->require.vacation) {
+	| VACATION vtags STRING  { if (!libsieve_parse_context->require.vacation) {
 				     libsieve_sieveerror("vacation not required");
 				     $$ = libsieve_new_command(VACATION);
 				     YYERROR;
@@ -219,7 +219,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
   				     $$ = static_build_vacation(VACATION,
 					    static_canon_vtags($2), $3);
 				   } }
-        | SETFLAG stringlist     { if (!parse_context->require.imap4flags) {
+        | SETFLAG stringlist     { if (!libsieve_parse_context->require.imap4flags) {
                                     libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
@@ -228,7 +228,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
 				    }
                                  $$ = libsieve_new_command(SETFLAG);
                                  $$->u.sl = $2; }
-        | ADDFLAG stringlist     { if (!parse_context->require.imap4flags) {
+        | ADDFLAG stringlist     { if (!libsieve_parse_context->require.imap4flags) {
                                     libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
@@ -237,7 +237,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
                                     }
                                  $$ = libsieve_new_command(ADDFLAG);
                                  $$->u.sl = $2; }
-        | REMOVEFLAG stringlist  { if (!parse_context->require.imap4flags) {
+        | REMOVEFLAG stringlist  { if (!libsieve_parse_context->require.imap4flags) {
                                      libsieve_sieveerror("imap4flags not required");
                                      YYERROR;
                                      }
@@ -246,7 +246,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
                                      }
                                  $$ = libsieve_new_command(REMOVEFLAG);
                                  $$->u.sl = $2; }
-        | NOTIFY ntags           { if (!parse_context->require.notify) {
+        | NOTIFY ntags           { if (!libsieve_parse_context->require.notify) {
 	       		             libsieve_sieveerror("notify not required");
 	       		             $$ = libsieve_new_command(NOTIFY); 
 	       		             YYERROR;
@@ -254,7 +254,7 @@ action: REJCT STRING             { if (!parse_context->require.reject) {
 				     $$ = static_build_notify(NOTIFY,
 	       		             static_canon_ntags($2));
 	       		         } }
-        | VALIDNOTIF stringlist  { if (!parse_context->require.notify) {
+        | VALIDNOTIF stringlist  { if (!libsieve_parse_context->require.notify) {
                                      libsieve_sieveerror("notify not required");
 				     $$ = libsieve_new_command(VALIDNOTIF);
 				     YYERROR;
@@ -347,7 +347,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 	| EXISTS stringlist      { $$ = libsieve_new_test(EXISTS); $$->u.sl = $2; }
 	| SFALSE		 { $$ = libsieve_new_test(SFALSE); }
 	| STRUE			 { $$ = libsieve_new_test(STRUE); }
-        | HASFLAG hftags stringlist { if (!parse_context->require.imap4flags) {
+        | HASFLAG hftags stringlist { if (!libsieve_parse_context->require.imap4flags) {
                                        libsieve_sieveerror("imap4flags not required");
                                        YYERROR;
                                     }
@@ -436,12 +436,12 @@ htags: /* empty */		 { $$ = static_new_htags(); }
 addrparttag: ALL                 { $$ = ALL; }
 	| LOCALPART		 { $$ = LOCALPART; }
 	| DOMAIN                 { $$ = DOMAIN; }
-	| USER                   { if (!parse_context->require.subaddress) {
+	| USER                   { if (!libsieve_parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
 				   $$ = USER; }
-	| DETAIL                { if (!parse_context->require.subaddress) {
+	| DETAIL                { if (!libsieve_parse_context->require.subaddress) {
 				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
@@ -451,7 +451,7 @@ addrparttag: ALL                 { $$ = ALL; }
 comptag: IS			 { $$ = IS; }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
-	| REGEX			 { if (!parse_context->require.regex) {
+	| REGEX			 { if (!libsieve_parse_context->require.regex) {
 				     libsieve_sieveerror("regex not required");
 				     YYERROR;
 				     }
@@ -480,7 +480,7 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
     extern commandlist_t *ret;
     extern int libsieve_sievelineno;
 
-    parse_context = context;
+    libsieve_parse_context = context;
 
     libsieve_sieveptr = context->script.script;
     libsieve_sieveerr = NULL;
@@ -501,9 +501,9 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
  * which does not have access to the context. */
 int libsieve_sieveerror_exec(char *msg)
 {
-    parse_context->exec_errors++;
+    libsieve_parse_context->exec_errors++;
 
-    libsieve_do_error_exec(parse_context, msg);
+    libsieve_do_error_exec(libsieve_parse_context, msg);
 
     return 0;
 }
@@ -512,9 +512,9 @@ int libsieve_sieveerror(char *msg)
 {
     extern int libsieve_sievelineno;
 
-    parse_context->parse_errors++;
+    libsieve_parse_context->parse_errors++;
 
-    libsieve_do_error_parse(parse_context, libsieve_sievelineno, msg);
+    libsieve_do_error_parse(libsieve_parse_context, libsieve_sievelineno, msg);
 
     return 0;
 }

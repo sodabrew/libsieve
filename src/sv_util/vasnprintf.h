@@ -65,9 +65,9 @@ extern "C" {
                 free (output);
             }
   */
-extern char * asnprintf (char *resultbuf, size_t *lengthp, const char *format, ...)
+extern char * libsieve_asnprintf (char *resultbuf, size_t *lengthp, const char *format, ...)
        __attribute__ ((__format__ (__printf__, 3, 4)));
-extern char * vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
+extern char * libsieve_vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
        __attribute__ ((__format__ (__printf__, 3, 0)));
 
 #ifdef	__cplusplus

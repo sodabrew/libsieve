@@ -112,12 +112,12 @@
 #include "sieve2_error.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT parse_context
+#define THIS_CONTEXT libsieve_parse_context
 
 /* There are global to this file */
 char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
 char *libsieve_headererr;          /* buffer for sieve parser error messages */
-extern struct sieve2_context *parse_context;
+extern struct sieve2_context *libsieve_parse_context;
 static header_list_t *hl = NULL;
 static struct mlbuf *ml = NULL;
 

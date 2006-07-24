@@ -69,6 +69,6 @@ STATIC
 #else
 extern
 #endif
-int printf_parse (const char *format, char_directives *d, arguments *a);
+int libsieve_printf_parse (const char *format, char_directives *d, arguments *a);
 
 #endif /* _PRINTF_PARSE_H */

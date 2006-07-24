@@ -49,9 +49,9 @@ extern "C" {
    If the memory allocation succeeds, store the address of the string in
    *RESULT and return the number of resulting bytes, excluding the trailing
    NUL.  Upon memory allocation error, or some other error, return -1.  */
-extern int asprintf (char **result, const char *format, ...)
+extern int libsieve_asprintf (char **result, const char *format, ...)
        __attribute__ ((__format__ (__printf__, 2, 3)));
-extern int vasprintf (char **result, const char *format, va_list args)
+extern int libsieve_vasprintf (char **result, const char *format, va_list args)
        __attribute__ ((__format__ (__printf__, 2, 0)));
 
 #ifdef	__cplusplus
