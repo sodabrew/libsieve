@@ -273,8 +273,8 @@ const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
     struct sieve2_context *c = sieve2_context;
 
     ext = libsieve_strconcat(     "regex ",
-                                  "imap4flags",
-        ( c->support.subaddress ? "subaddress"  : "" ),
+                                  "imap4flags ",
+        ( c->support.subaddress ? "subaddress "  : "" ),
         ( c->support.fileinto   ? "fileinto "  : "" ),
         ( c->support.reject     ? "reject "    : "" ),
         ( c->support.envelope   ? "envelope "  : "" ),
