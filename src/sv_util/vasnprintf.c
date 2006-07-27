@@ -25,7 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
-#ifndef IN_LIBINTL
+#if !defined(IN_LIBINTL) && defined(HAVE_ALLOCA_H)
 # include <alloca.h>
 #endif
 
