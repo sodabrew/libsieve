@@ -278,13 +278,13 @@ static void gdm_md5_update(struct GdmMD5Context *ctx,
 char *libsieve_makehash(char *s1, char *s2)
 {
     struct GdmMD5Context mycontext;
-    char result[16];
+    unsigned char result[16];
     char *hash;
     int i;
 
     gdm_md5_init(&mycontext);
-    gdm_md5_update(&mycontext, s1, strlen(s1));
-    gdm_md5_update(&mycontext, s2, strlen(s2));
+    gdm_md5_update(&mycontext, (unsigned char *)s1, strlen(s1));
+    gdm_md5_update(&mycontext, (unsigned char *)s2, strlen(s2));
     gdm_md5_final(result, &mycontext);
 
     hash = libsieve_malloc(33 * sizeof(char));

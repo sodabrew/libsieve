@@ -82,7 +82,7 @@ extern int sieve2_callbacks(sieve2_context_t *sieve2_context,
 /* Get a space separated list of extensions that libSieve
  * supports and for which you have registered a callback. */
 /* libSieve will free this memory for you, don't worry about it. */
-extern const char * const sieve2_listextensions(sieve2_context_t *sieve2_context);
+extern char * sieve2_listextensions(sieve2_context_t *sieve2_context);
 
 /* Validate a script for syntax and feature support */
 extern int sieve2_validate(sieve2_context_t *sieve2_context,
@@ -93,13 +93,13 @@ extern int sieve2_execute(sieve2_context_t *sieve2_context,
                           void *user_data);
 
 /* libSieve will free this memory for you, don't worry about it. */
-extern const char * const
+extern char * 
 sieve2_getvalue_string(
 	sieve2_context_t *sieve2_context,
 	char *value);
 
 /* libSieve will free this memory for you, don't worry about it. */
-extern const char * const * const
+extern char * * 
 sieve2_getvalue_stringlist(
 	sieve2_context_t *sieve2_context,
 	char *name);
@@ -125,15 +125,15 @@ extern int sieve2_setvalue_int(
 /* This translates the error numbers into static strings.
  * For fancier errors, callbacks from the context are used,
  * and that allows the context to manage the memory. */
-extern const char * const sieve2_errstr(int errval);
+extern char * sieve2_errstr(int errval);
 
 /* Get a list of Credits about who writes libSieve. */
 /* Does not allocate memory; points to static strings. */
-extern const char * const sieve2_credits(void);
+extern char * sieve2_credits(void);
 
 /* Get the License under which libSieve is distributed. */
 /* Does not allocate memory; points to static strings. */
-extern const char * const sieve2_license(void);
+extern char * sieve2_license(void);
 
 #if defined(c_plusplus) || defined(__cplusplus)
  } /* extern "C" */

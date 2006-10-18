@@ -88,7 +88,7 @@ int my_debug(sieve2_context_t *s, void *my)
 int my_notify(sieve2_context_t *s, void *my)
 {
 	struct my_context *m = (struct my_context *)my;
-	const char * const * options;
+	char ** options;
 	int i;
 
 	printf( "Action is NOTIFY: \n" );
@@ -178,7 +178,7 @@ int my_discard(sieve2_context_t *s, void *my)
 int my_fileinto(sieve2_context_t *s, void *my)
 {
 	struct my_context *m = (struct my_context *)my;
-	const char * const * flags;
+	char ** flags;
 	int i;
 
 	printf( "Action is KEEP or FILEINTO: \n" );
@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
 		if (res != SIEVE2_OK) {
 			printf("Message: read_file() returns %d\n", res);
 			exitcode = 1;
-			goto endnofree;
+			goto freecontext;
 		}
 	}
 
@@ -579,7 +579,7 @@ freesieve:
 		exitcode = 1;
 	}
 
-endnofree:
+freecontext:
 	if (my_context->m_buf) free(my_context->m_buf);
 	if (my_context->s_buf) free(my_context->s_buf);
 
@@ -592,6 +592,7 @@ endnofree:
 
 	if (my_context) free(my_context);
 
+endnofree:
 	return exitcode;
 }
 

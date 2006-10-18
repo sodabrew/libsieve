@@ -51,8 +51,6 @@ static struct aetags *static_new_aetags(void);
 static struct aetags *static_canon_aetags(struct aetags *ae);
 static void static_free_aetags(struct aetags *ae);
 static struct hftags *static_new_hftags(void);
-static struct hftags *static_canon_hftags(struct hftags *hf);
-static void static_free_hftags(struct hftags *hf);
 static struct htags *static_new_htags(void);
 static struct htags *static_canon_htags(struct htags *h);
 static void static_free_htags(struct htags *h);
@@ -64,7 +62,6 @@ static struct ntags *static_canon_ntags(struct ntags *n);
 static void static_free_ntags(struct ntags *n);
 
 static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *));
-static int static_verify_flags(const char *s);
 static int static_verify_mailbox(const char *s);
 static int static_verify_address(const char *s);
 static int static_verify_header(const char *s);

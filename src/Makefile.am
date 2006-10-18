@@ -2,11 +2,7 @@ AUTOMAKE_OPTIONS	= foreign
 
 SUBDIRS			= sv_parser sv_regex sv_interface sv_util . sv_test sv_include
 
-if ENABLE_DEBUG
-DEBUG			= -DDEBUG
-endif
-
-CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_regex -I$(top_srcdir)/sv_include -g $(DEBUG)
+CFLAGS			= -Wall -I$(top_srcdir)/sv_util -I$(top_srcdir)/sv_parser -I$(top_srcdir)/sv_interface -I$(top_srcdir)/sv_regex -I$(top_srcdir)/sv_include -g
 
 lib_LTLIBRARIES         = libsieve.la
 libsieve_la_SOURCES     = sv_empty.c

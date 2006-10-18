@@ -32,7 +32,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 /* sv_include */
 #include "sieve2.h"
@@ -147,13 +146,23 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 	}
 	for (sl = t->u.ae.sl; sl != NULL && !res; sl = sl->next) {
 	    int l;
-	    char *body[] = { "", NULL };
+	    char **body;
+	    char **header;
+	    char *envelope;
+	    int freebody = 0;
 
 	    /* use getheader for address, getenvelope for envelope */
-	    if (((t->type == ADDRESS) ? 
-		   libsieve_do_getheader(context, sl->s, (char ***)&body) :
-		   libsieve_do_getenvelope(context, sl->s, body)) != SIEVE2_OK) {
-		continue; /* try next header */
+	    if (t->type == ADDRESS) {
+		if (libsieve_do_getheader(context, sl->s, &header) != SIEVE2_OK)
+		    continue; /* try next header */
+		body = header;
+	    } else {
+		if (libsieve_do_getenvelope(context, sl->s, &envelope) != SIEVE2_OK)
+		    continue; /* try next header */
+		body = libsieve_malloc(2 * sizeof(char *));
+		body[0] = envelope;
+		body[1] = NULL;
+		freebody = 1;
 	    }
 
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
@@ -173,6 +182,9 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 		    libsieve_free_address(&data, &marker);
 		}
 	    }
+
+	    if (freebody)
+	        libsieve_free(body);
 	}
 	break;
     case ANYOF:

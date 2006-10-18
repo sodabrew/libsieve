@@ -32,6 +32,8 @@
 #define TRACE_DEBUG(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 4, THIS_MODULE, __FILE__, __func__, fmt)
 #define TRACE_ERROR(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 2, THIS_MODULE, __FILE__, __func__, fmt)
 
+#define libsieve_assert(cond) ( (cond) ? 0 : TRACE_ERROR("Assertion failed: [%s]", __STRING(cond)), exit(EXIT_FAILURE) )
+
 /* These are the memory oriented functions */
 
 void libsieve_free(void *ptr);

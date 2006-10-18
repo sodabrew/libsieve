@@ -36,11 +36,11 @@
 /* sv_parser */
 #include "parser.h"
 
-const char * const sieve2_errstr(int code)
+char * sieve2_errstr(int code)
 {
     if (code < SIEVE2_OK || code > SIEVE2_ERROR_LAST)
         return "Invalid error code.";
-    return sieve2_error_text[code];
+    return (char *)sieve2_error_text[code];
 }
 
 int sieve2_alloc(sieve2_context_t **context)
@@ -267,7 +267,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     return SIEVE2_OK;
 }
 
-const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
+char * sieve2_listextensions(sieve2_context_t *sieve2_context)
 {
     char *ext;
     struct sieve2_context *c = sieve2_context;
@@ -291,7 +291,7 @@ const char * const sieve2_listextensions(sieve2_context_t *sieve2_context)
 #  define NL "\n"
 #endif
 
-const char * const sieve2_credits(void)
+char * sieve2_credits(void)
 {
     return "libSieve is written and maintained by Aaron Stone"
         " with many thanks to those who have helped to debug"
@@ -307,7 +307,7 @@ const char * const sieve2_credits(void)
         ;
 }
 
-const char * const sieve2_license(void)
+char * sieve2_license(void)
 {
     return "libSieve is Copyright 2002, 2003, 2005 by Aaron Stone"
         " and is licensed under the GNU Lesser General Public License,"

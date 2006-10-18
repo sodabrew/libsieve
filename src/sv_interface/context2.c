@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 /* CMU portions. */
 #include "tree.h"
@@ -153,7 +152,7 @@ int libsieve_callback_end(
  * API on the inside, just in reverse! */
 
 /* libSieve will free this memory for you, don't worry about it. */
-const char * const sieve2_getvalue_string(
+char * sieve2_getvalue_string(
     sieve2_context_t *c,
     char *name)
 {
@@ -171,7 +170,7 @@ const char * const sieve2_getvalue_string(
 }
 
 /* libSieve will free this memory for you, don't worry about it. */
-const char * const * const sieve2_getvalue_stringlist(
+char * * sieve2_getvalue_stringlist(
     sieve2_context_t *c,
     char *name)
 {
@@ -181,7 +180,7 @@ const char * const * const sieve2_getvalue_stringlist(
         if (c->cur_call.values[i].type == VAL_STRINGLIST
         && c->cur_call.values[i].name && name
         && strcasecmp(c->cur_call.values[i].name, name) == 0) {
-            return (const char * const * const) c->cur_call.values[i].value.sl;
+            return c->cur_call.values[i].value.sl;
         }
     }
 

@@ -31,7 +31,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -524,7 +523,7 @@ static test_t *static_build_address(int t, struct aetags *ae,
 {
     test_t *ret = libsieve_new_test(t);	/* can be either ADDRESS or ENVELOPE */
 
-    assert((t == ADDRESS) || (t == ENVELOPE));
+    libsieve_assert((t == ADDRESS) || (t == ENVELOPE));
 
     if (ret) {
 	ret->u.ae.comptag = ae->comptag;
@@ -546,7 +545,7 @@ static test_t *static_build_header(int t, struct htags *h,
 {
     test_t *ret = libsieve_new_test(t);	/* can be HEADER */
 
-    assert(t == HEADER);
+    libsieve_assert(t == HEADER);
 
     if (ret) {
 	ret->u.h.comptag = h->comptag;
@@ -566,7 +565,7 @@ static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason
 {
     commandlist_t *ret = libsieve_new_command(t);
 
-    assert(t == VACATION);
+    libsieve_assert(t == VACATION);
 
     if (ret) {
 	ret->u.v.subject = v->subject; v->subject = NULL;
@@ -585,7 +584,7 @@ static commandlist_t *static_build_notify(int t, struct ntags *n)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
-    assert(t == NOTIFY);
+    libsieve_assert(t == NOTIFY);
 
     if (ret) {
 	ret->u.n.method = n->method; n->method = NULL;
@@ -603,7 +602,7 @@ static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
-    assert(t == VALIDNOTIF);
+    libsieve_assert(t == VALIDNOTIF);
 
 /*
     if (ret) {
