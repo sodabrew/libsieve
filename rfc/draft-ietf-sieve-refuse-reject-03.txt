@@ -1,0 +1,574 @@
+Internet Draft                                                M. Elvey
+Document: draft-ietf-sieve-refuse-reject-03     The Elvey Partnership,
+                                                                   LLC
+Expires: December 2006                                     A. Melnikov
+                                                             Isode Ltd
+                                                             June 2006
+                                            
+                                            
+
+         The SIEVE mail filtering language - reject extension
+                    draft-ietf-sieve-refuse-reject-03.txt
+   
+Status of this Memo
+   
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+   
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+   
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other
+   documents at any time. It is inappropriate to use Internet-Drafts
+   as reference material or to cite them other than as "work in
+   progress."
+   
+   The list of current Internet-Drafts can be accessed at
+        http://www.ietf.org/ietf/1id-abstracts.txt
+   The list of Internet-Draft Shadow Directories can be accessed at
+        http://www.ietf.org/shadow.html.
+   
+   A revised version of this draft document will be submitted to the
+   RFC editor as a Proposed Standard for the Internet Community.
+   Discussion and suggestions for improvement are requested.
+   Distribution of this draft is unlimited.
+   
+   
+Abstract
+   
+   This memo defines the SIEVE mail filtering language (RFC
+   <<3028bis>>) "reject" extension.
+   
+   A Joe-job is a spam run forged to appear as though it came from an
+   innocent party, who is then generally flooded by the bounces,
+   Message Disposition Notifications (MDNs) and messages with
+   complaints.  The original Sieve "reject" action defined in RFC 3028
+   required use of MDNs for rejecting messages, thus contributing to
+   the flood of Joe-job spam to victims of Joe-jobs.  This document
+   updates definition of "reject" to require rejecting messages during
+   the SMTP transaction (instead of accepting them and then sending
+   MDNs back to the alleged sender) wherever possible, thereby
+   reducing the problem.
+
+   
+Table of Contents
+
+  1. Introduction                                                   2
+  2. Conventions Used in this Document                              3
+  3. SIEVE "reject" extension                                       3
+     3.1 Action reject                                              3
+     3.2 "reject" compatibility with other actions                  7
+  4. Security Considerations                                        7
+  5. IANA Considerations                                            7
+     5.1 reject extension registration                              7
+     5.2 refuse extension registration                              8
+  6. References                                                     8
+     6.1 Normative References                                       8
+     6.2 Informative References                                     8
+  7. Acknowledgments                                                9
+  8. Author's Addresses                                             9
+  9. Intellectual Property Rights Statement                         9
+  10. Full Copyright Statement                                     10
+  11. Changes from RFC 3028                                        11
+  12. Change Log                                                   11
+  
+   
+1.   Introduction
+   
+   The SIEVE mail filtering language [SIEVE] "reject" action defined
+   in RFC 3028 only allowed users to refuse delivery of a message by
+   sending an [MDN].
+   
+   This document updates definition of the "reject" action to permit
+   users to handle unwanted email in a way that is sometimes
+   preferable to the existing 'discard' and the original 'reject'
+   capabilities.  When a spam-detection system suspects a message is
+   spam, but isn't certain, discarding the email is considered too
+   risky for some users, for example, those who receive sales leads by
+   email. They are willing to use the reject command. Users are
+   willing to reject but not discard because the sender of an email
+   incorrectly marked as spam will receive a notification that the
+   email was refused, and will likely try again to contact the
+   intended recipient, perhaps via another method of communication.
+   Unfortunately, this usage is problematic, because in the usual
+   case, the email is indeed spam, and the alleged sender to whom an
+   MDN caused by the reject will be sent will often be an innocent Joe-
+   job victim. The updated "reject" is less likely to result in email
+   to an innocent victim, because it requires that an implemention
+   refuse to accept an email for delivery instead of accepting it and
+   then sending an MDN wherever possible.  Much spam is sent through
+   open proxies, so SMTP level refusal reduces Joe-job bounces (AKA
+   backscatter) resulting from usage of MDNs. The updated "reject"
+   will also reduce Joe-jobs caused by virus self-propagation via
+   emails with false sender information.  SMTP level refusal helps to
+   prevent the blacklisting of sources of backscatter and conserve
+   bandwidth, by reducing the number of MDNs sent. Further discussion
+   highlighting the risks of generating MDNs and the benefits of
+   protocol level refusal can be found in [Joe-DoS].
+   
+   
+2.   Conventions Used in this Document
+   
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+   this document are to be interpreted as described in RFC 2119.
+   
+   Conventions for notations are as in [SIEVE] section 1.1.
+   
+   This document does not attempt to define what exactly constitutes a
+   spam or virus containing email or how it should be identified.
+   
+   
+3.   SIEVE "reject" extension
+
+   SIEVE implementations that implement the "reject" action must use
+   the "reject" capability string.
+   
+   
+3.1  Action reject
+   
+      Usage:   reject <reason: string>
+   
+   The "reject" action cancels the implicit keep and refuses delivery
+   of a message. The reason string is a UTF-8 [UTF-8] string
+   specifying the reason for refusal. How message is refused depends
+   on capabilities of mail component (MUA, MDA or MTA) executing the
+   Sieve script. The Sieve interpreter must do one of the following
+   actions, as detailed by the following priority table (items listed
+   earlier take precedence). Note that if action can not be taken or
+   fails, the interpreter should try the next item in the list:
+   
+     1.   If message return-path (MAIL FROM) is empty the message SHOULD
+        be accepted and discarded.
+     2.   If a "reject" implementation performs a return-path verification
+        and it clearly indicates that the message has a forged return-path,
+        the implementation need not refuse mail delivery, but rather MAY
+        accept and discard it.
+     3.   Message delivery is refused by sending 5XX response code over
+        SMTP [SMTP] or LMTP [LMTP]. See section 3.1.1 for more details.
+     4.   Message delivery is refused by sending a non delivery report
+        (DSN [DSN]). See section 3.1.2 for more details.
+     5.   Message delivery is refused by sending a message disposition
+        notification report (MDN). See section 3.1.3 for more details.
+   
+   
+3.1.1 Rejecting messages at SMTP/LMTP protocol level
+   
+   Sieve implementations that are able to reject messages at SMTP/LMTP
+   level SHOULD use the 550 response code. Note that if a message is
+   arriving over SMTP and has multiple recipients, some of which have
+   accepted the message, or the Sieve implementation is part of an
+   MUA, section 3.1.2 and section 3.1.3 define how to reject such a
+   message.
+   
+   Note that SMTP [SMTP] doesn't allow for non-ASCII characters in
+   SMTP response text. If non-ASCII characters appear in the "reason"
+   string, they can be sent if and only if the client and the server
+   use an SMTP extension that allows for transmission of non-ASCII
+   reply text. (One example of such SMTP extension is described in
+   [UTF8-RESP].) In the absence of such SMTP extension, Sieve engine
+   MUST replace any reason string containing non-ASCII characters
+   with an implementation defined ASCII-only string. Implementations
+   SHOULD notify user that such replacement took place.
+   Users that don't like this behavior should consider using
+   "reject :exacttext" as described in Section 3.2, if available.
+
+   If the "reason" string consist of multiple CRLF separated lines,
+   than the reason text MUST be
+   returned as a multiline SMTP/LMTP response, per [SMTP], section
+   4.2.1. Any line MUST NOT exceed the SMTP limit on the maximal line
+   length. To make the reason string conform to any such limits the
+   server MAY insert CRLFs and turn the response into a multiline
+   response.
+   
+   In the following script (which assumes support for the spamtest
+   [SPAMTEST] and fileinto extensions), messages that test highly
+   positive for spam are refused.
+   
+      Example:
+      require ["reject", "spamtest",
+      "comparator-i;ascii-numeric", "fileinto"];
+
+      if spamtest :value "ge" :comparator "i;ascii-numeric" "6" {
+          reject text:
+   AntiSpam engine thinks your message is spam.
+   It is therefore being refused.
+   Please call 1-900-PAY-US if you want to reach us.
+   .
+                            ;
+      } elsif spamtest :value "ge" :comparator "i;ascii-numeric" "4" {
+          fileinto "Suspect";
+      }
+   
+   The following excerpt from an SMTP session shows it in action.
+   ...
+   C: DATA
+   S: 354 Send message, ending in CRLF.CRLF.
+    ...
+   C: .
+   S: 550-AntiSpam engine thinks your message is spam.
+   S: 550-It is therefore being refused.
+   S: 550 Please call 1-900-PAY-US if you want to reach us.
+   
+   If the SMTP/LMTP server supports RFC 2034 [ENHANCED-CODES] it MUST
+   prepend an appropriate Enhanced Error Code to the "reason" text.
+   Enhanced Error code 5.7.1 or a more generic 5.7.0 are RECOMMENDED.
+   With Enhanced Error Code the response to DATA command in the SMTP
+   example below will look like:
+   
+     S: 550-5.7.1 AntiSpam engine thinks your message is spam.
+     S: 550-5.7.1 It is therefore being refused.
+     S: 550 5.7.1 Please call 1-900-PAY-US if you want to reach us.
+   
+   if the server selected "5.7.1" as appropriate.
+   
+   If a Sieve implementation that supports "reject" doesn't wish to
+   immediately disclose the reason for rejection (for example that it
+   detected spam), it may delay immediate sending the 550 error code
+   by sending a 4XX error code on the first attempt to receive the
+   message.
+   
+
+3.1.2 Rejecting message by sending DSN
+   
+   If the implementation receives a message via SMTP that has more
+   than one RCPT TO that has been accepted by the server, and at least
+   one but not all of them are refusing delivery (whether the refusal
+   is caused by execution of a Sieve "reject" or for another reason).
+   In this case, the server MUST accept the message and generate DSNs
+   for all recipients that are refusing it. Note that this exception
+   does not apply to LMTP, as LMTP is able to reject messages on a per-
+   recipient basis.
+  
+  
+3.1.3 Rejecting message by sending MDN
+   
+   When Sieve engine is running inside MUA it has no ability to reject
+   the message before it was delivered, as the message is already
+   delivered. In this case the client should send a Message
+   Disposition Notification [MDN] back to the sender. It resends the
+   message to the sender as specified in the Return-Path header field,
+   wrapping it in a "reject" form, noting that it was rejected by the
+   recipient.
+   MTAs and MDAs SHOULD NOT implement "reject" by sending MDNs, they
+   SHOULD reject at protocol level as described in section 3.1.1.
+   In the following script, a message is rejected and returned to the
+   sender.
+   
+   Example:
+                require ["reject"];
+   
+                if header :contains "from" "coyote@desert.example.org"
+   {
+                reject text:
+   I am not taking mail from you, and I don't
+   want your birdseed, either!"
+   .
+                ;
+             }
+   
+   A reject message MUST take the form of a failure MDN as specified
+   by [MDN]. The human-readable portion of the message, the first
+   component of the MDN, contains the human readable message
+   describing the error, and it SHOULD contain additional text
+   alerting the original sender that mail was refused by a filter.
+   This part of the MDN might appear as follows:
+   
+   ------------------------------------------------------------
+   The message was refused by the recipient's mail filtering program.
+   The reason
+   given was as follows:
+   
+   I am not taking mail from you, and I don't want your birdseed,
+   either!
+   ------------------------------------------------------------
+   
+   The MDN action-value field as defined in the MDN specification MUST
+   be "deleted" and MUST have the MDN-sent-automatically and automatic-
+   action modes set.
+   
+3.2  :exacttext optional argument to reject action
+
+   SIEVE implementations that implement the :exacttext optional argument
+   to the "reject" action must advertise "rejectexact" capability in
+   addition to the "reject" capability described above.
+
+   The :exacttext argument affects how reject processing described in
+   section 3.1.1 is performed. When this argument is present, SMTP
+   client and server don't support an SMTP extension that allows for
+   transmission of non-ASCII reply text and there is non-ASCII text
+   in the reason string, then the reason string MUST NOT be replaced
+   with an implementation defined ASCII-only string as defined in 3.1.1.
+   Instead, Sieve engine MUST try to generate DSN, in order to preserve
+   the exact text specified in the reason string.
+
+   Example:
+                require ["reject", "rejectexact];
+   
+                if size :over 100K {
+                reject :exacttext text:
+   Your message is to big. If you want to send me a big attachement,
+   put it on a public web site and send me an URL.
+   .
+                ;
+             }
+
+   <<Pretend that the reason string above contains some non-ASCII text>>
+
+   NOTE: The :exacttext optional argument doesn't affect reject, if
+   Sieve engine is running in MUA, or if Sieve engine is running in
+   MTA/MDA, but it also supports an SMTP/LMTP extension for sending
+   UTF-8 responses.
+   
+   
+3.3  "reject" compatibility with other actions
+   
+   A "reject" action cancels the implicit keep.
+   
+   Implementations MUST prohibit the execution of more than one reject
+   in a SIEVE script. "Reject" is also incompatible with the
+   "vacation" [VACATION] extensions.
+
+   Implementations MUST prohibit the execution of more than one reject
+   in a SIEVE script. "Reject" MUST be incompatible with the "vacation"
+   [VACATION] action. Implementations SHOULD prohibit the use of
+   "reject" with actions that cause mail delivery, such as "keep",
+   "fileinto", "redirect". <<What about discard?>>
+   Making "reject" compatible with actions that cause mail delivery
+   violates RFC 2821 principal that a message is either deliver or
+   bounced back to the sender. So bouncing message back (rejecting)
+   and delivering it will make the sender believe that the message was
+   not delivered.
+   However there are existing laws requiring certain organizations to
+   archive all received messages, even the rejected ones. Also, it can be
+   quite convenient to save copies of rejected messages for later
+   analysis.
+
+   Any action that would modify the message body will not have effect
+   on the body of any message refused by "reject" using the 550 SMTP
+   response code and MUST NOT have any effect on context of generated
+   DSN/MDNs.
+   
+
+4.   Security Considerations
+   
+   The Introduction section talks about why rejecting messages before
+   delivery is better then accepting and bouncing them.
+   
+   Security issues associated with mail auto-responders are fully
+   discussed in the security consideration section of [RFC3834]. This
+   document is believed not to introduce any additional security
+   considerations in this general area.
+   
+   The "reject" extension does not raise any other security
+   considerations that are not already present in the base [SIEVE]
+   protocol, and these issues are discussed in [SIEVE].
+   
+   
+5.   IANA Considerations
+   
+   The following section provides the IANA registrations for the Sieve
+   extensions specified in this document:
+   
+5.1  reject extension registration
+   
+   IANA is requested to update the registration for the SIEVE "reject"
+   extension to point to this document.
+   IANA is also requested to update Tim Showalter's email address to
+   be
+     tjs@psaux.com
+   
+   
+5.2  refuse extension registration
+   
+   IANA is requested to remove registration of the refuse extension.
+   <<Should this be taken care of by talking directly to IANA?>>
+
+
+5.3  rejectexact extension registration
+
+   IANA is requested to add the following registration to the list of
+   Sieve extensions:
+
+   Capability name: rejectexact
+   Description:     adds the ':exacttext' optional argument to the
+                    reject action, which instructs Sieve engine to
+                    generate Delivery Status Notifications if rejection
+                    reason string contains non-ASCII text.
+   RFC number:      this RFC (Sieve base spec)
+   Contact address: The Sieve discussion list <ietf-mta-filters@imc.org>
+   
+
+6.   References
+
+6.1  Normative References
+   
+   [KEYWORDS] Bradner, S., "Key words for use in RFCs to Indicate
+   Requirement Levels", RFC 2119, March 1997.
+   
+   [SIEVE] Showalter, T. and P. Guenther, "Sieve: An Email Filtering
+   Language", Work-in-progress, draft-ietf-sieve-3028bis-XX.txt
+   
+   [SMTP] Klensin, J. (Editor), "Simple Mail Transfer Protocol", AT&T
+   Laboratories, RFC 2821, April 2001.
+   
+   [LMTP] Myers, J., "Local Mail Transfer Protocol", Carnegie-Mellon
+   University, RFC 2033, October 1996.
+   
+   [DSN] Moore , K., Vaudreuil, G., "An Extensible Message Format for
+   Delivery Status Notifications", University of Tennessee, Lucent
+   Technologies, RFC 3464, January 2003.
+   
+   [MDN] Fajman, R., "An Extensible Message Format for Message
+   Disposition Notifications", National Institutes of Health, RFC
+   2298, March 1998.
+   
+   [ENHANCED-CODES] Freed, N., "SMTP Service Extension for Returning
+   Enhanced Error Codes", Innosoft, RFC 2034, October 1996.
+   
+   [UTF-8] Yergeau, F., "UTF-8, a transformation format of ISO 10646",
+   RFC 3629, November 2003.
+
+   [VACATION] Showalter, T. and N. Freed, "Sieve Email Filtering: 
+   Vacation Extension", work in progress, draft-ietf-sieve-vacation-XX.txt.
+
+6.2  Informative References
+
+   [Joe-DoS] Stefan Frei, Ivo Silvestri, Gunter Ollmann, "Mail Non
+   Delivery Message DDoS Attacks", 5 April 2004",
+   <http://www.techzoom.net/paper-mailbomb.asp>.
+   
+   [SPAMTEST] Daboo, C., "SIEVE Email Filtering: Spamtest and
+   Virustest Extensions", work in progress, draft-ietf-sieve-
+   spamtestbis-XX.txt
+   <<Note to the RFC editor: this reference can be safely replaced
+   with RFC 3685.>>
+   
+   [RFC3834] Moore, K., "Recommendations for Automatic Responses to
+   Electronic Mail", RFC 3834, August 2004.
+
+   [UTF8-RESP] A. Melnikov (Ed.), "SMTP Language Extension",
+   work in progress, draft-melnikov-smtp-lang-XX.txt
+
+
+7.   Acknowledgments
+   
+   Thanks to Ned Freed, Cyrus Daboo, Arnt Gulbrandsen, Kristin Hubner,
+   Mark E. Mallett, Philip Guenther and Michael Haardt for comments
+   and corrections.
+
+   The authors gratefully acknowledge the extensive work of Tim
+   Showalter as the author of the RFC 3028, which originally defined
+   the "reject" action.
+
+
+8.   Author's Addresses
+   
+   Matthew Elvey
+   The Elvey Partnership, LLC
+   3042 Sacramento-ietf St Ste 04
+   San Francisco, CA
+   U.S.A.
+   
+   Email: sieve3@matthew.elvey.com
+   
+   
+   Alexey Melnikov
+   Isode Limited
+   5 Castle Business Village
+   36 Station Road
+   Hampton, Middlesex, TW12 2BX
+   UK
+   
+   Email: Alexey.Melnikov@isode.com
+   
+   
+9.   Intellectual Property Rights Statement
+   
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed
+   to pertain to the implementation or use of the technology described
+   in this document or the extent to which any license under such
+   rights might or might not be available; nor does it represent that
+   it has made any independent effort to identify any such rights.
+   Information on the procedures with respect to rights in RFC
+   documents can be found in BCP 78 and BCP 79.
+   
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use
+   of such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository
+   at http://www.ietf.org/ipr.
+   
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at ietf-
+   ipr@ietf.org.
+   
+10.  Full Copyright Statement
+   
+   Copyright (C) The Internet Society (2006).
+   
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+   
+   This document and the information contained herein are provided on
+   an "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE
+   REPRESENTS OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND
+   THE INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT
+   THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR
+   ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
+   PARTICULAR PURPOSE.
+   
+   Acknowledgement
+   
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+   
+   
+11.  Changes from RFC 3028
+  
+  Clarified that the "reject" action cancels the implicit keep.
+  Extended list of allowable actions on reject to include protocol
+  level message rejection and generation of DSNs.
+  
+  
+12.  Change Log
+  
+  <<NOTE to the RFC editor: please delete this section before
+  publication.>>
+  
+   00   First formal draft.
+   01   Explicit RFC 2034 support, disallow "refuse" in MUAs, typos
+       corrected, clarifications, etc.
+   02   Many insubstantial editorial changes (mostly rewording text for
+       readability). Added text regarding non-ASCII characters in the refuse
+       "reason" string. Added an exception allowing return-path forgery to
+       justify discarding a message.
+   03   (Renamed to be SIEVE WG 00) - Updated boilerplate, added reject
+       action from the base spec, acknowledged Tim as the author of
+       "reject".
+   04   (SIEVE WG 01) Based on WGLC feedback, the refuse and the reject
+       actions were merged into a single action called reject. Text
+       reorganized as the result. Typos and examples corrected. Updated
+       IANA registration and Security Considerations sections.
+   05   (SIEVE WG 02) Copied some security considerations from Vacation
+       draft. Clarified that the "reason" string is in UTF-8. Clarified
+       interaction with "editheader" extension. Added text about sending
+       of 4XX instead of 550. Corrected typos in several examples.
+   06   (SIEVE WG 03) Explicitly list all actions incompable with reject.
+       Added two paragraphs explaining why reject SHOULD (as opposed to
+       MUST/MAY) be incompatible with them. Clarified that if the reason
+       string contains non-ASCII and rejection over protocol is possible,
+       then the reason string MUST be replaced with an implementations
+       defined ASCII-only string. Added :exacttext optional argument that
+       preserves UTF-8 reason string by forcing generation of DSN.

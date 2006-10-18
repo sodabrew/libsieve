@@ -1,0 +1,524 @@
+
+Network Working Group                                      Jutta Degener
+Internet Draft                                           Philip Guenther
+Expires: February 2007                                    Sendmail, Inc.
+                                                             August 2006
+
+
+               Sieve Email Filtering: Editheader Extension
+                    draft-ietf-sieve-editheader-06.txt
+
+
+Status of this memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as
+   Internet-Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other
+   documents at any time.  It is inappropriate to use Internet-
+   Drafts as reference material or to cite them other than as
+   "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/1id-abstracts.html
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   This document defines two new actions for the "Sieve" email
+   filtering language that add and delete email header fields.
+
+
+1. Introduction
+
+   Email header fields are a flexible and easy to understand means
+   of communication between email processors.
+   This extension enables sieve scripts to interact with other
+   components that consume or produce header fields by allowing
+   the script to delete and add header fields.
+
+
+
+
+
+Degener & Guenther           Standards Track                    [Page 1]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+2. Conventions used.
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [KEYWORDS].
+
+   Conventions for notations are as in [SIEVE] section 1.1, including
+   use of the "Usage:" label for the definition of action and tagged
+   arguments syntax.
+
+   The term "header field" is used here as in [IMAIL] to mean a
+   logical line of an email message header.
+
+   The capability string associated with the extension defined in
+   this document is "editheader".
+
+
+3. Action addheader
+
+   Usage: "addheader" [":last"] <field-name: string> <value: string>
+
+   The addheader action adds a header field to the existing message
+   header.  If the field-name is not a valid 7-bit US-ASCII header
+   field name as described by the [IMAIL] "field-name" nonterminal
+   syntax element, the implementation MUST flag an error.  The
+   addheader action does not affect Sieve's implicit keep.
+
+   If the specified field value does not match the RFC 2822
+   "unstructured" nonterminal syntax element or exceeds a length
+   limit set by the implementation, the implementation MUST either
+   flag an error or encode the field using folding white space and
+   the encodings described in [RFC2047] or [RFC2231] to be compliant
+   with RFC 2822.
+
+   An implementation MAY impose a length limit onto the size of
+   the encoded header field; such a limit MUST NOT be less
+   than 998 characters, not including the terminating CRLF
+   supplied by the implementation.
+
+   By default, the header field is inserted at the beginning of the
+   existing message header.  If the optional flag ":last" is
+   specified, it is appended at the end.
+
+   Example:
+        /* Don't redirect if we already redirected */
+        if not header :contains "X-Sieve-Filtered"
+                ["<kim@job.example.com>", "<kim@home.example.com>"]
+        {
+                addheader "X-Sieve-Filtered" "<kim@job.example.com>";
+                redirect "kim@home.example.com";
+        }
+
+
+Degener & Guenther           Standards Track                    [Page 2]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+4. Action deleteheader
+
+   Usage: "deleteheader" [":index" <fieldno: number> [":last"]]
+                [COMPARATOR] [MATCH-TYPE]
+                <field-name: string>
+                [<value-patterns: string-list>]
+
+   By default, the deleteheader action deletes all occurrences of
+   the named header field.  The deleteheader action does not affect
+   Sieve's implicit keep.
+
+   The field-name is mandatory and always matched as a case-insensitive
+   US-ASCII string.  The field-name MUST be a valid 7-bit header
+   field name as described by the [IMAIL] "field-name" nonterminal
+   syntax element.
+
+   The value-patterns, if specified, restrict which occurrences of
+   the header field are deleted to those whose values match any of
+   the specified value-patterns, the matching being according to
+   the match-type and comparator and performed as if by the "header"
+   test.  In particular, leading and trailing whitespace in the
+   field values is ignored.
+
+   If :index <fieldno> is specified, the attempts to match a value
+   are limited to the <fieldno> occurrence of the named header
+   field, beginning at 1, the first named header field.  If :last
+   is specified, the count is backwards; 1 denotes the last named
+   header field, 2 the second to last, and so on.  The counting
+   happens before the <value-patterns> match, if any.  For example:
+
+        deleteheader :index 2 :contains "Received" "via carrier-pigeon"
+
+   deletes the second "Received:" header field if it contains
+   the string "via carrier-pigeon" (not the second Received: field
+   that contains "via carrier-pigeon").
+
+   It is not an error if no header fields match the conditions in
+   the deleteheader action or if the :index argument is greater
+   than the number of named header fields.
+
+5. Interaction with Other Sieve Extensions
+
+   Actions that generate [MDN], [DSN], or similar disposition
+   messages MUST do so using the original, unmodified message header.
+   Similarly, if an error terminates processing of the script, the
+   original message header MUST be used when doing the implicit
+   keep required by [SIEVE] section 2.10.6.
+
+   All other actions that store or send the message MUST do so with
+   the current set of header fields.
+
+
+
+Degener & Guenther           Standards Track                    [Page 3]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+   Tests and actions such as "exists", "header", or "vacation"
+   [VACATION] that examine header fields MUST examine the current
+   state of a header as modified by any actions that have taken
+   place so far.
+   
+   As an example, the "header" test in the following fragment will
+   always evaluate to true, regardless of whether the incoming
+   message contained an "X-Hello" header field or not:
+
+        addheader "X-Hello" "World";
+        if header :contains "X-Hello" "World"
+        {
+                fileinto "international";
+        }
+
+   However, if the presence or value of a header field affects how
+   the implementation parses or decodes other parts of the message,
+   then for the purposes of that parsing or decoding the implementation
+   MAY ignore some or all changes made to those header fields.  For
+   example, in an implementation that supports the [BODY] extension,
+   "body" tests may be unaffected by deleting or adding Content-Type
+   or Content-Transfer-Encoding header fields.  This does not rescind
+   the requirement that changes to those header fields affect direct
+   tests; only the semantic side effects of changes to the fields
+   may be ignored.
+
+   For the purpose of weeding out duplicates, a message modified
+   by addheader or deleteheader MUST be considered the same as
+   the original message.  For example, in an implementation that
+   obeys the constraint in [SIEVE] section 2.10.3 and does not deliver
+   the same message to a folder more than once, the following
+   code fragment
+
+        keep;
+        addheader "X-Flavor" "vanilla";
+        keep;
+
+   MUST only file one message.  It is up to the implementation
+   to pick which of the redundant "fileinto" or "keep" actions is
+   executed, and which ones are ignored.
+
+   The "implicit keep" is thought to be executed at the end of
+   the script, after the headers have been modified.  (However,
+   a canceled "implicit keep" remains canceled.)
+
+
+
+
+
+
+
+
+
+Degener & Guenther           Standards Track                    [Page 4]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+6.  IANA Considerations
+
+    The following template specifies the IANA registration of the Sieve
+    extension specified in this document:
+
+    To: iana@iana.org
+    Subject: Registration of new Sieve extension
+
+    Capability name: editheader
+    Description:     adds actions 'addheader' and 'deleteheader'
+                     that modify the header of the message being
+                     processed
+    RFC number:      this RFC
+    Contact Address: Jutta Degener <jutta@pobox.com>
+
+    This information should be added to the list of sieve extensions
+    given on http://www.iana.org/assignments/sieve-extensions.
+
+
+7. Security Considerations
+
+   Someone with write access to a user's script storage may use this
+   extension to generate headers that a user would otherwise be
+   shielded from (by a gateway MTA that removes them).
+
+   A sieve filter that removes header fields may unwisely destroy
+   evidence about the path a message has taken.
+
+   Any change in a message content may interfere with digital
+   signature mechanisms that include the header in the signed
+   material.  Since normal message delivery adds "Received:"
+   header fields to the beginning of a message, many such schemas
+   are impervious to headers prefixed to a message, and will
+   work with "addheader" unless :last is used.
+
+   Any decision mechanism in a user's filter that is based
+   on headers is vulnerable to header spoofing.  For example,
+   if the user adds an APPROVED header or tag, a malicious sender
+   may add that tag or header themselves.  One way to guard against
+   this is to delete or rename any such headers or stamps prior
+   to processing the message.
+
+
+8. Acknowledgments
+
+   Thanks to Eric Allman, Cyrus Daboo, Matthew Elvey, Ned Freed,
+   Arnt Gulbrandsen, Simon Josefsson, Will Lee, William Leibzon,
+   Mark E. Mallett, Chris Markle, Alexey Melnikov, Randall Schwartz,
+   Nigel Swinson, Kjetil Torgrim Homme, and Rand Wacker for extensive
+   corrections and suggestions.
+
+
+
+Degener & Guenther           Standards Track                    [Page 5]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+9. Authors' Addresses
+
+   Jutta Degener
+   5245 College Ave, Suite #127
+   Oakland, CA 94618
+
+   Email: jutta@pobox.com
+
+   Philip Guenther
+   Sendmail, Inc.
+   6425 Christie Ave, 4th Floor
+   Emeryville, CA 94608
+
+   Email: guenther@sendmail.com
+
+
+10. Discussion
+
+   This section will be removed when this document leaves the
+   Internet-Draft stage.
+
+   This draft is intended as an extension to the Sieve mail filtering
+   language.  Sieve extensions are discussed on the MTA Filters mailing
+   list at <ietf-mta-filters@imc.org>.  Subscription requests can
+   be sent to <ietf-mta-filters-request@imc.org> (send an email
+   message with the word "subscribe" in the body).
+
+   More information on the mailing list along with a WWW archive of
+   back messages is available at <http://www.imc.org/ietf-mta-filters/>.
+
+
+10.1 Changes from draft-ietf-sieve-editheader-05.txt
+
+   MDN and DSN references are merely informative
+
+
+10.2 Changes from draft-ietf-sieve-editheader-04.txt
+
+   Ignore leading and trailing whitespace when matching header field
+   values.
+
+   Header modifications are ignored when continuing after an error
+   or generating MDNs or DSNs
+
+   Added references for MDN and DSN
+
+   Update IANA registration to match 3028bis
+
+   Added [KEYWORDS] boilerplate text
+
+   Describe an invalid field-name to addheader as an error (might
+   be detected at runtime)
+
+Degener & Guenther           Standards Track                    [Page 6]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+10.3 Changes from draft-ietf-sieve-editheader-03.txt
+
+   Change "Syntax:" to "Usage:".
+
+   Updated references.
+
+
+10.4 Changes from draft-ietf-sieve-editheader-02.txt
+
+   Clarify that value-patterns restrict which occurrences are deleted.
+
+   Add informative reference to [BODY].
+
+
+10.5 Changes from draft-ietf-sieve-editheader-01.txt
+
+   Whitespace and line length tweaks noted by ID-nits.
+
+   Clarified what is being counted by :index.
+
+   Update the [SIEVE] reference to the I-D of the revision.
+
+
+10.6 Changes from draft-ietf-sieve-editheader-00.txt
+
+   Updated IPR boilerplate to RFC 3978/3979.
+
+   Many corrections in response to WGLC comments.  Of particular note:
+     - correct a number of spelling and grammar errors
+     - document that neither addheader nor deleteheader affects the
+       implicit keep
+     - add normative references to RFC 2047 and RFC 2231
+     - it is not an error for deleteheader to affect nothing
+     - change "foo.tld" to "foo.example.com"
+     - add an informative reference to [VACATION], citing it as an
+       example of an action that examines header fields
+     - add weasel words about changes to fields that have secondary
+       effects
+     - add security consideration for combination of header changes
+       and "reject"
+
+
+10.7 Changes from draft-degener-sieve-editheader-03.txt
+
+   Renamed to draft-ietf-sieve-editheader-00.txt;
+   tweaked the title and abstract.
+
+   Added Philip Guenther as co-author.
+
+   Updated IPR boilerplate.
+
+
+
+Degener & Guenther           Standards Track                    [Page 7]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+10.8 Changes from draft-degener-sieve-editheader-02.txt
+
+   Changed the duplicate restrictions from "messages with different
+   headers MUST be considered different" to their direct opposite,
+   "messages with different headers MUST be considered the same,"
+   as requested by workgroup members on the mailing list.
+
+   Expanded mention of header signature schemes to Security
+   Considerations. 
+
+   Added IANA Considerations section.
+
+
+Appendices
+
+Appendix A.  Normative References
+
+   [IMAIL]    Resnick, P., "Internet Message Format", RFC 2822, April
+              2001.
+
+   [KEYWORDS] Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", RFC 2119, March 1997.
+
+   [RFC2047]  Moore, K., "MIME (Multipurpose Internet Mail
+              Extensions) Part Three: Message Header Extensions for
+              Non-ASCII Text", RFC 2047, November 1996.
+
+   [RFC2231]  Freed, N. and K. Moore, "MIME Parameter Value and
+              Encoded Word Extensions: Character Sets, Languages, and
+              Continuations", RFC 2231, November 1997.
+
+   [SIEVE]    Guenther, P. and T. Showalter, "Sieve: A Mail Filtering
+              Language", draft-ietf-sieve-3028bis-08, July 2006.
+
+Appendix B.  Informative References
+
+   [BODY]     Degener, J. and P. Guenther, "Sieve Email Filtering:
+              Body Extension", draft-ietf-sieve-body-03, March 2006
+
+   [DSN]      Moore, K. and G. Vaudreuil, "An Extensible Message Format
+              for Delivery Status Notifications", RFC 1894, January
+              1996.
+
+   [MDN]      Fajman, R., "An Extensible Message Format for Message
+              Disposition Notifications", RFC 2298, March 1998.
+
+   [VACATION] Showalter, T. and N. Freed, "Sieve Email Filtering:
+              Vacation Extension", draft-ietf-sieve-vacation-05,
+              December 2005
+
+
+
+
+Degener & Guenther           Standards Track                    [Page 8]
+
+Internet-Draft  Sieve Email Filtering: Editheader Extension  August 2006
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2006).  This document is
+   subject to the rights, licenses and restrictions contained in
+   BCP 78, and except as set forth therein, the authors retain all
+   their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE
+   REPRESENTS OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE
+   INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use
+   of such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository
+   at http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention
+   any copyrights, patents or patent applications, or other
+   proprietary rights that may cover technology that may be required
+   to implement this standard.  Please address the information to the
+   IETF at ietf-ipr@ietf.org.
+
+Acknowledgement
+
+   Funding for the RFC Editor function is currently provided by
+   the Internet Society.
+
+
+
+
+
+
+
+
+
+
+Degener & Guenther           Standards Track                    [Page 9]
+
+
