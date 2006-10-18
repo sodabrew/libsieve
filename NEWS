@@ -1,3 +1,19 @@
+libSieve 2.2.0
+--------------
+
+- Updated top-level README.
+
+- Fixed address test not working.
+
+- Fixed innocuous yet annoying GCC 4 warnings.
+
+libSieve 2.1.13
+---------------
+
+- Fixed capabilities missingspaces.
+
+- Fixed alloca.h in vasnprintf for FreeBSD.
+
 libSieve 2.1.12
 ---------------
 

@@ -1,20 +1,19 @@
 libSieve: a library for parsing, sorting and filtering your mail
------------------------------------------------------------------
+----------------------------------------------------------------
 
-This code is a standalone library based upon code which had been distributed
-with the Cyrus Mail Server. Currently libSieve implements two API's:
-one that is based upon, and compatible with, the Sieve API as built into
-the Cyrus Mail Server, as well as a new API which is very well suited to
-be incorporated into other programs and is reasonably extensible.
+This code is a standalone library providing an interpreter for RFC 3028 Sieve
+and various extensions. It is based upon code distributed with the Cyrus Mail
+Server prior to CMU's switch to a more restrictive license. The libSieve API
+attempts to be easy to use and extensible, and replaces the more rigid API in
+the Cyrus Sieve implementation.
 
-To get in touch with the usage and development communities for libSieve,
-please visit http://libsieve.sf.net/ and follow the SourceForge links to
-join the mailing lists.
+For questions and comments regarding this library, please contact Aaron Stone
+directly at aaron at serendipity dot cx. There are no mailing lists.
 
-The documents listed below coincide with those features currently
-implemented in libSieve. Both as these documents progress through the
-standardization process and as libSieve itself matures, additional
-extensions and later revisions of them will be implemented.
+The documents listed below coincide with those features currently implemented
+in libSieve. Both as these documents progress through the standardization
+process and as libSieve itself matures, additional extensions and later
+revisions of them will be implemented.
 
 References:
 
@@ -36,3 +35,4 @@ draft-murchison-sieve-regex-04.txt, August, 2001.
 
 [SUBADDR] Murchison, K., "Sieve: Subaddress Extension",
 draft-murchison-sieve-subaddress-03.txt, August, 2001.
+
