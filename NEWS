@@ -1,7 +1,7 @@
 libSieve 2.2.1
 --------------
 
-- Remove accidental dependency on Check.
+- Removed accidental dependency on Check.
 
 libSieve 2.2.0
 --------------
