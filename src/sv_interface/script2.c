@@ -192,9 +192,13 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
     if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
-    c->script.cmds = libsieve_sieve_parse_buffer(c);
-    libsieve_free_tree(c->script.cmds);
-    c->script.cmds = NULL;
+    try {
+        c->script.cmds = libsieve_sieve_parse_buffer(c);
+        libsieve_free_tree(c->script.cmds);
+        c->script.cmds = NULL;
+    } catch(SIEVE2_ERROR_INTERNAL) {
+        return SIEVE2_ERROR_INTERNAL;
+    } endtry;
 
     if (c->script.error_count > 0) {
         return SIEVE2_ERROR_PARSE;
@@ -228,35 +232,41 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
-    /* If the client app doesn't have its own header parser,
-     * we will use an internal one. */
-    if (!c->callbacks.getheader) {
-        if (!c->callbacks.getallheaders) {
-            /* Incomplete function registration.
-	     * FIXME: Would be nice to give more details. */
-            return SIEVE2_ERROR_NOT_FINALIZED;
-        } else {
-        /* Get the header! FIXME: should have different error codes... */
-        if (libsieve_do_getallheaders(c, &(c->message->header)) != SIEVE2_OK)
-            return SIEVE2_ERROR_HEADER;
-        /* Our "internal callback" instead of the user's getheader. */
-        c->callbacks.getheader = libsieve_message2_getheader;
-        if (libsieve_message2_parseheader(c->message) != SIEVE2_OK)
-            return SIEVE2_ERROR_HEADER;
-        }
-    }
+    try {
 
-    c->script.cmds = libsieve_sieve_parse_buffer(c);
-    if (c->script.error_count > 0) {
-        if (c->script.cmds) {
-            libsieve_free_tree(c->script.cmds);
+        /* If the client app doesn't have its own header parser,
+         * we will use an internal one. */
+        if (!c->callbacks.getheader) {
+            if (!c->callbacks.getallheaders) {
+                /* Incomplete function registration.
+                 * FIXME: Would be nice to give more details. */
+                return SIEVE2_ERROR_NOT_FINALIZED;
+            } else {
+            /* Get the header! FIXME: should have different error codes... */
+            if (libsieve_do_getallheaders(c, &(c->message->header)) != SIEVE2_OK)
+                return SIEVE2_ERROR_HEADER;
+            /* Our "internal callback" instead of the user's getheader. */
+            c->callbacks.getheader = libsieve_message2_getheader;
+            if (libsieve_message2_parseheader(c->message) != SIEVE2_OK)
+                return SIEVE2_ERROR_HEADER;
+            }
         }
-        c->script.cmds = NULL;
-        return SIEVE2_ERROR_PARSE;
-    }
+ 
+        c->script.cmds = libsieve_sieve_parse_buffer(c);
+        if (c->script.error_count > 0) {
+            if (c->script.cmds) {
+                libsieve_free_tree(c->script.cmds);
+            }
+            c->script.cmds = NULL;
+            return SIEVE2_ERROR_PARSE;
+        }
 
-    if (libsieve_eval(c, c->script.cmds, &errmsg) < 0)
-        return SIEVE2_ERROR_EXEC;
+        if (libsieve_eval(c, c->script.cmds, &errmsg) < 0)
+            return SIEVE2_ERROR_EXEC;
+
+    } catch(SIEVE2_ERROR_INTERNAL) {
+        return SIEVE2_ERROR_INTERNAL;
+    } endtry;
 
     /* If no action was taken, libsieve_eval will have
      * returned > 0. But we're going to hide that and

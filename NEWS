@@ -3,6 +3,10 @@ libSieve 2.2.1
 
 - Removed accidental dependency on Check.
 
+- Added exception handling system.
+
+- Added test runner scripts to sv_test.
+
 libSieve 2.2.0
 --------------
 

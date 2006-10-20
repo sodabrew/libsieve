@@ -15,6 +15,7 @@
 #include <stdio.h>
 /* Needed for vasprintf. */
 #include "vasprintf.h"
+#include "exception.h"
 
 /* Define several macros for GCC specific attributes.
  * Although the __attribute__ macro can be easily defined
@@ -28,11 +29,12 @@
 #define PRINTF_ARGS(X, Y)
 #endif
 
-// I don't know what would be the difference here. Whatever!?
+/* Things that are happening normally. */
 #define TRACE_DEBUG(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 4, THIS_MODULE, __FILE__, __func__, fmt)
+/* Bad things that will result in a failure code. */
 #define TRACE_ERROR(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 2, THIS_MODULE, __FILE__, __func__, fmt)
-
-#define libsieve_assert(cond) ( (cond) ? 0 : TRACE_ERROR("Assertion failed: [%s]", __STRING(cond)), exit(EXIT_FAILURE) )
+/* All assertions are always tested, and errors thrown upwards. */
+#define libsieve_assert(cond) ( (cond) ? 0 : ( TRACE_ERROR("Assertion failed: [%s]", __STRING(cond)), throw(SIEVE2_ERROR_INTERNAL) ) )
 
 /* These are the memory oriented functions */
 

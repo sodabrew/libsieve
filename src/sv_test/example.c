@@ -546,9 +546,12 @@ int main(int argc, char *argv[])
 		printf("Error %d when calling sieve2_validate: %s\n",
 			res, sieve2_errstr(res));
 		exitcode = 1;
+		goto freesieve;
 	}
 	if (!my_context->error_parse)
 		printf(" valid.\n");
+	else
+		printf(" not valid.\n");
 
 	if (message) {
 		printf("Executing script...\n");
@@ -557,6 +560,7 @@ int main(int argc, char *argv[])
 			printf("Error %d when calling sieve2_execute: %s\n",
 				res, sieve2_errstr(res));
 			exitcode = 1;
+			goto freesieve;
 		}
 		if (!my_context->actiontaken) {
 			printf("  no actions taken; keeping message.\n");
