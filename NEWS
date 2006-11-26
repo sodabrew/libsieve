@@ -1,3 +1,12 @@
+libSieve 2.2.2
+--------------
+
+- Added more test scripts.
+
+- Added support for RFC 3431 Relational comparators.
+
+- Fixed segfault when parsing group syntax with empty address list.
+
 libSieve 2.2.1
 --------------
 
