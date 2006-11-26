@@ -1,0 +1,15 @@
+From: envelope@example.org, secondenv@example.org
+Sender: blue@res.example.com
+To: undisclosed-recipients:;
+Date:  Mon, 31 Mar 1997 18:26:10 -0800
+Subject: There is no body to this message.
+List-Id: <ubuntu-users.lists.ubuntu.com>
+X-Priority: 4
+Equal: Bob
+Less: Abe
+Less-Equal: Bo
+Less-Equal: bob
+Greater: Chad
+Greater-Equal: Boba
+Not-Equal: whatever
+
