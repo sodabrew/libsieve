@@ -57,6 +57,7 @@ struct support2 {
     /* These are more like built-ins. */
     enum boolean          regex;
     enum boolean          subaddress;
+    enum boolean          relational;
 };
 
 struct actions2 {

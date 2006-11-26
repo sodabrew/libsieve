@@ -36,4 +36,17 @@ typedef int comparator_t(const char *, const char *);
 /* returns a pointer to a comparator function given it's name */
 comparator_t *libsieve_comparator_lookup(const char *comp, int mode);
 
+enum num {
+    gt = 1, // >
+    ge    , // >=
+    lt    , // <
+    le    , // <=
+    eq    , // ==
+    ne      // !=
+};
+
+/* returns a magic number of the relational comparator. */
+int libsieve_relational_lookup(const char *rel);
+int libsieve_relational_count(int mode);
+
 #endif

@@ -130,7 +130,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     int addrpart = 0;
 
     if (t == NULL) {
-	    TRACE_DEBUG("static_evaltest(): t is null but it shouldn't ever be");
+	    TRACE_DEBUG("t is null");
 	    return 0;
     }
 
@@ -165,6 +165,10 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 		freebody = 1;
 	    }
 
+	    // For :count, tally up the instances of the header and then call
+	    // the comparator with that numeric value in a decimal string.
+	    int count = 0;
+
 	    for (pl = t->u.ae.pl; pl != NULL && !res; pl = pl->next) {
 		for (l = 0; body[l] != NULL && !res; l++) {
 		    /* loop through each header */
@@ -176,11 +180,23 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
                     val = libsieve_get_address(context, addrpart, &marker, 0);
 		    while (val != NULL && !res) { 
 			/* loop through each address */
-			res |= t->u.ae.comp(pl->p, val);
+			if (libsieve_relational_count(t->u.h.comptag)) {
+			    count++;
+			} else {
+			    res |= t->u.ae.comp(pl->p, val);
+			}
 			val = libsieve_get_address(context, addrpart, &marker, 0);
        		    }
 		    libsieve_free_address(&data, &marker);
 		}
+
+	        if (libsieve_relational_count(t->u.h.comptag)) {
+	            char countstr[20];
+	            snprintf(countstr, 19, "%d", count);
+	            TRACE_DEBUG("Count was [%s] compfunc is [%p](%s, %s)",
+		    	countstr, t->u.ae.comp, (char *)pl->p, countstr);
+                    res |= t->u.ae.comp(pl->p, countstr);
+	        }
 	    }
 
 	    if (freebody)
@@ -214,15 +230,33 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 	break;
     case HEADER:
 	res = 0;
+	TRACE_DEBUG("Doing a header comparison");
+	TRACE_DEBUG("Relation is [%d]", t->u.h.comptag);
 	for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
 	    char **val;
 	    size_t l;
+	    TRACE_DEBUG("Asking for header [%s]", sl->s);
 	    if (libsieve_do_getheader(context, sl->s, &val) != SIEVE2_OK)
 		continue;
 	    for (pl = t->u.h.pl; pl != NULL && !res; pl = pl->next) {
+	        int count = 0;
 		for (l = 0; val[l] != NULL && !res; l++) {
-		    res |= t->u.h.comp(pl->p, val[l]);
+		    TRACE_DEBUG("test HEADER comparing [%s] with [%s]",
+		        (char *)pl->p, val[l]);
+		    if (libsieve_relational_count(t->u.h.comptag)) {
+		        count++;
+		    } else {
+		        res |= t->u.h.comp(pl->p, val[l]);
+		    }
 		}
+
+	        if (libsieve_relational_count(t->u.h.comptag)) {
+	            char countstr[20];
+	            snprintf(countstr, 19, "%d", count);
+	            TRACE_DEBUG("Count was [%s] compfunc is [%p](%s, %s)",
+		        countstr, t->u.h.comp, (char *)pl->p, countstr);
+                    res |= t->u.h.comp(pl->p, countstr);
+	        }
 	    }
 	}
 	break;

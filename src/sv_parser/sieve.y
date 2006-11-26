@@ -83,7 +83,7 @@ extern int libsieve_sievelex(void);
 %token SETFLAG ADDFLAG REMOVEFLAG MARK UNMARK FLAGS HASFLAG
 %token NOTIFY VALIDNOTIF
 %token ANYOF ALLOF EXISTS SFALSE STRUE HEADER NOT SIZE ADDRESS ENVELOPE
-%token COMPARATOR IS CONTAINS MATCHES REGEX OVER UNDER
+%token COMPARATOR IS CONTAINS MATCHES REGEX OVER UNDER COUNT VALUE
 %token ALL LOCALPART DOMAIN USER DETAIL
 %token DAYS ADDRESSES SUBJECT MIME FROM HANDLE
 %token METHOD ID OPTIONS LOW NORMAL HIGH MESSAGE
@@ -111,7 +111,7 @@ reqs: /* empty */
 	;
 
 require: REQUIRE stringlist ';'	{
-                                    int i = 1;
+                                    int unsupp = 0;
                                     char *msg;
                                     char *freemsg;
                                     stringlist_t *s;
@@ -123,8 +123,9 @@ require: REQUIRE stringlist ';'	{
                                         s = sl;
                                         sl = sl->next;
 
-                                        i &= static_check_reqs(libsieve_parse_context, s->s);
-                                        if (!i) {
+					/* Returns 1 if supported, 0 if not. */
+                                        if (!static_check_reqs(libsieve_parse_context, s->s)) {
+					    unsupp = 1;
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
                                             libsieve_free(freemsg);
@@ -134,7 +135,8 @@ require: REQUIRE stringlist ';'	{
                                         libsieve_free(s);
                                     }
 
-                                    if (!i) {
+				    /* If something wasn't supported, bomb out with msg. */
+                                    if (unsupp) {
                                         libsieve_sieveerror(msg);
                                         libsieve_free(msg);
                                         YYERROR; 
@@ -142,7 +144,6 @@ require: REQUIRE stringlist ';'	{
 
                                     /* This needs to be free'd regardless of error */
                                     libsieve_free(msg);
-
                                 }
 	;
 
@@ -448,6 +449,8 @@ addrparttag: ALL                 { $$ = ALL; }
 	;
 
 comptag: IS			 { $$ = IS; }
+	| VALUE	STRING		 { $$ = VALUE | libsieve_relational_lookup($2); /* HACK: bits above 10 carry the relational. */ }
+	| COUNT	STRING		 { $$ = COUNT | libsieve_relational_lookup($2); /* HACK: bits above 10 carry the relational. */ }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
 	| REGEX			 { if (!libsieve_parse_context->require.regex) {
@@ -690,21 +693,13 @@ static struct vtags *static_new_vtags(void)
 
 static struct vtags *static_canon_vtags(struct vtags *v)
 {
-/* TODO: Rewrite this. The deal here is that the client app
- * might want to specify min_response and max_response days.
- * libSieve should respect the client app's requests. For
- * right now, we're going to just leave these along and let
- * the script do whatever it wants. Eventually we need a 
- * context registration for this, though. */
-//    assert(parse_script->interp.vacation != NULL);
+/* TODO: Change this to an *in*sane default, and specify that the
+ * client app has to check for boundaries.  That would be much
+ * simpler than having a context registration for something that
+ * the user cannot test/check for at all.
+ */
 
     if (v->days == -1) { v->days = 7; }
-    /*
-    if (v->days < parse_script->interp.vacation->min_response) 
-       { v->days = parse_script->interp.vacation->min_response; }
-    if (v->days > parse_script->interp.vacation->max_response)
-       { v->days = parse_script->interp.vacation->max_response; }
-    */
     if (v->mime == -1) { v->mime = 0; }
 
     return v;
@@ -914,10 +909,15 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
     /* regex is built into the parser. */
     } else if (!strcmp("regex", req)) {
 	return c->require.regex = 1;
+    /* relational is built into the parser. */
+    } else if (!strcmp("relational", req)) {
+	return c->require.relational = 1;
     /* These comparators are built into the parser. */
     } else if (!strcmp("comparator-i;octet", req)) {
 	return 1;
     } else if (!strcmp("comparator-i;ascii-casemap", req)) {
+	return 1;
+    } else if (!strcmp("comparator-i;ascii-numeric", req)) {
 	return 1;
     }
     /* If we don't recognize it, then we don't support it! */

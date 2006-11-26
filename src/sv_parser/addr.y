@@ -240,11 +240,14 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
 {
     struct address *new;
     struct address *tmp = addr;
-    struct address *top = libsieve_malloc(sizeof(struct address));
+    struct address *top;
 
     if (!addr) {
-        TRACE_DEBUG("Mayday, addr is null in addrstructcopy");
+        TRACE_DEBUG("No addresses found at all, returning NULL.");
+	return NULL;
     }
+
+    top = libsieve_malloc(sizeof(struct address));
 
     TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
     top->mailbox = tmp->mailbox;
@@ -258,10 +261,12 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     new = top;
     while (tmp != NULL) {
         new->next = (struct address *)libsieve_malloc(sizeof(struct address));
-        if (new->next == NULL)
-            return NULL;   
-        else
+        if (new->next == NULL) {
+            TRACE_DEBUG("malloc failed, returning what we have so far.");
+	    return top;
+        } else {
             new = new->next;
+	}
         TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
         new->mailbox = tmp->mailbox;
         TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->domain, tmp->domain);

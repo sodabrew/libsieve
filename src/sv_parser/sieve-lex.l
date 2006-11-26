@@ -142,6 +142,8 @@ CRLF		(\r\n|\r|\n)
 <INITIAL>:handle	return HANDLE;
 <INITIAL>:comparator	return COMPARATOR;
 <INITIAL>:is		return IS;
+<INITIAL>:count		return COUNT;
+<INITIAL>:value		return VALUE;
 <INITIAL>:contains	return CONTAINS;
 <INITIAL>:matches	return MATCHES;
 <INITIAL>:regex		return REGEX;

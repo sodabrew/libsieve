@@ -36,6 +36,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "comparator.h"
 #include "tree.h"
 #include "sieve.h"
+#include "util.h"
+#include "callbacks2.h"
+
+#define THIS_MODULE "sv_comparator"
+#define THIS_CONTEXT libsieve_parse_context
+extern struct sieve2_context *libsieve_parse_context;
 
 /* --- i;octet comparators --- */
 
@@ -129,14 +135,6 @@ static int octet_regex(const char *pat, const char *text)
 
 /* --- i;ascii-casemap comparators --- */
 
-static int ascii_casemap_is(const char *pat, const char *text)
-{
-    size_t sl;
-    sl = strlen(pat);
-
-    return (sl == strlen(text)) && !strncasecmp(pat, text, sl);
-}
-
 /* sheer brute force */
 static int ascii_casemap_contains(const char *pat, const char *text)
 {
@@ -163,18 +161,116 @@ static int ascii_casemap_matches(const char *pat, const char *text)
     return octet_matches_(pat, text, 1);
 }
 
+static int ascii_numeric_unknown(const char *pat, const char *text)
+{
+    TRACE_DEBUG("Unknown numeric comparison requested");
+    return 0;
+}
+
 /* i;ascii-numeric; only supports "is"
  equality: numerically equal, or both not numbers */
-static int ascii_numeric_is(const char *pat, const char *text)
+static int ascii_numeric(enum num num, const char *pat, const char *text)
 {
+    TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);
     if (isdigit((int)(unsigned char)*pat)) {
 	if (isdigit((int)(unsigned char)*text)) {
-	    return (atoi(pat) == atoi(text));
+	    switch (num) {
+	    case gt:
+	        return (atoi(pat) >  atoi(text));
+	    case ge:
+	        return (atoi(pat) >= atoi(text));
+	    case lt:
+	        return (atoi(pat) <  atoi(text));
+	    case le:
+	        return (atoi(pat) <= atoi(text));
+	    case eq:
+	        return (atoi(pat) == atoi(text));
+	    case ne:
+	        return (atoi(pat) != atoi(text));
+            default:
+	        return 0;
+            }
 	} else {
 	    return 0;
 	}
     } else if (isdigit((int)(unsigned char)*text)) return 0;
     else return 1; /* both not digits */
+}
+
+static int ascii_numeric_gt(const char *pat, const char *text)
+    { return ascii_numeric(gt, pat, text); }
+static int ascii_numeric_ge(const char *pat, const char *text)
+    { return ascii_numeric(ge, pat, text); }
+static int ascii_numeric_lt(const char *pat, const char *text)
+    { return ascii_numeric(lt, pat, text); }
+static int ascii_numeric_le(const char *pat, const char *text)
+    { return ascii_numeric(le, pat, text); }
+static int ascii_numeric_eq(const char *pat, const char *text)
+    { return ascii_numeric(eq, pat, text); }
+static int ascii_numeric_ne(const char *pat, const char *text)
+    { return ascii_numeric(ne, pat, text); }
+
+static int ascii_casemap_unknown(const char *pat, const char *text)
+{
+    TRACE_DEBUG("Unknown casemap comparison requested");
+    return 0;
+}
+
+static int ascii_casemap(enum num num, const char *pat, const char *text)
+{
+    TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);
+    switch (num) {
+    case gt:
+        return strcasecmp(pat, text) <  0;
+    case ge:
+        return strcasecmp(pat, text) <= 0;
+    case lt:
+        return strcasecmp(pat, text) >  0;
+    case le:
+        return strcasecmp(pat, text) >= 0;
+    case eq:
+        return strcasecmp(pat, text) == 0;
+    case ne:
+        return strcasecmp(pat, text) != 0;
+    default:
+        return 0;
+    }
+}
+
+static int ascii_casemap_gt(const char *pat, const char *text)
+    { return ascii_casemap(gt, pat, text); }
+static int ascii_casemap_ge(const char *pat, const char *text)
+    { return ascii_casemap(ge, pat, text); }
+static int ascii_casemap_lt(const char *pat, const char *text)
+    { return ascii_casemap(lt, pat, text); }
+static int ascii_casemap_le(const char *pat, const char *text)
+    { return ascii_casemap(le, pat, text); }
+static int ascii_casemap_eq(const char *pat, const char *text)
+    { return ascii_casemap(eq, pat, text); }
+static int ascii_casemap_ne(const char *pat, const char *text)
+    { return ascii_casemap(ne, pat, text); }
+
+int libsieve_relational_lookup(const char *rel)
+{
+    enum num num;
+
+    if (!rel) {
+        return 0;
+    } else if (!strcmp(rel, "gt")) {
+        return (num = gt) << 10;
+    } else if (!strcmp(rel, "ge")) {
+        return (num = ge) << 10;
+    } else if (!strcmp(rel, "lt")) {
+        return (num = lt) << 10;
+    } else if (!strcmp(rel, "le")) {
+        return (num = le) << 10;
+    } else if (!strcmp(rel, "eq")) {
+        return (num = eq) << 10;
+    } else if (!strcmp(rel, "ne")) {
+        return (num = ne) << 10;
+    } else {
+        return 0;
+    }
 }
 
 comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
@@ -200,7 +296,7 @@ comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
     } else if (!strcmp(comp, "i;ascii-casemap")) {
 	switch (mode) {
 	case IS:
-	    ret = &ascii_casemap_is;
+	    ret = &ascii_casemap_eq;
 	    break;
 	case CONTAINS:
 	    ret = &ascii_casemap_contains;
@@ -213,13 +309,84 @@ comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
 	       the compilation of the regex in verify_regex() */
 	    ret = &octet_regex;
 	    break;
+	case VALUE:
+	    TRACE_DEBUG("Value comparison requested with default relation");
+	    goto casemap_switch;
+	case COUNT:
+	    TRACE_DEBUG("Count comparison requested with default relation");
+	default:
+        casemap_switch:
+	    switch ((enum num)(mode >> 10)) {
+            case gt:
+	        ret = &ascii_casemap_gt;
+		break;
+            case ge:
+	        ret = &ascii_casemap_ge;
+		break;
+            case lt:
+	        ret = &ascii_casemap_lt;
+		break;
+            case le:
+	        ret = &ascii_casemap_le;
+		break;
+            case eq:
+	        ret = &ascii_casemap_eq;
+		break;
+            case ne:
+	        ret = &ascii_casemap_ne;
+		break;
+	    default:
+	    	ret = &ascii_casemap_unknown;
+	    }
 	}
     } else if (!strcmp(comp, "i;ascii-numeric")) {
 	switch (mode) {
 	case IS:
-	    ret = &ascii_numeric_is;
+	    ret = &ascii_numeric_eq;
 	    break;
+	case VALUE:
+	    TRACE_DEBUG("Value comparison requested with default relation");
+	    goto numeric_switch;
+	case COUNT:
+	    TRACE_DEBUG("Count comparison requested with default relation");
+        default:
+        numeric_switch:
+	    switch ((enum num)(mode >> 10)) {
+            case gt:
+	        ret = &ascii_numeric_gt;
+		break;
+            case ge:
+	        ret = &ascii_numeric_ge;
+		break;
+            case lt:
+	        ret = &ascii_numeric_lt;
+		break;
+            case le:
+	        ret = &ascii_numeric_le;
+		break;
+            case eq:
+	        ret = &ascii_numeric_eq;
+		break;
+            case ne:
+	        ret = &ascii_numeric_ne;
+		break;
+	    default:
+	    	ret = &ascii_numeric_unknown;
+            }
 	}
     }
     return ret;
+}
+
+int libsieve_relational_count(int mode)
+{
+    if ((mode & COUNT) == COUNT) {
+        TRACE_DEBUG("Count relation [%d]", mode >> 10);
+        return 1;
+    }
+    if ((mode & VALUE) == VALUE) {
+        TRACE_DEBUG("Value relation [%d]", mode >> 10);
+        return 0;
+    }
+    return 0;
 }

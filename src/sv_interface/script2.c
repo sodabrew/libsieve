@@ -284,6 +284,7 @@ char * sieve2_listextensions(sieve2_context_t *sieve2_context)
 
     ext = libsieve_strconcat(     "regex ",
                                   "imap4flags ",
+                                  "relational ",
         ( c->support.subaddress ? "subaddress "  : "" ),
         ( c->support.fileinto   ? "fileinto "  : "" ),
         ( c->support.reject     ? "reject "    : "" ),

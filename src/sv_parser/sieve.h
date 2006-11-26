@@ -78,24 +78,26 @@
      REGEX = 294,
      OVER = 295,
      UNDER = 296,
-     ALL = 297,
-     LOCALPART = 298,
-     DOMAIN = 299,
-     USER = 300,
-     DETAIL = 301,
-     DAYS = 302,
-     ADDRESSES = 303,
-     SUBJECT = 304,
-     MIME = 305,
-     FROM = 306,
-     HANDLE = 307,
-     METHOD = 308,
-     ID = 309,
-     OPTIONS = 310,
-     LOW = 311,
-     NORMAL = 312,
-     HIGH = 313,
-     MESSAGE = 314
+     COUNT = 297,
+     VALUE = 298,
+     ALL = 299,
+     LOCALPART = 300,
+     DOMAIN = 301,
+     USER = 302,
+     DETAIL = 303,
+     DAYS = 304,
+     ADDRESSES = 305,
+     SUBJECT = 306,
+     MIME = 307,
+     FROM = 308,
+     HANDLE = 309,
+     METHOD = 310,
+     ID = 311,
+     OPTIONS = 312,
+     LOW = 313,
+     NORMAL = 314,
+     HIGH = 315,
+     MESSAGE = 316
    };
 #endif
 /* Tokens.  */
@@ -138,24 +140,26 @@
 #define REGEX 294
 #define OVER 295
 #define UNDER 296
-#define ALL 297
-#define LOCALPART 298
-#define DOMAIN 299
-#define USER 300
-#define DETAIL 301
-#define DAYS 302
-#define ADDRESSES 303
-#define SUBJECT 304
-#define MIME 305
-#define FROM 306
-#define HANDLE 307
-#define METHOD 308
-#define ID 309
-#define OPTIONS 310
-#define LOW 311
-#define NORMAL 312
-#define HIGH 313
-#define MESSAGE 314
+#define COUNT 297
+#define VALUE 298
+#define ALL 299
+#define LOCALPART 300
+#define DOMAIN 301
+#define USER 302
+#define DETAIL 303
+#define DAYS 304
+#define ADDRESSES 305
+#define SUBJECT 306
+#define MIME 307
+#define FROM 308
+#define HANDLE 309
+#define METHOD 310
+#define ID 311
+#define OPTIONS 312
+#define LOW 313
+#define NORMAL 314
+#define HIGH 315
+#define MESSAGE 316
 
 
 
@@ -177,7 +181,7 @@ typedef union YYSTYPE
     struct ntags *ntag;
 }
 /* Line 1528 of yacc.c.  */
-#line 181 "sieve.h"
+#line 185 "sieve.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
