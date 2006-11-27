@@ -167,26 +167,29 @@ static int ascii_numeric_unknown(const char *pat, const char *text)
     return 0;
 }
 
-/* i;ascii-numeric; only supports "is"
- equality: numerically equal, or both not numbers */
+/* i;ascii-numeric
+ * Note that the inequalities are backwards.
+ * This is because pat is the RHS and text is the LHS.
+ */
 static int ascii_numeric(enum num num, const char *pat, const char *text)
 {
     TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);
     if (isdigit((int)(unsigned char)*pat)) {
 	if (isdigit((int)(unsigned char)*text)) {
+            TRACE_DEBUG("Testing [%d] [%d] [%d]", atoi(pat), num, atoi(text));
 	    switch (num) {
 	    case gt:
-	        return (atoi(pat) >  atoi(text));
+	        return atoi(pat) <  atoi(text);
 	    case ge:
-	        return (atoi(pat) >= atoi(text));
+	        return atoi(pat) <= atoi(text);
 	    case lt:
-	        return (atoi(pat) <  atoi(text));
+	        return atoi(pat) >  atoi(text);
 	    case le:
-	        return (atoi(pat) <= atoi(text));
+	        return atoi(pat) >= atoi(text);
 	    case eq:
-	        return (atoi(pat) == atoi(text));
+	        return atoi(pat) == atoi(text);
 	    case ne:
-	        return (atoi(pat) != atoi(text));
+	        return atoi(pat) != atoi(text);
             default:
 	        return 0;
             }
@@ -216,6 +219,10 @@ static int ascii_casemap_unknown(const char *pat, const char *text)
     return 0;
 }
 
+/* i;ascii-casemap
+ * Note that the inequalities are backwards.
+ * This is because pat is the RHS and text is the LHS.
+ */
 static int ascii_casemap(enum num num, const char *pat, const char *text)
 {
     TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);

@@ -1,6 +1,6 @@
 # this is the version number :-)
 PACKAGE = libsieve
-VERSION = 2.2.2
+VERSION = 2.2.3
 SOURCES = src
 OTHERS = AUTHORS COPYING NEWS README Makefile
 
@@ -23,6 +23,18 @@ release: $(SOURCES) $(OTHERS)
 	@echo
 	-mkdir $(PACKAGE)-$(VERSION)
 	-cp -pr $(SOURCES) $(OTHERS) $(PACKAGE)-$(VERSION)
+	@echo
+	@echo "->Removing SVN control files: " $(PACKAGE)-$(VERSION)/.svn " " $(PACKAGE)-$(VERSION)/*/.svn
+	@echo
+	-rm -fr $(PACKAGE)-$(VERSION)/.svn $(PACKAGE)-$(VERSION)/*/.svn $(PACKAGE)-$(VERSION)/*/*/.svn
+	@echo
+	@echo "->Bootstrapping autotools: " $(PACKAGE)-$(VERSION)/src/bootstrap
+	@echo
+	-cd $(PACKAGE)-$(VERSION)/src/ && autoreconf -f -i
+	@echo
+	@echo "->Removing autotools cache: " $(PACKAGE)-$(VERSION)/autom4te.cache
+	@echo
+	-rm -fr $(PACKAGE)-$(VERSION)/src/autom4te.cache
 	@echo
 	@echo "->Making the compressed tar file " $(PACKAGE)-$(VERSION).tar.gz
 	@echo

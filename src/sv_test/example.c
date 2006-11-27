@@ -439,6 +439,7 @@ sieve2_callback_t my_callbacks[] = {
 { SIEVE2_ERRCALL_RUNTIME,       my_errexec       },
 { SIEVE2_ERRCALL_PARSE,         my_errparse      },
 { SIEVE2_ACTION_FILEINTO,       my_fileinto      },
+{ SIEVE2_ACTION_DISCARD,        my_discard       },
 { SIEVE2_ACTION_REDIRECT,       my_redirect      },
 { SIEVE2_ACTION_REJECT,         my_reject        },
 { SIEVE2_ACTION_NOTIFY,         my_notify        },
