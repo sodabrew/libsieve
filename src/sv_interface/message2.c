@@ -57,7 +57,6 @@ static int freecache(sieve2_message_t *m)
 	     * and so they are freed by headerlexfree() and headeryaccfree().
 	     * */
             libsieve_free(m->hash[i]->contents);
-            libsieve_free(m->hash[i]->name);
         }
         libsieve_free(m->hash[i]);
     }
@@ -155,7 +154,6 @@ int libsieve_message2_parseheader(sieve2_message_t *m)
           /* Since we're not using this header_t struct, free it.
            * Note that we're not freeing each of contents, we need those. */
           libsieve_free(hl->h->contents);
-          libsieve_free(hl->h->name);
           libsieve_free(hl->h);
         } else {
             /* Make of copy of the pointer */

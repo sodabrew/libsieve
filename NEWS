@@ -1,3 +1,12 @@
+libSieve 2.2.4
+--------------
+
+- Improved several test scripts.
+
+- Fixed a memory leak in header parsing.
+
+- Fixed a memory leak in comparator lookup.
+
 libSieve 2.2.3
 --------------
 

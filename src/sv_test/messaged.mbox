@@ -1,4 +1,4 @@
-From: envelope@example.org, secondenv@example.org
+From: envelope@example.org, secondenv@example.org, <bar<foo@<qux>>.com
 Sender: blue@res.example.com
 To: undisclosed-recipients:;
 Date:  Mon, 31 Mar 1997 18:26:10 -0800

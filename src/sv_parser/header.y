@@ -102,9 +102,14 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     if(libsieve_headerparse()) {
         TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
         *err = libsieve_headererr;
-        libsieve_free(hl->h->contents);
-        libsieve_free(hl->h);
-        libsieve_free(hl);
+	while (hl) {
+	    header_list_t *next = hl->next;
+            libsieve_free(hl->h->contents);
+            libsieve_free(hl->h);
+            libsieve_free(hl);
+	    hl = next;
+	}
+	hl = NULL;
 	return NULL;
     }
 
@@ -123,6 +128,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
     if(*data == NULL)
         *data = newdata;
 
+    hl = newdata;
     return *data;
 }
 
@@ -135,12 +141,19 @@ int libsieve_headerappend(header_list_t **hl)
     newlist = (header_list_t *)libsieve_malloc(sizeof(header_list_t));
     if (newlist == NULL)
         return SIEVE2_ERROR_NOMEM;
+
     newhead = (header_t *)libsieve_malloc(sizeof(header_t));
-    if (newhead == NULL)
+    if (newhead == NULL) {
+        libsieve_free(newlist);
         return SIEVE2_ERROR_NOMEM;
+    }
+
     c = (char **)libsieve_malloc(2 * sizeof(char *));
-    if (c == NULL)
+    if (c == NULL) {
+        libsieve_free(newlist);
+        libsieve_free(newhead);
         return SIEVE2_ERROR_NOMEM;
+    }
 
     TRACE_DEBUG( "Prepending a new headerlist and header struct" );
     newhead->count = 0;
@@ -163,7 +176,8 @@ void libsieve_headerentry(header_t *h, char *name, char *body)
 	/* Hmm, big big trouble here... */;
 
     size_t namelen = strlen(name);
-    h->name = libsieve_strtolower(libsieve_strndup(name, namelen), namelen);
+    // h->name = libsieve_strtolower(libsieve_strndup(name, namelen), namelen);
+    h->name = libsieve_strtolower(name, namelen);
     h->contents[0] = body;
     h->count = 1;
 

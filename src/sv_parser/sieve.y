@@ -449,8 +449,8 @@ addrparttag: ALL                 { $$ = ALL; }
 	;
 
 comptag: IS			 { $$ = IS; }
-	| VALUE	STRING		 { $$ = VALUE | libsieve_relational_lookup($2); /* HACK: bits above 10 carry the relational. */ }
-	| COUNT	STRING		 { $$ = COUNT | libsieve_relational_lookup($2); /* HACK: bits above 10 carry the relational. */ }
+	| VALUE	STRING		 { $$ = VALUE | libsieve_relational_lookup($2); libsieve_free($2); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
+	| COUNT	STRING		 { $$ = COUNT | libsieve_relational_lookup($2); libsieve_free($2); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
 	| REGEX			 { if (!libsieve_parse_context->require.regex) {

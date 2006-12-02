@@ -2265,12 +2265,12 @@ yyreduce:
 
   case 80:
 #line 452 "sieve.y"
-    { (yyval.nval) = VALUE | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. */ }
+    { (yyval.nval) = VALUE | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
     break;
 
   case 81:
 #line 453 "sieve.y"
-    { (yyval.nval) = COUNT | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. */ }
+    { (yyval.nval) = COUNT | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
     break;
 
   case 82:
