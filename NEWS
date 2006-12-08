@@ -7,6 +7,8 @@ libSieve 2.2.4
 
 - Fixed a memory leak in comparator lookup.
 
+- Accepted patch from Steffen Schuetz to respect :from in vacation action.
+
 libSieve 2.2.3
 --------------
 
