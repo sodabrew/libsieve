@@ -34,7 +34,7 @@
 /* Bad things that will result in a failure code. */
 #define TRACE_ERROR(fmt...) libsieve_do_debug_trace(THIS_CONTEXT, 2, THIS_MODULE, __FILE__, __func__, fmt)
 /* All assertions are always tested, and errors thrown upwards. */
-#define libsieve_assert(cond) ( (cond) ? 0 : ( TRACE_ERROR("Assertion failed: [%s]", __STRING(cond)), throw(SIEVE2_ERROR_INTERNAL) ) )
+#define libsieve_assert(cond) ( (cond) ? 0 : ( TRACE_ERROR("Assertion failed: [%s]", #cond), throw(SIEVE2_ERROR_INTERNAL) ) )
 
 /* These are the memory oriented functions */
 
