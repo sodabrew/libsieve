@@ -1,9 +1,13 @@
 libSieve 2.2.5
 --------------
 
-- Allowed CFLAGS to pass through Makefile.am.
+- Allowed CFLAGS to pass through Makefile.am
+  (thanks to Bernard Johnson).
 
 - Use # instead of __STRING for assertion stringification.
+
+- Fixed off-by-one when reallocing space for repeated headers
+  (thanks to Petri Laine).
 
 libSieve 2.2.4
 --------------

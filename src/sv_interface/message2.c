@@ -138,9 +138,9 @@ int libsieve_message2_parseheader(sieve2_message_t *m)
                 /* Followed by a terminating NULL */
                 m->hash[c]->contents[m->hash[c]->count] = NULL;
             } else {
-                /* Need to make some more space in here */
+                /* Need to make some more space in here, plus one for the NULL. */
                 char **tmp;
-                tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * (m->hash[c]->space+=8));
+                tmp = (char **)libsieve_realloc(m->hash[c]->contents, sizeof(char *) * ((m->hash[c]->space+=8) + 1));
                 if (tmp == NULL) {
                     return SIEVE2_ERROR_NOMEM;
 		} else {
