@@ -11,10 +11,6 @@
 #ifndef INCLUDED_UTIL_H
 #define INCLUDED_UTIL_H
 
-/* Needed for printf. */
-#include <stdio.h>
-/* Needed for vasprintf. */
-#include "vasprintf.h"
 #include "exception.h"
 
 /* Define several macros for GCC specific attributes.
@@ -79,6 +75,7 @@ struct catbuf {
     size_t len;
 };
 
+char *libsieve_catbuf_simple(struct catbuf *s, char *str);
 char *libsieve_catbuf(struct catbuf *s, char *str, size_t len);
 struct catbuf *libsieve_catbuf_alloc(void);
 char *libsieve_catbuf_free(struct catbuf *s);

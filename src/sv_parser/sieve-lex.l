@@ -1,35 +1,23 @@
 %{
-/* sieve.l -- sieve lexer
- * Larry Greenfield
+/* sieve-lex.l -- RFC 3028 Sieve Lexer
+ * Aaron Stone
+ * $Id$
  */
-/***********************************************************
-        Copyright 1999 by Carnegie Mellon University
-
-                      All Rights Reserved
-
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Carnegie Mellon
-University not be used in advertising or publicity pertaining to
-distribution of the software without specific, written prior
-permission.
-
-CARNEGIE MELLON UNIVERSITY DISCLAIMS ALL WARRANTIES WITH REGARD TO
-THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS, IN NO EVENT SHALL CARNEGIE MELLON UNIVERSITY BE LIABLE FOR
-ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
-OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-******************************************************************/
+/* * * *
+ * Copyright 2007 by Aaron Stone
+ *
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+/* C */
+#include <ctype.h>
 #include <string.h>
+
 /* sv_util */
 #include "util.h"
 
@@ -46,24 +34,27 @@ extern struct sieve2_context *libsieve_parse_context;
 #define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
 
 int libsieve_sieveinput(char *buf, int max_size);
+extern char *libsieve_encoded_char_hex(char *text, size_t len, size_t *outlen);
+extern char *libsieve_encoded_char_uni(char *text, size_t len, size_t *outlen);
+extern int libsieve_keyword(const char *str, unsigned int len);
 extern int libsieve_sieveerror(char *);
 
 #define YY_FATAL_ERROR libsieve_sievefatalerror
 void libsieve_sievefatalerror(const char msg[]);
 
 /* Holds a catbuf for the text: multiline. */
-static struct catbuf *text;
+static struct catbuf *text = NULL;
 
 %}
 
 %option yylineno
-%option noyywrap
 %option nounput
+%option noyywrap
 %option prefix="libsieve_sieve"
 %option never-interactive
 
 ws		[ \t]+
-ident		[a-zA-Z_][a-zA-Z_0-9]*
+ident		:?[a-zA-Z_][a-zA-Z_0-9]*
 CRLF		(\r\n|\r|\n)
 
 %state MULTILINE
@@ -73,6 +64,7 @@ CRLF		(\r\n|\r|\n)
 <MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
 			  BEGIN INITIAL;
 			  libsieve_sievelval.sval = libsieve_catbuf_free(text);
+			  text = NULL;
 			  return STRING; }
 <MULTILINE>^\.\.	{ TRACE_DEBUG("Dot-stuffing - one dot dropped.");
 			  libsieve_catbuf(text, yytext, yyleng - 1); }
@@ -83,77 +75,62 @@ CRLF		(\r\n|\r|\n)
 <MULTILINE>[^\.]+	{ TRACE_DEBUG("Multiline line [%s]", yytext);
 			  libsieve_catbuf(text, yytext, yyleng); }
 <MULTILINE><<EOF>>	{ libsieve_sieveerror("unexpected end of file in string"); 
-			  yyterminate(); }
+			  if (text) {
+			    libsieve_free(libsieve_catbuf_free(text));
+			    text = NULL;
+			  }
+			  throw(SIEVE2_ERROR_PARSE); }
 
-<QSTRING>\"		{ BEGIN INITIAL; }
-<QSTRING>([^\"]|\\\"|{CRLF})+ { libsieve_sievelval.sval = libsieve_strndup(yytext, yyleng);
+<QSTRING>\"		{ TRACE_DEBUG("Ending a string, found [%s]", text->str);
+			  BEGIN INITIAL;
+			  libsieve_sievelval.sval = libsieve_catbuf_free(text);
+			  text = NULL;
 			  return STRING; }
+<QSTRING>\$\{hex:[0-9a-fA-F\ ]+\} {
+			  size_t len = 0;
+			  char *decoded = libsieve_encoded_char_hex(yytext, yyleng, &len);
+			  libsieve_catbuf(text, decoded, len);
+			  libsieve_free(decoded); }
+<QSTRING>\$\{unicode:[0-9a-fA-F\ ]+\} {
+			  size_t len = 0;
+			  char *decoded = libsieve_encoded_char_uni(yytext, yyleng, &len);
+			  libsieve_catbuf(text, decoded, len);
+			  libsieve_free(decoded); }
+<QSTRING>([^\"|^\$\{]|\\\"|{CRLF})+ {
+			  TRACE_DEBUG("More string found [%s]", yytext);
+			  libsieve_catbuf(text, yytext, yyleng); }
+<QSTRING>.              { TRACE_DEBUG("Lone string char [%s]", yytext);
+			  libsieve_catbuf(text, yytext, yyleng); }
 
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ TRACE_DEBUG("Beginning a text: block.");
 			  BEGIN MULTILINE;
+			  if (text) libsieve_free(libsieve_catbuf_free(text));
 			  text = libsieve_catbuf_alloc(); }
 <INITIAL>\"\"		{ libsieve_sievelval.sval = libsieve_strdup("");
 			  return STRING; }
-<INITIAL>\"		{ BEGIN QSTRING; }
+<INITIAL>\"		{ BEGIN QSTRING;
+			  if (text) libsieve_free(libsieve_catbuf_free(text));
+			  text = libsieve_catbuf_alloc(); }
 <INITIAL>[0-9]+[KMG]?	{ libsieve_sievelval.nval = libsieve_strtonum(yytext);
 			  return NUMBER; }
-<INITIAL>if		return IF;
-<INITIAL>elsif		return ELSIF;
-<INITIAL>else		return ELSE;
-<INITIAL>anyof		return ANYOF;
-<INITIAL>allof		return ALLOF;
-<INITIAL>exists		return EXISTS;
-<INITIAL>false		return SFALSE;
-<INITIAL>true		return STRUE;
-<INITIAL>address	return ADDRESS;
-<INITIAL>envelope	return ENVELOPE;
-<INITIAL>header		return HEADER;
-<INITIAL>not		return NOT;
-<INITIAL>size		return SIZE;
-<INITIAL>reject		return REJCT;
-<INITIAL>fileinto	return FILEINTO;
-<INITIAL>redirect	return REDIRECT;
-<INITIAL>keep		return KEEP;
-<INITIAL>require	return REQUIRE;
-<INITIAL>stop		return STOP;
-<INITIAL>discard	return DISCARD;
-<INITIAL>setflag	return SETFLAG;
-<INITIAL>addflag	return ADDFLAG;
-<INITIAL>removeflag	return REMOVEFLAG;
-<INITIAL>hasflag	return HASFLAG;
-<INITIAL>mark		return MARK;
-<INITIAL>unmark		return UNMARK;
-<INITIAL>:flags		return FLAGS;
-<INITIAL>notify		return NOTIFY;
-<INITIAL>valid_notif_method return VALIDNOTIF;
-<INITIAL>:id		return ID;
-<INITIAL>:method	return METHOD;
-<INITIAL>:options	return OPTIONS;
-<INITIAL>:low		return LOW;
-<INITIAL>:normal	return NORMAL;
-<INITIAL>:high		return HIGH;
-<INITIAL>:message	return MESSAGE;
-<INITIAL>vacation	return VACATION;
-<INITIAL>:days		return DAYS;
-<INITIAL>:addresses	return ADDRESSES;
-<INITIAL>:subject	return SUBJECT;
-<INITIAL>:mime		return MIME;
-<INITIAL>:from		return FROM;
-<INITIAL>:handle	return HANDLE;
-<INITIAL>:comparator	return COMPARATOR;
-<INITIAL>:is		return IS;
-<INITIAL>:count		return COUNT;
-<INITIAL>:value		return VALUE;
-<INITIAL>:contains	return CONTAINS;
-<INITIAL>:matches	return MATCHES;
-<INITIAL>:regex		return REGEX;
-<INITIAL>:over		return OVER;
-<INITIAL>:under		return UNDER;
-<INITIAL>:all		return ALL;
-<INITIAL>:localpart	return LOCALPART;
-<INITIAL>:domain	return DOMAIN;
-<INITIAL>:user		return USER;
-<INITIAL>:detail	return DETAIL;
+
+<INITIAL>{ident}	{ int k = libsieve_keyword(yytext, yyleng);
+			  if (!k) {
+			    int len;
+			    char error[1024];
+			    memset(error, 0, 1024);
+			    len = snprintf(error, 1023, "invalid keyword: %s", yytext);
+			    if (len < 0 || len > 1023) {
+			      snprintf(error, 1023, "invalid keyword.");
+			    }
+			    libsieve_sieveerror(error); 
+			    if (text) {
+			      libsieve_free(libsieve_catbuf_free(text));
+			      text = NULL;
+			    }
+			    throw(SIEVE2_ERROR_PARSE);
+			} return k; }
+	
 <INITIAL>[ \t\n\r] ;	/* ignore whitespace */
 <INITIAL>#.* ;		/* ignore comments */
 .			return yytext[0];

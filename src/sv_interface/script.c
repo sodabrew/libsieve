@@ -29,6 +29,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "config.h"
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -130,13 +131,14 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     int addrpart = 0;
 
     if (t == NULL) {
-            TRACE_DEBUG("t is null");
-            return 0;
+        TRACE_DEBUG("t is null");
+        return 0;
     }
 
     switch (t->type) {
     case ADDRESS:
     case ENVELOPE:
+        TRACE_DEBUG("Doing an address/envelope comparison");
         switch (t->u.ae.addrpart) {
         case ALL: addrpart = ADDRESS_ALL; break;
         case LOCALPART: addrpart = ADDRESS_LOCALPART; break;
@@ -204,18 +206,21 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
         }
         break;
     case ANYOF:
+        TRACE_DEBUG("Anyof");
         res = 0;
         for (tl = t->u.tl; tl != NULL && !res; tl = tl->next) {
             res |= static_evaltest(context, tl->t);
         }
         break;
     case ALLOF:
+        TRACE_DEBUG("Allof");
         res = 1;
         for (tl = t->u.tl; tl != NULL && res; tl = tl->next) {
             res &= static_evaltest(context, tl->t);
         }
         break;
     case EXISTS:
+        TRACE_DEBUG("Exists");
         res = 1;
         for (sl = t->u.sl; sl != NULL && res; sl = sl->next) {
             char **headbody = NULL;
@@ -223,9 +228,11 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
         }
         break;
     case SFALSE:
+        TRACE_DEBUG("False");
         res = 0;
         break;
     case STRUE:
+        TRACE_DEBUG("True");
         res = 1;
         break;
     case HEADER:
@@ -261,6 +268,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
         }
         break;
     case HASFLAG:
+        TRACE_DEBUG("Doing a hasflag test");
         res = 0;
         for (sl = t->u.h.sl; sl != NULL && !res; sl = sl->next) {
             stringlist_t *csl;
@@ -276,78 +284,119 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
         }
         break;
     case NOT:
+        TRACE_DEBUG("Not");
         res = !static_evaltest(context, t->u.t);
         break;
-    case SIZE:
-    {
+    case SIZE: {
         int sz;
+        TRACE_DEBUG("Doing a size comparison");
 
         if (libsieve_do_getsize(context, &sz) != SIEVE2_OK)
             break;
 
-        if (t->u.sz.t == OVER) {
+        if (t->u.sz.t == OVER)
             res = (sz > t->u.sz.n);
-        } else { /* UNDER */
+        else /* UNDER */
             res = (sz < t->u.sz.n);
-        }
-        break;
-    }
+
+        } break;
     }
 
     return res;
 }
 
-/* evaluate the script c.  returns negative if error was encountered,
-   0 if it exited off the end, or positive if a stop action was encountered.
-   note that this is very stack hungry; we just evaluate the AST in
-   the naivest way.  if we implement some sort of depth limit, we'll
-   be ok here; otherwise we'd want to transform it a little smarter */
-// TODO: Can we change this to be iterative, or somehow tail-recursive-optimized?
-int libsieve_eval(struct sieve2_context *context,
-                  commandlist_t *c, const char **errmsg)
+/* Evaluate the script c. Returns:
+ *  o negative on error
+ *  o zero if it runs normally
+ *  o positive on stop
+ */
+int libsieve_eval(struct sieve2_context *context, commandlist_t *c)
 {
     int res = 0;
+    commandlist_t *cl_prev = NULL, *cl_tmp = NULL, **cl_up = NULL;
     stringlist_t *sl;
 
-    TRACE_DEBUG("starting into libsieve_eval");
+    TRACE_DEBUG("entering libsieve_eval");
     
     if (c == NULL)
         TRACE_DEBUG("the commandlist is null");
-    else
-        TRACE_DEBUG("the commandlist type is [%d]", c->type);
+
+eval_loop:
+    /* Reverse the order of elements at the current level
+     * because we're using a left-recursive grammar now. */
+    cl_prev = NULL;
+    while (c != NULL) {
+        cl_tmp = c->next;
+        c->next = cl_prev;
+        cl_prev = c;
+        if (cl_tmp) c = cl_tmp;
+        else break;
+    }
+    if (cl_up) *cl_up = c, cl_up = NULL;
 
     while (c != NULL) {
         TRACE_DEBUG("top of the eval loop");
         switch (c->type) {
         case IF:
-            if (static_evaltest(context, c->u.i.t))
-                res = libsieve_eval(context, c->u.i.do_then, errmsg);
-            else
-                res = libsieve_eval(context, c->u.i.do_else, errmsg);
+            TRACE_DEBUG("Testing an if");
+            if (static_evaltest(context, c->u.i.t)) {
+                if (c->u.i.do_then) {
+                    TRACE_DEBUG("following then via %s", (c->up ? "up" : "next"));
+                    c->u.i.do_then->up = ( c->up ? c->up : c->next );
+                    cl_up = &c->u.i.do_then;        
+                    c = c->u.i.do_then;        
+                    goto eval_loop;
+                } else {
+                    TRACE_DEBUG("empty then");
+                }
+            } else {
+                if (c->u.i.do_else) {
+                    TRACE_DEBUG("following else via %s", (c->up ? "up" : "next"));
+                    c->u.i.do_else->up = ( c->up ? c->up : c->next );
+                    cl_up = &c->u.i.do_then;        
+                    c = c->u.i.do_else;        
+                    goto eval_loop;
+                } else {
+                    TRACE_DEBUG("empty else");
+                }
+            }
             break;
         case REJCT:
+            TRACE_DEBUG("Doing a reject");
             res = libsieve_do_reject(context, c->u.str);
             if (res == SIEVE2_ERROR_EXEC)
-                *errmsg = "Reject can not be used with any other action";
-            TRACE_DEBUG("Doing a reject");
+                0; // *errmsg = "Reject can not be used with any other action";
+            else
+                context->cancel_keep = 1;
             break;
         case FILEINTO:
+            TRACE_DEBUG("Doing a fileinto");
             res = libsieve_do_fileinto(context, c->u.f.mailbox, c->u.f.slflags);
             if (res == SIEVE2_ERROR_EXEC)
-                *errmsg = "Fileinto can not be used with Reject";
-            TRACE_DEBUG("Doing a fileinto");
+                0; // *errmsg = "Fileinto can not be used with Reject";
+            else
+                context->cancel_keep = 1;
             break;
         case REDIRECT:
+            TRACE_DEBUG("Doing a redirect");
             res = libsieve_do_redirect(context, c->u.str);
             if (res == SIEVE2_ERROR_EXEC)
-                *errmsg = "Redirect can not be used with Reject";
-            TRACE_DEBUG("Doing a redirect");
+                0; // *errmsg = "Redirect can not be used with Reject";
+            else
+                context->cancel_keep = 1;
             break;
         case KEEP:
+            TRACE_DEBUG("Doing a keep");
             res = libsieve_do_keep(context, c->u.f.slflags);
             if (res == SIEVE2_ERROR_EXEC)
-                *errmsg = "Keep can not be used with Reject";
-            TRACE_DEBUG("Doing a keep");
+                0; // *errmsg = "Keep can not be used with Reject";
+            else
+                context->cancel_keep = 1;
+            break;
+        case NOTIFY:
+            TRACE_DEBUG("Doing a notify");
+            res = libsieve_do_notify(context, c->u.n.from, c->u.n.method,
+                            c->u.n.options, c->u.n.importance, c->u.n.message);
             break;
         case VACATION:
             {
@@ -418,20 +467,20 @@ int libsieve_eval(struct sieve2_context *context,
                     }
 
                     /* first, is it from me? */
-                    if (l == SIEVE2_OK && !strcmp(myaddr, reply_to)) {
+                    if (l == SIEVE2_OK && myaddr && !strcmp(myaddr, reply_to)) {
                         TRACE_DEBUG("VACATION aborted because the message is from my primary address.");
                         l = SIEVE2_DONE;
                     }
 
-                    /* ok, is it any of the other addresses i've
-                       specified? */
-                    if (l == SIEVE2_OK)
+                    /* ok, is it any of the other addresses i've specified? */
+                    if (l == SIEVE2_OK) {
                         for (sl = c->u.v.addresses; sl != NULL; sl = sl->next)
                             if (!strcmp(sl->s, reply_to))
                                 l = SIEVE2_DONE;
 
-                    if (l == SIEVE2_DONE)
-                        TRACE_DEBUG("VACATION aborted because the message is from a secondary address.");
+                        if (l == SIEVE2_DONE)
+                            TRACE_DEBUG("VACATION aborted because the message is from a secondary address.");
+                    }
                 
                     /* ok, is it a system address? */
                     if (l == SIEVE2_OK && sysaddr(reply_to)) {
@@ -473,7 +522,7 @@ int libsieve_eval(struct sieve2_context *context,
                         char **s;
                     
                         if (libsieve_do_getheader(context, "subject", &s) != SIEVE2_OK ||
-                            s[0] == NULL) {
+                            s == NULL || s[0] == NULL) {
                             strcpy(buf, "Automated reply");
                         } else {
                             /* s[0] contains the original subject */
@@ -500,7 +549,7 @@ int libsieve_eval(struct sieve2_context *context,
                                       c->u.v.days, c->u.v.mime);
                 
                      if (res == SIEVE2_ERROR_EXEC)
-                         *errmsg = "Vacation can not be used with Reject or Vacation";
+                         0; // *errmsg = "Vacation can not be used with Reject or Vacation";
 
                 } else {
                     libsieve_free(reply_to);
@@ -513,16 +562,19 @@ int libsieve_eval(struct sieve2_context *context,
             res = 1;
             break;
         case DISCARD:
-            res = libsieve_do_discard(context);
             TRACE_DEBUG("Doing a discard");
+            res = libsieve_do_discard(context);
+            if (res != SIEVE2_ERROR_EXEC)
+                context->cancel_keep = 1;
             break;
         case SETFLAG:
+            TRACE_DEBUG("Doing a setflag");
             sl = c->u.sl;
             libsieve_free_sl_only(context->slflags);
-            context->slflags = libsieve_new_sl(sl->s, context->slflags);
-            TRACE_DEBUG("Doing a setflag");
+            context->slflags = libsieve_new_sl(sl->s, NULL);
             break;
         case ADDFLAG:
+            TRACE_DEBUG("Doing an addflag");
             for (sl = c->u.sl; sl != NULL; sl = sl->next) {
                 stringlist_t *csl;
                 int found = 0;
@@ -536,10 +588,10 @@ int libsieve_eval(struct sieve2_context *context,
                     context->slflags = libsieve_new_sl(sl->s, context->slflags);
                     TRACE_DEBUG("Added flag: [%s]", sl->s);
                 }
-                TRACE_DEBUG("Doing an addflag: [%s]", sl->s);
             }
             break;
         case REMOVEFLAG:
+            TRACE_DEBUG("Doing a removeflag");
             for (sl = c->u.sl; sl != NULL; sl = sl->next) {
                 stringlist_t *csl, *prev = NULL;
                 for (csl = context->slflags; csl != NULL; csl = csl->next) {
@@ -557,22 +609,26 @@ int libsieve_eval(struct sieve2_context *context,
                     }
                     prev = csl; // Previous item in the list.
                 }
-                TRACE_DEBUG("Doing a removeflag [%s]", sl->s);
             }
-            break;
-        case NOTIFY:
-            res = libsieve_do_notify(context, c->u.n.id, c->u.n.method,
-                            c->u.n.options, c->u.n.priority, c->u.n.message);
-            TRACE_DEBUG("Doing a notify");
             break;
         }
 
         if (res) /* we've either encountered an error or a stop */
             break;
 
-        /* execute next command */
-        c = c->next;
+        /* execute next command, or return from the previous if block, or be done. */
+        if (c->next) {
+            TRACE_DEBUG("following next");
+            c = c->next;
+        } else if (c->up) {
+            TRACE_DEBUG("following up");
+            c = c->up;
+        } else {
+            break;
+        }
     }
+
+    TRACE_DEBUG("leaving libsieve_eval res = %d", res);
 
     return res;
 }

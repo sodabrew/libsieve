@@ -32,7 +32,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "sieve2.h"
 #include "context2.h"
 
-int libsieve_eval(struct sieve2_context *context,
-		commandlist_t *c, const char **errmsg);
+int libsieve_eval(struct sieve2_context *context, commandlist_t *c);
 
 #endif /* SIEVE_SCRIPT_H */

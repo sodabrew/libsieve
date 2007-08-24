@@ -77,7 +77,6 @@ struct actions2 {
 };
 
 struct script2 {
-    int error_count;
     int error_lineno;
     const char *script;
     commandlist_t *cmds;
@@ -108,6 +107,8 @@ struct sieve2_context {
     sieve2_message_t *message;
     stringlist_t *slflags;
     struct mlbuf *strbuf;
+
+    int cancel_keep;
 
     int parse_errors;
     int exec_errors;

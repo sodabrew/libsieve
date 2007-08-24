@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
 
@@ -92,7 +92,7 @@
      FROM = 308,
      HANDLE = 309,
      METHOD = 310,
-     ID = 311,
+     IMPORTANCE = 311,
      OPTIONS = 312,
      LOW = 313,
      NORMAL = 314,
@@ -154,7 +154,7 @@
 #define FROM 308
 #define HANDLE 309
 #define METHOD 310
-#define ID 311
+#define IMPORTANCE 311
 #define OPTIONS 312
 #define LOW 313
 #define NORMAL 314
@@ -166,7 +166,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 65 "sieve.y"
+#line 67 "sieve.y"
 {
     int nval;
     char *sval;
@@ -180,7 +180,7 @@ typedef union YYSTYPE
     struct hftags *hftag;
     struct ntags *ntag;
 }
-/* Line 1528 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 185 "sieve.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

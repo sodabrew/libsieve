@@ -104,7 +104,7 @@ static int octet_matches_(const char *pat, const char *text, int casemap)
 		t++;
 	    }
 	case '\\':
-	    p++;
+	    c = *p++;
 	    /* falls through */
 	default:
 	    if (casemap && (toupper((int)(unsigned char)c) ==

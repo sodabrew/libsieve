@@ -66,6 +66,12 @@ void libsieve_headerfatalerror(const char msg[]);
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
+:([\ \t])+(\r|\n)+([\ \t])+      {
+                /* Special case of a malformed header: whitespace followed by newlines followed by whitespace */
+                BEGIN S_TEXT;
+                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
+                return COLON;
+                }
 :([\ \t])+(\r|\n)+      {
                 /* Special case of an empty header: whitespace followed by newlines */
                 TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
@@ -79,6 +85,13 @@ void libsieve_headerfatalerror(const char msg[]);
                 }
 (\r|\n)+                {
                 /* Eat stray newlines, such as those at the end of every line... */
+                }
+
+<S_NAME>TODO      {
+                /* Special case of a malformed header: wrapped line not starting with whitespace */
+                BEGIN S_WRAP;
+                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
+                return WRAP;
                 }
 
 <S_NAME>([^:])+         {

@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 
@@ -47,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.2"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -127,7 +127,7 @@
      FROM = 308,
      HANDLE = 309,
      METHOD = 310,
-     ID = 311,
+     IMPORTANCE = 311,
      OPTIONS = 312,
      LOW = 313,
      NORMAL = 314,
@@ -189,7 +189,7 @@
 #define FROM 308
 #define HANDLE 309
 #define METHOD 310
-#define ID 311
+#define IMPORTANCE 311
 #define OPTIONS 312
 #define LOW 313
 #define NORMAL 314
@@ -254,13 +254,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
+#define THIS_CONTEXT context
 
 struct sieve2_context *libsieve_parse_context;
-extern int libsieve_sieveerror(char *msg);
+extern int libsieve_sieveerror(struct sieve2_context *context, char *msg);
 extern int libsieve_sievelex(void);
 
-#define YYERROR_VERBOSE /* i want better error messages! */
+// #define YYERROR_VERBOSE /* i want better error messages! */
 
 
 /* Enabling traces.  */
@@ -283,7 +283,7 @@ extern int libsieve_sievelex(void);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 65 "sieve.y"
+#line 67 "sieve.y"
 {
     int nval;
     char *sval;
@@ -297,7 +297,7 @@ typedef union YYSTYPE
     struct hftags *hftag;
     struct ntags *ntag;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 302 "sieve.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -526,16 +526,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   189
+#define YYLAST   204
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  70
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  24
+#define YYNNTS  23
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  89
+#define YYNRULES  86
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  145
+#define YYNSTATES  142
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -589,57 +589,57 @@ static const yytype_uint8 yyprhs[] =
        0,     0,     3,     4,     7,     8,    11,    15,    17,    20,
       23,    28,    31,    32,    37,    40,    43,    47,    49,    54,
       57,    60,    62,    64,    68,    71,    74,    77,    80,    83,
-      84,    88,    92,    96,    99,   103,   104,   107,   111,   113,
-     115,   117,   118,   122,   126,   130,   134,   138,   141,   145,
-     147,   149,   153,   157,   160,   163,   166,   169,   171,   173,
-     177,   182,   187,   190,   194,   196,   198,   200,   201,   204,
-     207,   211,   212,   215,   219,   221,   223,   225,   227,   229,
-     231,   234,   237,   239,   241,   243,   245,   247,   251,   253
+      84,    88,    92,    96,   100,   103,   104,   107,   111,   112,
+     116,   120,   124,   128,   132,   135,   139,   141,   143,   147,
+     151,   154,   157,   160,   163,   165,   167,   171,   176,   181,
+     184,   188,   190,   192,   194,   195,   198,   201,   205,   206,
+     209,   213,   215,   217,   219,   221,   223,   225,   228,   231,
+     233,   235,   237,   239,   241,   245,   247
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
       71,     0,    -1,    -1,    72,    74,    -1,    -1,    73,    72,
-      -1,    15,    82,    62,    -1,    75,    -1,    75,    74,    -1,
-      77,    62,    -1,     5,    85,    84,    76,    -1,     1,    62,
-      -1,    -1,     6,    85,    84,    76,    -1,     7,    84,    -1,
-       8,     4,    -1,    11,    21,    82,    -1,    11,    -1,     9,
-      21,    82,     4,    -1,     9,     4,    -1,    10,     4,    -1,
-      12,    -1,    13,    -1,    14,    81,     4,    -1,    16,    82,
-      -1,    17,    82,    -1,    18,    82,    -1,    23,    78,    -1,
-      24,    82,    -1,    -1,    78,    56,     4,    -1,    78,    55,
-       4,    -1,    78,    57,    82,    -1,    78,    80,    -1,    78,
-      61,     4,    -1,    -1,    79,    90,    -1,    79,    35,     4,
-      -1,    58,    -1,    59,    -1,    60,    -1,    -1,    81,    49,
-       3,    -1,    81,    50,    82,    -1,    81,    51,     4,    -1,
-      81,    54,     4,    -1,    81,    53,     4,    -1,    81,    52,
-      -1,    63,    83,    64,    -1,     4,    -1,     4,    -1,     4,
-      65,    83,    -1,    66,    74,    67,    -1,    66,    67,    -1,
-      25,    92,    -1,    26,    92,    -1,    27,    82,    -1,    28,
-      -1,    29,    -1,    22,    79,    82,    -1,    30,    88,    82,
-      82,    -1,    86,    87,    82,    82,    -1,    31,    85,    -1,
-      32,    91,     3,    -1,     1,    -1,    33,    -1,    34,    -1,
-      -1,    87,    89,    -1,    87,    90,    -1,    87,    35,     4,
-      -1,    -1,    88,    90,    -1,    88,    35,     4,    -1,    44,
-      -1,    45,    -1,    46,    -1,    47,    -1,    48,    -1,    36,
-      -1,    43,     4,    -1,    42,     4,    -1,    37,    -1,    38,
-      -1,    39,    -1,    40,    -1,    41,    -1,    68,    93,    69,
-      -1,    85,    -1,    85,    65,    93,    -1
+      -1,    15,    81,    62,    -1,    75,    -1,    74,    75,    -1,
+      77,    62,    -1,     5,    84,    83,    76,    -1,     1,    62,
+      -1,    -1,     6,    84,    83,    76,    -1,     7,    83,    -1,
+       8,     4,    -1,    11,    21,    81,    -1,    11,    -1,     9,
+      21,    81,     4,    -1,     9,     4,    -1,    10,     4,    -1,
+      12,    -1,    13,    -1,    14,    80,     4,    -1,    16,    81,
+      -1,    17,    81,    -1,    18,    81,    -1,    23,    78,    -1,
+      24,    81,    -1,    -1,    78,    57,    81,    -1,    78,    56,
+       3,    -1,    78,    61,     4,    -1,    78,    55,     4,    -1,
+      78,     4,    -1,    -1,    79,    89,    -1,    79,    35,     4,
+      -1,    -1,    80,    49,     3,    -1,    80,    50,    81,    -1,
+      80,    51,     4,    -1,    80,    54,     4,    -1,    80,    53,
+       4,    -1,    80,    52,    -1,    63,    82,    64,    -1,     4,
+      -1,     4,    -1,     4,    65,    82,    -1,    66,    74,    67,
+      -1,    66,    67,    -1,    25,    91,    -1,    26,    91,    -1,
+      27,    81,    -1,    28,    -1,    29,    -1,    22,    79,    81,
+      -1,    30,    87,    81,    81,    -1,    85,    86,    81,    81,
+      -1,    31,    84,    -1,    32,    90,     3,    -1,     1,    -1,
+      33,    -1,    34,    -1,    -1,    86,    88,    -1,    86,    89,
+      -1,    86,    35,     4,    -1,    -1,    87,    89,    -1,    87,
+      35,     4,    -1,    44,    -1,    45,    -1,    46,    -1,    47,
+      -1,    48,    -1,    36,    -1,    43,     4,    -1,    42,     4,
+      -1,    37,    -1,    38,    -1,    39,    -1,    40,    -1,    41,
+      -1,    68,    92,    69,    -1,    84,    -1,    84,    65,    92,
+      -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   105,   105,   106,   109,   110,   113,   150,   151,   154,
-     155,   156,   159,   160,   161,   164,   169,   176,   179,   197,
-     207,   212,   213,   214,   222,   231,   240,   249,   257,   266,
-     267,   270,   273,   276,   279,   284,   285,   286,   291,   292,
-     293,   296,   297,   301,   309,   315,   321,   327,   333,   334,
-     337,   338,   341,   342,   345,   346,   347,   348,   349,   350,
-     366,   382,   398,   399,   401,   404,   405,   408,   409,   414,
-     418,   424,   425,   429,   436,   437,   438,   439,   444,   451,
-     452,   453,   454,   455,   456,   463,   464,   467,   470,   471
+       0,   106,   106,   107,   110,   111,   114,   151,   152,   155,
+     156,   157,   160,   161,   162,   165,   170,   177,   180,   198,
+     208,   213,   214,   215,   223,   232,   241,   250,   258,   267,
+     268,   271,   274,   277,   280,   285,   286,   287,   292,   293,
+     297,   305,   311,   317,   323,   329,   330,   333,   334,   337,
+     338,   341,   342,   343,   344,   345,   346,   362,   378,   394,
+     395,   397,   400,   401,   404,   405,   410,   414,   420,   421,
+     425,   432,   433,   434,   435,   440,   447,   448,   449,   450,
+     451,   452,   459,   460,   463,   466,   467
 };
 #endif
 
@@ -656,10 +656,10 @@ static const char *const yytname[] =
   "ENVELOPE", "COMPARATOR", "IS", "CONTAINS", "MATCHES", "REGEX", "OVER",
   "UNDER", "COUNT", "VALUE", "ALL", "LOCALPART", "DOMAIN", "USER",
   "DETAIL", "DAYS", "ADDRESSES", "SUBJECT", "MIME", "FROM", "HANDLE",
-  "METHOD", "ID", "OPTIONS", "LOW", "NORMAL", "HIGH", "MESSAGE", "';'",
-  "'['", "']'", "','", "'{'", "'}'", "'('", "')'", "$accept", "start",
-  "reqs", "require", "commands", "command", "elsif", "action", "ntags",
-  "hftags", "priority", "vtags", "stringlist", "strings", "block", "test",
+  "METHOD", "IMPORTANCE", "OPTIONS", "LOW", "NORMAL", "HIGH", "MESSAGE",
+  "';'", "'['", "']'", "','", "'{'", "'}'", "'('", "')'", "$accept",
+  "start", "reqs", "require", "commands", "command", "elsif", "action",
+  "ntags", "hftags", "vtags", "stringlist", "strings", "block", "test",
   "addrorenv", "aetags", "htags", "addrparttag", "comptag", "sizetag",
   "testlist", "tests", 0
 };
@@ -687,11 +687,11 @@ static const yytype_uint8 yyr1[] =
       75,    75,    76,    76,    76,    77,    77,    77,    77,    77,
       77,    77,    77,    77,    77,    77,    77,    77,    77,    78,
       78,    78,    78,    78,    78,    79,    79,    79,    80,    80,
-      80,    81,    81,    81,    81,    81,    81,    81,    82,    82,
-      83,    83,    84,    84,    85,    85,    85,    85,    85,    85,
-      85,    85,    85,    85,    85,    86,    86,    87,    87,    87,
-      87,    88,    88,    88,    89,    89,    89,    89,    89,    90,
-      90,    90,    90,    90,    90,    91,    91,    92,    93,    93
+      80,    80,    80,    80,    80,    81,    81,    82,    82,    83,
+      83,    84,    84,    84,    84,    84,    84,    84,    84,    84,
+      84,    84,    85,    85,    86,    86,    86,    86,    87,    87,
+      87,    88,    88,    88,    88,    88,    89,    89,    89,    89,
+      89,    89,    90,    90,    91,    92,    92
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -700,12 +700,12 @@ static const yytype_uint8 yyr2[] =
        0,     2,     0,     2,     0,     2,     3,     1,     2,     2,
        4,     2,     0,     4,     2,     2,     3,     1,     4,     2,
        2,     1,     1,     3,     2,     2,     2,     2,     2,     0,
-       3,     3,     3,     2,     3,     0,     2,     3,     1,     1,
-       1,     0,     3,     3,     3,     3,     3,     2,     3,     1,
-       1,     3,     3,     2,     2,     2,     2,     1,     1,     3,
-       4,     4,     2,     3,     1,     1,     1,     0,     2,     2,
-       3,     0,     2,     3,     1,     1,     1,     1,     1,     1,
-       2,     2,     1,     1,     1,     1,     1,     3,     1,     3
+       3,     3,     3,     3,     2,     0,     2,     3,     0,     3,
+       3,     3,     3,     3,     2,     3,     1,     1,     3,     3,
+       2,     2,     2,     2,     1,     1,     3,     4,     4,     2,
+       3,     1,     1,     1,     0,     2,     2,     3,     0,     2,
+       3,     1,     1,     1,     1,     1,     1,     2,     2,     1,
+       1,     1,     1,     1,     3,     1,     3
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -713,131 +713,135 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       4,     0,     0,     0,     4,    49,     0,     0,     1,     0,
-       0,     0,     0,     0,    17,    21,    22,    41,     0,     0,
-       0,    29,     0,     3,     0,     0,     5,    50,     0,     6,
-      11,    64,    35,     0,     0,     0,    57,    58,    71,     0,
-       0,    65,    66,     0,    67,    15,    19,     0,    20,     0,
-       0,    24,    25,    26,    27,    28,     8,     9,     0,    48,
-       0,     0,    54,    55,    56,     0,    62,    85,    86,     0,
-       0,    12,     0,     0,    16,    23,     0,     0,     0,    47,
-       0,     0,     0,     0,     0,    38,    39,    40,     0,    33,
-      51,     0,    79,    82,    83,    84,     0,     0,    59,    36,
-      88,     0,     0,     0,    72,    63,    53,     0,     0,     0,
-      10,     0,    74,    75,    76,    77,    78,     0,    68,    69,
-      18,    42,    43,    44,    46,    45,    31,    30,    32,    34,
-      37,    81,    80,     0,    87,    73,    60,    52,     0,    14,
-      70,    61,    89,    12,    13
+       4,     0,     0,     0,     4,    46,     0,     0,     1,     0,
+       0,     0,     0,     0,    17,    21,    22,    38,     0,     0,
+       0,    29,     0,     0,     7,     0,     5,    47,     0,     6,
+      11,    61,    35,     0,     0,     0,    54,    55,    68,     0,
+       0,    62,    63,     0,    64,    15,    19,     0,    20,     0,
+       0,    24,    25,    26,    27,    28,     8,     9,     0,    45,
+       0,     0,    51,    52,    53,     0,    59,    82,    83,     0,
+       0,    12,     0,     0,    16,    23,     0,     0,     0,    44,
+       0,     0,    34,     0,     0,     0,     0,    48,     0,    76,
+      79,    80,    81,     0,     0,    56,    36,    85,     0,     0,
+       0,    69,    60,    50,     0,     0,     0,    10,     0,    71,
+      72,    73,    74,    75,     0,    65,    66,    18,    39,    40,
+      41,    43,    42,    33,    31,    30,    32,    37,    78,    77,
+       0,    84,    70,    57,    49,     0,    14,    67,    58,    86,
+      12,    13
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4,    23,    24,   110,    25,    54,    60,
-      89,    50,     7,    28,    71,   100,    44,    72,    65,   118,
-      99,    69,    62,   101
+      -1,     2,     3,     4,    23,    24,   107,    25,    54,    60,
+      50,     7,    28,    71,    97,    44,    72,    65,   115,    96,
+      69,    62,    98
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -98
+#define YYPACT_NINF -100
 static const yytype_int16 yypact[] =
 {
-      30,     2,    35,   158,    31,   -98,    46,   -11,   -98,   -10,
-     124,    51,     4,    52,    36,   -98,   -98,   -98,     2,     2,
-       2,   -98,     2,   -98,    10,    -4,   -98,    -5,    -3,   -98,
-     -98,   -98,   -98,    -6,    -6,     2,   -98,   -98,   -98,   124,
-     -27,   -98,   -98,     3,   -98,   -98,   -98,     2,   -98,     2,
-      91,   -98,   -98,   -98,   128,   -98,   -98,   -98,    46,   -98,
-       1,   124,   -98,   -98,   -98,    85,   -98,   -98,   -98,    60,
-      70,    42,    68,    63,   -98,   -98,    65,     2,    66,   -98,
-      69,    72,    86,    87,     2,   -98,   -98,   -98,    88,   -98,
-     -98,    92,   -98,   -98,   -98,   -98,    93,    94,   -98,   -98,
-       9,    33,    96,     2,   -98,   -98,   -98,    41,   124,     3,
-     -98,   105,   -98,   -98,   -98,   -98,   -98,     2,   -98,   -98,
-     -98,   -98,   -98,   -98,   -98,   -98,   -98,   -98,   -98,   -98,
-     -98,   -98,   -98,   124,   -98,   -98,   -98,   -98,     3,   -98,
-     -98,   -98,   -98,    42,   -98
+      30,     9,    14,   180,     1,  -100,    35,   -27,  -100,   -21,
+     124,    39,     4,    40,    25,  -100,  -100,  -100,     9,     9,
+       9,  -100,     9,   160,  -100,   -14,  -100,   -16,   -13,  -100,
+    -100,  -100,  -100,   -12,   -12,     9,  -100,  -100,  -100,   124,
+     -31,  -100,  -100,   -11,  -100,  -100,  -100,     9,  -100,     9,
+      91,  -100,  -100,  -100,    36,  -100,  -100,  -100,    35,  -100,
+      85,   124,  -100,  -100,  -100,    96,  -100,  -100,  -100,    47,
+      10,    31,    67,    48,  -100,  -100,    55,     9,    69,  -100,
+      70,    74,  -100,    75,    77,     9,    79,  -100,    80,  -100,
+    -100,  -100,  -100,    81,    82,  -100,  -100,    16,    19,    86,
+       9,  -100,  -100,  -100,    52,   124,   -11,  -100,    90,  -100,
+    -100,  -100,  -100,  -100,     9,  -100,  -100,  -100,  -100,  -100,
+    -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+     124,  -100,  -100,  -100,  -100,   -11,  -100,  -100,  -100,  -100,
+      31,  -100
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -98,   -98,   113,   -98,   -17,   -98,   -25,   -98,   -98,   -98,
-     -98,   -98,   -18,    61,   -97,    -7,   -98,   -98,   -98,   -98,
-     -56,   -98,    95,    -1
+    -100,  -100,    95,  -100,    37,   -17,   -39,  -100,  -100,  -100,
+    -100,   -18,    50,   -99,    -7,  -100,  -100,  -100,  -100,   -60,
+    -100,    83,    -4
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -8
+#define YYTABLE_NINF -4
 static const yytype_int16 yytable[] =
 {
-      51,    52,    53,    43,    55,     5,     5,    56,    46,   104,
-      -7,     9,   139,    67,    68,    10,   119,    64,    11,    12,
+      51,    52,    53,    43,    55,   101,    56,   136,    46,    67,
+      68,     9,   116,     5,     8,    10,     1,    64,    11,    12,
       13,    14,    15,    16,    17,    47,    18,    19,    20,    73,
-      -2,    74,    66,    21,    22,     8,    91,    92,    93,    94,
-      95,   143,    98,    96,    97,     1,     1,   103,   108,   109,
-      27,    29,    30,   107,   117,    45,    48,    49,    57,   122,
-      58,    59,    61,   105,     6,     6,   128,   120,   121,    70,
-     123,     9,     5,   124,   133,    10,   125,    -7,    11,    12,
-      13,    14,    15,    16,    17,   136,    18,    19,    20,     5,
-     126,   127,   129,    21,    22,    75,   130,   131,   132,   141,
-     135,   138,   134,   111,    92,    93,    94,    95,   137,   140,
-      96,    97,   112,   113,   114,   115,   116,    26,   144,    90,
-     102,    92,    93,    94,    95,    31,     0,    96,    97,    63,
-       0,     6,   142,     0,     0,     0,     0,   106,     0,     0,
+      -2,    74,    66,    21,    22,    29,   140,   105,   106,    27,
+      82,    30,    95,    45,    48,     1,    49,   100,    57,    58,
+     102,    59,   117,     9,   114,    70,    61,    10,   118,   119,
+      11,    12,    13,    14,    15,    16,    17,   125,    18,    19,
+      20,     5,     6,   120,   121,    21,    22,   103,   122,   123,
+     124,   130,   133,   126,   127,   128,   129,    56,   131,     5,
+     132,    83,    84,    85,   137,    75,   138,    86,   135,    26,
+       5,   141,   108,    89,    90,    91,    92,   104,    87,    93,
+      94,   109,   110,   111,   112,   113,     0,    63,     0,   134,
+      88,    89,    90,    91,    92,    31,   139,    93,    94,     0,
+       6,    99,    89,    90,    91,    92,     0,     0,    93,    94,
       76,    77,    78,    79,    80,    81,    32,     0,     6,    33,
-      34,    35,    36,    37,    38,    39,    40,    41,    42,     9,
-       0,     0,     0,    10,     0,     0,    11,    12,    13,    14,
-      15,    16,    17,     0,    18,    19,    20,     0,     0,     0,
-       0,    21,    22,    82,    83,    84,    85,    86,    87,    88
+      34,    35,    36,    37,    38,    39,    40,    41,    42,     6,
+      -3,     9,     0,     0,     0,    10,     0,     0,    11,    12,
+      13,    14,    15,    16,    17,     0,    18,    19,    20,     0,
+       0,     9,     0,    21,    22,    10,     0,     0,    11,    12,
+      13,    14,    15,    16,    17,     0,    18,    19,    20,     0,
+       0,     0,     0,    21,    22
 };
 
 static const yytype_int16 yycheck[] =
 {
-      18,    19,    20,    10,    22,     4,     4,    24,     4,    65,
-       0,     1,   109,    40,    41,     5,    72,    35,     8,     9,
+      18,    19,    20,    10,    22,    65,    23,   106,     4,    40,
+      41,     1,    72,     4,     0,     5,    15,    35,     8,     9,
       10,    11,    12,    13,    14,    21,    16,    17,    18,    47,
-       0,    49,    39,    23,    24,     0,    35,    36,    37,    38,
-      39,   138,    60,    42,    43,    15,    15,    65,     6,     7,
-       4,    62,    62,    70,    72,     4,     4,    21,    62,    77,
-      65,    64,    68,     3,    63,    63,    84,     4,     3,    66,
-       4,     1,     4,     4,    65,     5,     4,    67,     8,     9,
-      10,    11,    12,    13,    14,   103,    16,    17,    18,     4,
-       4,     4,     4,    23,    24,     4,     4,     4,     4,   117,
-       4,   108,    69,    35,    36,    37,    38,    39,    67,     4,
-      42,    43,    44,    45,    46,    47,    48,     4,   143,    58,
-      35,    36,    37,    38,    39,     1,    -1,    42,    43,    34,
-      -1,    63,   133,    -1,    -1,    -1,    -1,    67,    -1,    -1,
+       0,    49,    39,    23,    24,    62,   135,     6,     7,     4,
+       4,    62,    60,     4,     4,    15,    21,    65,    62,    65,
+       3,    64,     4,     1,    72,    66,    68,     5,     3,    77,
+       8,     9,    10,    11,    12,    13,    14,    85,    16,    17,
+      18,     4,    63,     4,     4,    23,    24,    67,     4,     4,
+       3,    65,   100,     4,     4,     4,     4,   104,    69,     4,
+       4,    55,    56,    57,     4,     4,   114,    61,   105,     4,
+       4,   140,    35,    36,    37,    38,    39,    70,    58,    42,
+      43,    44,    45,    46,    47,    48,    -1,    34,    -1,    67,
+      35,    36,    37,    38,    39,     1,   130,    42,    43,    -1,
+      63,    35,    36,    37,    38,    39,    -1,    -1,    42,    43,
       49,    50,    51,    52,    53,    54,    22,    -1,    63,    25,
-      26,    27,    28,    29,    30,    31,    32,    33,    34,     1,
-      -1,    -1,    -1,     5,    -1,    -1,     8,     9,    10,    11,
-      12,    13,    14,    -1,    16,    17,    18,    -1,    -1,    -1,
-      -1,    23,    24,    55,    56,    57,    58,    59,    60,    61
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    63,
+       0,     1,    -1,    -1,    -1,     5,    -1,    -1,     8,     9,
+      10,    11,    12,    13,    14,    -1,    16,    17,    18,    -1,
+      -1,     1,    -1,    23,    24,     5,    -1,    -1,     8,     9,
+      10,    11,    12,    13,    14,    -1,    16,    17,    18,    -1,
+      -1,    -1,    -1,    23,    24
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    15,    71,    72,    73,     4,    63,    82,     0,     1,
+       0,    15,    71,    72,    73,     4,    63,    81,     0,     1,
        5,     8,     9,    10,    11,    12,    13,    14,    16,    17,
-      18,    23,    24,    74,    75,    77,    72,     4,    83,    62,
+      18,    23,    24,    74,    75,    77,    72,     4,    82,    62,
       62,     1,    22,    25,    26,    27,    28,    29,    30,    31,
-      32,    33,    34,    85,    86,     4,     4,    21,     4,    21,
-      81,    82,    82,    82,    78,    82,    74,    62,    65,    64,
-      79,    68,    92,    92,    82,    88,    85,    40,    41,    91,
-      66,    84,    87,    82,    82,     4,    49,    50,    51,    52,
-      53,    54,    55,    56,    57,    58,    59,    60,    61,    80,
-      83,    35,    36,    37,    38,    39,    42,    43,    82,    90,
-      85,    93,    35,    82,    90,     3,    67,    74,     6,     7,
-      76,    35,    44,    45,    46,    47,    48,    82,    89,    90,
-       4,     3,    82,     4,     4,     4,     4,     4,    82,     4,
-       4,     4,     4,    65,    69,     4,    82,    67,    85,    84,
-       4,    82,    93,    84,    76
+      32,    33,    34,    84,    85,     4,     4,    21,     4,    21,
+      80,    81,    81,    81,    78,    81,    75,    62,    65,    64,
+      79,    68,    91,    91,    81,    87,    84,    40,    41,    90,
+      66,    83,    86,    81,    81,     4,    49,    50,    51,    52,
+      53,    54,     4,    55,    56,    57,    61,    82,    35,    36,
+      37,    38,    39,    42,    43,    81,    89,    84,    92,    35,
+      81,    89,     3,    67,    74,     6,     7,    76,    35,    44,
+      45,    46,    47,    48,    81,    88,    89,     4,     3,    81,
+       4,     4,     4,     4,     3,    81,     4,     4,     4,     4,
+      65,    69,     4,    81,    67,    84,    83,     4,    81,    92,
+      83,    76
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -870,7 +874,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (YY_("syntax error: cannot back up")); \
+      yyerror (context, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -950,7 +954,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value); \
+		  Type, Value, context); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -964,17 +968,19 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, context)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   if (!yyvaluep)
     return;
+  YYUSE (context);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -996,13 +1002,14 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep)
+yy_symbol_print (yyoutput, yytype, yyvaluep, context)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -1010,7 +1017,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
   else
     YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, context);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -1050,15 +1057,13 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, 
-		   int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule, struct sieve2_context *context)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule
-		   )
+yy_reduce_print (yyvsp, yyrule, context)
     YYSTYPE *yyvsp;
-    
-		   int yyrule;
+    int yyrule;
+    struct sieve2_context *context;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1072,7 +1077,7 @@ yy_reduce_print (yyvsp, yyrule
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       );
+		       		       , context);
       fprintf (stderr, "\n");
     }
 }
@@ -1080,7 +1085,7 @@ yy_reduce_print (yyvsp, yyrule
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule); \
+    yy_reduce_print (yyvsp, Rule, context); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1331,16 +1336,18 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, struct sieve2_context *context)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep)
+yydestruct (yymsg, yytype, yyvaluep, context)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   YYUSE (yyvaluep);
+  YYUSE (context);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1365,7 +1372,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (void);
+int yyparse (struct sieve2_context *context);
 #else
 int yyparse ();
 #endif
@@ -1402,11 +1409,11 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (void)
+yyparse (struct sieve2_context *context)
 #else
 int
-yyparse ()
-
+yyparse (context)
+    struct sieve2_context *context;
 #endif
 #endif
 {
@@ -1655,17 +1662,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 105 "sieve.y"
-    { ret = NULL; }
+#line 106 "sieve.y"
+    { context->script.cmds = NULL; }
     break;
 
   case 3:
-#line 106 "sieve.y"
-    { ret = (yyvsp[(2) - (2)].cl); }
+#line 107 "sieve.y"
+    { context->script.cmds = (yyvsp[(2) - (2)].cl); }
     break;
 
   case 6:
-#line 113 "sieve.y"
+#line 114 "sieve.y"
     {
                                     int unsupp = 0;
                                     char *msg;
@@ -1680,7 +1687,7 @@ yyreduce:
                                         sl = sl->next;
 
 					/* Returns 1 if supported, 0 if not. */
-                                        if (!static_check_reqs(libsieve_parse_context, s->s)) {
+                                        if (!static_check_reqs(context, s->s)) {
 					    unsupp = 1;
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -1693,7 +1700,7 @@ yyreduce:
 
 				    /* If something wasn't supported, bomb out with msg. */
                                     if (unsupp) {
-                                        libsieve_sieveerror(msg);
+                                        libsieve_sieveerror(context, msg);
                                         libsieve_free(msg);
                                         YYERROR; 
                                     }
@@ -1704,58 +1711,58 @@ yyreduce:
     break;
 
   case 7:
-#line 150 "sieve.y"
+#line 151 "sieve.y"
     { (yyval.cl) = (yyvsp[(1) - (1)].cl); }
     break;
 
   case 8:
-#line 151 "sieve.y"
-    { (yyvsp[(1) - (2)].cl)->next = (yyvsp[(2) - (2)].cl); (yyval.cl) = (yyvsp[(1) - (2)].cl); }
+#line 152 "sieve.y"
+    { (yyvsp[(2) - (2)].cl)->next = (yyvsp[(1) - (2)].cl); (yyval.cl) = (yyvsp[(2) - (2)].cl); }
     break;
 
   case 9:
-#line 154 "sieve.y"
+#line 155 "sieve.y"
     { (yyval.cl) = (yyvsp[(1) - (2)].cl); }
     break;
 
   case 10:
-#line 155 "sieve.y"
+#line 156 "sieve.y"
     { (yyval.cl) = libsieve_new_if((yyvsp[(2) - (4)].test), (yyvsp[(3) - (4)].cl), (yyvsp[(4) - (4)].cl)); }
     break;
 
   case 11:
-#line 156 "sieve.y"
+#line 157 "sieve.y"
     { (yyval.cl) = libsieve_new_command(STOP); }
     break;
 
   case 12:
-#line 159 "sieve.y"
+#line 160 "sieve.y"
     { (yyval.cl) = NULL; }
     break;
 
   case 13:
-#line 160 "sieve.y"
+#line 161 "sieve.y"
     { (yyval.cl) = libsieve_new_if((yyvsp[(2) - (4)].test), (yyvsp[(3) - (4)].cl), (yyvsp[(4) - (4)].cl)); }
     break;
 
   case 14:
-#line 161 "sieve.y"
+#line 162 "sieve.y"
     { (yyval.cl) = (yyvsp[(2) - (2)].cl); }
     break;
 
   case 15:
-#line 164 "sieve.y"
-    { if (!libsieve_parse_context->require.reject) {
-				     libsieve_sieveerror("reject not required");
+#line 165 "sieve.y"
+    { if (!context->require.reject) {
+				     libsieve_sieveerror(context, "reject not required");
 				     YYERROR;
 				   }
 				   (yyval.cl) = libsieve_new_command(REJCT); (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); }
     break;
 
   case 16:
-#line 169 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
-				     libsieve_sieveerror("imap4flags not required");
+#line 170 "sieve.y"
+    { if (!context->require.imap4flags) {
+				     libsieve_sieveerror(context, "imap4flags not required");
 	                             YYERROR;
                                    }
 	                           (yyval.cl) = libsieve_new_command(KEEP);
@@ -1764,27 +1771,27 @@ yyreduce:
     break;
 
   case 17:
-#line 176 "sieve.y"
+#line 177 "sieve.y"
     { (yyval.cl) = libsieve_new_command(KEEP);
 	                           (yyval.cl)->u.f.mailbox = NULL;
 				   (yyval.cl)->u.f.slflags = NULL; }
     break;
 
   case 18:
-#line 179 "sieve.y"
-    { if (!libsieve_parse_context->require.fileinto) {
-				     libsieve_sieveerror("fileinto not required");
+#line 180 "sieve.y"
+    { if (!context->require.fileinto) {
+				     libsieve_sieveerror(context, "fileinto not required");
 	                             YYERROR;
-                                   } if (!libsieve_parse_context->require.imap4flags) {
-				     libsieve_sieveerror("imap4flags not required");
+                                   } if (!context->require.imap4flags) {
+				     libsieve_sieveerror(context, "imap4flags not required");
 	                             YYERROR;
                                    }
 
-                                   if (!static_verify_stringlist((yyvsp[(3) - (4)].sl), static_verify_flag)) {
+                                   if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_flag)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   if (!static_verify_mailbox((yyvsp[(4) - (4)].sval))) {
+				   if (!static_verify_mailbox(context, (yyvsp[(4) - (4)].sval))) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           (yyval.cl) = libsieve_new_command(FILEINTO);
@@ -1793,12 +1800,12 @@ yyreduce:
     break;
 
   case 19:
-#line 197 "sieve.y"
-    { if (!libsieve_parse_context->require.fileinto) {
-				     libsieve_sieveerror("fileinto not required");
+#line 198 "sieve.y"
+    { if (!context->require.fileinto) {
+				     libsieve_sieveerror(context, "fileinto not required");
 	                             YYERROR;
                                    }
-				   if (!static_verify_mailbox((yyvsp[(2) - (2)].sval))) {
+				   if (!static_verify_mailbox(context, (yyvsp[(2) - (2)].sval))) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           (yyval.cl) = libsieve_new_command(FILEINTO);
@@ -1807,43 +1814,43 @@ yyreduce:
     break;
 
   case 20:
-#line 207 "sieve.y"
+#line 208 "sieve.y"
     { (yyval.cl) = libsieve_new_command(REDIRECT);
-				   if (!static_verify_address((yyvsp[(2) - (2)].sval))) {
+				   if (!static_verify_address(context, (yyvsp[(2) - (2)].sval))) {
 				     YYERROR; /* va should call sieveerror() */
 				   }
 				   (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); }
     break;
 
   case 21:
-#line 212 "sieve.y"
+#line 213 "sieve.y"
     { (yyval.cl) = libsieve_new_command(STOP); }
     break;
 
   case 22:
-#line 213 "sieve.y"
+#line 214 "sieve.y"
     { (yyval.cl) = libsieve_new_command(DISCARD); }
     break;
 
   case 23:
-#line 214 "sieve.y"
-    { if (!libsieve_parse_context->require.vacation) {
-				     libsieve_sieveerror("vacation not required");
+#line 215 "sieve.y"
+    { if (!context->require.vacation) {
+				     libsieve_sieveerror(context, "vacation not required");
 				     (yyval.cl) = libsieve_new_command(VACATION);
 				     YYERROR;
 				   } else {
-  				     (yyval.cl) = static_build_vacation(VACATION,
+  				     (yyval.cl) = static_build_vacation(context, VACATION,
 					    static_canon_vtags((yyvsp[(2) - (3)].vtag)), (yyvsp[(3) - (3)].sval));
 				   } }
     break;
 
   case 24:
-#line 222 "sieve.y"
+#line 223 "sieve.y"
     { if (!libsieve_parse_context->require.imap4flags) {
-                                    libsieve_sieveerror("imap4flags not required");
+                                    libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
-                                  if (!static_verify_stringlist((yyvsp[(2) - (2)].sl), static_verify_flag)) {
+                                  if (!static_verify_stringlist(context, (yyvsp[(2) - (2)].sl), static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
 				    }
                                  (yyval.cl) = libsieve_new_command(SETFLAG);
@@ -1851,12 +1858,12 @@ yyreduce:
     break;
 
   case 25:
-#line 231 "sieve.y"
+#line 232 "sieve.y"
     { if (!libsieve_parse_context->require.imap4flags) {
-                                    libsieve_sieveerror("imap4flags not required");
+                                    libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
-                                 if (!static_verify_stringlist((yyvsp[(2) - (2)].sl), static_verify_flag)) {
+                                 if (!static_verify_stringlist(context, (yyvsp[(2) - (2)].sl), static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                     }
                                  (yyval.cl) = libsieve_new_command(ADDFLAG);
@@ -1864,12 +1871,12 @@ yyreduce:
     break;
 
   case 26:
-#line 240 "sieve.y"
+#line 241 "sieve.y"
     { if (!libsieve_parse_context->require.imap4flags) {
-                                     libsieve_sieveerror("imap4flags not required");
+                                     libsieve_sieveerror(context, "imap4flags not required");
                                      YYERROR;
                                      }
-                                 if (!static_verify_stringlist((yyvsp[(2) - (2)].sl), static_verify_flag)) {
+                                 if (!static_verify_stringlist(context, (yyvsp[(2) - (2)].sl), static_verify_flag)) {
                                      YYERROR; /* vf should call sieveerror() */
                                      }
                                  (yyval.cl) = libsieve_new_command(REMOVEFLAG);
@@ -1877,225 +1884,210 @@ yyreduce:
     break;
 
   case 27:
-#line 249 "sieve.y"
+#line 250 "sieve.y"
     { if (!libsieve_parse_context->require.notify) {
-	       		             libsieve_sieveerror("notify not required");
+	       		             libsieve_sieveerror(context, "notify not required");
 	       		             (yyval.cl) = libsieve_new_command(NOTIFY); 
 	       		             YYERROR;
 				 } else {
-				     (yyval.cl) = static_build_notify(NOTIFY,
+				     (yyval.cl) = static_build_notify(context, NOTIFY,
 	       		             static_canon_ntags((yyvsp[(2) - (2)].ntag)));
 	       		         } }
     break;
 
   case 28:
-#line 257 "sieve.y"
+#line 258 "sieve.y"
     { if (!libsieve_parse_context->require.notify) {
-                                     libsieve_sieveerror("notify not required");
+                                     libsieve_sieveerror(context, "notify not required");
 				     (yyval.cl) = libsieve_new_command(VALIDNOTIF);
 				     YYERROR;
 				 } else {
-				     (yyval.cl) = static_build_validnotif(VALIDNOTIF, (yyvsp[(2) - (2)].sl));
+				     (yyval.cl) = static_build_validnotif(context, VALIDNOTIF, (yyvsp[(2) - (2)].sl));
 				 } }
     break;
 
   case 29:
-#line 266 "sieve.y"
+#line 267 "sieve.y"
     { (yyval.ntag) = static_new_ntags(); }
     break;
 
   case 30:
-#line 267 "sieve.y"
-    { if ((yyval.ntag)->id != NULL) { 
-					libsieve_sieveerror("duplicate :method"); YYERROR; }
-				   else { (yyval.ntag)->id = (yyvsp[(3) - (3)].sval); } }
-    break;
-
-  case 31:
-#line 270 "sieve.y"
-    { if ((yyval.ntag)->method != NULL) { 
-					libsieve_sieveerror("duplicate :method"); YYERROR; }
-				   else { (yyval.ntag)->method = (yyvsp[(3) - (3)].sval); } }
-    break;
-
-  case 32:
-#line 273 "sieve.y"
+#line 268 "sieve.y"
     { if ((yyval.ntag)->options != NULL) { 
-					libsieve_sieveerror("duplicate :options"); YYERROR; }
+					libsieve_sieveerror(context, "duplicate :options"); YYERROR; }
 				     else { (yyval.ntag)->options = (yyvsp[(3) - (3)].sl); } }
     break;
 
-  case 33:
-#line 276 "sieve.y"
-    { if ((yyval.ntag)->priority != NULL) { 
-					libsieve_sieveerror("duplicate :priority"); YYERROR; }
-				   else { (yyval.ntag)->priority = (yyvsp[(2) - (2)].sval); } }
+  case 31:
+#line 271 "sieve.y"
+    { if ((yyval.ntag)->importance != 0) {  /* FIXME: "NUMBER" not NUMBER :\ */
+					libsieve_sieveerror(context, "duplicate :importance"); YYERROR; }
+				   else { (yyval.ntag)->importance = (yyvsp[(3) - (3)].nval); } }
     break;
 
-  case 34:
-#line 279 "sieve.y"
+  case 32:
+#line 274 "sieve.y"
     { if ((yyval.ntag)->message != NULL) { 
-					libsieve_sieveerror("duplicate :message"); YYERROR; }
+					libsieve_sieveerror(context, "duplicate :message"); YYERROR; }
 				   else { (yyval.ntag)->message = (yyvsp[(3) - (3)].sval); } }
     break;
 
+  case 33:
+#line 277 "sieve.y"
+    { if ((yyval.ntag)->method != NULL) {
+					libsieve_sieveerror(context, "duplicate method"); YYERROR; }
+				   else { (yyval.ntag)->method = (yyvsp[(3) - (3)].sval); } }
+    break;
+
+  case 34:
+#line 280 "sieve.y"
+    { if ((yyval.ntag)->method != NULL) { 
+					libsieve_sieveerror(context, "duplicate method"); YYERROR; }
+				   else { (yyval.ntag)->method = (yyvsp[(2) - (2)].sval); } }
+    break;
+
   case 35:
-#line 284 "sieve.y"
+#line 285 "sieve.y"
     { (yyval.hftag) = static_new_hftags(); }
     break;
 
   case 36:
-#line 285 "sieve.y"
+#line 286 "sieve.y"
     { (yyval.hftag)->comptag = (yyvsp[(2) - (2)].nval); }
     break;
 
   case 37:
-#line 286 "sieve.y"
+#line 287 "sieve.y"
     { if ((yyval.hftag)->comparator != NULL) { 
-				   libsieve_sieveerror("duplicate comparator tag"); YYERROR; }
+				   libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
 				   else { (yyval.hftag)->comparator = (yyvsp[(3) - (3)].sval); } }
     break;
 
   case 38:
-#line 291 "sieve.y"
-    { (yyval.sval) = "low"; }
-    break;
-
-  case 39:
 #line 292 "sieve.y"
-    { (yyval.sval) = "normal"; }
-    break;
-
-  case 40:
-#line 293 "sieve.y"
-    { (yyval.sval) = "high"; }
-    break;
-
-  case 41:
-#line 296 "sieve.y"
     { (yyval.vtag) = static_new_vtags(); }
     break;
 
-  case 42:
-#line 297 "sieve.y"
+  case 39:
+#line 293 "sieve.y"
     { if ((yyval.vtag)->days != -1) { 
-					libsieve_sieveerror("duplicate :days");
+					libsieve_sieveerror(context, "duplicate :days");
 					YYERROR; }
 				   else { (yyval.vtag)->days = (yyvsp[(3) - (3)].nval); } }
     break;
 
-  case 43:
-#line 301 "sieve.y"
+  case 40:
+#line 297 "sieve.y"
     { if ((yyval.vtag)->addresses != NULL) { 
-					libsieve_sieveerror("duplicate :addresses"); 
+					libsieve_sieveerror(context, "duplicate :addresses"); 
 					YYERROR;
-				       } else if (!static_verify_stringlist((yyvsp[(3) - (3)].sl),
+				       } else if (!static_verify_stringlist(context, (yyvsp[(3) - (3)].sl),
 							static_verify_address)) {
 					  YYERROR;
 				       } else {
 					 (yyval.vtag)->addresses = (yyvsp[(3) - (3)].sl); } }
     break;
 
-  case 44:
-#line 309 "sieve.y"
+  case 41:
+#line 305 "sieve.y"
     { if ((yyval.vtag)->subject != NULL) { 
-					libsieve_sieveerror("duplicate :subject"); 
+					libsieve_sieveerror(context, "duplicate :subject"); 
 					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+				   } else if (!static_ok_header(context, (yyvsp[(3) - (3)].sval))) {
 					YYERROR;
 				   } else { (yyval.vtag)->subject = (yyvsp[(3) - (3)].sval); } }
     break;
 
-  case 45:
-#line 315 "sieve.y"
+  case 42:
+#line 311 "sieve.y"
     { if ((yyval.vtag)->handle != NULL) { 
-					libsieve_sieveerror("duplicate :handle"); 
+					libsieve_sieveerror(context, "duplicate :handle"); 
 					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+				   } else if (!static_ok_header(context, (yyvsp[(3) - (3)].sval))) {
 					YYERROR;
 				   } else { (yyval.vtag)->handle = (yyvsp[(3) - (3)].sval); } }
     break;
 
-  case 46:
-#line 321 "sieve.y"
+  case 43:
+#line 317 "sieve.y"
     { if ((yyval.vtag)->from != NULL) { 
-					libsieve_sieveerror("duplicate :from"); 
+					libsieve_sieveerror(context, "duplicate :from"); 
 					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+				   } else if (!static_ok_header(context, (yyvsp[(3) - (3)].sval))) {
 					YYERROR;
 				   } else { (yyval.vtag)->from = (yyvsp[(3) - (3)].sval); } }
     break;
 
-  case 47:
-#line 327 "sieve.y"
+  case 44:
+#line 323 "sieve.y"
     { if ((yyval.vtag)->mime != -1) { 
-					libsieve_sieveerror("duplicate :mime"); 
+					libsieve_sieveerror(context, "duplicate :mime"); 
 					YYERROR; }
 				   else { (yyval.vtag)->mime = MIME; } }
     break;
 
-  case 48:
-#line 333 "sieve.y"
+  case 45:
+#line 329 "sieve.y"
     { (yyval.sl) = (yyvsp[(2) - (3)].sl); }
     break;
 
-  case 49:
+  case 46:
+#line 330 "sieve.y"
+    { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); }
+    break;
+
+  case 47:
+#line 333 "sieve.y"
+    { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); }
+    break;
+
+  case 48:
 #line 334 "sieve.y"
-    { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); }
-    break;
-
-  case 50:
-#line 337 "sieve.y"
-    { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); }
-    break;
-
-  case 51:
-#line 338 "sieve.y"
     { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (3)].sval), (yyvsp[(3) - (3)].sl)); }
     break;
 
-  case 52:
-#line 341 "sieve.y"
+  case 49:
+#line 337 "sieve.y"
     { (yyval.cl) = (yyvsp[(2) - (3)].cl); }
     break;
 
-  case 53:
-#line 342 "sieve.y"
+  case 50:
+#line 338 "sieve.y"
     { (yyval.cl) = NULL; }
     break;
 
-  case 54:
-#line 345 "sieve.y"
+  case 51:
+#line 341 "sieve.y"
     { (yyval.test) = libsieve_new_test(ANYOF); (yyval.test)->u.tl = (yyvsp[(2) - (2)].testl); }
     break;
 
-  case 55:
-#line 346 "sieve.y"
+  case 52:
+#line 342 "sieve.y"
     { (yyval.test) = libsieve_new_test(ALLOF); (yyval.test)->u.tl = (yyvsp[(2) - (2)].testl); }
     break;
 
-  case 56:
-#line 347 "sieve.y"
+  case 53:
+#line 343 "sieve.y"
     { (yyval.test) = libsieve_new_test(EXISTS); (yyval.test)->u.sl = (yyvsp[(2) - (2)].sl); }
     break;
 
-  case 57:
-#line 348 "sieve.y"
+  case 54:
+#line 344 "sieve.y"
     { (yyval.test) = libsieve_new_test(SFALSE); }
     break;
 
-  case 58:
-#line 349 "sieve.y"
+  case 55:
+#line 345 "sieve.y"
     { (yyval.test) = libsieve_new_test(STRUE); }
     break;
 
-  case 59:
-#line 350 "sieve.y"
+  case 56:
+#line 346 "sieve.y"
     { if (!libsieve_parse_context->require.imap4flags) {
-                                       libsieve_sieveerror("imap4flags not required");
+                                       libsieve_sieveerror(context, "imap4flags not required");
                                        YYERROR;
                                     }
-                                    if (!static_verify_stringlist((yyvsp[(3) - (3)].sl), static_verify_flag)) {
+                                    if (!static_verify_stringlist(context, (yyvsp[(3) - (3)].sl), static_verify_flag)) {
                                        YYERROR; /* vf should call sieveerror() */
 				    }
                                     (yyval.test) = libsieve_new_test(HASFLAG);
@@ -2109,217 +2101,217 @@ yyreduce:
                                     (yyval.test)->u.hf.sl = (yyvsp[(3) - (3)].sl); }
     break;
 
-  case 60:
-#line 367 "sieve.y"
+  case 57:
+#line 363 "sieve.y"
     { patternlist_t *pl;
-                                   if (!static_verify_stringlist((yyvsp[(3) - (4)].sl), static_verify_header)) {
+                                   if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   (yyvsp[(2) - (4)].htag) = static_canon_htags((yyvsp[(2) - (4)].htag));
 				   if ((yyvsp[(2) - (4)].htag)->comptag == REGEX) {
-				     pl = static_verify_regexs((yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].htag)->comparator);
+				     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].htag)->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
 				     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
 				       
-				   (yyval.test) = static_build_header(HEADER, (yyvsp[(2) - (4)].htag), (yyvsp[(3) - (4)].sl), pl);
+				   (yyval.test) = static_build_header(context, HEADER, (yyvsp[(2) - (4)].htag), (yyvsp[(3) - (4)].sl), pl);
 				   if ((yyval.test) == NULL) { YYERROR; } }
     break;
 
-  case 61:
-#line 383 "sieve.y"
+  case 58:
+#line 379 "sieve.y"
     { patternlist_t *pl;
-                                   if (!static_verify_stringlist((yyvsp[(3) - (4)].sl), static_verify_header)) {
+                                   if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   (yyvsp[(2) - (4)].aetag) = static_canon_aetags((yyvsp[(2) - (4)].aetag));
 				   if ((yyvsp[(2) - (4)].aetag)->comptag == REGEX) {
-				     pl = static_verify_regexs((yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].aetag)->comparator);
+				     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].aetag)->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
 				     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
 				       
-				   (yyval.test) = static_build_address((yyvsp[(1) - (4)].nval), (yyvsp[(2) - (4)].aetag), (yyvsp[(3) - (4)].sl), pl);
+				   (yyval.test) = static_build_address(context, (yyvsp[(1) - (4)].nval), (yyvsp[(2) - (4)].aetag), (yyvsp[(3) - (4)].sl), pl);
 				   if ((yyval.test) == NULL) { YYERROR; } }
     break;
 
-  case 62:
-#line 398 "sieve.y"
+  case 59:
+#line 394 "sieve.y"
     { (yyval.test) = libsieve_new_test(NOT); (yyval.test)->u.t = (yyvsp[(2) - (2)].test); }
     break;
 
-  case 63:
-#line 399 "sieve.y"
+  case 60:
+#line 395 "sieve.y"
     { (yyval.test) = libsieve_new_test(SIZE); (yyval.test)->u.sz.t = (yyvsp[(2) - (3)].nval);
 		                   (yyval.test)->u.sz.n = (yyvsp[(3) - (3)].nval); }
     break;
 
-  case 64:
-#line 401 "sieve.y"
+  case 61:
+#line 397 "sieve.y"
     { (yyval.test) = NULL; }
     break;
 
-  case 65:
-#line 404 "sieve.y"
+  case 62:
+#line 400 "sieve.y"
     { (yyval.nval) = ADDRESS; }
     break;
 
-  case 66:
-#line 405 "sieve.y"
+  case 63:
+#line 401 "sieve.y"
     { (yyval.nval) = ENVELOPE; }
     break;
 
-  case 67:
-#line 408 "sieve.y"
+  case 64:
+#line 404 "sieve.y"
     { (yyval.aetag) = static_new_aetags(); }
     break;
 
-  case 68:
-#line 409 "sieve.y"
+  case 65:
+#line 405 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (2)].aetag);
 				   if ((yyval.aetag)->addrtag != -1) { 
-			libsieve_sieveerror("duplicate or conflicting address part tag");
+			libsieve_sieveerror(context, "duplicate or conflicting address part tag");
 			YYERROR; }
 				   else { (yyval.aetag)->addrtag = (yyvsp[(2) - (2)].nval); } }
     break;
 
-  case 69:
-#line 414 "sieve.y"
+  case 66:
+#line 410 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (2)].aetag);
 				   if ((yyval.aetag)->comptag != -1) { 
-			libsieve_sieveerror("duplicate comparator type tag"); YYERROR; }
+			libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
 				   else { (yyval.aetag)->comptag = (yyvsp[(2) - (2)].nval); } }
     break;
 
-  case 70:
-#line 418 "sieve.y"
+  case 67:
+#line 414 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (3)].aetag);
 				   if ((yyval.aetag)->comparator != NULL) { 
-			libsieve_sieveerror("duplicate comparator tag"); YYERROR; }
+			libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
 				   else { (yyval.aetag)->comparator = (yyvsp[(3) - (3)].sval); } }
     break;
 
-  case 71:
-#line 424 "sieve.y"
+  case 68:
+#line 420 "sieve.y"
     { (yyval.htag) = static_new_htags(); }
     break;
 
-  case 72:
-#line 425 "sieve.y"
+  case 69:
+#line 421 "sieve.y"
     { (yyval.htag) = (yyvsp[(1) - (2)].htag);
 				   if ((yyval.htag)->comptag != -1) { 
-			libsieve_sieveerror("duplicate comparator type tag"); YYERROR; }
+			libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
 				   else { (yyval.htag)->comptag = (yyvsp[(2) - (2)].nval); } }
     break;
 
-  case 73:
-#line 429 "sieve.y"
+  case 70:
+#line 425 "sieve.y"
     { (yyval.htag) = (yyvsp[(1) - (3)].htag);
 				   if ((yyval.htag)->comparator != NULL) { 
-			libsieve_sieveerror("duplicate comparator tag");
+			libsieve_sieveerror(context, "duplicate comparator tag");
 					YYERROR; }
 				   else { (yyval.htag)->comparator = (yyvsp[(3) - (3)].sval); } }
     break;
 
-  case 74:
-#line 436 "sieve.y"
+  case 71:
+#line 432 "sieve.y"
     { (yyval.nval) = ALL; }
     break;
 
-  case 75:
-#line 437 "sieve.y"
+  case 72:
+#line 433 "sieve.y"
     { (yyval.nval) = LOCALPART; }
     break;
 
-  case 76:
-#line 438 "sieve.y"
+  case 73:
+#line 434 "sieve.y"
     { (yyval.nval) = DOMAIN; }
     break;
 
-  case 77:
-#line 439 "sieve.y"
-    { if (!libsieve_parse_context->require.subaddress) {
-				     libsieve_sieveerror("subaddress not required");
+  case 74:
+#line 435 "sieve.y"
+    { if (!context->require.subaddress) {
+				     libsieve_sieveerror(context, "subaddress not required");
 				     YYERROR;
 				   }
 				   (yyval.nval) = USER; }
     break;
 
-  case 78:
-#line 444 "sieve.y"
-    { if (!libsieve_parse_context->require.subaddress) {
-				     libsieve_sieveerror("subaddress not required");
+  case 75:
+#line 440 "sieve.y"
+    { if (!context->require.subaddress) {
+				     libsieve_sieveerror(context, "subaddress not required");
 				     YYERROR;
 				   }
 				   (yyval.nval) = DETAIL; }
     break;
 
-  case 79:
-#line 451 "sieve.y"
+  case 76:
+#line 447 "sieve.y"
     { (yyval.nval) = IS; }
     break;
 
-  case 80:
-#line 452 "sieve.y"
+  case 77:
+#line 448 "sieve.y"
     { (yyval.nval) = VALUE | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
     break;
 
-  case 81:
-#line 453 "sieve.y"
+  case 78:
+#line 449 "sieve.y"
     { (yyval.nval) = COUNT | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
     break;
 
-  case 82:
-#line 454 "sieve.y"
+  case 79:
+#line 450 "sieve.y"
     { (yyval.nval) = CONTAINS; }
     break;
 
-  case 83:
-#line 455 "sieve.y"
+  case 80:
+#line 451 "sieve.y"
     { (yyval.nval) = MATCHES; }
     break;
 
-  case 84:
-#line 456 "sieve.y"
-    { if (!libsieve_parse_context->require.regex) {
-				     libsieve_sieveerror("regex not required");
+  case 81:
+#line 452 "sieve.y"
+    { if (!context->require.regex) {
+				     libsieve_sieveerror(context, "regex not required");
 				     YYERROR;
 				     }
 				   (yyval.nval) = REGEX; }
     break;
 
-  case 85:
-#line 463 "sieve.y"
+  case 82:
+#line 459 "sieve.y"
     { (yyval.nval) = OVER; }
     break;
 
-  case 86:
-#line 464 "sieve.y"
+  case 83:
+#line 460 "sieve.y"
     { (yyval.nval) = UNDER; }
     break;
 
-  case 87:
-#line 467 "sieve.y"
+  case 84:
+#line 463 "sieve.y"
     { (yyval.testl) = (yyvsp[(2) - (3)].testl); }
     break;
 
-  case 88:
-#line 470 "sieve.y"
+  case 85:
+#line 466 "sieve.y"
     { (yyval.testl) = libsieve_new_testlist((yyvsp[(1) - (1)].test), NULL); }
     break;
 
-  case 89:
-#line 471 "sieve.y"
+  case 86:
+#line 467 "sieve.y"
     { (yyval.testl) = libsieve_new_testlist((yyvsp[(1) - (3)].test), (yyvsp[(3) - (3)].testl)); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2323 "sieve.c"
+#line 2315 "sieve.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2355,7 +2347,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (YY_("syntax error"));
+      yyerror (context, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -2379,11 +2371,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (yymsg);
+	    yyerror (context, yymsg);
 	  }
 	else
 	  {
-	    yyerror (YY_("syntax error"));
+	    yyerror (context, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -2407,7 +2399,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval);
+		      yytoken, &yylval, context);
 	  yychar = YYEMPTY;
 	}
     }
@@ -2463,7 +2455,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp);
+		  yystos[yystate], yyvsp, context);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -2501,7 +2493,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (YY_("memory exhausted"));
+  yyerror (context, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -2509,7 +2501,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval);
+		 yytoken, &yylval, context);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -2517,7 +2509,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp);
+		  yystos[*yyssp], yyvsp, context);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -2528,20 +2520,19 @@ yyreturn:
   if (yymsg != yymsgbuf)
     YYSTACK_FREE (yymsg);
 #endif
-  return yyresult;
+  /* Make sure YYID is used.  */
+  return YYID (yyresult);
 }
 
 
-#line 474 "sieve.y"
+#line 470 "sieve.y"
 
 
 const char *libsieve_sieveptr;         /* pointer to sieve string for address lexer */
 char *libsieve_sieveerr;         /* buffer for sieve parser error messages */
 
-commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
+void libsieve_sieve_parse_buffer(struct sieve2_context *context)
 {
-    commandlist_t *t;
-    extern commandlist_t *ret;
     extern int libsieve_sievelineno;
 
     libsieve_parse_context = context;
@@ -2552,13 +2543,8 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
 
     libsieve_sievelexrestart();
 
-    if (libsieve_sieveparse()) {
-	return NULL;
-    } else {
-        t = ret;
-	ret = NULL;
-	return t;
-    }
+    if (libsieve_sieveparse(context))
+        throw(SIEVE2_ERROR_PARSE);
 }
 
 /* This gets called by the address parser,
@@ -2572,19 +2558,21 @@ int libsieve_sieveerror_exec(char *msg)
     return 0;
 }
 
-int libsieve_sieveerror(char *msg)
+int libsieve_sieveerror(struct sieve2_context *context, char *msg)
 {
     extern int libsieve_sievelineno;
 
-    libsieve_parse_context->parse_errors++;
+    context->parse_errors++;
 
-    libsieve_do_error_parse(libsieve_parse_context, libsieve_sievelineno, msg);
+    libsieve_do_error_parse(context, libsieve_sievelineno, msg);
 
     return 0;
 }
 
-static test_t *static_build_address(int t, struct aetags *ae,
-			     stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_address(
+	struct sieve2_context *context,
+	int t, struct aetags *ae,
+	stringlist_t *sl, patternlist_t *pl)
 {
     test_t *ret = libsieve_new_test(t);	/* can be either ADDRESS or ENVELOPE */
 
@@ -2605,8 +2593,10 @@ static test_t *static_build_address(int t, struct aetags *ae,
     return ret;
 }
 
-static test_t *static_build_header(int t, struct htags *h,
-			    stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_header(
+	struct sieve2_context *context,
+	int t, struct htags *h,
+	stringlist_t *sl, patternlist_t *pl)
 {
     test_t *ret = libsieve_new_test(t);	/* can be HEADER */
 
@@ -2626,7 +2616,9 @@ static test_t *static_build_header(int t, struct htags *h,
     return ret;
 }
 
-static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason)
+static commandlist_t *static_build_vacation(
+	struct sieve2_context *context,
+	int t, struct vtags *v, char *reason)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -2645,7 +2637,9 @@ static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason
     return ret;
 }
 
-static commandlist_t *static_build_notify(int t, struct ntags *n)
+static commandlist_t *static_build_notify(
+	struct sieve2_context *context,
+	int t, struct ntags *n)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -2653,9 +2647,9 @@ static commandlist_t *static_build_notify(int t, struct ntags *n)
 
     if (ret) {
 	ret->u.n.method = n->method; n->method = NULL;
-	ret->u.n.id = n->id; n->id = NULL;
 	ret->u.n.options = n->options; n->options = NULL;
-	ret->u.n.priority = n->priority;
+	ret->u.n.from = n->from; n->from= NULL;
+	ret->u.n.importance = n->importance; n->importance = 0;
 	ret->u.n.message = n->message; n->message = NULL;
 	static_free_ntags(n);
     }
@@ -2663,7 +2657,9 @@ static commandlist_t *static_build_notify(int t, struct ntags *n)
 }
 
 // FIXME: I think we just test and return true or false... check around.
-static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
+static commandlist_t *static_build_validnotif(
+	struct sieve2_context *context,
+	int t, stringlist_t *sl)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -2674,7 +2670,7 @@ static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
 	ret->u.d.comptag = d->comptag;
 	ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
 	ret->u.d.pattern = d->pattern; d->pattern = NULL;
-	ret->u.d.priority = d->priority;
+	ret->u.d.importance = d->importance;
 	static_free_dtags(d);
     }*/
     return ret;
@@ -2781,9 +2777,9 @@ static struct ntags *static_new_ntags(void)
     struct ntags *r = (struct ntags *) libsieve_malloc(sizeof(struct ntags));
 
     r->method = NULL;
-    r->id = NULL;
+    r->from = NULL;
     r->options = NULL;
-    r->priority = NULL;
+    r->importance = 0;
     r->message = NULL;
 
     return r;
@@ -2792,7 +2788,6 @@ static struct ntags *static_new_ntags(void)
 static struct ntags *static_canon_ntags(struct ntags *n)
 {
     char *from = "$from$: $subject$";
-    if (n->priority == NULL) { n->priority = "normal"; }
     if (n->message == NULL) { n->message = libsieve_strdup(from); }
 
     return n;
@@ -2801,28 +2796,29 @@ static struct ntags *static_canon_ntags(struct ntags *n)
 static void static_free_ntags(struct ntags *n)
 {
     libsieve_free(n->method);
-    libsieve_free(n->id);
+    libsieve_free(n->from);
     if (n->options) libsieve_free_sl(n->options);
     libsieve_free(n->message);
     libsieve_free(n);
 }
 
-static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *))
+static int static_verify_stringlist(struct sieve2_context *context, stringlist_t *sl,
+	int (*verify)(struct sieve2_context *, const char *))
 {
-    for (; sl != NULL && verify(sl->s); sl = sl->next) ;
+    for (; sl != NULL && verify(context, sl->s); sl = sl->next) ;
     return (sl == NULL);
 }
 
-static int static_verify_flag(const char *s)
+static int static_verify_flag(struct sieve2_context *context, const char *s)
 {
     /* xxx if not a flag, call sieveerror */
     return 1;
 }
 
-char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
-char *libsieve_addrerr;		/* buffer for sieve parser error messages */
+extern char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
+extern char *libsieve_addrerr;		/* buffer for sieve parser error messages */
 
-static int static_verify_address(const char *s)
+static int static_verify_address(struct sieve2_context *context, const char *s)
 {
     char *aerr = NULL;
     char *serr = NULL;
@@ -2831,7 +2827,7 @@ static int static_verify_address(const char *s)
     addr = libsieve_addr_parse_buffer(&addr, &s, &aerr);
     if (addr == NULL) {
         serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
-        libsieve_sieveerror(serr);
+        libsieve_sieveerror(context, serr);
         libsieve_free(serr);
         libsieve_free(aerr);
         return 0;
@@ -2840,13 +2836,13 @@ static int static_verify_address(const char *s)
     return 1;
 }
 
-static int static_verify_mailbox(const char *s UNUSED)
+static int static_verify_mailbox(struct sieve2_context *context, const char *s UNUSED)
 {
     /* xxx if not a mailbox, call sieveerror */
     return 1;
 }
 
-static int static_verify_header(const char *hdr)
+static int static_verify_header(struct sieve2_context *context, const char *hdr)
 {
     const char *h = hdr;
     char *err;
@@ -2859,7 +2855,7 @@ static int static_verify_header(const char *hdr)
 	   ;  ":". */
 	if (!((*h >= 33 && *h <= 57) || (*h >= 59 && *h <= 126))) {
 	    err = libsieve_strconcat("header '", hdr, "': not a valid header", NULL);
-	    libsieve_sieveerror(err);
+	    libsieve_sieveerror(context, err);
 	    libsieve_free(err);
 	    return 0;
 	}
@@ -2868,42 +2864,7 @@ static int static_verify_header(const char *hdr)
     return 1;
 }
  
-/* Was this supposed to be modifying its argument?! */
-/*
-static int static_verify_flag(const char *flag)
-{
-    int ret;
-    char *f, *err;
-
-    // Make ourselves a local copy to change the case
-    f = libsieve_strdup(flag);
- 
-    if (f[0] == '\\') {
-	libsieve_strtolower(f,strlen(f));
-	if (strcmp(f, "\\\\seen") && strcmp(f, "\\\\answered") &&
-	    strcmp(f, "\\\\flagged") && strcmp(f, "\\\\draft") &&
-	    strcmp(f, "\\\\deleted")) {
-            err = libsieve_strconcat("flag '", f, "': not a system flag", NULL);
-	    libsieve_sieveerror(err);
-	    libsieve_free(err);
-	    ret = 0;
-	}
-	ret = 1;
-    }
-    else if (!libsieve_strisatom(f,strlen(f))) {
-	err = libsieve_strconcat("flag '", f, "': not a valid keyword", NULL);
-	libsieve_sieveerror(err);
-	libsieve_free(err);
-	ret = 0;
-    }
-    ret = 1;
-
-    libsieve_free(f);
-    return ret;
-}
-*/
- 
-static regex_t *static_verify_regex(const char *s, int cflags)
+static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags)
 {
     int ret;
     char errbuf[100];
@@ -2911,14 +2872,14 @@ static regex_t *static_verify_regex(const char *s, int cflags)
 
     if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
 	(void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
-	libsieve_sieveerror(errbuf);
+	libsieve_sieveerror(context, errbuf);
 	libsieve_free(reg);
 	return NULL;
     }
     return reg;
 }
 
-static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
+static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp)
 {
     stringlist_t *sl2;
     patternlist_t *pl = NULL;
@@ -2930,7 +2891,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = static_verify_regex(sl2->s, cflags)) == NULL) {
+	if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
 	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}
@@ -2944,7 +2905,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
 }
 
 /* xxx is it ok to put this in an RFC822 header body? */
-static int static_ok_header(char *s UNUSED)
+static int static_ok_header(struct sieve2_context *context UNUSED, char *s UNUSED)
 {
     return 1;
 }
@@ -2961,7 +2922,7 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
         return c->require.envelope = c->support.envelope;
     } else if (!strcmp("vacation", req)) {
         return c->require.vacation = c->support.vacation;
-    } else if (!strcmp("notify",req)) {
+    } else if (!strcmp("enotify",req)) {
         return c->require.notify = c->support.notify;
     } else if (!strcmp("subaddress", req)) {
 	return c->require.subaddress = c->support.subaddress;

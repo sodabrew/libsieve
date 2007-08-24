@@ -92,6 +92,7 @@ commandlist_t *libsieve_new_command(int type)
     commandlist_t *p = (commandlist_t *) libsieve_malloc(sizeof(commandlist_t));
     p->type = type;
     p->next = NULL;
+    p->up = NULL;
     return p;
 }
 
@@ -103,6 +104,7 @@ commandlist_t *libsieve_new_if(test_t *t, commandlist_t *y, commandlist_t *n)
     p->u.i.do_then = y;
     p->u.i.do_else = n;
     p->next = NULL;
+    p->up = NULL;
     return p;
 }
 
@@ -248,7 +250,7 @@ void libsieve_free_tree(commandlist_t *cl)
 
 	case NOTIFY:
 	    if (cl->u.n.method) libsieve_free(cl->u.n.method);
-	    if (cl->u.n.id) libsieve_free(cl->u.n.id);
+	    if (cl->u.n.from) libsieve_free(cl->u.n.from);
 	    if (cl->u.n.options) libsieve_free_sl(cl->u.n.options);
 	    if (cl->u.n.message) libsieve_free(cl->u.n.message);
 	    break;
@@ -262,26 +264,26 @@ void libsieve_free_tree(commandlist_t *cl)
 
 char **libsieve_stringlist_to_chararray(stringlist_t *list)
 {
-    size_t space = 0, count = 0;
-    char **tmp = NULL, **ret = NULL;
+    size_t space = 1, count = 0;
+    char **ret;
+    stringlist_t *sl;
 
-    while (list != NULL) {
-        if (count + 1 < space) {
-            ret[count++] = list->s;
-            ret[count] = NULL;
-        } else {
-            tmp = (char **)libsieve_realloc(ret, (space+=4) * sizeof(char *));
-            if (tmp == NULL) {
-                libsieve_free(ret);
-                return NULL;
-            } else {
-                ret = tmp;
-            }
-            ret[count++] = list->s;
-            ret[count] = NULL;
-        }
-        list = list->next;
+    sl = list;
+    while (sl != NULL) {
+        space++;
+        sl = sl->next;
     }
+
+    ret = libsieve_malloc(space * sizeof(char *));
+    if (!ret) return NULL;
+
+    sl = list;
+    while (sl != NULL) {
+        ret[count++] = sl->s;
+        sl = sl->next;
+    }
+
+    ret[count] = NULL;
 
     return ret;
 }

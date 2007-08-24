@@ -2,7 +2,8 @@ From: envelope@example.com
 Date: Tue, 1 Apr 1997 09:06:31 -0800 (PST)
 From: coyote@desert.example.org
 To: roadrunner@acme.example.com
-Subject: I have a present for you
+FooSubject: I have a present for you
+Subject: 
 
 Look, I'm sorry about the whole anvil thing, and I really
 didn't mean to try and drop it on you from the top of the

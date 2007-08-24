@@ -81,6 +81,7 @@ int my_debug(sieve2_context_t *s, void *my)
 			sieve2_getvalue_string(s, "file"),
 			sieve2_getvalue_string(s, "function"),
 			sieve2_getvalue_string(s, "message"));
+		fflush(stdout);
 	}
 	return SIEVE2_OK;
 }
@@ -92,21 +93,14 @@ int my_notify(sieve2_context_t *s, void *my)
 	int i;
 
 	printf( "Action is NOTIFY: \n" );
-	printf( "  ID \"%s\" is %s\n",
-		sieve2_getvalue_string(s, "id"),
-		sieve2_getvalue_string(s, "active"));
-	printf( "    Method is %s\n",
-		sieve2_getvalue_string(s, "method"));
-	printf( "    Priority is %s\n",
-		sieve2_getvalue_string(s, "priority"));
-	printf( "    Message is %s\n",
-		sieve2_getvalue_string(s, "message"));
+	printf( "  From %s\n", sieve2_getvalue_string(s, "fromaddr"));
+	printf( "  Method is %s\n", sieve2_getvalue_string(s, "method"));
+	printf( "  Importance is %d\n", sieve2_getvalue_int(s, "importance"));
+	printf( "  Message is %s\n", sieve2_getvalue_string(s, "message"));
 
 	options = sieve2_getvalue_stringlist(s, "options");
-	if (!options)
-		return SIEVE2_ERROR_BADARGS;
-	for (i = 0; options[i] != NULL; i++) {
-		printf( "    Options are %s\n", options[i] );
+	for (i = 0; options && options[i] != NULL; i++) {
+		printf( "  Options are %s\n", options[i] );
 	}
 
 	m->actiontaken = 1;
@@ -212,7 +206,7 @@ int my_errparse(sieve2_context_t *s, void *my)
 {
 	struct my_context *m = (struct my_context *)my;
 
-	printf( "Error is PARSE: " );
+	printf( "Error is PARSE: \n" );
 	printf( "  Line is %d\n",
 		sieve2_getvalue_int(s, "lineno"));
 	printf( "  Message is %s\n",
@@ -297,7 +291,8 @@ int my_getheader(sieve2_context_t *s, void *my)
 int my_getenvelope(sieve2_context_t *s, void *my)
 {
 	sieve2_setvalue_string(s, "to", "foo+AllowedBox@bar");
-	sieve2_setvalue_string(s, "from", "from@nothing" );
+//	sieve2_setvalue_string(s, "from", "f r o m" );
+	sieve2_setvalue_string(s, "from", "from@example.com" );
 
 	return SIEVE2_OK;
 //	return SIEVE2_ERROR_UNSUPPORTED;

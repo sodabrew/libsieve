@@ -367,8 +367,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 10
-#define YY_END_OF_BUFFER 11
+#define YY_NUM_RULES 12
+#define YY_END_OF_BUFFER 13
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -376,11 +376,12 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[29] =
+static yyconst flex_int16_t yy_accept[34] =
     {   0,
-        0,    0,    0,    0,    0,    0,    0,    0,   11,   10,
-        6,    6,   10,    1,    2,    1,    7,    8,    9,    6,
-        6,    5,    7,    8,    9,    3,    4,    0
+        0,    0,    0,    0,    0,    0,    0,    0,   13,   12,
+        7,    7,   12,    1,    2,    1,    9,    9,   10,   11,
+        7,    7,    6,    9,    9,   10,   11,    3,    5,    9,
+        4,    8,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -391,9 +392,9 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    2,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    5,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    6,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    7,    1,
+        1,    1,    1,    8,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
 
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -415,45 +416,47 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[6] =
+static yyconst flex_int32_t yy_meta[9] =
     {   0,
-        1,    2,    3,    3,    4
+        1,    1,    2,    2,    3,    1,    1,    1
     } ;
 
-static yyconst flex_int16_t yy_base[36] =
+static yyconst flex_int16_t yy_base[41] =
     {   0,
-        0,    5,   46,   45,    8,   10,   12,   14,   49,   52,
-       16,   45,    0,   52,   52,    0,    0,    0,    0,    0,
-       45,   19,    0,    0,    0,   52,   43,   52,   23,   27,
-       31,   39,   35,   38,   42
+        0,    5,    9,   13,   19,   21,   23,   25,   57,   58,
+       27,   53,   53,   58,   58,   51,    0,   43,    0,    0,
+        0,   18,   30,    0,   13,    0,    0,   58,   14,    8,
+        0,    0,   58,   34,   37,   40,   43,   46,   48,   51
     } ;
 
-static yyconst flex_int16_t yy_def[36] =
+static yyconst flex_int16_t yy_def[41] =
     {   0,
-       28,   28,   29,   29,   30,   30,   31,   31,   28,   28,
-       28,   11,   32,   28,   28,   32,   33,   34,   35,   11,
-       11,   28,   33,   34,   35,   28,   22,    0,   28,   28,
-       28,   28,   28,   28,   28
+       34,   33,   35,   35,   36,   36,   37,   37,   33,   33,
+       33,   11,   33,   33,   33,   33,   38,   38,   39,   40,
+       11,   11,   33,   38,   38,   39,   40,   33,   23,   38,
+       33,   38,    0,   33,   33,   33,   33,   33,   33,   33
     } ;
 
-static yyconst flex_int16_t yy_nxt[58] =
+static yyconst flex_int16_t yy_nxt[67] =
     {   0,
-       10,   10,   11,   12,   13,   14,   15,   11,   12,   16,
-       10,   10,   10,   10,   10,   10,   10,   10,   20,   20,
-       22,   27,   27,   17,   17,   17,   17,   18,   18,   18,
-       18,   19,   19,   19,   19,   23,   23,   23,   24,   24,
-       22,   24,   25,   25,   28,   25,   26,   21,   28,   10,
-       10,    9,   28,   28,   28,   28,   28
+       33,   31,   11,   12,   13,   14,   15,   11,   12,   16,
+       14,   14,   14,   10,   32,   31,   18,   10,   30,   28,
+       18,   10,   10,   10,   10,   10,   10,   10,   10,   21,
+       21,   23,   29,   29,   10,   10,   10,   17,   17,   17,
+       19,   19,   19,   20,   20,   20,   24,   24,   26,   25,
+       26,   27,   23,   27,   23,   22,   33,    9,   33,   33,
+       33,   33,   33,   33,   33,   33
     } ;
 
-static yyconst flex_int16_t yy_chk[58] =
+static yyconst flex_int16_t yy_chk[67] =
     {   0,
-        1,    1,    1,    1,    1,    2,    2,    2,    2,    2,
-        5,    5,    6,    6,    7,    7,    8,    8,   11,   11,
-       22,   22,   22,   29,   29,   29,   29,   30,   30,   30,
-       30,   31,   31,   31,   31,   33,   33,   33,   34,   34,
-       32,   34,   35,   35,   27,   35,   21,   12,    9,    4,
-        3,   28,   28,   28,   28,   28,   28
+        0,   31,    1,    1,    1,    2,    2,    2,    2,    2,
+        2,    2,    2,    3,   30,   29,    3,    4,   25,   22,
+        4,    5,    5,    6,    6,    7,    7,    8,    8,   11,
+       11,   23,   23,   23,   34,   34,   34,   35,   35,   35,
+       36,   36,   36,   37,   37,   37,   38,   38,   39,   18,
+       39,   40,   16,   40,   13,   12,    9,   33,   33,   33,
+       33,   33,   33,   33,   33,   33
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -512,7 +515,7 @@ static struct mlbuf *ml = NULL;
 void libsieve_headerfatalerror(const char msg[]);
 
 
-#line 516 "header-lex.c"
+#line 519 "header-lex.c"
 
 #define INITIAL 0
 #define S_NAME 1
@@ -672,7 +675,7 @@ YY_DECL
 #line 50 "header-lex.l"
 
 
-#line 676 "header-lex.c"
+#line 679 "header-lex.c"
 
 	if ( !(yy_init) )
 		{
@@ -726,13 +729,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 29 )
+				if ( yy_current_state >= 34 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 28 );
+		while ( yy_current_state != 33 );
 		yy_cp = (yy_last_accepting_cpos);
 		yy_current_state = (yy_last_accepting_state);
 
@@ -787,14 +790,25 @@ case 4:
 YY_RULE_SETUP
 #line 69 "header-lex.l"
 {
+                /* Special case of a malformed header: whitespace followed by newlines followed by whitespace */
+                BEGIN S_TEXT;
+                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
+                return COLON;
+                }
+	YY_BREAK
+case 5:
+/* rule 5 can match eol */
+YY_RULE_SETUP
+#line 75 "header-lex.l"
+{
                 /* Special case of an empty header: whitespace followed by newlines */
                 TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
                 return COLON;
                 }
 	YY_BREAK
-case 5:
+case 6:
 YY_RULE_SETUP
-#line 74 "header-lex.l"
+#line 80 "header-lex.l"
 {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
@@ -802,18 +816,28 @@ YY_RULE_SETUP
                 return COLON;
                 }
 	YY_BREAK
-case 6:
-/* rule 6 can match eol */
+case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
-#line 80 "header-lex.l"
+#line 86 "header-lex.l"
 {
                 /* Eat stray newlines, such as those at the end of every line... */
                 }
 	YY_BREAK
-case 7:
-/* rule 7 can match eol */
+case 8:
 YY_RULE_SETUP
-#line 84 "header-lex.l"
+#line 90 "header-lex.l"
+{
+                /* Special case of a malformed header: wrapped line not starting with whitespace */
+                BEGIN S_WRAP;
+                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
+                return WRAP;
+                }
+	YY_BREAK
+case 9:
+/* rule 9 can match eol */
+YY_RULE_SETUP
+#line 97 "header-lex.l"
 {
                 /* FIXME: Should be something like [!-9;-~]... */
                 /* Field names must be in these ASCII ranges:
@@ -826,9 +850,9 @@ YY_RULE_SETUP
                 return NAME;
                 }
 	YY_BREAK
-case 8:
+case 10:
 YY_RULE_SETUP
-#line 96 "header-lex.l"
+#line 109 "header-lex.l"
 {
                 TRACE_DEBUG( "TEXT: %s", libsieve_headertext );
 		libsieve_headerlval = libsieve_strbuf(ml, libsieve_headertext, strlen(libsieve_headertext), NOFREE);
@@ -836,9 +860,9 @@ YY_RULE_SETUP
                 return TEXT;
                 }
 	YY_BREAK
-case 9:
+case 11:
 YY_RULE_SETUP
-#line 103 "header-lex.l"
+#line 116 "header-lex.l"
 {
                 TRACE_DEBUG( "WRAP: %s", libsieve_headertext );
 		libsieve_headerlval = libsieve_strbuf(ml, libsieve_headertext, strlen(libsieve_headertext), NOFREE);
@@ -846,12 +870,12 @@ YY_RULE_SETUP
                 return WRAP;
                 }
 	YY_BREAK
-case 10:
+case 12:
 YY_RULE_SETUP
-#line 110 "header-lex.l"
+#line 123 "header-lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 855 "header-lex.c"
+#line 879 "header-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(S_NAME):
 case YY_STATE_EOF(S_TEXT):
@@ -1140,7 +1164,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 29 )
+			if ( yy_current_state >= 34 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1168,11 +1192,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 29 )
+		if ( yy_current_state >= 34 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 28);
+	yy_is_jam = (yy_current_state == 33);
 
 	return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1803,7 +1827,7 @@ void libsieve_headerfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 110 "header-lex.l"
+#line 123 "header-lex.l"
 
 
 

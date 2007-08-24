@@ -213,6 +213,11 @@ char *libsieve_strconcat (const char *str, ...)
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
+char *libsieve_catbuf_simple(struct catbuf *s, char *str)
+{
+	return libsieve_catbuf(s, str, strlen(str));
+}
+
 /* This thing is used to build a single string from many pieces. */
 char *libsieve_catbuf(struct catbuf *s, char *str, size_t len)
 {

@@ -52,9 +52,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
 char *libsieve_addrerr;          /* buffer for sieve parser error messages */
-struct sieve2_context *libsieve_parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
+extern struct sieve2_context *libsieve_parse_context;
 %}
 
 %name-prefix="libsieve_addr"

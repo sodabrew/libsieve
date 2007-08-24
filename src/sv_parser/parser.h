@@ -25,7 +25,7 @@ void libsieve_addrlexrestart(void);
 #include "context2.h"
 #include "message2.h"
 
-commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
+void libsieve_sieve_parse_buffer(struct sieve2_context *context);
 int libsieve_sieveerror_exec(char *msg);
 
 void libsieve_sievelexfree(void);
