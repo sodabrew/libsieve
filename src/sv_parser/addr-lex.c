@@ -802,7 +802,7 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 69 "addr-lex.l"
-{ libsieve_addrerror("address parse error, "
+{ libsieve_addrerror(libsieve_parse_context, "address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
@@ -884,7 +884,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
 #line 110 "addr-lex.l"
-{ libsieve_addrerror("address parse error, "
+{ libsieve_addrerror(libsieve_parse_context, "address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
 				  yyterminate(); }
@@ -1857,6 +1857,7 @@ int libsieve_addrinput(char *buf, int max)
         n = 0;
     else
         n = strlen(libsieve_addrptr) < max_size ? strlen(libsieve_addrptr) : max_size;
+
     if (n > 0) {
 	memcpy(buf, libsieve_addrptr, n);
 	libsieve_addrptr += n;

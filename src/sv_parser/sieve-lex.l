@@ -59,6 +59,7 @@ CRLF		(\r\n|\r|\n)
 
 %state MULTILINE
 %state QSTRING
+%state COMMENT
 
 %%
 <MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
@@ -102,6 +103,9 @@ CRLF		(\r\n|\r|\n)
 <QSTRING>.              { TRACE_DEBUG("Lone string char [%s]", yytext);
 			  libsieve_catbuf(text, yytext, yyleng); }
 
+<COMMENT>\*\/           { BEGIN INITIAL; }
+<COMMENT>. ;            /* ignore comments */
+
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ TRACE_DEBUG("Beginning a text: block.");
 			  BEGIN MULTILINE;
 			  if (text) libsieve_free(libsieve_catbuf_free(text));
@@ -133,6 +137,7 @@ CRLF		(\r\n|\r|\n)
 	
 <INITIAL>[ \t\n\r] ;	/* ignore whitespace */
 <INITIAL>#.* ;		/* ignore comments */
+<INITIAL>\/\*           { BEGIN COMMENT; }
 .			return yytext[0];
 
 %%

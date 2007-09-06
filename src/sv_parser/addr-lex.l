@@ -66,7 +66,7 @@ void libsieve_addrfatalerror(const char msg[]);
 \"				{ BEGIN QSTRING; TRACE_DEBUG( "Begin QSTRING" ); return QUOTE; }
 \[				{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return yytext[0]; }
 \(				{ ncom = 1; TRACE_DEBUG( "Begin COMMENT" ); BEGIN COMMENT; }
-\)				{ libsieve_addrerror("address parse error, "
+\)				{ libsieve_addrerror(libsieve_parse_context, "address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
@@ -107,7 +107,7 @@ void libsieve_addrfatalerror(const char msg[]);
 <COMMENT>([^\(\)\n\0\\]|\\.)*	/* ignore comments */
 <COMMENT>\(			ncom++;
 <COMMENT>\)			{ ncom--; if (ncom == 0) BEGIN INITIAL; }
-<COMMENT><<EOF>>		{ libsieve_addrerror("address parse error, "
+<COMMENT><<EOF>>		{ libsieve_addrerror(libsieve_parse_context, "address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
 				  yyterminate(); }
@@ -125,6 +125,7 @@ int libsieve_addrinput(char *buf, int max)
         n = 0;
     else
         n = strlen(libsieve_addrptr) < max_size ? strlen(libsieve_addrptr) : max_size;
+
     if (n > 0) {
 	memcpy(buf, libsieve_addrptr, n);
 	libsieve_addrptr += n;

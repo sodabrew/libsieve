@@ -40,6 +40,7 @@ static struct mlbuf *ml = NULL;
 %}
 
 %name-prefix="libsieve_header"
+%parse-param { struct sieve2_context *context }
 
 %token NAME COLON TEXT WRAP
 %start headers
@@ -77,7 +78,7 @@ body: TEXT                      {
 %%
 
 /* copy header error message into buffer provided by sieve parser */
-void libsieve_headererror(const char *s)
+void libsieve_headererror(struct sieve2_context *context, const char *s)
 {
     extern char *libsieve_headererr;
     libsieve_headererr = libsieve_strdup(s);
@@ -86,7 +87,7 @@ void libsieve_headererror(const char *s)
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr, char **err)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
@@ -99,7 +100,7 @@ header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, ch
 
     libsieve_headerlexrestart();
 
-    if(libsieve_headerparse()) {
+    if(libsieve_headerparse(context)) {
         TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
         *err = libsieve_headererr;
 	while (hl) {

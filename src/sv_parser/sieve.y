@@ -53,15 +53,16 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT context
 
+/* Better yacc error messages please */
+#define YYERROR_VERBOSE
+
 struct sieve2_context *libsieve_parse_context;
 extern int libsieve_sieveerror(struct sieve2_context *context, char *msg);
 extern int libsieve_sievelex(void);
 
-// #define YYERROR_VERBOSE /* i want better error messages! */
 %}
 
 %name-prefix="libsieve_sieve"
-
 %parse-param { struct sieve2_context *context }
 
 %union {
@@ -765,7 +766,7 @@ static int static_verify_address(struct sieve2_context *context, const char *s)
     char *serr = NULL;
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(&addr, &s, &aerr);
+    addr = libsieve_addr_parse_buffer(context, &addr, &s, &aerr);
     if (addr == NULL) {
         serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
         libsieve_sieveerror(context, serr);

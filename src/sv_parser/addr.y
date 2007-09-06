@@ -58,6 +58,7 @@ extern struct sieve2_context *libsieve_parse_context;
 %}
 
 %name-prefix="libsieve_addr"
+%parse-param { struct sieve2_context *context }
 
 %token ATOM QTEXT DTEXT QUOTE
 
@@ -165,7 +166,7 @@ qstring: QUOTE QTEXT QUOTE	{
 %%
 
 /* Run an execution error callback. */
-void libsieve_addrerror(char *s)
+void libsieve_addrerror(struct sieve2_context *context, char *s)
 {
     libsieve_sieveerror_exec(s);
 }
@@ -173,7 +174,7 @@ void libsieve_addrerror(char *s)
 /* Wrapper for addrparse() which sets up the 
  * required environment and allocates variables
  */
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr, char **err)
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr, char **err)
 {
     struct address *newdata = NULL;
     extern struct mlbuf *ml;
@@ -188,7 +189,7 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
 
     libsieve_addrlexrestart();
 
-    if(libsieve_addrparse()) {
+    if(libsieve_addrparse(context)) {
         // FIXME: Make sure that this is sufficient cleanup
         libsieve_addrstructfree(addr, CHARSALSO);
         libsieve_strbuffree(&ml, FREEME);

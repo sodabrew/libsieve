@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "context2.h"
+
 /* ADDRESS */
 struct address {
   char *name;
@@ -15,7 +17,7 @@ struct addr_marker {
     char *freeme;
 };
 
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr, char **err);
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr, char **err);
 void libsieve_addrlexfree(void);
 void libsieve_addrlexalloc(void);
 void libsieve_addrlexrestart(void);
@@ -32,7 +34,7 @@ void libsieve_sievelexfree(void);
 void libsieve_sievelexalloc(void);
 void libsieve_sievelexrestart(void);
 
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err);
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr, char **err);
 void libsieve_headerlexfree(void);
 void libsieve_headerlexalloc(void);
 void libsieve_headerlexrestart(void);

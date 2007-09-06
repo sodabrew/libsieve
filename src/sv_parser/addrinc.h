@@ -5,9 +5,9 @@
 #include "parser.h"
 
 int libsieve_addrlex(void);
-int libsieve_addrparse(void);
+int libsieve_addrparse(struct sieve2_context *context);
 int libsieve_addrinput(char *buf, int max_size);
-void libsieve_addrerror(char *str);
+void libsieve_addrerror(struct sieve2_context *context, char *str);
 void libsieve_addrappend(struct address **a);
 
 #define STRUCTONLY 0
