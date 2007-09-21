@@ -58,15 +58,9 @@ int sieve2_alloc(sieve2_context_t **context)
     }
     memset(c, 0, sizeof(struct sieve2_context));
 
-    // TODO: Contextualize the lexer and parser.
-    libsieve_addrlexalloc();
-    libsieve_sievelexalloc();
-    libsieve_headerlexalloc();
-    libsieve_headeryaccalloc();
-
     libsieve_message2_alloc(&c->message);
 
-    libsieve_strbufalloc(&c->strbuf);
+    libsieve_strbufalloc(&c->ml);
 
     *context = c;
 
@@ -88,12 +82,7 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_message2_free(&c->message);
 
-    libsieve_addrlexfree();
-    libsieve_sievelexfree();
-    libsieve_headerlexfree();
-    libsieve_headeryaccfree();
-
-    libsieve_strbuffree(&c->strbuf, FREEME);
+    libsieve_strbuffree(&c->ml, FREEME);
 
     if (c->slflags) {
         libsieve_free_sl_only(c->slflags);
@@ -182,7 +171,6 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
     int retval = SIEVE2_OK;
-    int scriptlen;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
@@ -192,7 +180,7 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script, &scriptlen) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.len) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
@@ -227,7 +215,6 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
     int retval = SIEVE2_OK;
-    int scriptlen;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
@@ -237,7 +224,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script, &scriptlen) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.len) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
@@ -255,7 +242,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
                 return SIEVE2_ERROR_HEADER;
             /* Our "internal callback" instead of the user's getheader. */
             c->callbacks.getheader = libsieve_message2_getheader;
-            if (libsieve_message2_parseheader(c->message) != SIEVE2_OK)
+            if (libsieve_message2_parseheader(c, c->message) != SIEVE2_OK)
                 return SIEVE2_ERROR_HEADER;
             }
         }
@@ -312,7 +299,7 @@ char * sieve2_listextensions(sieve2_context_t *sieve2_context)
         ( c->support.notify     ? "enotify "   : "" ),
         NULL );
 
-    return libsieve_strbuf(c->strbuf, ext, strlen(ext), FREEME);
+    return libsieve_strbuf(c->ml, ext, strlen(ext), FREEME);
 }
 
 #if (MSDOS || WIN32)

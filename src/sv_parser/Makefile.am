@@ -5,7 +5,7 @@ LFLAGS			= -s -olex.yy.c
 YFLAGS			= -d -p$*
 
 noinst_LTLIBRARIES      = libparser.la
-libparser_la_SOURCES    = addr.y  addr-lex.l  sieve.y  sieve-lex.l  sieve-keywords.c  sieve-encodedchar.c  header.y  header-lex.l  comparator.c
+libparser_la_SOURCES    = addr-lex.l header-lex.l sieve-lex.l addr.y header.y sieve.y sieve-keywords.c sieve-encodedchar.c comparator.c parser.c
 libparser_la_LDFLAGS    = -no-undefined
 
 # Handling the Gperf code

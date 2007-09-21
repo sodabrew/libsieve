@@ -7,8 +7,8 @@ Server prior to CMU's switch to a more restrictive license. The libSieve API
 attempts to be easy to use and extensible, and replaces the more rigid API in
 the Cyrus Sieve implementation.
 
-For questions and comments regarding this library, please contact Aaron Stone
-directly at aaron at serendipity dot cx. There are no mailing lists.
+For questions, comments, and bug reports regarding this library, please contact
+Aaron Stone <aaron@serendipity.cx> directly. There are no mailing lists.
 
 The documents listed below coincide with those features currently implemented
 in libSieve. Both as these documents progress through the standardization

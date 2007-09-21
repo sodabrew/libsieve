@@ -21,37 +21,35 @@
 /* sv_util */
 #include "util.h"
 
+/* sv_parser */
+#include "sieve-encodedchar.h"
+#include "sieve-keywords.h"
+#include "parser.h"
+
 /* sv_interface */
 #include "tree.h"
 #include "sieve.h"
 
 #include "callbacks2.h"
-extern struct sieve2_context *libsieve_parse_context;
+
+#define context yyextra
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
+#define THIS_CONTEXT context
 
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
-
-int libsieve_sieveinput(char *buf, int max_size);
-extern char *libsieve_encoded_char_hex(char *text, size_t len, size_t *outlen);
-extern char *libsieve_encoded_char_uni(char *text, size_t len, size_t *outlen);
-extern int libsieve_keyword(const char *str, unsigned int len);
-extern int libsieve_sieveerror(char *);
-
-#define YY_FATAL_ERROR libsieve_sievefatalerror
-void libsieve_sievefatalerror(const char msg[]);
+#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
+#define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_sieveget_extra(yyscanner), msg)
 
 /* Holds a catbuf for the text: multiline. */
 static struct catbuf *text = NULL;
 
 %}
 
-%option yylineno
-%option nounput
-%option noyywrap
+%option noyywrap nounput
+%option yylineno never-interactive
 %option prefix="libsieve_sieve"
-%option never-interactive
+%option header-file="sieve-lex.h"
+%option reentrant extra-type="struct sieve2_context *"
 
 ws		[ \t]+
 ident		:?[a-zA-Z_][a-zA-Z_0-9]*
@@ -75,7 +73,7 @@ CRLF		(\r\n|\r|\n)
 			  libsieve_catbuf(text, yytext, yyleng); }
 <MULTILINE>[^\.]+	{ TRACE_DEBUG("Multiline line [%s]", yytext);
 			  libsieve_catbuf(text, yytext, yyleng); }
-<MULTILINE><<EOF>>	{ libsieve_sieveerror("unexpected end of file in string"); 
+<MULTILINE><<EOF>>	{ libsieve_sieveerror(context, "unexpected end of file in string"); 
 			  if (text) {
 			    libsieve_free(libsieve_catbuf_free(text));
 			    text = NULL;
@@ -89,12 +87,12 @@ CRLF		(\r\n|\r|\n)
 			  return STRING; }
 <QSTRING>\$\{hex:[0-9a-fA-F\ ]+\} {
 			  size_t len = 0;
-			  char *decoded = libsieve_encoded_char_hex(yytext, yyleng, &len);
+			  char *decoded = libsieve_encoded_char_hex(context, yytext, yyleng, &len);
 			  libsieve_catbuf(text, decoded, len);
 			  libsieve_free(decoded); }
 <QSTRING>\$\{unicode:[0-9a-fA-F\ ]+\} {
 			  size_t len = 0;
-			  char *decoded = libsieve_encoded_char_uni(yytext, yyleng, &len);
+			  char *decoded = libsieve_encoded_char_uni(context, yytext, yyleng, &len);
 			  libsieve_catbuf(text, decoded, len);
 			  libsieve_free(decoded); }
 <QSTRING>([^\"|^\$\{]|\\\"|{CRLF})+ {
@@ -127,7 +125,7 @@ CRLF		(\r\n|\r|\n)
 			    if (len < 0 || len > 1023) {
 			      snprintf(error, 1023, "invalid keyword.");
 			    }
-			    libsieve_sieveerror(error); 
+			    libsieve_sieveerror(context, error); 
 			    if (text) {
 			      libsieve_free(libsieve_catbuf_free(text));
 			      text = NULL;
@@ -141,45 +139,4 @@ CRLF		(\r\n|\r|\n)
 .			return yytext[0];
 
 %%
-/* take input from sieve string provided by sieve parser */
-int libsieve_sieveinput(char *buf, int max_size)
-{
-    extern char *libsieve_sieveptr;	/* current position in sieve string */
-    size_t n;			/* number of characters to read from string */
-
-    n = strlen(libsieve_sieveptr) < (size_t)max_size ? strlen(libsieve_sieveptr) : max_size;
-    if (n > 0) {
-	memcpy(buf, libsieve_sieveptr, n);
-	libsieve_sieveptr += n;
-    }
-
-    return n;
-}
-
-/* Clean up after ourselves by free()ing the current buffer */
-void libsieve_sievelexfree()
-{
-    libsieve_sievelex_destroy();
-}
-
-/* Kind of a hack, but this sets up the file statics */
-void libsieve_sievelexalloc()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Restart the lexer before each invocation of the parser */
-void libsieve_sievelexrestart()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Replacement for the YY_FATAL_ERROR macro,
- * which would print msg to stderr and exit. */
-void libsieve_sievefatalerror(const char msg[])
-{
-    /* Basically stop and don't do anything
-     * Supress the unused yy_fatal_error warning. */
-    if (0) yy_fatal_error(msg);
-}
 

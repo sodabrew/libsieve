@@ -40,8 +40,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "callbacks2.h"
 
 #define THIS_MODULE "sv_comparator"
-#define THIS_CONTEXT libsieve_parse_context
-extern struct sieve2_context *libsieve_parse_context;
+#define THIS_CONTEXT NULL
 
 /* --- i;octet comparators --- */
 

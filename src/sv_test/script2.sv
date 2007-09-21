@@ -1,5 +1,7 @@
 	require "fileinto";
 
+	/** Hello, I am a comment!! ****/ /** /* */
+
 	if header :is "X-Mailinglist" "suse-linux" { 	
 		fileinto "INBOX.Listen.suse-linux";} 	
 	elsif header :contains "Mailing-List" "reiserfs" {

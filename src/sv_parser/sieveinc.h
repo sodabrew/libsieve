@@ -4,6 +4,7 @@
 #include "tree.h"
 #include "script.h"
 #include "context2.h"
+#include "parser.h"
 
 struct vtags {
     int days;

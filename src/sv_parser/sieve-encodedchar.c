@@ -24,8 +24,7 @@
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
-extern struct sieve2_context *libsieve_parse_context;
+#define THIS_CONTEXT context
 
 typedef int (* char_conv_fp)(unsigned int, char *);
 
@@ -63,7 +62,8 @@ static int char_hex(unsigned int ch, char *text)
 }
 
 
-static char *libsieve_encoded_char(char *text, size_t len, size_t *outlen,
+static char *libsieve_encoded_char(struct sieve2_context *context,
+	char *text, size_t len, size_t *outlen,
 	char_conv_fp char_conv)
 {
         size_t i = 0, j = 0;
@@ -116,13 +116,13 @@ static char *libsieve_encoded_char(char *text, size_t len, size_t *outlen,
         return decoded;
 }
 
-char *libsieve_encoded_char_hex(char *text, size_t len, size_t *outlen)
+char *libsieve_encoded_char_hex(struct sieve2_context *context, char *text, size_t len, size_t *outlen)
 {
-	return libsieve_encoded_char(text, len, outlen, char_hex);
+	return libsieve_encoded_char(context, text, len, outlen, char_hex);
 }
 
-char *libsieve_encoded_char_uni(char *text, size_t len, size_t *outlen)
+char *libsieve_encoded_char_uni(struct sieve2_context *context, char *text, size_t len, size_t *outlen)
 {
-	return libsieve_encoded_char(text, len, outlen, char_uni);
+	return libsieve_encoded_char(context, text, len, outlen, char_uni);
 }
 

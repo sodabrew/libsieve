@@ -50,13 +50,13 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* given a header, extract an address out of it.  if marker points to NULL,
    extract the first address.  otherwise, it's an index into the header to
    say where to start extracting */
-int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker)
+int libsieve_parse_address(struct sieve2_context *context, const char *header, struct address **data, struct addr_marker **marker)
 {
     char *err;
     struct addr_marker *am;
     struct address *newdata = NULL;
 
-    newdata = libsieve_addr_parse_buffer(data, &header, &err);
+    newdata = libsieve_addr_parse_buffer(context, data, &header, &err);
     if( newdata == NULL )
         return SIEVE2_ERROR_EXEC;
 
