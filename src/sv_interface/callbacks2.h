@@ -46,7 +46,7 @@ int libsieve_do_vacation(struct sieve2_context *c, char *addr, char *fromaddr,
 		int days, int mime);
 int libsieve_do_notify(struct sieve2_context *c, char *id,
 		char *method, stringlist_t *options,
-		int importance, char *message);
+		char *priority, char *message);
 
 /* Reporting parse and runtime errors. */
 int libsieve_do_error_parse(struct sieve2_context *c, int lineno, char *msg);
@@ -60,7 +60,7 @@ int libsieve_do_debug_trace(struct sieve2_context *c, int level,
 /* Ask the user app for information about the script & message. */
 int libsieve_do_getscript(struct sieve2_context *context,
 		const char * const path, const char * const name,
-		const char ** script, int * scriptlen);
+		const char ** script);
 int libsieve_do_getallheaders(struct sieve2_context *context,
 		char ** header);
 int libsieve_do_getheader(struct sieve2_context *context,

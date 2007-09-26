@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 34
+#define YY_FLEX_SUBMINOR_VERSION 33
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -31,7 +31,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -94,12 +94,11 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
+#if __STDC__
 
 #define YY_USE_CONST
 
-#endif	/* defined (__STDC__) */
+#endif	/* __STDC__ */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -118,41 +117,24 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
 
-/* An opaque pointer. */
-#ifndef YY_TYPEDEF_YY_SCANNER_T
-#define YY_TYPEDEF_YY_SCANNER_T
-typedef void* yyscan_t;
-#endif
-
-/* For convenience, these vars (plus the bison vars far below)
-   are macros in the reentrant scanner. */
-#define yyin yyg->yyin_r
-#define yyout yyg->yyout_r
-#define yyextra yyg->yyextra_r
-#define yyleng yyg->yyleng_r
-#define yytext yyg->yytext_r
-#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
-#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
-#define yy_flex_debug yyg->yy_flex_debug_r
-
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
-#define BEGIN yyg->yy_start = 1 + 2 *
+#define BEGIN (yy_start) = 1 + 2 *
 
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
-#define YY_START ((yyg->yy_start - 1) / 2)
+#define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
 
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE libsieve_addrrestart(yyin ,yyscanner )
+#define YY_NEW_FILE libsieve_addrrestart(libsieve_addrin  )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -170,6 +152,10 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
+extern int libsieve_addrleng;
+
+extern FILE *libsieve_addrin, *libsieve_addrout;
+
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
@@ -180,17 +166,17 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up yytext. */ \
+		/* Undo effects of setting up libsieve_addrtext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		*yy_cp = yyg->yy_hold_char; \
+		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
-		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
+		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
+		YY_DO_BEFORE_ACTION; /* set up libsieve_addrtext again */ \
 		} \
 	while ( 0 )
 
-#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
+#define unput(c) yyunput( c, (yytext_ptr)  )
 
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
@@ -260,12 +246,17 @@ struct yy_buffer_state
 	 *
 	 * When we actually see the EOF, we change the status to "new"
 	 * (via libsieve_addrrestart()), so that the user can continue scanning by
-	 * just pointing yyin at a new input file.
+	 * just pointing libsieve_addrin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
 	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
+
+/* Stack of input buffers. */
+static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
+static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
+static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
@@ -273,45 +264,60 @@ struct yy_buffer_state
  *
  * Returns the top of the stack, or NULL.
  */
-#define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
-                          ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
+#define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
+                          ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
                           : NULL)
 
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
-#define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
+#define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-void libsieve_addrrestart (FILE *input_file ,yyscan_t yyscanner );
-void libsieve_addr_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE libsieve_addr_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void libsieve_addr_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void libsieve_addr_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void libsieve_addrpush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void libsieve_addrpop_buffer_state (yyscan_t yyscanner );
+/* yy_hold_char holds the character lost when libsieve_addrtext is formed. */
+static char yy_hold_char;
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+int libsieve_addrleng;
 
-static void libsieve_addrensure_buffer_stack (yyscan_t yyscanner );
-static void libsieve_addr_load_buffer_state (yyscan_t yyscanner );
-static void libsieve_addr_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+/* Points to current character in buffer. */
+static char *yy_c_buf_p = (char *) 0;
+static int yy_init = 0;		/* whether we need to initialize */
+static int yy_start = 0;	/* start state number */
 
-#define YY_FLUSH_BUFFER libsieve_addr_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+/* Flag which is used to allow libsieve_addrwrap()'s to do buffer switches
+ * instead of setting up a fresh libsieve_addrin.  A bit of a hack ...
+ */
+static int yy_did_buffer_switch_on_eof;
 
-YY_BUFFER_STATE libsieve_addr_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE libsieve_addr_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE libsieve_addr_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+void libsieve_addrrestart (FILE *input_file  );
+void libsieve_addr_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE libsieve_addr_create_buffer (FILE *file,int size  );
+void libsieve_addr_delete_buffer (YY_BUFFER_STATE b  );
+void libsieve_addr_flush_buffer (YY_BUFFER_STATE b  );
+void libsieve_addrpush_buffer_state (YY_BUFFER_STATE new_buffer  );
+void libsieve_addrpop_buffer_state (void );
 
-void *libsieve_addralloc (yy_size_t ,yyscan_t yyscanner );
-void *libsieve_addrrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void libsieve_addrfree (void * ,yyscan_t yyscanner );
+static void libsieve_addrensure_buffer_stack (void );
+static void libsieve_addr_load_buffer_state (void );
+static void libsieve_addr_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+
+#define YY_FLUSH_BUFFER libsieve_addr_flush_buffer(YY_CURRENT_BUFFER )
+
+YY_BUFFER_STATE libsieve_addr_scan_buffer (char *base,yy_size_t size  );
+YY_BUFFER_STATE libsieve_addr_scan_string (yyconst char *yy_str  );
+YY_BUFFER_STATE libsieve_addr_scan_bytes (yyconst char *bytes,int len  );
+
+void *libsieve_addralloc (yy_size_t  );
+void *libsieve_addrrealloc (void *,yy_size_t  );
+void libsieve_addrfree (void *  );
 
 #define yy_new_buffer libsieve_addr_create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        libsieve_addrensure_buffer_stack (yyscanner); \
+        libsieve_addrensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            libsieve_addr_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            libsieve_addr_create_buffer(libsieve_addrin,YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -319,9 +325,9 @@ void libsieve_addrfree (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        libsieve_addrensure_buffer_stack (yyscanner); \
+        libsieve_addrensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            libsieve_addr_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            libsieve_addr_create_buffer(libsieve_addrin,YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -335,24 +341,31 @@ void libsieve_addrfree (void * ,yyscan_t yyscanner );
 
 typedef unsigned char YY_CHAR;
 
+FILE *libsieve_addrin = (FILE *) 0, *libsieve_addrout = (FILE *) 0;
+
 typedef int yy_state_type;
 
-#define yytext_ptr yytext_r
+extern int libsieve_addrlineno;
 
-static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
-static int yy_get_next_buffer (yyscan_t yyscanner );
-static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
+int libsieve_addrlineno = 1;
+
+extern char *libsieve_addrtext;
+#define yytext_ptr libsieve_addrtext
+
+static yy_state_type yy_get_previous_state (void );
+static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
+static int yy_get_next_buffer (void );
+static void yy_fatal_error (yyconst char msg[]  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up yytext.
+ * corresponding action - sets up libsieve_addrtext.
  */
 #define YY_DO_BEFORE_ACTION \
-	yyg->yytext_ptr = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
-	yyg->yy_hold_char = *yy_cp; \
+	(yytext_ptr) = yy_bp; \
+	libsieve_addrleng = (size_t) (yy_cp - yy_bp); \
+	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
-	yyg->yy_c_buf_p = yy_cp;
+	(yy_c_buf_p) = yy_cp;
 
 #define YY_NUM_RULES 15
 #define YY_END_OF_BUFFER 16
@@ -465,6 +478,12 @@ static yyconst flex_int16_t yy_chk[136] =
        36,   36,   36,   36,   36
     } ;
 
+static yy_state_type yy_last_accepting_state;
+static char *yy_last_accepting_cpos;
+
+extern int libsieve_addr_flex_debug;
+int libsieve_addr_flex_debug = 0;
+
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
  */
@@ -472,6 +491,7 @@ static yyconst flex_int16_t yy_chk[136] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
+char *libsieve_addrtext;
 #line 1 "addr-lex.l"
 #line 2 "addr-lex.l"
 /*
@@ -505,6 +525,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* Must be defined before addr.h */
 #define YYSTYPE char *
+#undef YY_INPUT
+#define YY_INPUT(b, r, ms) (r = libsieve_addrinput(b, ms))
 
 #include <string.h>
 /* sv_util */
@@ -515,18 +537,18 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "addr.h"
 #include "addrinc.h"
 
-#define context yyextra
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
 
+extern struct sieve2_context *libsieve_parse_context;
 static int ncom = 0;	/* number of open comments */
+static struct mlbuf *ml = NULL;
 
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->addr_ptr, &context->addr_len, b, ms))
-#define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_addrget_extra(yyscanner), msg)
+#define YY_FATAL_ERROR libsieve_addrfatalerror
+void libsieve_addrfatalerror(const char msg[]);
 
 
-#line 530 "addr-lex.c"
+#line 552 "addr-lex.c"
 
 #define INITIAL 0
 #define QSTRING 1
@@ -541,76 +563,11 @@ static int ncom = 0;	/* number of open comments */
 #include <unistd.h>
 #endif
 
-#define YY_EXTRA_TYPE struct sieve2_context *
+#ifndef YY_EXTRA_TYPE
+#define YY_EXTRA_TYPE void *
+#endif
 
-/* Holds the entire state of the reentrant scanner. */
-struct yyguts_t
-    {
-
-    /* User-defined. Not touched by flex. */
-    YY_EXTRA_TYPE yyextra_r;
-
-    /* The rest are the same as the globals declared in the non-reentrant scanner. */
-    FILE *yyin_r, *yyout_r;
-    size_t yy_buffer_stack_top; /**< index of top of stack. */
-    size_t yy_buffer_stack_max; /**< capacity of stack. */
-    YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
-    char yy_hold_char;
-    int yy_n_chars;
-    int yyleng_r;
-    char *yy_c_buf_p;
-    int yy_init;
-    int yy_start;
-    int yy_did_buffer_switch_on_eof;
-    int yy_start_stack_ptr;
-    int yy_start_stack_depth;
-    int *yy_start_stack;
-    yy_state_type yy_last_accepting_state;
-    char* yy_last_accepting_cpos;
-
-    int yylineno_r;
-    int yy_flex_debug_r;
-
-    char *yytext_r;
-    int yy_more_flag;
-    int yy_more_len;
-
-    }; /* end struct yyguts_t */
-
-static int yy_init_globals (yyscan_t yyscanner );
-
-int libsieve_addrlex_init (yyscan_t* scanner);
-
-int libsieve_addrlex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
-
-/* Accessor methods to globals.
-   These are made visible to non-reentrant scanners for convenience. */
-
-int libsieve_addrlex_destroy (yyscan_t yyscanner );
-
-int libsieve_addrget_debug (yyscan_t yyscanner );
-
-void libsieve_addrset_debug (int debug_flag ,yyscan_t yyscanner );
-
-YY_EXTRA_TYPE libsieve_addrget_extra (yyscan_t yyscanner );
-
-void libsieve_addrset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
-
-FILE *libsieve_addrget_in (yyscan_t yyscanner );
-
-void libsieve_addrset_in  (FILE * in_str ,yyscan_t yyscanner );
-
-FILE *libsieve_addrget_out (yyscan_t yyscanner );
-
-void libsieve_addrset_out  (FILE * out_str ,yyscan_t yyscanner );
-
-int libsieve_addrget_leng (yyscan_t yyscanner );
-
-char *libsieve_addrget_text (yyscan_t yyscanner );
-
-int libsieve_addrget_lineno (yyscan_t yyscanner );
-
-void libsieve_addrset_lineno (int line_number ,yyscan_t yyscanner );
+static int yy_init_globals (void );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -618,26 +575,26 @@ void libsieve_addrset_lineno (int line_number ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int libsieve_addrwrap (yyscan_t yyscanner );
+extern "C" int libsieve_addrwrap (void );
 #else
-extern int libsieve_addrwrap (yyscan_t yyscanner );
+extern int libsieve_addrwrap (void );
 #endif
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen (yyconst char * );
 #endif
 
 #ifndef YY_NO_INPUT
 
 #ifdef __cplusplus
-static int yyinput (yyscan_t yyscanner );
+static int yyinput (void );
 #else
-static int input (yyscan_t yyscanner );
+static int input (void );
 #endif
 
 #endif
@@ -652,7 +609,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO (void) fwrite( libsieve_addrtext, libsieve_addrleng, 1, libsieve_addrout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -663,20 +620,20 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		int n; \
+		size_t n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( libsieve_addrin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( yyin ) ) \
+		if ( c == EOF && ferror( libsieve_addrin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		while ( (result = fread(buf, 1, max_size, libsieve_addrin))==0 && ferror(libsieve_addrin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -684,7 +641,7 @@ static int input (yyscan_t yyscanner );
 				break; \
 				} \
 			errno=0; \
-			clearerr(yyin); \
+			clearerr(libsieve_addrin); \
 			} \
 		}\
 \
@@ -706,7 +663,7 @@ static int input (yyscan_t yyscanner );
 
 /* Report a fatal error. */
 #ifndef YY_FATAL_ERROR
-#define YY_FATAL_ERROR(msg) yy_fatal_error( msg , yyscanner)
+#define YY_FATAL_ERROR(msg) yy_fatal_error( msg )
 #endif
 
 /* end tables serialization structures and prototypes */
@@ -717,12 +674,12 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int libsieve_addrlex (yyscan_t yyscanner);
+extern int libsieve_addrlex (void);
 
-#define YY_DECL int libsieve_addrlex (yyscan_t yyscanner)
+#define YY_DECL int libsieve_addrlex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after yytext and yyleng
+/* Code executed at the beginning of each rule, after libsieve_addrtext and libsieve_addrleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -744,60 +701,59 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    
+#line 64 "addr-lex.l"
 
-#line 63 "addr-lex.l"
 
+#line 709 "addr-lex.c"
 
-#line 753 "addr-lex.c"
-
-	if ( !yyg->yy_init )
+	if ( !(yy_init) )
 		{
-		yyg->yy_init = 1;
+		(yy_init) = 1;
 
 #ifdef YY_USER_INIT
 		YY_USER_INIT;
 #endif
 
-		if ( ! yyg->yy_start )
-			yyg->yy_start = 1;	/* first start state */
+		if ( ! (yy_start) )
+			(yy_start) = 1;	/* first start state */
 
-		if ( ! yyin )
-			yyin = stdin;
+		if ( ! libsieve_addrin )
+			libsieve_addrin = stdin;
 
-		if ( ! yyout )
-			yyout = stdout;
+		if ( ! libsieve_addrout )
+			libsieve_addrout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			libsieve_addrensure_buffer_stack (yyscanner);
+			libsieve_addrensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				libsieve_addr_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				libsieve_addr_create_buffer(libsieve_addrin,YY_BUF_SIZE );
 		}
 
-		libsieve_addr_load_buffer_state(yyscanner );
+		libsieve_addr_load_buffer_state( );
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
-		yy_cp = yyg->yy_c_buf_p;
+		yy_cp = (yy_c_buf_p);
 
-		/* Support of yytext. */
-		*yy_cp = yyg->yy_hold_char;
+		/* Support of libsieve_addrtext. */
+		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
 		 * the current run.
 		 */
 		yy_bp = yy_cp;
 
-		yy_current_state = yyg->yy_start;
+		yy_current_state = (yy_start);
 yy_match:
 		do
 			{
 			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
-				yyg->yy_last_accepting_state = yy_current_state;
-				yyg->yy_last_accepting_cpos = yy_cp;
+				(yy_last_accepting_state) = yy_current_state;
+				(yy_last_accepting_cpos) = yy_cp;
 				}
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
@@ -809,8 +765,8 @@ yy_match:
 			++yy_cp;
 			}
 		while ( yy_current_state != 36 );
-		yy_cp = yyg->yy_last_accepting_cpos;
-		yy_current_state = yyg->yy_last_accepting_state;
+		yy_cp = (yy_last_accepting_cpos);
+		yy_current_state = (yy_last_accepting_state);
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -823,46 +779,46 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 			case 0: /* must back up */
 			/* undo the effects of YY_DO_BEFORE_ACTION */
-			*yy_cp = yyg->yy_hold_char;
-			yy_cp = yyg->yy_last_accepting_cpos;
-			yy_current_state = yyg->yy_last_accepting_state;
+			*yy_cp = (yy_hold_char);
+			yy_cp = (yy_last_accepting_cpos);
+			yy_current_state = (yy_last_accepting_state);
 			goto yy_find_action;
 
 case 1:
 YY_RULE_SETUP
-#line 65 "addr-lex.l"
+#line 66 "addr-lex.l"
 { BEGIN QSTRING; TRACE_DEBUG( "Begin QSTRING" ); return QUOTE; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 66 "addr-lex.l"
-{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return yytext[0]; }
+#line 67 "addr-lex.l"
+{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return libsieve_addrtext[0]; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 67 "addr-lex.l"
+#line 68 "addr-lex.l"
 { ncom = 1; TRACE_DEBUG( "Begin COMMENT" ); BEGIN COMMENT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 68 "addr-lex.l"
-{ libsieve_addrerror(context, NULL, "address parse error, "
+#line 69 "addr-lex.l"
+{ libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 73 "addr-lex.l"
+#line 74 "addr-lex.l"
 {
 		/* Return the special character */
-		return yytext[0];
+		return libsieve_addrtext[0];
 				}
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 77 "addr-lex.l"
+#line 78 "addr-lex.l"
 {
 		TRACE_DEBUG( "Whitespace silently murdered." );
 		/* Ignore whitespace by not returning */
@@ -870,27 +826,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 81 "addr-lex.l"
+#line 82 "addr-lex.l"
 {
 		/* Match any set of non-special-characters */
-		libsieve_addrlval = libsieve_strbuf(context->ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, libsieve_addrtext, strlen(libsieve_addrtext), NOFREE);
 		return ATOM;
 				}
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 87 "addr-lex.l"
+#line 88 "addr-lex.l"
 {
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
-		libsieve_addrlval = libsieve_strbuf(context->ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, libsieve_addrtext, strlen(libsieve_addrtext), NOFREE);
 		return QTEXT;
 				}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 93 "addr-lex.l"
+#line 94 "addr-lex.l"
 {
 		BEGIN INITIAL;
 		TRACE_DEBUG( "End QSTRING" );
@@ -899,46 +855,46 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 99 "addr-lex.l"
+#line 100 "addr-lex.l"
 return DTEXT;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 100 "addr-lex.l"
+#line 101 "addr-lex.l"
 {
 		BEGIN INITIAL;
 		TRACE_DEBUG( "End DOMAINLIT" );
-		return yytext[0];
+		return libsieve_addrtext[0];
 		};
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 106 "addr-lex.l"
+#line 107 "addr-lex.l"
 /* ignore comments */
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 107 "addr-lex.l"
+#line 108 "addr-lex.l"
 ncom++;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 108 "addr-lex.l"
+#line 109 "addr-lex.l"
 { ncom--; if (ncom == 0) BEGIN INITIAL; }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 109 "addr-lex.l"
-{ libsieve_addrerror(context, NULL, "address parse error, "
+#line 110 "addr-lex.l"
+{ libsieve_addrerror("address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
 				  yyterminate(); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 114 "addr-lex.l"
+#line 115 "addr-lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 942 "addr-lex.c"
+#line 898 "addr-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(QSTRING):
 case YY_STATE_EOF(DOMAINLIT):
@@ -947,25 +903,25 @@ case YY_STATE_EOF(DOMAINLIT):
 	case YY_END_OF_BUFFER:
 		{
 		/* Amount of text matched not including the EOB char. */
-		int yy_amount_of_matched_text = (int) (yy_cp - yyg->yytext_ptr) - 1;
+		int yy_amount_of_matched_text = (int) (yy_cp - (yytext_ptr)) - 1;
 
 		/* Undo the effects of YY_DO_BEFORE_ACTION. */
-		*yy_cp = yyg->yy_hold_char;
+		*yy_cp = (yy_hold_char);
 		YY_RESTORE_YY_MORE_OFFSET
 
 		if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW )
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed yyin at a new source and called
+			 * just pointed libsieve_addrin at a new source and called
 			 * libsieve_addrlex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
-			yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
+			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = libsieve_addrin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -976,13 +932,13 @@ case YY_STATE_EOF(DOMAINLIT):
 		 * end-of-buffer state).  Contrast this with the test
 		 * in input().
 		 */
-		if ( yyg->yy_c_buf_p <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
+		if ( (yy_c_buf_p) <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
 			{ /* This was really a NUL. */
 			yy_state_type yy_next_state;
 
-			yyg->yy_c_buf_p = yyg->yytext_ptr + yy_amount_of_matched_text;
+			(yy_c_buf_p) = (yytext_ptr) + yy_amount_of_matched_text;
 
-			yy_current_state = yy_get_previous_state( yyscanner );
+			yy_current_state = yy_get_previous_state(  );
 
 			/* Okay, we're now positioned to make the NUL
 			 * transition.  We couldn't have
@@ -993,44 +949,44 @@ case YY_STATE_EOF(DOMAINLIT):
 			 * will run more slowly).
 			 */
 
-			yy_next_state = yy_try_NUL_trans( yy_current_state , yyscanner);
+			yy_next_state = yy_try_NUL_trans( yy_current_state );
 
-			yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+			yy_bp = (yytext_ptr) + YY_MORE_ADJ;
 
 			if ( yy_next_state )
 				{
 				/* Consume the NUL. */
-				yy_cp = ++yyg->yy_c_buf_p;
+				yy_cp = ++(yy_c_buf_p);
 				yy_current_state = yy_next_state;
 				goto yy_match;
 				}
 
 			else
 				{
-				yy_cp = yyg->yy_last_accepting_cpos;
-				yy_current_state = yyg->yy_last_accepting_state;
+				yy_cp = (yy_last_accepting_cpos);
+				yy_current_state = (yy_last_accepting_state);
 				goto yy_find_action;
 				}
 			}
 
-		else switch ( yy_get_next_buffer( yyscanner ) )
+		else switch ( yy_get_next_buffer(  ) )
 			{
 			case EOB_ACT_END_OF_FILE:
 				{
-				yyg->yy_did_buffer_switch_on_eof = 0;
+				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( libsieve_addrwrap(yyscanner ) )
+				if ( libsieve_addrwrap( ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * yytext, we can now set up
+					 * libsieve_addrtext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
 					 * YY_NULL, it'll still work - another
 					 * YY_NULL will get returned.
 					 */
-					yyg->yy_c_buf_p = yyg->yytext_ptr + YY_MORE_ADJ;
+					(yy_c_buf_p) = (yytext_ptr) + YY_MORE_ADJ;
 
 					yy_act = YY_STATE_EOF(YY_START);
 					goto do_action;
@@ -1038,30 +994,30 @@ case YY_STATE_EOF(DOMAINLIT):
 
 				else
 					{
-					if ( ! yyg->yy_did_buffer_switch_on_eof )
+					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
 					}
 				break;
 				}
 
 			case EOB_ACT_CONTINUE_SCAN:
-				yyg->yy_c_buf_p =
-					yyg->yytext_ptr + yy_amount_of_matched_text;
+				(yy_c_buf_p) =
+					(yytext_ptr) + yy_amount_of_matched_text;
 
-				yy_current_state = yy_get_previous_state( yyscanner );
+				yy_current_state = yy_get_previous_state(  );
 
-				yy_cp = yyg->yy_c_buf_p;
-				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+				yy_cp = (yy_c_buf_p);
+				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
 				goto yy_match;
 
 			case EOB_ACT_LAST_MATCH:
-				yyg->yy_c_buf_p =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars];
+				(yy_c_buf_p) =
+				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)];
 
-				yy_current_state = yy_get_previous_state( yyscanner );
+				yy_current_state = yy_get_previous_state(  );
 
-				yy_cp = yyg->yy_c_buf_p;
-				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+				yy_cp = (yy_c_buf_p);
+				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
 				goto yy_find_action;
 			}
 		break;
@@ -1081,21 +1037,20 @@ case YY_STATE_EOF(DOMAINLIT):
  *	EOB_ACT_CONTINUE_SCAN - continue scanning from current position
  *	EOB_ACT_END_OF_FILE - end of file
  */
-static int yy_get_next_buffer (yyscan_t yyscanner)
+static int yy_get_next_buffer (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = yyg->yytext_ptr;
+    	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	register char *source = (yytext_ptr);
 	register int number_to_move, i;
 	int ret_val;
 
-	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
+	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
 		YY_FATAL_ERROR(
 		"fatal flex scanner internal error--end of buffer missed" );
 
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0 )
 		{ /* Don't try to fill the buffer, so this is an EOF. */
-		if ( yyg->yy_c_buf_p - yyg->yytext_ptr - YY_MORE_ADJ == 1 )
+		if ( (yy_c_buf_p) - (yytext_ptr) - YY_MORE_ADJ == 1 )
 			{
 			/* We matched a single character, the EOB, so
 			 * treat this as a final EOF.
@@ -1115,7 +1070,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1124,7 +1079,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		/* don't do the read, it's not guaranteed to return an EOF,
 		 * just force an EOF
 		 */
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars = 0;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars) = 0;
 
 	else
 		{
@@ -1138,7 +1093,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
-				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
+				(int) ((yy_c_buf_p) - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
@@ -1151,7 +1106,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					libsieve_addrrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					libsieve_addrrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1161,7 +1116,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 				YY_FATAL_ERROR(
 				"fatal error - scanner input buffer overflow" );
 
-			yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
+			(yy_c_buf_p) = &b->yy_ch_buf[yy_c_buf_p_offset];
 
 			num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
 						number_to_move - 1;
@@ -1173,17 +1128,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			yyg->yy_n_chars, (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
 
-	if ( yyg->yy_n_chars == 0 )
+	if ( (yy_n_chars) == 0 )
 		{
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			libsieve_addrrestart(yyin  ,yyscanner);
+			libsieve_addrrestart(libsieve_addrin  );
 			}
 
 		else
@@ -1197,40 +1152,31 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
-		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) libsieve_addrrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
-		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
-	}
+	(yy_n_chars) += number_to_move;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
 
-	yyg->yy_n_chars += number_to_move;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
-
-	yyg->yytext_ptr = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
+	(yytext_ptr) = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
 
 	return ret_val;
 }
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
 
-    static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
+    static yy_state_type yy_get_previous_state (void)
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    
+	yy_current_state = (yy_start);
 
-	yy_current_state = yyg->yy_start;
-
-	for ( yy_cp = yyg->yytext_ptr + YY_MORE_ADJ; yy_cp < yyg->yy_c_buf_p; ++yy_cp )
+	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
 		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 12);
 		if ( yy_accept[yy_current_state] )
 			{
-			yyg->yy_last_accepting_state = yy_current_state;
-			yyg->yy_last_accepting_cpos = yy_cp;
+			(yy_last_accepting_state) = yy_current_state;
+			(yy_last_accepting_cpos) = yy_cp;
 			}
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
@@ -1249,17 +1195,16 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * synopsis
  *	next_state = yy_try_NUL_trans( current_state );
  */
-    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state , yyscan_t yyscanner)
+    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
 {
 	register int yy_is_jam;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
-	register char *yy_cp = yyg->yy_c_buf_p;
+    	register char *yy_cp = (yy_c_buf_p);
 
 	register YY_CHAR yy_c = 12;
 	if ( yy_accept[yy_current_state] )
 		{
-		yyg->yy_last_accepting_state = yy_current_state;
-		yyg->yy_last_accepting_cpos = yy_cp;
+		(yy_last_accepting_state) = yy_current_state;
+		(yy_last_accepting_cpos) = yy_cp;
 		}
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
@@ -1275,33 +1220,32 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
-    static int yyinput (yyscan_t yyscanner)
+    static int yyinput (void)
 #else
-    static int input  (yyscan_t yyscanner)
+    static int input  (void)
 #endif
 
 {
 	int c;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    
+	*(yy_c_buf_p) = (yy_hold_char);
 
-	*yyg->yy_c_buf_p = yyg->yy_hold_char;
-
-	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
+	if ( *(yy_c_buf_p) == YY_END_OF_BUFFER_CHAR )
 		{
 		/* yy_c_buf_p now points to the character we want to return.
 		 * If this occurs *before* the EOB characters, then it's a
 		 * valid NUL; if not, then we've hit the end of the buffer.
 		 */
-		if ( yyg->yy_c_buf_p < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
+		if ( (yy_c_buf_p) < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
 			/* This was really a NUL. */
-			*yyg->yy_c_buf_p = '\0';
+			*(yy_c_buf_p) = '\0';
 
 		else
 			{ /* need more input */
-			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
-			++yyg->yy_c_buf_p;
+			int offset = (yy_c_buf_p) - (yytext_ptr);
+			++(yy_c_buf_p);
 
-			switch ( yy_get_next_buffer( yyscanner ) )
+			switch ( yy_get_next_buffer(  ) )
 				{
 				case EOB_ACT_LAST_MATCH:
 					/* This happens because yy_g_n_b()
@@ -1315,34 +1259,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					libsieve_addrrestart(yyin ,yyscanner);
+					libsieve_addrrestart(libsieve_addrin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( libsieve_addrwrap(yyscanner ) )
+					if ( libsieve_addrwrap( ) )
 						return EOF;
 
-					if ( ! yyg->yy_did_buffer_switch_on_eof )
+					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
 #ifdef __cplusplus
-					return yyinput(yyscanner);
+					return yyinput();
 #else
-					return input(yyscanner);
+					return input();
 #endif
 					}
 
 				case EOB_ACT_CONTINUE_SCAN:
-					yyg->yy_c_buf_p = yyg->yytext_ptr + offset;
+					(yy_c_buf_p) = (yytext_ptr) + offset;
 					break;
 				}
 			}
 		}
 
-	c = *(unsigned char *) yyg->yy_c_buf_p;	/* cast for 8-bit char's */
-	*yyg->yy_c_buf_p = '\0';	/* preserve yytext */
-	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
+	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
+	*(yy_c_buf_p) = '\0';	/* preserve libsieve_addrtext */
+	(yy_hold_char) = *++(yy_c_buf_p);
 
 	return c;
 }
@@ -1350,79 +1294,76 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
- * @param yyscanner The scanner object.
+ * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void libsieve_addrrestart  (FILE * input_file , yyscan_t yyscanner)
+    void libsieve_addrrestart  (FILE * input_file )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
 	if ( ! YY_CURRENT_BUFFER ){
-        libsieve_addrensure_buffer_stack (yyscanner);
+        libsieve_addrensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            libsieve_addr_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            libsieve_addr_create_buffer(libsieve_addrin,YY_BUF_SIZE );
 	}
 
-	libsieve_addr_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	libsieve_addr_load_buffer_state(yyscanner );
+	libsieve_addr_init_buffer(YY_CURRENT_BUFFER,input_file );
+	libsieve_addr_load_buffer_state( );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
- * @param yyscanner The scanner object.
+ * 
  */
-    void libsieve_addr_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void libsieve_addr_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		libsieve_addrpop_buffer_state();
 	 *		libsieve_addrpush_buffer_state(new_buffer);
      */
-	libsieve_addrensure_buffer_stack (yyscanner);
+	libsieve_addrensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
-		*yyg->yy_c_buf_p = yyg->yy_hold_char;
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		*(yy_c_buf_p) = (yy_hold_char);
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	libsieve_addr_load_buffer_state(yyscanner );
+	libsieve_addr_load_buffer_state( );
 
 	/* We don't actually know whether we did this switch during
 	 * EOF (libsieve_addrwrap()) processing, but the only time this flag
 	 * is looked at is after libsieve_addrwrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
-	yyg->yy_did_buffer_switch_on_eof = 1;
+	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void libsieve_addr_load_buffer_state  (yyscan_t yyscanner)
+static void libsieve_addr_load_buffer_state  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
-	yyg->yy_hold_char = *yyg->yy_c_buf_p;
+    	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
+	libsieve_addrin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	(yy_hold_char) = *(yy_c_buf_p);
 }
 
 /** Allocate and initialize an input buffer state.
  * @param file A readable stream.
  * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
- * @param yyscanner The scanner object.
+ * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE libsieve_addr_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE libsieve_addr_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) libsieve_addralloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) libsieve_addralloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_addr_create_buffer()" );
 
@@ -1431,25 +1372,24 @@ static void libsieve_addr_load_buffer_state  (yyscan_t yyscanner)
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) libsieve_addralloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) libsieve_addralloc(b->yy_buf_size + 2  );
 	if ( ! b->yy_ch_buf )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_addr_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	libsieve_addr_init_buffer(b,file ,yyscanner);
+	libsieve_addr_init_buffer(b,file );
 
 	return b;
 }
 
 /** Destroy the buffer.
  * @param b a buffer created with libsieve_addr_create_buffer()
- * @param yyscanner The scanner object.
+ * 
  */
-    void libsieve_addr_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void libsieve_addr_delete_buffer (YY_BUFFER_STATE  b )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
 	if ( ! b )
 		return;
 
@@ -1457,22 +1397,21 @@ static void libsieve_addr_load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		libsieve_addrfree((void *) b->yy_ch_buf ,yyscanner );
+		libsieve_addrfree((void *) b->yy_ch_buf  );
 
-	libsieve_addrfree((void *) b ,yyscanner );
+	libsieve_addrfree((void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a libsieve_addrrestart() or at EOF.
  */
-    static void libsieve_addr_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void libsieve_addr_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-	libsieve_addr_flush_buffer(b ,yyscanner);
+    
+	libsieve_addr_flush_buffer(b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
@@ -1493,12 +1432,11 @@ static void libsieve_addr_load_buffer_state  (yyscan_t yyscanner)
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
- * @param yyscanner The scanner object.
+ * 
  */
-    void libsieve_addr_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void libsieve_addr_flush_buffer (YY_BUFFER_STATE  b )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	if ( ! b )
+    	if ( ! b )
 		return;
 
 	b->yy_n_chars = 0;
@@ -1516,117 +1454,110 @@ static void libsieve_addr_load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		libsieve_addr_load_buffer_state(yyscanner );
+		libsieve_addr_load_buffer_state( );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
  *  the current state. This function will allocate the stack
  *  if necessary.
  *  @param new_buffer The new state.
- *  @param yyscanner The scanner object.
+ *  
  */
-void libsieve_addrpush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void libsieve_addrpush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	if (new_buffer == NULL)
+    	if (new_buffer == NULL)
 		return;
 
-	libsieve_addrensure_buffer_stack(yyscanner);
+	libsieve_addrensure_buffer_stack();
 
 	/* This block is copied from libsieve_addr_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
-		*yyg->yy_c_buf_p = yyg->yy_hold_char;
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		*(yy_c_buf_p) = (yy_hold_char);
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
 
 	/* Only push if top exists. Otherwise, replace top. */
 	if (YY_CURRENT_BUFFER)
-		yyg->yy_buffer_stack_top++;
+		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
 	/* copied from libsieve_addr_switch_to_buffer. */
-	libsieve_addr_load_buffer_state(yyscanner );
-	yyg->yy_did_buffer_switch_on_eof = 1;
+	libsieve_addr_load_buffer_state( );
+	(yy_did_buffer_switch_on_eof) = 1;
 }
 
 /** Removes and deletes the top of the stack, if present.
  *  The next element becomes the new top.
- *  @param yyscanner The scanner object.
+ *  
  */
-void libsieve_addrpop_buffer_state (yyscan_t yyscanner)
+void libsieve_addrpop_buffer_state (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	if (!YY_CURRENT_BUFFER)
+    	if (!YY_CURRENT_BUFFER)
 		return;
 
-	libsieve_addr_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	libsieve_addr_delete_buffer(YY_CURRENT_BUFFER );
 	YY_CURRENT_BUFFER_LVALUE = NULL;
-	if (yyg->yy_buffer_stack_top > 0)
-		--yyg->yy_buffer_stack_top;
+	if ((yy_buffer_stack_top) > 0)
+		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		libsieve_addr_load_buffer_state(yyscanner );
-		yyg->yy_did_buffer_switch_on_eof = 1;
+		libsieve_addr_load_buffer_state( );
+		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
 
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void libsieve_addrensure_buffer_stack (yyscan_t yyscanner)
+static void libsieve_addrensure_buffer_stack (void)
 {
 	int num_to_alloc;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-	if (!yyg->yy_buffer_stack) {
+    
+	if (!(yy_buffer_stack)) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)libsieve_addralloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)libsieve_addralloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
-								, yyscanner);
-		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in libsieve_addrensure_buffer_stack()" );
-								  
-		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+								);
+		
+		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
-		yyg->yy_buffer_stack_max = num_to_alloc;
-		yyg->yy_buffer_stack_top = 0;
+		(yy_buffer_stack_max) = num_to_alloc;
+		(yy_buffer_stack_top) = 0;
 		return;
 	}
 
-	if (yyg->yy_buffer_stack_top >= (yyg->yy_buffer_stack_max) - 1){
+	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
 		int grow_size = 8 /* arbitrary grow size */;
 
-		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)libsieve_addrrealloc
-								(yyg->yy_buffer_stack,
+		num_to_alloc = (yy_buffer_stack_max) + grow_size;
+		(yy_buffer_stack) = (struct yy_buffer_state**)libsieve_addrrealloc
+								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
-								, yyscanner);
-		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in libsieve_addrensure_buffer_stack()" );
+								);
 
 		/* zero only the new slots.*/
-		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
-		yyg->yy_buffer_stack_max = num_to_alloc;
+		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
+		(yy_buffer_stack_max) = num_to_alloc;
 	}
 }
 
 /** Setup the input buffer state to scan directly from a user-specified character buffer.
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
- * @param yyscanner The scanner object.
+ * 
  * @return the newly allocated buffer state object. 
  */
-YY_BUFFER_STATE libsieve_addr_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE libsieve_addr_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -1636,7 +1567,7 @@ YY_BUFFER_STATE libsieve_addr_scan_buffer  (char * base, yy_size_t  size , yysca
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) libsieve_addralloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) libsieve_addralloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_addr_scan_buffer()" );
 
@@ -1650,33 +1581,33 @@ YY_BUFFER_STATE libsieve_addr_scan_buffer  (char * base, yy_size_t  size , yysca
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	libsieve_addr_switch_to_buffer(b ,yyscanner );
+	libsieve_addr_switch_to_buffer(b  );
 
 	return b;
 }
 
 /** Setup the input buffer state to scan a string. The next call to libsieve_addrlex() will
  * scan from a @e copy of @a str.
- * @param yystr a NUL-terminated string to scan
- * @param yyscanner The scanner object.
+ * @param str a NUL-terminated string to scan
+ * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
  *       libsieve_addr_scan_bytes() instead.
  */
-YY_BUFFER_STATE libsieve_addr_scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE libsieve_addr_scan_string (yyconst char * yystr )
 {
     
-	return libsieve_addr_scan_bytes(yystr,strlen(yystr) ,yyscanner);
+	return libsieve_addr_scan_bytes(yystr,strlen(yystr) );
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to libsieve_addrlex() will
  * scan from a @e copy of @a bytes.
  * @param bytes the byte buffer to scan
  * @param len the number of bytes in the buffer pointed to by @a bytes.
- * @param yyscanner The scanner object.
+ * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE libsieve_addr_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE libsieve_addr_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -1685,7 +1616,7 @@ YY_BUFFER_STATE libsieve_addr_scan_bytes  (yyconst char * yybytes, int  _yybytes
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
-	buf = (char *) libsieve_addralloc(n ,yyscanner );
+	buf = (char *) libsieve_addralloc(n  );
 	if ( ! buf )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_addr_scan_bytes()" );
 
@@ -1694,7 +1625,7 @@ YY_BUFFER_STATE libsieve_addr_scan_bytes  (yyconst char * yybytes, int  _yybytes
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = libsieve_addr_scan_buffer(buf,n ,yyscanner);
+	b = libsieve_addr_scan_buffer(buf,n );
 	if ( ! b )
 		YY_FATAL_ERROR( "bad buffer in libsieve_addr_scan_bytes()" );
 
@@ -1710,7 +1641,7 @@ YY_BUFFER_STATE libsieve_addr_scan_bytes  (yyconst char * yybytes, int  _yybytes
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
+static void yy_fatal_error (yyconst char* msg )
 {
     	(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
@@ -1722,252 +1653,117 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up yytext. */ \
+		/* Undo effects of setting up libsieve_addrtext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		yytext[yyleng] = yyg->yy_hold_char; \
-		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
-		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
-		*yyg->yy_c_buf_p = '\0'; \
-		yyleng = yyless_macro_arg; \
+		libsieve_addrtext[libsieve_addrleng] = (yy_hold_char); \
+		(yy_c_buf_p) = libsieve_addrtext + yyless_macro_arg; \
+		(yy_hold_char) = *(yy_c_buf_p); \
+		*(yy_c_buf_p) = '\0'; \
+		libsieve_addrleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-/** Get the user-defined data for this scanner.
- * @param yyscanner The scanner object.
- */
-YY_EXTRA_TYPE libsieve_addrget_extra  (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yyextra;
-}
-
 /** Get the current line number.
- * @param yyscanner The scanner object.
+ * 
  */
-int libsieve_addrget_lineno  (yyscan_t yyscanner)
+int libsieve_addrget_lineno  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
-        if (! YY_CURRENT_BUFFER)
-            return 0;
-    
-    return yylineno;
-}
-
-/** Get the current column number.
- * @param yyscanner The scanner object.
- */
-int libsieve_addrget_column  (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
-        if (! YY_CURRENT_BUFFER)
-            return 0;
-    
-    return yycolumn;
+        
+    return libsieve_addrlineno;
 }
 
 /** Get the input stream.
- * @param yyscanner The scanner object.
+ * 
  */
-FILE *libsieve_addrget_in  (yyscan_t yyscanner)
+FILE *libsieve_addrget_in  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yyin;
+        return libsieve_addrin;
 }
 
 /** Get the output stream.
- * @param yyscanner The scanner object.
+ * 
  */
-FILE *libsieve_addrget_out  (yyscan_t yyscanner)
+FILE *libsieve_addrget_out  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yyout;
+        return libsieve_addrout;
 }
 
 /** Get the length of the current token.
- * @param yyscanner The scanner object.
+ * 
  */
-int libsieve_addrget_leng  (yyscan_t yyscanner)
+int libsieve_addrget_leng  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yyleng;
+        return libsieve_addrleng;
 }
 
 /** Get the current token.
- * @param yyscanner The scanner object.
+ * 
  */
 
-char *libsieve_addrget_text  (yyscan_t yyscanner)
+char *libsieve_addrget_text  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yytext;
-}
-
-/** Set the user-defined data. This data is never touched by the scanner.
- * @param user_defined The data to be associated with this scanner.
- * @param yyscanner The scanner object.
- */
-void libsieve_addrset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yyextra = user_defined ;
+        return libsieve_addrtext;
 }
 
 /** Set the current line number.
  * @param line_number
- * @param yyscanner The scanner object.
+ * 
  */
-void libsieve_addrset_lineno (int  line_number , yyscan_t yyscanner)
+void libsieve_addrset_lineno (int  line_number )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-        /* lineno is only valid if an input buffer exists. */
-        if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "libsieve_addrset_lineno called with no buffer" , yyscanner); 
     
-    yylineno = line_number;
-}
-
-/** Set the current column.
- * @param line_number
- * @param yyscanner The scanner object.
- */
-void libsieve_addrset_column (int  column_no , yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-        /* column is only valid if an input buffer exists. */
-        if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "libsieve_addrset_column called with no buffer" , yyscanner); 
-    
-    yycolumn = column_no;
+    libsieve_addrlineno = line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
  * @param in_str A readable stream.
- * @param yyscanner The scanner object.
+ * 
  * @see libsieve_addr_switch_to_buffer
  */
-void libsieve_addrset_in (FILE *  in_str , yyscan_t yyscanner)
+void libsieve_addrset_in (FILE *  in_str )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yyin = in_str ;
+        libsieve_addrin = in_str ;
 }
 
-void libsieve_addrset_out (FILE *  out_str , yyscan_t yyscanner)
+void libsieve_addrset_out (FILE *  out_str )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yyout = out_str ;
+        libsieve_addrout = out_str ;
 }
 
-int libsieve_addrget_debug  (yyscan_t yyscanner)
+int libsieve_addrget_debug  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yy_flex_debug;
+        return libsieve_addr_flex_debug;
 }
 
-void libsieve_addrset_debug (int  bdebug , yyscan_t yyscanner)
+void libsieve_addrset_debug (int  bdebug )
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yy_flex_debug = bdebug ;
+        libsieve_addr_flex_debug = bdebug ;
 }
 
-/* Accessor methods for yylval and yylloc */
-
-/* User-visible API */
-
-/* libsieve_addrlex_init is special because it creates the scanner itself, so it is
- * the ONLY reentrant function that doesn't take the scanner as the last argument.
- * That's why we explicitly handle the declaration, instead of using our macros.
- */
-
-int libsieve_addrlex_init(yyscan_t* ptr_yy_globals)
-
+static int yy_init_globals (void)
 {
-    if (ptr_yy_globals == NULL){
-        errno = EINVAL;
-        return 1;
-    }
-
-    *ptr_yy_globals = (yyscan_t) libsieve_addralloc ( sizeof( struct yyguts_t ), NULL );
-
-    if (*ptr_yy_globals == NULL){
-        errno = ENOMEM;
-        return 1;
-    }
-
-    /* By setting to 0xAA, we expose bugs in yy_init_globals. Leave at 0x00 for releases. */
-    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-
-    return yy_init_globals ( *ptr_yy_globals );
-}
-
-/* libsieve_addrlex_init_extra has the same functionality as libsieve_addrlex_init, but follows the
- * convention of taking the scanner as the last argument. Note however, that
- * this is a *pointer* to a scanner, as it will be allocated by this call (and
- * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to libsieve_addralloc in
- * the yyextra field.
- */
-
-int libsieve_addrlex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
-
-{
-    struct yyguts_t dummy_yyguts;
-
-    libsieve_addrset_extra (yy_user_defined, &dummy_yyguts);
-
-    if (ptr_yy_globals == NULL){
-        errno = EINVAL;
-        return 1;
-    }
-	
-    *ptr_yy_globals = (yyscan_t) libsieve_addralloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-	
-    if (*ptr_yy_globals == NULL){
-        errno = ENOMEM;
-        return 1;
-    }
-    
-    /* By setting to 0xAA, we expose bugs in
-    yy_init_globals. Leave at 0x00 for releases. */
-    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-    
-    libsieve_addrset_extra (yy_user_defined, *ptr_yy_globals);
-    
-    return yy_init_globals ( *ptr_yy_globals );
-}
-
-static int yy_init_globals (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    /* Initialization is the same as for the non-reentrant scanner.
+        /* Initialization is the same as for the non-reentrant scanner.
      * This function is called from libsieve_addrlex_destroy(), so don't allocate here.
      */
 
-    yyg->yy_buffer_stack = 0;
-    yyg->yy_buffer_stack_top = 0;
-    yyg->yy_buffer_stack_max = 0;
-    yyg->yy_c_buf_p = (char *) 0;
-    yyg->yy_init = 0;
-    yyg->yy_start = 0;
-
-    yyg->yy_start_stack_ptr = 0;
-    yyg->yy_start_stack_depth = 0;
-    yyg->yy_start_stack =  NULL;
+    (yy_buffer_stack) = 0;
+    (yy_buffer_stack_top) = 0;
+    (yy_buffer_stack_max) = 0;
+    (yy_c_buf_p) = (char *) 0;
+    (yy_init) = 0;
+    (yy_start) = 0;
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    yyin = stdin;
-    yyout = stdout;
+    libsieve_addrin = stdin;
+    libsieve_addrout = stdout;
 #else
-    yyin = (FILE *) 0;
-    yyout = (FILE *) 0;
+    libsieve_addrin = (FILE *) 0;
+    libsieve_addrout = (FILE *) 0;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
@@ -1977,32 +1773,24 @@ static int yy_init_globals (yyscan_t yyscanner)
 }
 
 /* libsieve_addrlex_destroy is for both reentrant and non-reentrant scanners. */
-int libsieve_addrlex_destroy  (yyscan_t yyscanner)
+int libsieve_addrlex_destroy  (void)
 {
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
+    
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		libsieve_addr_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		libsieve_addr_delete_buffer(YY_CURRENT_BUFFER  );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		libsieve_addrpop_buffer_state(yyscanner);
+		libsieve_addrpop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	libsieve_addrfree(yyg->yy_buffer_stack ,yyscanner);
-	yyg->yy_buffer_stack = NULL;
-
-    /* Destroy the start condition stack. */
-        libsieve_addrfree(yyg->yy_start_stack ,yyscanner );
-        yyg->yy_start_stack = NULL;
+	libsieve_addrfree((yy_buffer_stack) );
+	(yy_buffer_stack) = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
      * libsieve_addrlex() is called, initialization will occur. */
-    yy_init_globals( yyscanner);
+    yy_init_globals( );
 
-    /* Destroy the main struct (reentrant only). */
-    libsieve_addrfree ( yyscanner , yyscanner );
-    yyscanner = NULL;
     return 0;
 }
 
@@ -2011,7 +1799,7 @@ int libsieve_addrlex_destroy  (yyscan_t yyscanner)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 {
 	register int i;
 	for ( i = 0; i < n; ++i )
@@ -2020,7 +1808,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yysca
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
+static int yy_flex_strlen (yyconst char * s )
 {
 	register int n;
 	for ( n = 0; s[n]; ++n )
@@ -2030,12 +1818,12 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *libsieve_addralloc (yy_size_t  size , yyscan_t yyscanner)
+void *libsieve_addralloc (yy_size_t  size )
 {
 	return (void *) malloc( size );
 }
 
-void *libsieve_addrrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *libsieve_addrrealloc  (void * ptr, yy_size_t  size )
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -2047,15 +1835,62 @@ void *libsieve_addrrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void libsieve_addrfree (void * ptr , yyscan_t yyscanner)
+void libsieve_addrfree (void * ptr )
 {
 	free( (char *) ptr );	/* see libsieve_addrrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 114 "addr-lex.l"
+#line 115 "addr-lex.l"
 
 
+
+/* take input from address string provided by sieve parser */
+int libsieve_addrinput(char *buf, int max)
+{
+    extern char *libsieve_addrptr;	/* current position in address string */
+    size_t n;			/* number of characters to read from string */
+    size_t max_size = (size_t)max;
+
+    if(libsieve_addrptr == NULL)
+        n = 0;
+    else
+        n = strlen(libsieve_addrptr) < max_size ? strlen(libsieve_addrptr) : max_size;
+    if (n > 0) {
+	memcpy(buf, libsieve_addrptr, n);
+	libsieve_addrptr += n;
+    }
+    return n;
+}
+
+/* Clean up after ourselves by free()ing the current buffer */
+void libsieve_addrlexfree()
+{
+    libsieve_strbuffree(&ml, FREEME);
+    libsieve_addrlex_destroy();
+}
+
+/* Kind of a hack, but this sets up the file statics */
+void libsieve_addrlexalloc()
+{
+    libsieve_strbufalloc(&ml);
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_addrlexrestart()
+{
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Replacement for the YY_FATAL_ERROR macro,
+ * which would print msg to stderr and exit. */
+void libsieve_addrfatalerror(const char msg[])
+{
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
+}
 
 

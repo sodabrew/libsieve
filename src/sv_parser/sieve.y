@@ -41,7 +41,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "comparator.h"
 #include "sieveinc.h"
 #include "addrinc.h"
-#include "sieve-lex.h"
 
 /* sv_interface */
 #include "callbacks2.h"
@@ -52,18 +51,16 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
 
-/* Better yacc error messages please */
-#define YYERROR_VERBOSE
+struct sieve2_context *libsieve_parse_context;
+extern int libsieve_sieveerror(char *msg);
+extern int libsieve_sievelex(void);
 
-#define YYLEX_PARAM context->sieve_scanner
-
+#define YYERROR_VERBOSE /* i want better error messages! */
 %}
 
 %name-prefix="libsieve_sieve"
-%parse-param { struct sieve2_context *context }
-%lex-param { void *context->sieve_scanner }
 
 %union {
     int nval;
@@ -89,7 +86,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %token COMPARATOR IS CONTAINS MATCHES REGEX OVER UNDER COUNT VALUE
 %token ALL LOCALPART DOMAIN USER DETAIL
 %token DAYS ADDRESSES SUBJECT MIME FROM HANDLE
-%token METHOD IMPORTANCE OPTIONS LOW NORMAL HIGH MESSAGE
+%token METHOD ID OPTIONS LOW NORMAL HIGH MESSAGE
 
 %type <cl> commands command action elsif block
 %type <sl> stringlist strings
@@ -101,11 +98,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %type <aetag> aetags
 %type <vtag> vtags
 %type <ntag> ntags
+%type <sval> priority
 
 %%
 
-start: /* empty */		{ context->script.cmds = NULL; }
-	| reqs commands		{ context->script.cmds = $2; }
+start: /* empty */		{ ret = NULL; }
+	| reqs commands		{ ret = $2; }
 	;
 
 reqs: /* empty */
@@ -126,7 +124,7 @@ require: REQUIRE stringlist ';'	{
                                         sl = sl->next;
 
 					/* Returns 1 if supported, 0 if not. */
-                                        if (!static_check_reqs(context, s->s)) {
+                                        if (!static_check_reqs(libsieve_parse_context, s->s)) {
 					    unsupp = 1;
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -139,7 +137,7 @@ require: REQUIRE stringlist ';'	{
 
 				    /* If something wasn't supported, bomb out with msg. */
                                     if (unsupp) {
-                                        libsieve_sieveerror(context, msg);
+                                        libsieve_sieveerror(msg);
                                         libsieve_free(msg);
                                         YYERROR; 
                                     }
@@ -150,7 +148,7 @@ require: REQUIRE stringlist ';'	{
 	;
 
 commands: command		{ $$ = $1; }
-	| commands command	{ $2->next = $1; $$ = $2; }
+	| command commands	{ $1->next = $2; $$ = $1; }
 	;
 
 command: action ';'		{ $$ = $1; }
@@ -163,13 +161,13 @@ elsif: /* empty */               { $$ = NULL; }
 	| ELSE block             { $$ = $2; }
 	;
 
-action: REJCT STRING             { if (!context->require.reject) {
-				     libsieve_sieveerror(context, "reject not required");
+action: REJCT STRING             { if (!libsieve_parse_context->require.reject) {
+				     libsieve_sieveerror("reject not required");
 				     YYERROR;
 				   }
 				   $$ = libsieve_new_command(REJCT); $$->u.str = $2; }
-	| KEEP FLAGS stringlist	 { if (!context->require.imap4flags) {
-				     libsieve_sieveerror(context, "imap4flags not required");
+	| KEEP FLAGS stringlist	 { if (!libsieve_parse_context->require.imap4flags) {
+				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
 	                           $$ = libsieve_new_command(KEEP);
@@ -178,152 +176,157 @@ action: REJCT STRING             { if (!context->require.reject) {
 	| KEEP			 { $$ = libsieve_new_command(KEEP);
 	                           $$->u.f.mailbox = NULL;
 				   $$->u.f.slflags = NULL; }
-	| FILEINTO FLAGS stringlist STRING	 { if (!context->require.fileinto) {
-				     libsieve_sieveerror(context, "fileinto not required");
+	| FILEINTO FLAGS stringlist STRING	 { if (!libsieve_parse_context->require.fileinto) {
+				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
-                                   } if (!context->require.imap4flags) {
-				     libsieve_sieveerror(context, "imap4flags not required");
+                                   } if (!libsieve_parse_context->require.imap4flags) {
+				     libsieve_sieveerror("imap4flags not required");
 	                             YYERROR;
                                    }
 
-                                   if (!static_verify_stringlist(context, $3, static_verify_flag)) {
+                                   if (!static_verify_stringlist($3, static_verify_flag)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   if (!static_verify_mailbox(context, $4)) {
+				   if (!static_verify_mailbox($4)) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           $$ = libsieve_new_command(FILEINTO);
 				   $$->u.f.slflags = $3;
 				   $$->u.f.mailbox = $4; }
-	| FILEINTO STRING	 { if (!context->require.fileinto) {
-				     libsieve_sieveerror(context, "fileinto not required");
+	| FILEINTO STRING	 { if (!libsieve_parse_context->require.fileinto) {
+				     libsieve_sieveerror("fileinto not required");
 	                             YYERROR;
                                    }
-				   if (!static_verify_mailbox(context, $2)) {
+				   if (!static_verify_mailbox($2)) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           $$ = libsieve_new_command(FILEINTO);
 				   $$->u.f.slflags = NULL;
 				   $$->u.f.mailbox = $2; }
 	| REDIRECT STRING         { $$ = libsieve_new_command(REDIRECT);
-				   if (!static_verify_address(context, $2)) {
+				   if (!static_verify_address($2)) {
 				     YYERROR; /* va should call sieveerror() */
 				   }
 				   $$->u.str = $2; }
 	| STOP			 { $$ = libsieve_new_command(STOP); }
 	| DISCARD		 { $$ = libsieve_new_command(DISCARD); }
-	| VACATION vtags STRING  { if (!context->require.vacation) {
-				     libsieve_sieveerror(context, "vacation not required");
+	| VACATION vtags STRING  { if (!libsieve_parse_context->require.vacation) {
+				     libsieve_sieveerror("vacation not required");
 				     $$ = libsieve_new_command(VACATION);
 				     YYERROR;
 				   } else {
-  				     $$ = static_build_vacation(context, VACATION,
+  				     $$ = static_build_vacation(VACATION,
 					    static_canon_vtags($2), $3);
 				   } }
-        | SETFLAG stringlist     { if (!context->require.imap4flags) {
-                                    libsieve_sieveerror(context, "imap4flags not required");
+        | SETFLAG stringlist     { if (!libsieve_parse_context->require.imap4flags) {
+                                    libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
-                                  if (!static_verify_stringlist(context, $2, static_verify_flag)) {
+                                  if (!static_verify_stringlist($2, static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
 				    }
                                  $$ = libsieve_new_command(SETFLAG);
                                  $$->u.sl = $2; }
-        | ADDFLAG stringlist     { if (!context->require.imap4flags) {
-                                    libsieve_sieveerror(context, "imap4flags not required");
+        | ADDFLAG stringlist     { if (!libsieve_parse_context->require.imap4flags) {
+                                    libsieve_sieveerror("imap4flags not required");
                                     YYERROR;
                                     }
-                                 if (!static_verify_stringlist(context, $2, static_verify_flag)) {
+                                 if (!static_verify_stringlist($2, static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                     }
                                  $$ = libsieve_new_command(ADDFLAG);
                                  $$->u.sl = $2; }
-        | REMOVEFLAG stringlist  { if (!context->require.imap4flags) {
-                                     libsieve_sieveerror(context, "imap4flags not required");
+        | REMOVEFLAG stringlist  { if (!libsieve_parse_context->require.imap4flags) {
+                                     libsieve_sieveerror("imap4flags not required");
                                      YYERROR;
                                      }
-                                 if (!static_verify_stringlist(context, $2, static_verify_flag)) {
+                                 if (!static_verify_stringlist($2, static_verify_flag)) {
                                      YYERROR; /* vf should call sieveerror() */
                                      }
                                  $$ = libsieve_new_command(REMOVEFLAG);
                                  $$->u.sl = $2; }
-        | NOTIFY ntags           { if (!context->require.notify) {
-	       		             libsieve_sieveerror(context, "notify not required");
+        | NOTIFY ntags           { if (!libsieve_parse_context->require.notify) {
+	       		             libsieve_sieveerror("notify not required");
 	       		             $$ = libsieve_new_command(NOTIFY); 
 	       		             YYERROR;
 				 } else {
-				     $$ = static_build_notify(context, NOTIFY,
+				     $$ = static_build_notify(NOTIFY,
 	       		             static_canon_ntags($2));
 	       		         } }
-        | VALIDNOTIF stringlist  { if (!context->require.notify) {
-                                     libsieve_sieveerror(context, "notify not required");
+        | VALIDNOTIF stringlist  { if (!libsieve_parse_context->require.notify) {
+                                     libsieve_sieveerror("notify not required");
 				     $$ = libsieve_new_command(VALIDNOTIF);
 				     YYERROR;
 				 } else {
-				     $$ = static_build_validnotif(context, VALIDNOTIF, $2);
+				     $$ = static_build_validnotif(VALIDNOTIF, $2);
 				 } }
 	;
 
 ntags: /* empty */		 { $$ = static_new_ntags(); }
-	| ntags OPTIONS stringlist { if ($$->options != NULL) { 
-					libsieve_sieveerror(context, "duplicate :options"); YYERROR; }
-				     else { $$->options = $3; } }
-	| ntags IMPORTANCE NUMBER { if ($$->importance != 0) {  /* FIXME: "NUMBER" not NUMBER :\ */
-					libsieve_sieveerror(context, "duplicate :importance"); YYERROR; }
-				   else { $$->importance = $3; } }
-	| ntags MESSAGE STRING	 { if ($$->message != NULL) { 
-					libsieve_sieveerror(context, "duplicate :message"); YYERROR; }
-				   else { $$->message = $3; } }
-	| ntags METHOD STRING	 { if ($$->method != NULL) {
-					libsieve_sieveerror(context, "duplicate method"); YYERROR; }
+	| ntags ID STRING	 { if ($$->id != NULL) { 
+					libsieve_sieveerror("duplicate :method"); YYERROR; }
+				   else { $$->id = $3; } }
+	| ntags METHOD STRING	 { if ($$->method != NULL) { 
+					libsieve_sieveerror("duplicate :method"); YYERROR; }
 				   else { $$->method = $3; } }
-	| ntags STRING           { if ($$->method != NULL) { 
-					libsieve_sieveerror(context, "duplicate method"); YYERROR; }
-				   else { $$->method = $2; } }
+	| ntags OPTIONS stringlist { if ($$->options != NULL) { 
+					libsieve_sieveerror("duplicate :options"); YYERROR; }
+				     else { $$->options = $3; } }
+	| ntags priority	 { if ($$->priority != NULL) { 
+					libsieve_sieveerror("duplicate :priority"); YYERROR; }
+				   else { $$->priority = $2; } }
+	| ntags MESSAGE STRING	 { if ($$->message != NULL) { 
+					libsieve_sieveerror("duplicate :message"); YYERROR; }
+				   else { $$->message = $3; } }
 	;
 
 hftags: /*empty */               { $$ = static_new_hftags(); }
 	| hftags comptag         { $$->comptag = $2; }
 	| hftags COMPARATOR STRING { if ($$->comparator != NULL) { 
-				     libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
+				   libsieve_sieveerror("duplicate comparator tag"); YYERROR; }
 				   else { $$->comparator = $3; } }
 	;
 
+priority: LOW    { $$ = "low"; }
+        | NORMAL { $$ = "normal"; }
+        | HIGH   { $$ = "high"; }
+        ;
+
 vtags: /* empty */		 { $$ = static_new_vtags(); }
 	| vtags DAYS NUMBER	 { if ($$->days != -1) { 
-				     libsieve_sieveerror(context, "duplicate :days");
-				     YYERROR; }
+					libsieve_sieveerror("duplicate :days");
+					YYERROR; }
 				   else { $$->days = $3; } }
 	| vtags ADDRESSES stringlist { if ($$->addresses != NULL) { 
-				     libsieve_sieveerror(context, "duplicate :addresses"); 
-				     YYERROR;
-				   } else if (!static_verify_stringlist(context, $3,
+					libsieve_sieveerror("duplicate :addresses"); 
+					YYERROR;
+				       } else if (!static_verify_stringlist($3,
 							static_verify_address)) {
-				     YYERROR;
-				   } else {
-				      $$->addresses = $3; } }
+					  YYERROR;
+				       } else {
+					 $$->addresses = $3; } }
 	| vtags SUBJECT STRING	 { if ($$->subject != NULL) { 
-				     libsieve_sieveerror(context, "duplicate :subject"); 
-				     YYERROR;
-				   } else if (!static_ok_header(context, $3)) {
-				     YYERROR;
+					libsieve_sieveerror("duplicate :subject"); 
+					YYERROR;
+				   } else if (!static_ok_header($3)) {
+					YYERROR;
 				   } else { $$->subject = $3; } }
 	| vtags HANDLE STRING	 { if ($$->handle != NULL) { 
-				     libsieve_sieveerror(context, "duplicate :handle"); 
-				     YYERROR;
-				   } else if (!static_ok_header(context, $3)) {
-				     YYERROR;
+					libsieve_sieveerror("duplicate :handle"); 
+					YYERROR;
+				   } else if (!static_ok_header($3)) {
+					YYERROR;
 				   } else { $$->handle = $3; } }
 	| vtags FROM STRING	 { if ($$->from != NULL) { 
-				     libsieve_sieveerror(context, "duplicate :from"); 
-				     YYERROR;
-				   } else if (!static_ok_header(context, $3)) {
-				     YYERROR;
+					libsieve_sieveerror("duplicate :from"); 
+					YYERROR;
+				   } else if (!static_ok_header($3)) {
+					YYERROR;
 				   } else { $$->from = $3; } }
 	| vtags MIME		 { if ($$->mime != -1) { 
-				     libsieve_sieveerror(context, "duplicate :mime"); 
-				     YYERROR; }
+					libsieve_sieveerror("duplicate :mime"); 
+					YYERROR; }
 				   else { $$->mime = MIME; } }
 	;
 
@@ -344,11 +347,11 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 	| EXISTS stringlist      { $$ = libsieve_new_test(EXISTS); $$->u.sl = $2; }
 	| SFALSE		 { $$ = libsieve_new_test(SFALSE); }
 	| STRUE			 { $$ = libsieve_new_test(STRUE); }
-        | HASFLAG hftags stringlist { if (!context->require.imap4flags) {
-                                       libsieve_sieveerror(context, "imap4flags not required");
+        | HASFLAG hftags stringlist { if (!libsieve_parse_context->require.imap4flags) {
+                                       libsieve_sieveerror("imap4flags not required");
                                        YYERROR;
                                     }
-                                    if (!static_verify_stringlist(context, $3, static_verify_flag)) {
+                                    if (!static_verify_stringlist($3, static_verify_flag)) {
                                        YYERROR; /* vf should call sieveerror() */
 				    }
                                     $$ = libsieve_new_test(HASFLAG);
@@ -362,35 +365,35 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
                                     $$->u.hf.sl = $3; }
 	| HEADER htags stringlist stringlist
 				 { patternlist_t *pl;
-                                   if (!static_verify_stringlist(context, $3, static_verify_header)) {
+                                   if (!static_verify_stringlist($3, static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   $2 = static_canon_htags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs(context, $4, $2->comparator);
+				     pl = static_verify_regexs($4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
 				     pl = (patternlist_t *) $4;
 				       
-				   $$ = static_build_header(context, HEADER, $2, $3, pl);
+				   $$ = static_build_header(HEADER, $2, $3, pl);
 				   if ($$ == NULL) { YYERROR; } }
 	| addrorenv aetags stringlist stringlist
 				 { patternlist_t *pl;
-                                   if (!static_verify_stringlist(context, $3, static_verify_header)) {
+                                   if (!static_verify_stringlist($3, static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   $2 = static_canon_aetags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs(context, $4, $2->comparator);
+				     pl = static_verify_regexs($4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
 				     pl = (patternlist_t *) $4;
 				       
-				   $$ = static_build_address(context, $1, $2, $3, pl);
+				   $$ = static_build_address($1, $2, $3, pl);
 				   if ($$ == NULL) { YYERROR; } }
 	| NOT test		 { $$ = libsieve_new_test(NOT); $$->u.t = $2; }
 	| SIZE sizetag NUMBER    { $$ = libsieve_new_test(SIZE); $$->u.sz.t = $2;
@@ -405,44 +408,41 @@ addrorenv: ADDRESS		 { $$ = ADDRESS; }
 aetags: /* empty */              { $$ = static_new_aetags(); }
         | aetags addrparttag	 { $$ = $1;
 				   if ($$->addrtag != -1) { 
-				     libsieve_sieveerror(context, "duplicate or conflicting address part tag");
-				     YYERROR; }
+			libsieve_sieveerror("duplicate or conflicting address part tag");
+			YYERROR; }
 				   else { $$->addrtag = $2; } }
 	| aetags comptag         { $$ = $1;
 				   if ($$->comptag != -1) { 
-				     libsieve_sieveerror(context, "duplicate comparator type tag");
-				     YYERROR; }
+			libsieve_sieveerror("duplicate comparator type tag"); YYERROR; }
 				   else { $$->comptag = $2; } }
 	| aetags COMPARATOR STRING { $$ = $1;
 				   if ($$->comparator != NULL) { 
-				     libsieve_sieveerror(context, "duplicate comparator tag");
-				     YYERROR; }
+			libsieve_sieveerror("duplicate comparator tag"); YYERROR; }
 				   else { $$->comparator = $3; } }
 	;
 
 htags: /* empty */		 { $$ = static_new_htags(); }
 	| htags comptag		 { $$ = $1;
 				   if ($$->comptag != -1) { 
-				     libsieve_sieveerror(context, "duplicate comparator type tag");
-				     YYERROR; }
+			libsieve_sieveerror("duplicate comparator type tag"); YYERROR; }
 				   else { $$->comptag = $2; } }
 	| htags COMPARATOR STRING { $$ = $1;
 				   if ($$->comparator != NULL) { 
-				     libsieve_sieveerror(context, "duplicate comparator tag");
-				     YYERROR; }
+			libsieve_sieveerror("duplicate comparator tag");
+					YYERROR; }
 				   else { $$->comparator = $3; } }
 	;
 
 addrparttag: ALL                 { $$ = ALL; }
 	| LOCALPART		 { $$ = LOCALPART; }
 	| DOMAIN                 { $$ = DOMAIN; }
-	| USER                   { if (!context->require.subaddress) {
-				     libsieve_sieveerror(context, "subaddress not required");
+	| USER                   { if (!libsieve_parse_context->require.subaddress) {
+				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
 				   $$ = USER; }
-	| DETAIL                { if (!context->require.subaddress) {
-				     libsieve_sieveerror(context, "subaddress not required");
+	| DETAIL                { if (!libsieve_parse_context->require.subaddress) {
+				     libsieve_sieveerror("subaddress not required");
 				     YYERROR;
 				   }
 				   $$ = DETAIL; }
@@ -453,8 +453,8 @@ comptag: IS			 { $$ = IS; }
 	| COUNT	STRING		 { $$ = COUNT | libsieve_relational_lookup($2); libsieve_free($2); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ }
 	| CONTAINS		 { $$ = CONTAINS; }
 	| MATCHES		 { $$ = MATCHES; }
-	| REGEX			 { if (!context->require.regex) {
-				     libsieve_sieveerror(context, "regex not required");
+	| REGEX			 { if (!libsieve_parse_context->require.regex) {
+				     libsieve_sieveerror("regex not required");
 				     YYERROR;
 				     }
 				   $$ = REGEX; }
@@ -473,44 +473,56 @@ tests: test                      { $$ = libsieve_new_testlist($1, NULL); }
 
 %%
 
-void libsieve_sieve_parse_buffer(struct sieve2_context *context)
+const char *libsieve_sieveptr;         /* pointer to sieve string for address lexer */
+char *libsieve_sieveerr;         /* buffer for sieve parser error messages */
+
+commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
 {
-    libsieve_sievelex_init_extra(context, &context->sieve_scanner);
+    commandlist_t *t;
+    extern commandlist_t *ret;
+    extern int libsieve_sievelineno;
 
-    context->sieve_ptr = (char *)context->script.script;
-    context->sieve_len = context->script.len;
+    libsieve_parse_context = context;
 
-    if (libsieve_sieveparse(context)) {
-        libsieve_sievelex_destroy(context->sieve_scanner);
-        throw(SIEVE2_ERROR_PARSE);
+    libsieve_sieveptr = context->script.script;
+    libsieve_sieveerr = NULL;
+    libsieve_sievelineno = 1;
+
+    libsieve_sievelexrestart();
+
+    if (libsieve_sieveparse()) {
+	return NULL;
+    } else {
+        t = ret;
+	ret = NULL;
+	return t;
     }
-
-    libsieve_sievelex_destroy(context->sieve_scanner);
 }
 
-int libsieve_sieveerror_exec(struct sieve2_context *context, char *msg)
+/* This gets called by the address parser,
+ * which does not have access to the context. */
+int libsieve_sieveerror_exec(char *msg)
 {
-    context->exec_errors++;
+    libsieve_parse_context->exec_errors++;
 
-    libsieve_do_error_exec(context, msg);
+    libsieve_do_error_exec(libsieve_parse_context, msg);
 
     return 0;
 }
 
-int libsieve_sieveerror(struct sieve2_context *context, char *msg)
+int libsieve_sieveerror(char *msg)
 {
-    context->parse_errors++;
+    extern int libsieve_sievelineno;
 
-// FIXME: Get the line number back in here.
-    libsieve_do_error_parse(context, 0, msg);
+    libsieve_parse_context->parse_errors++;
+
+    libsieve_do_error_parse(libsieve_parse_context, libsieve_sievelineno, msg);
 
     return 0;
 }
 
-static test_t *static_build_address(
-	struct sieve2_context *context,
-	int t, struct aetags *ae,
-	stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_address(int t, struct aetags *ae,
+			     stringlist_t *sl, patternlist_t *pl)
 {
     test_t *ret = libsieve_new_test(t);	/* can be either ADDRESS or ENVELOPE */
 
@@ -531,10 +543,8 @@ static test_t *static_build_address(
     return ret;
 }
 
-static test_t *static_build_header(
-	struct sieve2_context *context,
-	int t, struct htags *h,
-	stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_header(int t, struct htags *h,
+			    stringlist_t *sl, patternlist_t *pl)
 {
     test_t *ret = libsieve_new_test(t);	/* can be HEADER */
 
@@ -554,9 +564,7 @@ static test_t *static_build_header(
     return ret;
 }
 
-static commandlist_t *static_build_vacation(
-	struct sieve2_context *context,
-	int t, struct vtags *v, char *reason)
+static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -575,9 +583,7 @@ static commandlist_t *static_build_vacation(
     return ret;
 }
 
-static commandlist_t *static_build_notify(
-	struct sieve2_context *context,
-	int t, struct ntags *n)
+static commandlist_t *static_build_notify(int t, struct ntags *n)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -585,9 +591,9 @@ static commandlist_t *static_build_notify(
 
     if (ret) {
 	ret->u.n.method = n->method; n->method = NULL;
+	ret->u.n.id = n->id; n->id = NULL;
 	ret->u.n.options = n->options; n->options = NULL;
-	ret->u.n.from = n->from; n->from= NULL;
-	ret->u.n.importance = n->importance; n->importance = 0;
+	ret->u.n.priority = n->priority;
 	ret->u.n.message = n->message; n->message = NULL;
 	static_free_ntags(n);
     }
@@ -595,9 +601,7 @@ static commandlist_t *static_build_notify(
 }
 
 // FIXME: I think we just test and return true or false... check around.
-static commandlist_t *static_build_validnotif(
-	struct sieve2_context *context,
-	int t, stringlist_t *sl)
+static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -608,7 +612,7 @@ static commandlist_t *static_build_validnotif(
 	ret->u.d.comptag = d->comptag;
 	ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
 	ret->u.d.pattern = d->pattern; d->pattern = NULL;
-	ret->u.d.importance = d->importance;
+	ret->u.d.priority = d->priority;
 	static_free_dtags(d);
     }*/
     return ret;
@@ -715,9 +719,9 @@ static struct ntags *static_new_ntags(void)
     struct ntags *r = (struct ntags *) libsieve_malloc(sizeof(struct ntags));
 
     r->method = NULL;
-    r->from = NULL;
+    r->id = NULL;
     r->options = NULL;
-    r->importance = 0;
+    r->priority = NULL;
     r->message = NULL;
 
     return r;
@@ -726,6 +730,7 @@ static struct ntags *static_new_ntags(void)
 static struct ntags *static_canon_ntags(struct ntags *n)
 {
     char *from = "$from$: $subject$";
+    if (n->priority == NULL) { n->priority = "normal"; }
     if (n->message == NULL) { n->message = libsieve_strdup(from); }
 
     return n;
@@ -734,50 +739,52 @@ static struct ntags *static_canon_ntags(struct ntags *n)
 static void static_free_ntags(struct ntags *n)
 {
     libsieve_free(n->method);
-    libsieve_free(n->from);
+    libsieve_free(n->id);
     if (n->options) libsieve_free_sl(n->options);
     libsieve_free(n->message);
     libsieve_free(n);
 }
 
-static int static_verify_stringlist(struct sieve2_context *context, stringlist_t *sl,
-	int (*verify)(struct sieve2_context *, const char *))
+static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *))
 {
-    for (; sl != NULL && verify(context, sl->s); sl = sl->next) ;
+    for (; sl != NULL && verify(sl->s); sl = sl->next) ;
     return (sl == NULL);
 }
 
-static int static_verify_flag(struct sieve2_context *context, const char *s)
+static int static_verify_flag(const char *s)
 {
     /* xxx if not a flag, call sieveerror */
     return 1;
 }
 
-static int static_verify_address(struct sieve2_context *context, const char *s)
+char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
+char *libsieve_addrerr;		/* buffer for sieve parser error messages */
+
+static int static_verify_address(const char *s)
 {
     char *aerr = NULL;
     char *serr = NULL;
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(context, &addr, &s, &aerr);
+    addr = libsieve_addr_parse_buffer(&addr, &s, &aerr);
     if (addr == NULL) {
         serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
-        libsieve_sieveerror(context, serr);
+        libsieve_sieveerror(serr);
         libsieve_free(serr);
         libsieve_free(aerr);
         return 0;
     }
-    libsieve_addrstructfree(context, addr, CHARSALSO);
+    libsieve_addrstructfree(addr, CHARSALSO);
     return 1;
 }
 
-static int static_verify_mailbox(struct sieve2_context *context, const char *s UNUSED)
+static int static_verify_mailbox(const char *s UNUSED)
 {
     /* xxx if not a mailbox, call sieveerror */
     return 1;
 }
 
-static int static_verify_header(struct sieve2_context *context, const char *hdr)
+static int static_verify_header(const char *hdr)
 {
     const char *h = hdr;
     char *err;
@@ -790,7 +797,7 @@ static int static_verify_header(struct sieve2_context *context, const char *hdr)
 	   ;  ":". */
 	if (!((*h >= 33 && *h <= 57) || (*h >= 59 && *h <= 126))) {
 	    err = libsieve_strconcat("header '", hdr, "': not a valid header", NULL);
-	    libsieve_sieveerror(context, err);
+	    libsieve_sieveerror(err);
 	    libsieve_free(err);
 	    return 0;
 	}
@@ -799,7 +806,42 @@ static int static_verify_header(struct sieve2_context *context, const char *hdr)
     return 1;
 }
  
-static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags)
+/* Was this supposed to be modifying its argument?! */
+/*
+static int static_verify_flag(const char *flag)
+{
+    int ret;
+    char *f, *err;
+
+    // Make ourselves a local copy to change the case
+    f = libsieve_strdup(flag);
+ 
+    if (f[0] == '\\') {
+	libsieve_strtolower(f,strlen(f));
+	if (strcmp(f, "\\\\seen") && strcmp(f, "\\\\answered") &&
+	    strcmp(f, "\\\\flagged") && strcmp(f, "\\\\draft") &&
+	    strcmp(f, "\\\\deleted")) {
+            err = libsieve_strconcat("flag '", f, "': not a system flag", NULL);
+	    libsieve_sieveerror(err);
+	    libsieve_free(err);
+	    ret = 0;
+	}
+	ret = 1;
+    }
+    else if (!libsieve_strisatom(f,strlen(f))) {
+	err = libsieve_strconcat("flag '", f, "': not a valid keyword", NULL);
+	libsieve_sieveerror(err);
+	libsieve_free(err);
+	ret = 0;
+    }
+    ret = 1;
+
+    libsieve_free(f);
+    return ret;
+}
+*/
+ 
+static regex_t *static_verify_regex(const char *s, int cflags)
 {
     int ret;
     char errbuf[100];
@@ -807,14 +849,14 @@ static regex_t *static_verify_regex(struct sieve2_context *context, const char *
 
     if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
 	(void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
-	libsieve_sieveerror(context, errbuf);
+	libsieve_sieveerror(errbuf);
 	libsieve_free(reg);
 	return NULL;
     }
     return reg;
 }
 
-static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp)
+static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
 {
     stringlist_t *sl2;
     patternlist_t *pl = NULL;
@@ -826,7 +868,7 @@ static patternlist_t *static_verify_regexs(struct sieve2_context *context, strin
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
+	if ((reg = static_verify_regex(sl2->s, cflags)) == NULL) {
 	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}
@@ -840,7 +882,7 @@ static patternlist_t *static_verify_regexs(struct sieve2_context *context, strin
 }
 
 /* xxx is it ok to put this in an RFC822 header body? */
-static int static_ok_header(struct sieve2_context *context UNUSED, char *s UNUSED)
+static int static_ok_header(char *s UNUSED)
 {
     return 1;
 }
@@ -857,26 +899,26 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
         return c->require.envelope = c->support.envelope;
     } else if (!strcmp("vacation", req)) {
         return c->require.vacation = c->support.vacation;
-    } else if (!strcmp("enotify",req)) {
+    } else if (!strcmp("notify",req)) {
         return c->require.notify = c->support.notify;
     } else if (!strcmp("subaddress", req)) {
-        return c->require.subaddress = c->support.subaddress;
+	return c->require.subaddress = c->support.subaddress;
     /* imap4flags is built into the parser. */
     } else if (!strcmp("imap4flags", req)) {
         return c->require.imap4flags = 1;
     /* regex is built into the parser. */
     } else if (!strcmp("regex", req)) {
-        return c->require.regex = 1;
+	return c->require.regex = 1;
     /* relational is built into the parser. */
     } else if (!strcmp("relational", req)) {
-        return c->require.relational = 1;
+	return c->require.relational = 1;
     /* These comparators are built into the parser. */
     } else if (!strcmp("comparator-i;octet", req)) {
-        return 1;
+	return 1;
     } else if (!strcmp("comparator-i;ascii-casemap", req)) {
-        return 1;
+	return 1;
     } else if (!strcmp("comparator-i;ascii-numeric", req)) {
-        return 1;
+	return 1;
     }
     /* If we don't recognize it, then we don't support it! */
     return 0;

@@ -13,6 +13,8 @@
 
 /* Must be defined before header.h */
 #define YYSTYPE char *
+#undef YY_INPUT
+#define YY_INPUT(b, r, ms) (r = libsieve_headerinput(b, ms))
 
 #include <string.h>
 
@@ -26,23 +28,22 @@
 /* sv_interface */
 #include "callbacks2.h"
 
-#define context yyextra
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
+extern struct sieve2_context *libsieve_parse_context;
+
+static struct mlbuf *ml = NULL;
 
 #define YY_NO_UNISTD_H 1
-
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->header_ptr, &context->header_len, b, ms))
-#define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_headerget_extra(yyscanner), msg)
+#define YY_FATAL_ERROR libsieve_headerfatalerror
+void libsieve_headerfatalerror(const char msg[]);
 
 %}
 
-%option noyywrap nounput
-%option never-interactive
+%option noyywrap
+%option nounput
 %option prefix="libsieve_header"
-%option header-file="header-lex.h"
-%option reentrant extra-type="struct sieve2_context *"
+%option never-interactive
 
 %x S_NAME S_TEXT S_WRAP
 
@@ -65,12 +66,6 @@
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
-:([\ \t])+(\r|\n)+([\ \t])+      {
-                /* Special case of a malformed header: whitespace followed by newlines followed by whitespace */
-                BEGIN S_TEXT;
-                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
-                return COLON;
-                }
 :([\ \t])+(\r|\n)+      {
                 /* Special case of an empty header: whitespace followed by newlines */
                 TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
@@ -86,13 +81,6 @@
                 /* Eat stray newlines, such as those at the end of every line... */
                 }
 
-<S_NAME>TODO      {
-                /* Special case of a malformed header: wrapped line not starting with whitespace */
-                BEGIN S_WRAP;
-                TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
-                return WRAP;
-                }
-
 <S_NAME>([^:])+         {
                 /* FIXME: Should be something like [!-9;-~]... */
                 /* Field names must be in these ASCII ranges:
@@ -100,24 +88,71 @@
                  * 59  ;  to  126 ~
                  * Note that  58  :  is reserved as the field separator */
                 TRACE_DEBUG( "NAME: %s", yytext );
-		libsieve_headerlval = libsieve_strbuf(context->ml, yytext, yyleng, NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return NAME;
                 }
 
 <S_TEXT>([^\r\n])+      {
                 TRACE_DEBUG( "TEXT: %s", yytext );
-		libsieve_headerlval = libsieve_strbuf(context->ml, yytext, yyleng, NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return TEXT;
                 }
 
 <S_WRAP>([^\r\n])+      {
                 TRACE_DEBUG( "WRAP: %s", yytext );
-		libsieve_headerlval = libsieve_strbuf(context->ml, yytext, yyleng, NOFREE);
+		libsieve_headerlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
                 BEGIN INITIAL;
                 return WRAP;
                 }
 
 %%
+
+/* take input from header string provided by sieve parser */
+int libsieve_headerinput(char *buf, int max)
+{
+    extern char *libsieve_headerptr;	/* current position in header string */
+    size_t n;			/* number of characters to read from string */
+    size_t max_size = (size_t)max;
+
+    if(libsieve_headerptr == NULL)
+        n = 0;
+    else
+        n = strlen(libsieve_headerptr) < max_size ? strlen(libsieve_headerptr) : max_size;
+    if (n > 0) {
+	memcpy(buf, libsieve_headerptr, n);
+	libsieve_headerptr += n;
+    }
+    return n;
+}
+
+/* Clean up after ourselves by free()ing the current buffer */
+void libsieve_headerlexfree()
+{
+    libsieve_strbuffree(&ml, FREEME);
+    libsieve_headerlex_destroy();
+}
+
+/* Kind of a hack, but this sets up the file statics */
+void libsieve_headerlexalloc()
+{
+    libsieve_strbufalloc(&ml);
+    libsieve_headerrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_headerlexrestart()
+{
+    libsieve_headerrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Replacement for the YY_FATAL_ERROR macro,
+ * which would print msg to stderr and exit. */
+void libsieve_headerfatalerror(const char msg[])
+{
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
+}
 

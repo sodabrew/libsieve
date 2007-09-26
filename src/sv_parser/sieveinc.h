@@ -4,7 +4,6 @@
 #include "tree.h"
 #include "script.h"
 #include "context2.h"
-#include "parser.h"
 
 struct vtags {
     int days;
@@ -33,21 +32,21 @@ struct aetags {
 
 struct ntags {
     char *method;
-    char *from;
+    char *id;
     stringlist_t *options;
-    int importance;
+    char *priority;
     char *message;
 };
 
-static test_t *static_build_address(struct sieve2_context *context,
-	int t, struct aetags *ae,
-	stringlist_t *sl, patternlist_t *pl);
-static test_t *static_build_header(struct sieve2_context *context,
-	int t, struct htags *h,
-	stringlist_t *sl, patternlist_t *pl);
-static commandlist_t *static_build_vacation(struct sieve2_context *context, int t, struct vtags *h, char *s);
-static commandlist_t *static_build_notify(struct sieve2_context *context, int t, struct ntags *n);
-static commandlist_t *static_build_validnotif(struct sieve2_context *context, int t, stringlist_t *sl);
+static commandlist_t *ret;
+
+static test_t *static_build_address(int t, struct aetags *ae,
+			     stringlist_t *sl, patternlist_t *pl);
+static test_t *static_build_header(int t, struct htags *h,
+			    stringlist_t *sl, patternlist_t *pl);
+static commandlist_t *static_build_vacation(int t, struct vtags *h, char *s);
+static commandlist_t *static_build_notify(int t, struct ntags *n);
+static commandlist_t *static_build_validnotif(int t, stringlist_t *sl);
 static struct aetags *static_new_aetags(void);
 static struct aetags *static_canon_aetags(struct aetags *ae);
 static void static_free_aetags(struct aetags *ae);
@@ -62,15 +61,14 @@ static struct ntags *static_new_ntags(void);
 static struct ntags *static_canon_ntags(struct ntags *n);
 static void static_free_ntags(struct ntags *n);
 
-static int static_verify_stringlist(struct sieve2_context *context, stringlist_t *sl,
-	int (*verify)(struct sieve2_context *, const char *));
-static int static_verify_mailbox(struct sieve2_context *context, const char *s);
-static int static_verify_address(struct sieve2_context *context, const char *s);
-static int static_verify_header(struct sieve2_context *context, const char *s);
-static int static_verify_flag(struct sieve2_context *context, const char *s);
-static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags);
-static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp);
-static int static_ok_header(struct sieve2_context *context, char *s);
+static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *));
+static int static_verify_mailbox(const char *s);
+static int static_verify_address(const char *s);
+static int static_verify_header(const char *s);
+static int static_verify_flag(const char *s);
+static regex_t *static_verify_regex(const char *s, int cflags);
+static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp);
+static int static_ok_header(char *s);
 
 static int static_check_reqs(struct sieve2_context *context, char *req);
 

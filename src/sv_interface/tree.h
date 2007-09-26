@@ -124,13 +124,18 @@ struct Commandlist {
 	} v;
 	struct { /* it's a notify action */
 	    char *method;
-	    char *from;
+	    char *id;
 	    stringlist_t *options;
-	    int importance;
+	    char *priority;
 	    char *message;
 	} n;
+	struct { /* it's a denotify action */
+	    int comptag;
+	    comparator_t *comp;
+	    void *pattern;
+	    char *priority;
+	} d;
     } u;
-    struct Commandlist *up; /* backlink after an if block */
     struct Commandlist *next;
 };
 

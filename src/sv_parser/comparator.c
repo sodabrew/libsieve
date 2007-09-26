@@ -40,7 +40,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "callbacks2.h"
 
 #define THIS_MODULE "sv_comparator"
-#define THIS_CONTEXT NULL
+#define THIS_CONTEXT libsieve_parse_context
+extern struct sieve2_context *libsieve_parse_context;
 
 /* --- i;octet comparators --- */
 
@@ -103,7 +104,7 @@ static int octet_matches_(const char *pat, const char *text, int casemap)
 		t++;
 	    }
 	case '\\':
-	    c = *p++;
+	    p++;
 	    /* falls through */
 	default:
 	    if (casemap && (toupper((int)(unsigned char)c) ==

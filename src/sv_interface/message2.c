@@ -66,8 +66,6 @@ static int freecache(sieve2_message_t *m)
     return SIEVE2_OK;
 }
 
-#define HEADERHASHSIZE 1019
-
 int libsieve_message2_alloc(sieve2_message_t **m)
 {
     int i;
@@ -109,14 +107,13 @@ int libsieve_message2_free(sieve2_message_t **m)
  * then uses the header parser to work at filling
  * the header hash in m->hash
  */
-int libsieve_message2_parseheader(void *sieve2_context, sieve2_message_t *m)
+int libsieve_message2_parseheader(sieve2_message_t *m)
 {
     size_t c, cl;
     char *err = NULL;
     header_list_t *hl = NULL, *hlfree;
-    struct sieve2_context *context = (struct sieve2_context *)sieve2_context;
 
-    if ((hl = libsieve_header_parse_buffer(context, &hl, &m->header, &err)) == NULL) {
+    if ((hl = libsieve_header_parse_buffer(&hl, &m->header, &err)) == NULL) {
         libsieve_free(err);
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_EXEC;

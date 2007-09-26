@@ -1,6 +1,6 @@
 require "vacation";
 
-vacation #:subject "I'm just not here" 
+vacation :subject "I'm just not here" 
 :days 2
  :handle "foo12345"
 	:from "vacation@localhost"

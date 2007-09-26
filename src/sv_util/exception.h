@@ -20,7 +20,6 @@
 #endif
 
 #include <setjmp.h>
-#include "context2.h"
 
 /*
   some useful macros
@@ -62,8 +61,8 @@ struct _exceptionContext_ {
   jmp_buf context;
 };
 
-extern __thread struct _exceptionContext_ *const _returnExceptionContext_;
-extern __thread struct _exceptionContext_ *_currentExceptionContext_;
+extern struct _exceptionContext_ *const _returnExceptionContext_;
+extern struct _exceptionContext_ *_currentExceptionContext_;
 
 /* exception keywords */
 #define try								 \
@@ -106,9 +105,13 @@ extern __thread struct _exceptionContext_ *_currentExceptionContext_;
     return __VA_ARGS__;						\
   } while(0)
 
+#ifdef DEBUG_THROW
 #define throw(except)						\
-  _exceptionThrow_(THIS_CONTEXT, THIS_MODULE, __FILE__, __LINE__, __func__,		\
+  _exceptionThrowDebug_(__FILE__, __LINE__, __func__,		\
                         _string_(except), (int)(except))
+#else
+#define throw(except) _exceptionThrow_((int)(except))
+#endif /* DEBUG_THROW */
 
 /*
   pointer protection
@@ -143,7 +146,7 @@ unprotectPtr(void *ptr)
   extern declarations
 */
 
-extern void _exceptionThrow_(struct sieve2_context *, char const *module,
-                             char const*, int, char const*, char const*,
-                             int except);
+extern void _exceptionThrow_(int except);
+extern void _exceptionThrowDebug_(char const*, int, char const*, char const*,
+				  int except);
 #endif

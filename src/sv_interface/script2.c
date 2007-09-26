@@ -36,9 +36,6 @@
 /* sv_parser */
 #include "parser.h"
 
-#define THIS_MODULE "interface"
-#define THIS_CONTEXT context
-
 char * sieve2_errstr(int code)
 {
     if (code < SIEVE2_OK || code > SIEVE2_ERROR_LAST)
@@ -58,9 +55,15 @@ int sieve2_alloc(sieve2_context_t **context)
     }
     memset(c, 0, sizeof(struct sieve2_context));
 
+    // TODO: Contextualize the lexer and parser.
+    libsieve_addrlexalloc();
+    libsieve_sievelexalloc();
+    libsieve_headerlexalloc();
+    libsieve_headeryaccalloc();
+
     libsieve_message2_alloc(&c->message);
 
-    libsieve_strbufalloc(&c->ml);
+    libsieve_strbufalloc(&c->strbuf);
 
     *context = c;
 
@@ -82,10 +85,15 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_message2_free(&c->message);
 
-    libsieve_strbuffree(&c->ml, FREEME);
+    libsieve_addrlexfree();
+    libsieve_sievelexfree();
+    libsieve_headerlexfree();
+    libsieve_headeryaccfree();
+
+    libsieve_strbuffree(&c->strbuf, FREEME);
 
     if (c->slflags) {
-        libsieve_free_sl_only(c->slflags);
+	libsieve_free_sl_only(c->slflags);
     }
 
     libsieve_free(c);
@@ -98,23 +106,23 @@ int sieve2_free(sieve2_context_t **context)
  * the registered callbacks. */
 static void static_check_support(struct sieve2_context *c)
 {
-    if (c->callbacks.fileinto)
-        c->support.fileinto = 1;
-    
+	if (c->callbacks.fileinto)
+	    c->support.fileinto = 1;
+	
         if (c->callbacks.reject)
-        c->support.reject = 1;
+	    c->support.reject = 1;
 
-    if (c->callbacks.getenvelope)
-        c->support.envelope = 1;
+	if (c->callbacks.getenvelope)
+	    c->support.envelope = 1;
 
-    if (c->callbacks.getsubaddress)
-        c->support.subaddress = 1;
+	if (c->callbacks.getsubaddress)
+	    c->support.subaddress = 1;
 
-    if (c->callbacks.vacation)
-        c->support.vacation = 1;
+	if (c->callbacks.vacation)
+	    c->support.vacation = 1;
 
-    if (c->callbacks.notify)
-        c->support.notify = 1;
+	if (c->callbacks.notify)
+	    c->support.notify = 1;
 }
 
 /* Register the user's callback functions into the Sieve context.
@@ -129,8 +137,10 @@ int sieve2_callbacks(sieve2_context_t *context,
     if (c == NULL || callbacks == NULL)
         return SIEVE2_ERROR_BADARGS;
 
-    for (cb = callbacks; cb->value; cb++) {
-        switch(cb->value) {
+    for (cb = callbacks; cb->value; cb++)
+      {
+        switch(cb->value)
+          {
 #define   CBCASE(VAL, CB) \
           case VAL: \
               c->callbacks.CB = cb->func; \
@@ -155,11 +165,10 @@ int sieve2_callbacks(sieve2_context_t *context,
           CBCASE(SIEVE2_MESSAGE_GETENVELOPE,   getenvelope);
           CBCASE(SIEVE2_MESSAGE_GETSIZE,       getsize);
           CBCASE(SIEVE2_MESSAGE_GETBODY,       getbody);
-
-          default:
+	  default:
               // FIXME: Also put useful error text into the context.
               return SIEVE2_ERROR_UNSUPPORTED;
-          }
+	  }
       }
 
     static_check_support(c);
@@ -170,34 +179,32 @@ int sieve2_callbacks(sieve2_context_t *context,
 int sieve2_validate(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
-    int retval = SIEVE2_OK;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
 
     c->user_data = user_data;
 
+    c->script.error_count = 0;         /* Reset error count */
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.len) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
+        c->script.cmds = libsieve_sieve_parse_buffer(c);
         libsieve_free_tree(c->script.cmds);
-        libsieve_sieve_parse_buffer(c);
+        c->script.cmds = NULL;
     } catch(SIEVE2_ERROR_INTERNAL) {
-        TRACE_ERROR("Caught internal error");
-        retval = SIEVE2_ERROR_INTERNAL;
-    } catch(SIEVE2_ERROR_PARSE) {
-        TRACE_ERROR("Caught parse error");
-        retval = SIEVE2_ERROR_PARSE;
+        return SIEVE2_ERROR_INTERNAL;
     } endtry;
 
-    libsieve_free_tree(c->script.cmds);
-    c->script.cmds = NULL;
+    if (c->script.error_count > 0) {
+        return SIEVE2_ERROR_PARSE;
+    }
 
-    return retval;
+    return SIEVE2_OK;
 }
 
 /* This is where we really do it:
@@ -207,24 +214,22 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
  * SIEVE2_ERROR_BADARGS if any of the arguments are NULL
  * SIEVE2_ERROR_PARSE for script parse errors
  * SIEVE2_ERROR_EXEC for script evaluation errors
- * SIEVE2_ERROR_HEADER for header parse errors
- * SIEVE2_ERROR_GETSCRIPT for script callback errors
- * SIEVE2_ERROR_NOT_FINALIZED for missing header callback registration
  */
 int sieve2_execute(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
-    int retval = SIEVE2_OK;
+    const char *errmsg = NULL;
 
     if (context == NULL)
         return SIEVE2_ERROR_BADARGS;
 
     c->user_data = user_data;
 
+    c->script.error_count = 0;         /* Reset error count */
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.len) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
@@ -242,45 +247,34 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
                 return SIEVE2_ERROR_HEADER;
             /* Our "internal callback" instead of the user's getheader. */
             c->callbacks.getheader = libsieve_message2_getheader;
-            if (libsieve_message2_parseheader(c, c->message) != SIEVE2_OK)
+            if (libsieve_message2_parseheader(c->message) != SIEVE2_OK)
                 return SIEVE2_ERROR_HEADER;
             }
         }
  
-        libsieve_free_tree(c->script.cmds);
-        libsieve_sieve_parse_buffer(c);
+        c->script.cmds = libsieve_sieve_parse_buffer(c);
+        if (c->script.error_count > 0) {
+            if (c->script.cmds) {
+                libsieve_free_tree(c->script.cmds);
+            }
+            c->script.cmds = NULL;
+            return SIEVE2_ERROR_PARSE;
+        }
 
-        if (libsieve_eval(c, c->script.cmds) < 0)
-            throw(SIEVE2_ERROR_EXEC);
-
-        /* If no action was taken, call libsieve_do_keep. Make
-         * sure to pass back the current flag state.
-         *
-         * This is a subtle change in behavior at libSieve 2.2.6;
-         * a check of extant consumers at the time of release shows
-         * that they don't treat the explicit or implicit keep differently.
-         * The crucial issue here is that we need to be able to pass message
-         * flags in the event of an implicit keep but explicit setflags.
-         * */
-
-        if (!c->cancel_keep)
-            libsieve_do_keep(c, NULL);
+        if (libsieve_eval(c, c->script.cmds, &errmsg) < 0)
+            return SIEVE2_ERROR_EXEC;
 
     } catch(SIEVE2_ERROR_INTERNAL) {
-        TRACE_ERROR("Caught internal error");
-        retval = SIEVE2_ERROR_INTERNAL;
-    } catch(SIEVE2_ERROR_PARSE) {
-        TRACE_ERROR("Caught parse error");
-        retval = SIEVE2_ERROR_PARSE;
-    } catch(SIEVE2_ERROR_EXEC) {
-        TRACE_ERROR("Caught exec error");
-        retval = SIEVE2_ERROR_EXEC;
+        return SIEVE2_ERROR_INTERNAL;
     } endtry;
 
-    libsieve_free_tree(c->script.cmds);
-    c->script.cmds = NULL;
-
-    return retval;
+    /* If no action was taken, libsieve_eval will have
+     * returned > 0. But we're going to hide that and
+     * just return SIEVE2_OK. It is up to the client app
+     * to notice that no callbacks occurred and therefore
+     * a keep MUST be performed.
+     * */
+    return SIEVE2_OK;
 }
 
 char * sieve2_listextensions(sieve2_context_t *sieve2_context)
@@ -296,10 +290,10 @@ char * sieve2_listextensions(sieve2_context_t *sieve2_context)
         ( c->support.reject     ? "reject "    : "" ),
         ( c->support.envelope   ? "envelope "  : "" ),
         ( c->support.vacation   ? "vacation "  : "" ),
-        ( c->support.notify     ? "enotify "   : "" ),
-        NULL );
+        ( c->support.notify     ? "notify "    : "" ),
+	NULL );
 
-    return libsieve_strbuf(c->ml, ext, strlen(ext), FREEME);
+    return libsieve_strbuf(c->strbuf, ext, strlen(ext), FREEME);
 }
 
 #if (MSDOS || WIN32)

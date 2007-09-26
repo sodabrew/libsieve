@@ -40,7 +40,7 @@ typedef struct message {
     header_list_t *list;
 } sieve2_message_t;
 
-int libsieve_message2_parseheader(void *context, sieve2_message_t *m);
+int libsieve_message2_parseheader(sieve2_message_t *m);
 int libsieve_message2_alloc(sieve2_message_t **m);
 int libsieve_message2_free(sieve2_message_t **m);
 

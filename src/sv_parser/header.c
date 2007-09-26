@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 2.2.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 
@@ -47,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -115,20 +115,21 @@
 /* sv_util */
 #include "util.h"
 #include "callbacks2.h"
-
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
-#include "header-lex.h"
-
 /* sv_include */
 #include "sieve2_error.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
 
-#define YYLEX_PARAM context->header_scanner
+/* There are global to this file */
+char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
+char *libsieve_headererr;          /* buffer for sieve parser error messages */
+extern struct sieve2_context *libsieve_parse_context;
 static header_list_t *hl = NULL;
+static struct mlbuf *ml = NULL;
 
 
 /* Enabling traces.  */
@@ -162,7 +163,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 166 "header.c"
+#line 167 "header.c"
 
 #ifdef short
 # undef short
@@ -445,7 +446,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    49,    49,    54,    60,    64,    69,    73
+       0,    48,    48,    53,    59,    63,    68,    72
 };
 #endif
 
@@ -560,7 +561,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (context, YY_("syntax error: cannot back up")); \
+      yyerror (YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -617,7 +618,7 @@ while (YYID (0))
 #ifdef YYLEX_PARAM
 # define YYLEX yylex (YYLEX_PARAM)
 #else
-# define YYLEX yylex (yyscanner)
+# define YYLEX yylex ()
 #endif
 
 /* Enable debugging if requested.  */
@@ -640,7 +641,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, context); \
+		  Type, Value); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -654,19 +655,17 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
+yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, context)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    YYSTYPE const * const yyvaluep;
-    struct sieve2_context *context;
+    const YYSTYPE * const yyvaluep;
 #endif
 {
   if (!yyvaluep)
     return;
-  YYUSE (context);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -688,14 +687,13 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, context)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
+yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, context)
+yy_symbol_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    YYSTYPE const * const yyvaluep;
-    struct sieve2_context *context;
+    const YYSTYPE * const yyvaluep;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -703,7 +701,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, context)
   else
     YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, context);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -743,13 +741,15 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, int yyrule, struct sieve2_context *context)
+yy_reduce_print (YYSTYPE *yyvsp, 
+		   int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule, context)
+yy_reduce_print (yyvsp, yyrule
+		   )
     YYSTYPE *yyvsp;
-    int yyrule;
-    struct sieve2_context *context;
+    
+		   int yyrule;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -763,7 +763,7 @@ yy_reduce_print (yyvsp, yyrule, context)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       , context);
+		       		       );
       fprintf (stderr, "\n");
     }
 }
@@ -771,7 +771,7 @@ yy_reduce_print (yyvsp, yyrule, context)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule, context); \
+    yy_reduce_print (yyvsp, Rule); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1022,18 +1022,16 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, struct sieve2_context *context)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, context)
+yydestruct (yymsg, yytype, yyvaluep)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
-    struct sieve2_context *context;
 #endif
 {
   YYUSE (yyvaluep);
-  YYUSE (context);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1058,7 +1056,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (struct sieve2_context *context);
+int yyparse (void);
 #else
 int yyparse ();
 #endif
@@ -1095,11 +1093,11 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (struct sieve2_context *context)
+yyparse (void)
 #else
 int
-yyparse (context)
-    struct sieve2_context *context;
+yyparse ()
+
 #endif
 #endif
 {
@@ -1348,41 +1346,41 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 49 "header.y"
+#line 48 "header.y"
     {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 }
     break;
 
   case 3:
-#line 54 "header.y"
+#line 53 "header.y"
     {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 }
     break;
 
   case 4:
-#line 60 "header.y"
+#line 59 "header.y"
     {
                 TRACE_DEBUG( "header: NAME COLON: %s:", (yyvsp[(1) - (2)]) );
-                libsieve_headerentry(context, hl->h, (yyvsp[(1) - (2)]), NULL);
+                libsieve_headerentry(hl->h, (yyvsp[(1) - (2)]), NULL);
                 }
     break;
 
   case 5:
-#line 64 "header.y"
+#line 63 "header.y"
     {
                 TRACE_DEBUG( "header: NAME COLON body: %s:%s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
-                libsieve_headerentry(context, hl->h, (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
+                libsieve_headerentry(hl->h, (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
                 }
     break;
 
   case 6:
-#line 69 "header.y"
+#line 68 "header.y"
     {
                 /* Default action is $$ = $1 */
                 TRACE_DEBUG( "body: TEXT: %s", (yyvsp[(1) - (1)]) );
@@ -1390,16 +1388,16 @@ yyreduce:
     break;
 
   case 7:
-#line 73 "header.y"
+#line 72 "header.y"
     {
                 TRACE_DEBUG( "body: body WRAP: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
-                (yyval) = libsieve_strbuf(context->ml, libsieve_strconcat( (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)])), FREEME);
+                (yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)])), FREEME);
                 }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1403 "header.c"
+#line 1401 "header.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1435,7 +1433,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (context, YY_("syntax error"));
+      yyerror (YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1459,11 +1457,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (context, yymsg);
+	    yyerror (yymsg);
 	  }
 	else
 	  {
-	    yyerror (context, YY_("syntax error"));
+	    yyerror (YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -1487,7 +1485,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, context);
+		      yytoken, &yylval);
 	  yychar = YYEMPTY;
 	}
     }
@@ -1543,7 +1541,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, context);
+		  yystos[yystate], yyvsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1581,7 +1579,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (context, YY_("memory exhausted"));
+  yyerror (YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1589,7 +1587,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, context);
+		 yytoken, &yylval);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1597,7 +1595,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, context);
+		  yystos[*yyssp], yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1608,38 +1606,39 @@ yyreturn:
   if (yymsg != yymsgbuf)
     YYSTACK_FREE (yymsg);
 #endif
-  /* Make sure YYID is used.  */
-  return YYID (yyresult);
+  return yyresult;
 }
 
 
-#line 78 "header.y"
+#line 77 "header.y"
 
 
 /* copy header error message into buffer provided by sieve parser */
-void libsieve_headererror(struct sieve2_context *context, const char *s)
+void libsieve_headererror(const char *s)
 {
-    TRACE_DEBUG( "Header parse error: %s", s);
+    extern char *libsieve_headererr;
+    libsieve_headererr = libsieve_strdup(s);
 }
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
 
     hl = NULL;
-    if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+    if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
-    context->header_ptr = *ptr;
-    context->header_len = strlen(*ptr);
-    libsieve_headerlex_init_extra(context, &context->header_scanner);
+    libsieve_headerptr = *ptr;
 
-    if (libsieve_headerparse(context)) {
-        libsieve_headerlex_destroy(context->header_scanner);
+    libsieve_headerlexrestart();
+
+    if(libsieve_headerparse()) {
+        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
+        *err = libsieve_headererr;
 	while (hl) {
 	    header_list_t *next = hl->next;
             libsieve_free(hl->h->contents);
@@ -1662,7 +1661,6 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
     libsieve_free(hl->h->contents);
     libsieve_free(hl->h);
     libsieve_free(hl);
-    libsieve_headerlex_destroy(context->header_scanner);
 
     if(*data == NULL)
         *data = newdata;
@@ -1671,7 +1669,7 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
     return *data;
 }
 
-int libsieve_headerappend(struct sieve2_context *context, header_list_t **hl)
+int libsieve_headerappend(header_list_t **hl)
 {
     header_list_t *newlist = NULL;
     header_t *newhead = NULL;
@@ -1707,7 +1705,7 @@ int libsieve_headerappend(struct sieve2_context *context, header_list_t **hl)
     return SIEVE2_OK;
 }
 
-void libsieve_headerentry(struct sieve2_context *context, header_t *h, char *name, char *body)
+void libsieve_headerentry(header_t *h, char *name, char *body)
 {
     TRACE_DEBUG( "Entering name and body into header struct" );
     if (h == NULL)
@@ -1723,6 +1721,19 @@ void libsieve_headerentry(struct sieve2_context *context, header_t *h, char *nam
     /* This function is NOT designed for general purpose
      * entries, but only for making the very first entry!
      * */
+}
+
+void libsieve_headeryaccalloc()
+{
+    libsieve_strbufalloc(&ml);
+}
+
+void libsieve_headeryaccfree()
+{
+    /* This must correspond to sieve2_messagecache
+     * knowing not to free its contents[] entries.
+     * */
+    libsieve_strbuffree(&ml, FREEME);
 }
 
 

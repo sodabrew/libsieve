@@ -30,6 +30,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* Must be defined before addr.h */
 #define YYSTYPE char *
+#undef YY_INPUT
+#define YY_INPUT(b, r, ms) (r = libsieve_addrinput(b, ms))
 
 #include <string.h>
 /* sv_util */
@@ -40,23 +42,22 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "addr.h"
 #include "addrinc.h"
 
-#define context yyextra
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
 
+extern struct sieve2_context *libsieve_parse_context;
 static int ncom = 0;	/* number of open comments */
+static struct mlbuf *ml = NULL;
 
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->addr_ptr, &context->addr_len, b, ms))
-#define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_addrget_extra(yyscanner), msg)
+#define YY_FATAL_ERROR libsieve_addrfatalerror
+void libsieve_addrfatalerror(const char msg[]);
 
 %}
 
-%option noyywrap nounput
-%option never-interactive
+%option noyywrap
+%option nounput
 %option prefix="libsieve_addr"
-%option header-file="addr-lex.h"
-%option reentrant extra-type="struct sieve2_context *"
+%option never-interactive
 
 %x QSTRING DOMAINLIT COMMENT
 
@@ -65,7 +66,7 @@ static int ncom = 0;	/* number of open comments */
 \"				{ BEGIN QSTRING; TRACE_DEBUG( "Begin QSTRING" ); return QUOTE; }
 \[				{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return yytext[0]; }
 \(				{ ncom = 1; TRACE_DEBUG( "Begin COMMENT" ); BEGIN COMMENT; }
-\)				{ libsieve_addrerror(context, NULL, "address parse error, "
+\)				{ libsieve_addrerror("address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
@@ -80,14 +81,14 @@ static int ncom = 0;	/* number of open comments */
 				}
 ([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
 		/* Match any set of non-special-characters */
-		libsieve_addrlval = libsieve_strbuf(context->ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return ATOM;
 				}
 
 <QSTRING>([^\"]|\\\")+		{
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
-		libsieve_addrlval = libsieve_strbuf(context->ml, yytext, strlen(yytext), NOFREE);
+		libsieve_addrlval = libsieve_strbuf(ml, yytext, strlen(yytext), NOFREE);
 		return QTEXT;
 				}
 <QSTRING>\"			{
@@ -106,10 +107,57 @@ static int ncom = 0;	/* number of open comments */
 <COMMENT>([^\(\)\n\0\\]|\\.)*	/* ignore comments */
 <COMMENT>\(			ncom++;
 <COMMENT>\)			{ ncom--; if (ncom == 0) BEGIN INITIAL; }
-<COMMENT><<EOF>>		{ libsieve_addrerror(context, NULL, "address parse error, "
+<COMMENT><<EOF>>		{ libsieve_addrerror("address parse error, "
 					  "expecting `')'' "
 					  "(unterminated comment)");
 				  yyterminate(); }
 
 %%
+
+/* take input from address string provided by sieve parser */
+int libsieve_addrinput(char *buf, int max)
+{
+    extern char *libsieve_addrptr;	/* current position in address string */
+    size_t n;			/* number of characters to read from string */
+    size_t max_size = (size_t)max;
+
+    if(libsieve_addrptr == NULL)
+        n = 0;
+    else
+        n = strlen(libsieve_addrptr) < max_size ? strlen(libsieve_addrptr) : max_size;
+    if (n > 0) {
+	memcpy(buf, libsieve_addrptr, n);
+	libsieve_addrptr += n;
+    }
+    return n;
+}
+
+/* Clean up after ourselves by free()ing the current buffer */
+void libsieve_addrlexfree()
+{
+    libsieve_strbuffree(&ml, FREEME);
+    libsieve_addrlex_destroy();
+}
+
+/* Kind of a hack, but this sets up the file statics */
+void libsieve_addrlexalloc()
+{
+    libsieve_strbufalloc(&ml);
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Restart the lexer before each invocation of the parser */
+void libsieve_addrlexrestart()
+{
+    libsieve_addrrestart( (FILE *)YY_CURRENT_BUFFER );
+}
+
+/* Replacement for the YY_FATAL_ERROR macro,
+ * which would print msg to stderr and exit. */
+void libsieve_addrfatalerror(const char msg[])
+{
+    /* Basically stop and don't do anything
+     * Supress the unused yy_fatal_error warning. */
+    if (0) yy_fatal_error(msg);
+}
 

@@ -56,7 +56,7 @@ typedef enum {
     ADDRESS_DETAIL
 } address_part_t;
 
-int libsieve_parse_address(struct sieve2_context *context, const char *header, struct address **data, struct addr_marker **marker);
+int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker);
 char *libsieve_get_address(struct sieve2_context *context, address_part_t addrpart, struct addr_marker **marker, int canon_domain);
 int libsieve_free_address(struct address **data, struct addr_marker **marker);
 

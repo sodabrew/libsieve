@@ -77,7 +77,8 @@ struct actions2 {
 };
 
 struct script2 {
-    int error_lineno, len;
+    int error_count;
+    int error_lineno;
     const char *script;
     commandlist_t *cmds;
 };
@@ -106,22 +107,7 @@ struct cur_call {
 struct sieve2_context {
     sieve2_message_t *message;
     stringlist_t *slflags;
-
-    struct mlbuf *ml;
-
-    void *sieve_scanner;
-    void *header_scanner;
-    void *addr_scanner;
-
-    char *sieve_ptr;
-    char *header_ptr;
-    char *addr_ptr;
-
-    size_t sieve_len;
-    size_t header_len;
-    size_t addr_len;
-
-    int cancel_keep;
+    struct mlbuf *strbuf;
 
     int parse_errors;
     int exec_errors;

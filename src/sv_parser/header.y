@@ -22,25 +22,24 @@
 /* sv_util */
 #include "util.h"
 #include "callbacks2.h"
-
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
-#include "header-lex.h"
-
 /* sv_include */
 #include "sieve2_error.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
+#define THIS_CONTEXT libsieve_parse_context
 
-#define YYLEX_PARAM context->header_scanner
+/* There are global to this file */
+char *libsieve_headerptr;          /* pointer to sieve string for header lexer */
+char *libsieve_headererr;          /* buffer for sieve parser error messages */
+extern struct sieve2_context *libsieve_parse_context;
 static header_list_t *hl = NULL;
+static struct mlbuf *ml = NULL;
 %}
 
 %name-prefix="libsieve_header"
-%parse-param { struct sieve2_context *context }
-%lex-param { void *yyscanner }
 
 %token NAME COLON TEXT WRAP
 %start headers
@@ -48,22 +47,22 @@ static header_list_t *hl = NULL;
 %%
 headers: header                 {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 }
         | headers header        {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
                 };
 
 header: NAME COLON              {
                 TRACE_DEBUG( "header: NAME COLON: %s:", $1 );
-                libsieve_headerentry(context, hl->h, $1, NULL);
+                libsieve_headerentry(hl->h, $1, NULL);
                 }
         | NAME COLON body       {
                 TRACE_DEBUG( "header: NAME COLON body: %s:%s", $1, $3 );
-                libsieve_headerentry(context, hl->h, $1, $3);
+                libsieve_headerentry(hl->h, $1, $3);
                 };
 
 body: TEXT                      {
@@ -72,35 +71,37 @@ body: TEXT                      {
                 }
         | body WRAP             {
                 TRACE_DEBUG( "body: body WRAP: %s %s", $1, $2 );
-                $$ = libsieve_strbuf(context->ml, libsieve_strconcat( $1, $2, NULL ), strlen($1)+strlen($2), FREEME);
+                $$ = libsieve_strbuf(ml, libsieve_strconcat( $1, $2, NULL ), strlen($1)+strlen($2), FREEME);
                 };
 
 %%
 
 /* copy header error message into buffer provided by sieve parser */
-void libsieve_headererror(struct sieve2_context *context, const char *s)
+void libsieve_headererror(const char *s)
 {
-    TRACE_DEBUG( "Header parse error: %s", s);
+    extern char *libsieve_headererr;
+    libsieve_headererr = libsieve_strdup(s);
 }
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
 
     hl = NULL;
-    if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+    if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
-    context->header_ptr = *ptr;
-    context->header_len = strlen(*ptr);
-    libsieve_headerlex_init_extra(context, &context->header_scanner);
+    libsieve_headerptr = *ptr;
 
-    if (libsieve_headerparse(context)) {
-        libsieve_headerlex_destroy(context->header_scanner);
+    libsieve_headerlexrestart();
+
+    if(libsieve_headerparse()) {
+        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
+        *err = libsieve_headererr;
 	while (hl) {
 	    header_list_t *next = hl->next;
             libsieve_free(hl->h->contents);
@@ -123,7 +124,6 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
     libsieve_free(hl->h->contents);
     libsieve_free(hl->h);
     libsieve_free(hl);
-    libsieve_headerlex_destroy(context->header_scanner);
 
     if(*data == NULL)
         *data = newdata;
@@ -132,7 +132,7 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
     return *data;
 }
 
-int libsieve_headerappend(struct sieve2_context *context, header_list_t **hl)
+int libsieve_headerappend(header_list_t **hl)
 {
     header_list_t *newlist = NULL;
     header_t *newhead = NULL;
@@ -168,7 +168,7 @@ int libsieve_headerappend(struct sieve2_context *context, header_list_t **hl)
     return SIEVE2_OK;
 }
 
-void libsieve_headerentry(struct sieve2_context *context, header_t *h, char *name, char *body)
+void libsieve_headerentry(header_t *h, char *name, char *body)
 {
     TRACE_DEBUG( "Entering name and body into header struct" );
     if (h == NULL)
@@ -184,5 +184,18 @@ void libsieve_headerentry(struct sieve2_context *context, header_t *h, char *nam
     /* This function is NOT designed for general purpose
      * entries, but only for making the very first entry!
      * */
+}
+
+void libsieve_headeryaccalloc()
+{
+    libsieve_strbufalloc(&ml);
+}
+
+void libsieve_headeryaccfree()
+{
+    /* This must correspond to sieve2_messagecache
+     * knowing not to free its contents[] entries.
+     * */
+    libsieve_strbuffree(&ml, FREEME);
 }
 

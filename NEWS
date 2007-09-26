@@ -1,18 +1,3 @@
-libSieve 2.2.6
---------------
-
-- Full thread safety.
-
-- Support for /* bracketed comments. */
-
-- Support for enotify extension (replacing notify).
-
-- Better lexing through gperf keywords.
-
-- Updated requirements: gperf, bison 2.x, flex 2.5.34 (but only
-  required if you are regenerating the lexer/scanner; they ship
-  already ready already in the source distribution).
-
 libSieve 2.2.5
 --------------
 
