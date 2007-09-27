@@ -89,6 +89,9 @@ CRLF		(\r\n|\r|\n)
 <QSTRING>([^\"]|\\\"|{CRLF})+ { libsieve_sievelval.sval = libsieve_strndup(yytext, yyleng);
 			  return STRING; }
 
+<COMMENT>\*\/           { BEGIN INITIAL; }
+<COMMENT>. ;            /* ignore comments */
+
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ TRACE_DEBUG("Beginning a text: block.");
 			  BEGIN MULTILINE;
 			  text = libsieve_catbuf_alloc(); }
@@ -156,6 +159,7 @@ CRLF		(\r\n|\r|\n)
 <INITIAL>:detail	return DETAIL;
 <INITIAL>[ \t\n\r] ;	/* ignore whitespace */
 <INITIAL>#.* ;		/* ignore comments */
+<INITIAL>\/\*           { BEGIN COMMENT; }
 .			return yytext[0];
 
 %%

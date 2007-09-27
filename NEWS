@@ -1,3 +1,10 @@
+libSieve 2.2.6
+--------------
+
+- Fix for bracketed comments (thanks to Daniel Shahaf).
+
+- More graceful handling of malformed addresses.
+
 libSieve 2.2.5
 --------------
 
