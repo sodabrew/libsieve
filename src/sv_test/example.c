@@ -119,7 +119,7 @@ int my_vacation(sieve2_context_t *s, void *my)
 	int yn;
 
 	/* Ask for the message hash, the days parameters, etc. */
-	printf("Have I already responded to '%s' in the past %d days?\n",
+	fprintf(stderr, "Have I already responded to '%s' in the past %d days?\n",
 		sieve2_getvalue_string(s, "hash"),
 		sieve2_getvalue_int(s, "days") );
 
