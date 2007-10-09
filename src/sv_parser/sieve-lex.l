@@ -68,6 +68,7 @@ CRLF		(\r\n|\r|\n)
 
 %state MULTILINE
 %state QSTRING
+%state COMMENT
 
 %%
 <MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
