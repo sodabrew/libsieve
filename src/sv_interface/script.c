@@ -418,7 +418,7 @@ int libsieve_eval(struct sieve2_context *context,
                     }
 
                     /* first, is it from me? */
-                    if (l == SIEVE2_OK && !strcmp(myaddr, reply_to)) {
+                    if (l == SIEVE2_OK && myaddr && !strcmp(myaddr, reply_to)) {
                         TRACE_DEBUG("VACATION aborted because the message is from my primary address.");
                         l = SIEVE2_DONE;
                     }
@@ -427,7 +427,7 @@ int libsieve_eval(struct sieve2_context *context,
                        specified? */
                     if (l == SIEVE2_OK)
                         for (sl = c->u.v.addresses; sl != NULL; sl = sl->next)
-                            if (!strcmp(sl->s, reply_to))
+                            if (sl->s && !strcmp(sl->s, reply_to))
                                 l = SIEVE2_DONE;
 
                     if (l == SIEVE2_DONE)

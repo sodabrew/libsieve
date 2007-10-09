@@ -80,6 +80,7 @@ struct script2 {
     int error_count;
     int error_lineno;
     const char *script;
+    int length;
     commandlist_t *cmds;
 };
 

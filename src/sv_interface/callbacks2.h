@@ -60,7 +60,7 @@ int libsieve_do_debug_trace(struct sieve2_context *c, int level,
 /* Ask the user app for information about the script & message. */
 int libsieve_do_getscript(struct sieve2_context *context,
 		const char * const path, const char * const name,
-		const char ** script);
+		const char ** script, int * scriptlen);
 int libsieve_do_getallheaders(struct sieve2_context *context,
 		char ** header);
 int libsieve_do_getheader(struct sieve2_context *context,

@@ -189,7 +189,7 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.length) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
@@ -229,7 +229,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     c->script.error_lineno = 1;        /* Reset line number */
 
     /* First callback already! Get the script! */
-    if (libsieve_do_getscript(c, "", "", &c->script.script) != SIEVE2_OK)
+    if (libsieve_do_getscript(c, "", "", &c->script.script, &c->script.length) != SIEVE2_OK)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {

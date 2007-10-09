@@ -244,14 +244,17 @@ int libsieve_do_debug_trace(struct sieve2_context *c, int level,
 		const char *module, const char *file, const char *function,
 		const char *formatstring, ...)
 {
-    char *message;
+    char message[1024];
     va_list argp;
+    int len;
 
     // Check if tracing has been registered
-    // because vasprintf is relatively expensive.
+    // because vsprintf is relatively expensive.
     // NOTE: Remind implementations that they should
     // only register a trace function if it is needed.
-    if (c->callbacks.debug_trace) {
+
+    // Petri Lane says that sometimes c comes in as NULL.
+    if (c && c->callbacks.debug_trace) {
         libsieve_callback_begin(c, SIEVE2_DEBUG_TRACE);
 
         libsieve_setvalue_int(c, "level", level);
@@ -261,14 +264,19 @@ int libsieve_do_debug_trace(struct sieve2_context *c, int level,
         libsieve_setvalue_string(c, "function", (char *)function);
 
 	va_start(argp, formatstring);
-        libsieve_vasprintf(&message, formatstring, argp);
+	// This used to be vasnprintf, but it's not availabe in Solaris < 10
+	// or any other commercial Unices, and including equiv. code from
+	// gnulib was an absurd amount of overhead for a little library.
+	memset(message, 0, 1024);
+        len = vsnprintf(message, 1023, formatstring, argp);
+	if (len < 0 || len > 1023) {
+		snprintf(message, 1023, "A Sieve error occurred, but the error message is not available.");
+	}
         libsieve_setvalue_string(c, "message", message);
 	va_end(argp);
 
         libsieve_callback_do(c, SIEVE2_DEBUG_TRACE);
         libsieve_callback_end(c, SIEVE2_DEBUG_TRACE);
- 
-        libsieve_free(message);
     }
 
     return SIEVE2_OK;
@@ -276,7 +284,7 @@ int libsieve_do_debug_trace(struct sieve2_context *c, int level,
 
 int libsieve_do_getscript(struct sieve2_context *c,
 		const char * const path, const char * const name,
-		const char ** script)
+		const char ** script, int * scriptlen)
 {
     libsieve_callback_begin(c, SIEVE2_SCRIPT_GETSCRIPT);
 
@@ -286,6 +294,11 @@ int libsieve_do_getscript(struct sieve2_context *c,
     libsieve_callback_do(c, SIEVE2_SCRIPT_GETSCRIPT);
 
     *script = libsieve_getvalue_string(c, "script");
+
+    if (*script)
+        *scriptlen = strlen(*script);
+    else
+        *scriptlen = 0;
 
     libsieve_callback_end(c, SIEVE2_SCRIPT_GETSCRIPT);
 
