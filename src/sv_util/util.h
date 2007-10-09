@@ -13,8 +13,6 @@
 
 /* Needed for printf. */
 #include <stdio.h>
-/* Needed for vasprintf. */
-#include "vasprintf.h"
 #include "exception.h"
 
 /* Define several macros for GCC specific attributes.
