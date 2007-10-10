@@ -52,11 +52,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
    say where to start extracting */
 int libsieve_parse_address(const char *header, struct address **data, struct addr_marker **marker)
 {
-    char *err;
     struct addr_marker *am;
     struct address *newdata = NULL;
 
-    newdata = libsieve_addr_parse_buffer(data, &header, &err);
+    newdata = libsieve_addr_parse_buffer(data, &header);
     if( newdata == NULL )
         return SIEVE2_ERROR_EXEC;
 

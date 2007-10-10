@@ -757,21 +757,14 @@ static int static_verify_flag(const char *s)
     return 1;
 }
 
-char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
-char *libsieve_addrerr;		/* buffer for sieve parser error messages */
+extern char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
 
 static int static_verify_address(const char *s)
 {
-    char *aerr = NULL;
-    char *serr = NULL;
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(&addr, &s, &aerr);
+    addr = libsieve_addr_parse_buffer(&addr, &s);
     if (addr == NULL) {
-        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
-        libsieve_sieveerror(serr);
-        libsieve_free(serr);
-        libsieve_free(aerr);
         return 0;
     }
     libsieve_addrstructfree(addr, CHARSALSO);

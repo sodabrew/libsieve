@@ -155,6 +155,9 @@ int sieve2_callbacks(sieve2_context_t *context,
 
           CBCASE(SIEVE2_ERRCALL_RUNTIME,       err_runtime);
           CBCASE(SIEVE2_ERRCALL_PARSE,         err_parse);
+          CBCASE(SIEVE2_ERRCALL_HEADER,        err_header);
+          CBCASE(SIEVE2_ERRCALL_ADDRESS,       err_address);
+
           CBCASE(SIEVE2_DEBUG_TRACE,           debug_trace);
 
           CBCASE(SIEVE2_SCRIPT_GETSCRIPT,      getscript);

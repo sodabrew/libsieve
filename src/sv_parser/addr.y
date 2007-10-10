@@ -51,7 +51,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
-char *libsieve_addrerr;          /* buffer for sieve parser error messages */
 struct sieve2_context *libsieve_parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
@@ -165,15 +164,17 @@ qstring: QUOTE QTEXT QUOTE	{
 %%
 
 /* Run an execution error callback. */
-void libsieve_addrerror(char *s)
+void libsieve_addrerror(char *msg)
 {
-    libsieve_sieveerror_exec(s);
+    libsieve_parse_context->exec_errors++;
+
+    libsieve_do_error_address(libsieve_parse_context, msg);
 }
 
 /* Wrapper for addrparse() which sets up the 
  * required environment and allocates variables
  */
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr, char **err)
+struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr)
 {
     struct address *newdata = NULL;
     extern struct mlbuf *ml;
@@ -187,6 +188,13 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
     libsieve_addrptr = (char *)*ptr;
 
     libsieve_addrlexrestart();
+
+/*
+        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
+        libsieve_sieveerror(serr);
+        libsieve_free(serr);
+        libsieve_free(aerr);
+	*/
 
     if(libsieve_addrparse()) {
         // FIXME: Make sure that this is sufficient cleanup

@@ -88,6 +88,9 @@ int libsieve_callback_do(
 
           CBCALL(SIEVE2_ERRCALL_RUNTIME,       err_runtime);
           CBCALL(SIEVE2_ERRCALL_PARSE,         err_parse);
+          CBCALL(SIEVE2_ERRCALL_HEADER,        err_header);
+          CBCALL(SIEVE2_ERRCALL_ADDRESS,       err_address);
+
           CBCALL(SIEVE2_DEBUG_TRACE,           debug_trace);
 
           CBCALL(SIEVE2_SCRIPT_GETSCRIPT,      getscript);

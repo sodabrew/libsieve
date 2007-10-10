@@ -212,7 +212,33 @@ int my_errparse(sieve2_context_t *s, void *my)
 {
 	struct my_context *m = (struct my_context *)my;
 
-	printf( "Error is PARSE: " );
+	printf( "Error is SCRIPT PARSE: " );
+	printf( "  Line is %d\n",
+		sieve2_getvalue_int(s, "lineno"));
+	printf( "  Message is %s\n",
+		sieve2_getvalue_string(s, "message"));
+
+	m->error_parse = 1;
+	return SIEVE2_OK;
+}
+
+int my_erraddress(sieve2_context_t *s, void *my)
+{
+//	struct my_context *m = (struct my_context *)my;
+
+	printf( "Error is ADDRESS PARSE: " );
+	printf( "  Message is %s\n",
+		sieve2_getvalue_string(s, "message"));
+
+//	m->error_parse = 1;
+	return SIEVE2_OK;
+}
+
+int my_errheader(sieve2_context_t *s, void *my)
+{
+	struct my_context *m = (struct my_context *)my;
+
+	printf( "Error is HEADER PARSE: " );
 	printf( "  Line is %d\n",
 		sieve2_getvalue_int(s, "lineno"));
 	printf( "  Message is %s\n",
@@ -437,7 +463,8 @@ sieve2_callback_t my_callbacks[] = {
 { SIEVE2_DEBUG_TRACE,           my_debug         },
 { SIEVE2_ERRCALL_PARSE,         my_errparse      },
 { SIEVE2_ERRCALL_RUNTIME,       my_errexec       },
-{ SIEVE2_ERRCALL_PARSE,         my_errparse      },
+{ SIEVE2_ERRCALL_ADDRESS,       my_erraddress    },
+{ SIEVE2_ERRCALL_HEADER,        my_errheader     },
 { SIEVE2_ACTION_FILEINTO,       my_fileinto      },
 { SIEVE2_ACTION_DISCARD,        my_discard       },
 { SIEVE2_ACTION_REDIRECT,       my_redirect      },

@@ -5,6 +5,8 @@ libSieve 2.2.6
 
 - More graceful handling of malformed addresses (thanks to Paul Stevens).
 
+- Return header and address errors separately from script parse errors.
+
 libSieve 2.2.5
 --------------
 

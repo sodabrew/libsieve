@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 
@@ -47,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.2"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -655,13 +655,13 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (!yyvaluep)
@@ -687,13 +687,13 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -741,15 +741,12 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, 
-		   int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule
-		   )
+yy_reduce_print (yyvsp, yyrule)
     YYSTYPE *yyvsp;
-    
-		   int yyrule;
+    int yyrule;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1397,7 +1394,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1401 "header.c"
+#line 1398 "header.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1606,7 +1603,8 @@ yyreturn:
   if (yymsg != yymsgbuf)
     YYSTACK_FREE (yymsg);
 #endif
-  return yyresult;
+  /* Make sure YYID is used.  */
+  return YYID (yyresult);
 }
 
 
@@ -1616,29 +1614,33 @@ yyreturn:
 /* copy header error message into buffer provided by sieve parser */
 void libsieve_headererror(const char *s)
 {
-    extern char *libsieve_headererr;
-    libsieve_headererr = libsieve_strdup(s);
+    extern int libsieve_headerlineno;
+    TRACE_DEBUG( "Header parse error on line %d: %s",
+        libsieve_headerlineno, s );
+    libsieve_do_error_header(libsieve_parse_context, libsieve_headerlineno, s);
 }
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
+    extern int libsieve_headerlineno;
 
     hl = NULL;
     if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
     libsieve_headerptr = *ptr;
+    libsieve_headererr = NULL;
+    libsieve_headerlineno = 1;
 
     libsieve_headerlexrestart();
 
     if(libsieve_headerparse()) {
-        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
-        *err = libsieve_headererr;
+        TRACE_DEBUG( "Header parse error, returning null" );
 	while (hl) {
 	    header_list_t *next = hl->next;
             libsieve_free(hl->h->contents);

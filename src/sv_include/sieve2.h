@@ -40,7 +40,7 @@ typedef enum {
 	SIEVE2_DEBUG_TRACE,           // NEW in 2.1.11
 
 	SIEVE2_SCRIPT_GETSCRIPT,
-	SIEVE2_SCRIPT_GETSIZE,
+	SIEVE2_SCRIPT_GETSIZE,        // DEPRECATED since 2.2.6 (was never implemented!)
 
 	SIEVE2_MESSAGE_GETHEADER,
 	SIEVE2_MESSAGE_GETALLHEADERS,
@@ -49,7 +49,10 @@ typedef enum {
 	SIEVE2_MESSAGE_GETBODY,
 	SIEVE2_MESSAGE_GETSUBADDRESS, // NEW in 2.1.11
 
-	SIEVE2_VALUE_LAST /* Can we use this as an API version check? */
+	SIEVE2_ERRCALL_HEADER,        // NEW in 2.2.6
+	SIEVE2_ERRCALL_ADDRESS,       // NEW in 2.2.6
+
+	SIEVE2_VALUE_LAST             // Use this as an API version check
 } sieve2_values_t;
 
 typedef int (*sieve2_callback_func) (

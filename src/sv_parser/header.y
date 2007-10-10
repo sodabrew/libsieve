@@ -79,29 +79,33 @@ body: TEXT                      {
 /* copy header error message into buffer provided by sieve parser */
 void libsieve_headererror(const char *s)
 {
-    extern char *libsieve_headererr;
-    libsieve_headererr = libsieve_strdup(s);
+    extern int libsieve_headerlineno;
+    TRACE_DEBUG( "Header parse error on line %d: %s",
+        libsieve_headerlineno, s );
+    libsieve_do_error_header(libsieve_parse_context, libsieve_headerlineno, s);
 }
 
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr, char **err)
+header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;
+    extern int libsieve_headerlineno;
 
     hl = NULL;
     if (libsieve_headerappend(&hl) != SIEVE2_OK)
         /* Problems... */;
 
     libsieve_headerptr = *ptr;
+    libsieve_headererr = NULL;
+    libsieve_headerlineno = 1;
 
     libsieve_headerlexrestart();
 
     if(libsieve_headerparse()) {
-        TRACE_DEBUG( "Header parse error: %s", libsieve_headererr );
-        *err = libsieve_headererr;
+        TRACE_DEBUG( "Header parse error, returning null" );
 	while (hl) {
 	    header_list_t *next = hl->next;
             libsieve_free(hl->h->contents);

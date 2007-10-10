@@ -25,7 +25,8 @@
 #define SIEVE2_ERROR_NOINTERPS         10
 #define SIEVE2_ERROR_HEADER            11
 #define SIEVE2_ERROR_GETSCRIPT         12
-#define SIEVE2_ERROR_LAST              13
+#define SIEVE2_ERROR_ADDRESS           13
+#define SIEVE2_ERROR_LAST              14
 
 static const char * const sieve2_error_text[] = {
     "Sieve OK",
@@ -41,6 +42,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: no more interpreters available",
     "Sieve Error: header could not be parsed",
     "Sieve Error: script was not retrieved",
+    "Sieve Error: address could not be parsed",
     NULL
 };
 

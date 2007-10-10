@@ -110,13 +110,11 @@ int libsieve_message2_free(sieve2_message_t **m)
 int libsieve_message2_parseheader(sieve2_message_t *m)
 {
     size_t c, cl;
-    char *err = NULL;
     header_list_t *hl = NULL, *hlfree;
 
-    if ((hl = libsieve_header_parse_buffer(&hl, &m->header, &err)) == NULL) {
-        libsieve_free(err);
+    if ((hl = libsieve_header_parse_buffer(&hl, &m->header)) == NULL) {
         /* That's a shame, we didn't find anything, or worse! */
-        return SIEVE2_ERROR_EXEC;
+        return SIEVE2_ERROR_HEADER;
     }
 
     while (hl != NULL) {

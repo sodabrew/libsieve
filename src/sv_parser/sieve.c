@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 
@@ -47,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.2"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -297,7 +297,7 @@ typedef union YYSTYPE
     struct hftags *hftag;
     struct ntags *ntag;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 302 "sieve.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -964,13 +964,13 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (!yyvaluep)
@@ -996,13 +996,13 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -1050,15 +1050,12 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, 
-		   int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule
-		   )
+yy_reduce_print (yyvsp, yyrule)
     YYSTYPE *yyvsp;
-    
-		   int yyrule;
+    int yyrule;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -2319,7 +2316,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2323 "sieve.c"
+#line 2320 "sieve.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2528,7 +2525,8 @@ yyreturn:
   if (yymsg != yymsgbuf)
     YYSTACK_FREE (yymsg);
 #endif
-  return yyresult;
+  /* Make sure YYID is used.  */
+  return YYID (yyresult);
 }
 
 
@@ -2819,21 +2817,14 @@ static int static_verify_flag(const char *s)
     return 1;
 }
 
-char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
-char *libsieve_addrerr;		/* buffer for sieve parser error messages */
+extern char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
 
 static int static_verify_address(const char *s)
 {
-    char *aerr = NULL;
-    char *serr = NULL;
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(&addr, &s, &aerr);
+    addr = libsieve_addr_parse_buffer(&addr, &s);
     if (addr == NULL) {
-        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
-        libsieve_sieveerror(serr);
-        libsieve_free(serr);
-        libsieve_free(aerr);
         return 0;
     }
     libsieve_addrstructfree(addr, CHARSALSO);

@@ -40,6 +40,7 @@ void libsieve_headerfatalerror(const char msg[]);
 
 %}
 
+%option yylineno
 %option noyywrap
 %option nounput
 %option prefix="libsieve_header"

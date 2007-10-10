@@ -29,6 +29,8 @@ struct callbacks2 {
     sieve2_callback_func addflag;
     sieve2_callback_func removeflag;
 
+    sieve2_callback_func err_header;
+    sieve2_callback_func err_address;
     sieve2_callback_func err_runtime;
     sieve2_callback_func err_parse;
     sieve2_callback_func debug_trace;

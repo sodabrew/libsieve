@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 
@@ -47,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.2"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -144,7 +144,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* There are global to this file */
 char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
-char *libsieve_addrerr;          /* buffer for sieve parser error messages */
 struct sieve2_context *libsieve_parse_context;
 static struct address *addr = NULL;
 static struct mlbuf *ml = NULL;
@@ -181,7 +180,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 185 "addr.c"
+#line 184 "addr.c"
 
 #ifdef short
 # undef short
@@ -475,10 +474,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    66,    66,    67,    68,    74,    75,    77,    78,    80,
-      86,    94,    95,    96,   103,   104,   111,   120,   124,   129,
-     130,   135,   136,   141,   142,   144,   146,   151,   152,   157,
-     158,   160
+       0,    65,    65,    66,    67,    73,    74,    76,    77,    79,
+      85,    93,    94,    95,   102,   103,   110,   119,   123,   128,
+     129,   134,   135,   140,   141,   143,   145,   150,   151,   156,
+     157,   159
 };
 #endif
 
@@ -724,13 +723,13 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (!yyvaluep)
@@ -756,13 +755,13 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep)
     FILE *yyoutput;
     int yytype;
-    const YYSTYPE * const yyvaluep;
+    YYSTYPE const * const yyvaluep;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -810,15 +809,12 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, 
-		   int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule
-		   )
+yy_reduce_print (yyvsp, yyrule)
     YYSTYPE *yyvsp;
-    
-		   int yyrule;
+    int yyrule;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1415,17 +1411,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 66 "addr.y"
+#line 65 "addr.y"
     { libsieve_addrappend(&addr); }
     break;
 
   case 3:
-#line 67 "addr.y"
+#line 66 "addr.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 4:
-#line 68 "addr.y"
+#line 67 "addr.y"
     {
 		/* Lousy case to catch malformed addresses. */
 		libsieve_addrappend(&addr);
@@ -1434,27 +1430,27 @@ yyreduce:
     break;
 
   case 5:
-#line 74 "addr.y"
+#line 73 "addr.y"
     { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 6:
-#line 75 "addr.y"
+#line 74 "addr.y"
     { TRACE_DEBUG( "address: group: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 7:
-#line 77 "addr.y"
+#line 76 "addr.y"
     { TRACE_DEBUG( "group: phrase: %s", (yyvsp[(1) - (3)]) ); }
     break;
 
   case 8:
-#line 78 "addr.y"
+#line 77 "addr.y"
     { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]) ); }
     break;
 
   case 9:
-#line 80 "addr.y"
+#line 79 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailbox: %s", (yyvsp[(1) - (1)]) );
@@ -1464,7 +1460,7 @@ yyreduce:
     break;
 
   case 10:
-#line 86 "addr.y"
+#line 85 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
@@ -1474,17 +1470,17 @@ yyreduce:
     break;
 
   case 11:
-#line 94 "addr.y"
+#line 93 "addr.y"
     { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 12:
-#line 95 "addr.y"
+#line 94 "addr.y"
     { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 13:
-#line 96 "addr.y"
+#line 95 "addr.y"
     {
 		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		// This is a "top terminal" state...
@@ -1494,12 +1490,12 @@ yyreduce:
     break;
 
   case 14:
-#line 103 "addr.y"
+#line 102 "addr.y"
     { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[(2) - (3)]) ); }
     break;
 
   case 15:
-#line 104 "addr.y"
+#line 103 "addr.y"
     {
 		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]) );
 		// This is a "top terminal" state...
@@ -1509,7 +1505,7 @@ yyreduce:
     break;
 
   case 16:
-#line 111 "addr.y"
+#line 110 "addr.y"
     {
 		TRACE_DEBUG( "addrspec: localpart domain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		// This is a "top terminal" state...
@@ -1521,7 +1517,7 @@ yyreduce:
     break;
 
   case 17:
-#line 120 "addr.y"
+#line 119 "addr.y"
     {
 		TRACE_DEBUG( "route: domain: %s", (yyvsp[(2) - (2)]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1529,7 +1525,7 @@ yyreduce:
     break;
 
   case 18:
-#line 124 "addr.y"
+#line 123 "addr.y"
     {
 		TRACE_DEBUG( "route: domain route: %s %s", (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (4)]), ",", (yyvsp[(4) - (4)]), NULL ), strlen((yyvsp[(2) - (4)]))+strlen((yyvsp[(4) - (4)]))+2, FREEME);
@@ -1537,12 +1533,12 @@ yyreduce:
     break;
 
   case 19:
-#line 129 "addr.y"
+#line 128 "addr.y"
     { TRACE_DEBUG( "localpart: word: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 20:
-#line 130 "addr.y"
+#line 129 "addr.y"
     {
 		TRACE_DEBUG( "localpart: localpart word: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1550,12 +1546,12 @@ yyreduce:
     break;
 
   case 21:
-#line 135 "addr.y"
+#line 134 "addr.y"
     { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 22:
-#line 136 "addr.y"
+#line 135 "addr.y"
     {
 		TRACE_DEBUG( "domain: domain subdomain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1563,22 +1559,22 @@ yyreduce:
     break;
 
   case 23:
-#line 141 "addr.y"
+#line 140 "addr.y"
     { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 24:
-#line 142 "addr.y"
+#line 141 "addr.y"
     { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 25:
-#line 144 "addr.y"
+#line 143 "addr.y"
     { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 26:
-#line 146 "addr.y"
+#line 145 "addr.y"
     {
 	 	TRACE_DEBUG( "domainlit: DTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1586,12 +1582,12 @@ yyreduce:
     break;
 
   case 27:
-#line 151 "addr.y"
+#line 150 "addr.y"
     { TRACE_DEBUG( "phrase: word: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 28:
-#line 152 "addr.y"
+#line 151 "addr.y"
     {
 		TRACE_DEBUG( "phrase: phrase word: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), " ", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1599,17 +1595,17 @@ yyreduce:
     break;
 
   case 29:
-#line 157 "addr.y"
+#line 156 "addr.y"
     { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 30:
-#line 158 "addr.y"
+#line 157 "addr.y"
     { TRACE_DEBUG( "word: qstring: %s", (yyvsp[(1) - (1)]) ); }
     break;
 
   case 31:
-#line 160 "addr.y"
+#line 159 "addr.y"
     {
 		TRACE_DEBUG( "qstring: QTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1618,7 +1614,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1622 "addr.c"
+#line 1618 "addr.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1827,23 +1823,26 @@ yyreturn:
   if (yymsg != yymsgbuf)
     YYSTACK_FREE (yymsg);
 #endif
-  return yyresult;
+  /* Make sure YYID is used.  */
+  return YYID (yyresult);
 }
 
 
-#line 165 "addr.y"
+#line 164 "addr.y"
 
 
 /* Run an execution error callback. */
-void libsieve_addrerror(char *s)
+void libsieve_addrerror(char *msg)
 {
-    libsieve_sieveerror_exec(s);
+    libsieve_parse_context->exec_errors++;
+
+    libsieve_do_error_address(libsieve_parse_context, msg);
 }
 
 /* Wrapper for addrparse() which sets up the 
  * required environment and allocates variables
  */
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr, char **err)
+struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr)
 {
     struct address *newdata = NULL;
     extern struct mlbuf *ml;
@@ -1857,6 +1856,13 @@ struct address *libsieve_addr_parse_buffer(struct address **data, const char **p
     libsieve_addrptr = (char *)*ptr;
 
     libsieve_addrlexrestart();
+
+/*
+        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
+        libsieve_sieveerror(serr);
+        libsieve_free(serr);
+        libsieve_free(aerr);
+	*/
 
     if(libsieve_addrparse()) {
         // FIXME: Make sure that this is sufficient cleanup

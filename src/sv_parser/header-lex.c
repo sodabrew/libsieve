@@ -160,7 +160,20 @@ extern FILE *libsieve_headerin, *libsieve_headerout;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    #define YY_LESS_LINENO(n)
+    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
+     *       access to the local variable yy_act. Since yyless() is a macro, it would break
+     *       existing scanners that call yyless() from OUTSIDE libsieve_headerlex. 
+     *       One obvious solution it to make yy_act a global. I tried that, and saw
+     *       a 5% performance hit in a non-libsieve_headerlineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
+     */
+    #define  YY_LESS_LINENO(n) \
+            do { \
+                int yyl;\
+                for ( yyl = n; yyl < libsieve_headerleng; ++yyl )\
+                    if ( libsieve_headertext[yyl] == '\n' )\
+                        --libsieve_headerlineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -456,6 +469,11 @@ static yyconst flex_int16_t yy_chk[58] =
         3,   28,   28,   28,   28,   28,   28
     } ;
 
+/* Table of booleans, true if rule could match eol. */
+static yyconst flex_int32_t yy_rule_can_match_eol[11] =
+    {   0,
+0, 0, 1, 1, 0, 1, 1, 0, 0, 0,     };
+
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
@@ -512,7 +530,7 @@ static struct mlbuf *ml = NULL;
 void libsieve_headerfatalerror(const char msg[]);
 
 
-#line 516 "header-lex.c"
+#line 534 "header-lex.c"
 
 #define INITIAL 0
 #define S_NAME 1
@@ -669,10 +687,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 50 "header-lex.l"
+#line 51 "header-lex.l"
 
 
-#line 676 "header-lex.c"
+#line 694 "header-lex.c"
 
 	if ( !(yy_init) )
 		{
@@ -741,6 +759,16 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			int yyl;
+			for ( yyl = 0; yyl < libsieve_headerleng; ++yyl )
+				if ( libsieve_headertext[yyl] == '\n' )
+					   
+    libsieve_headerlineno++;
+;
+			}
+
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -754,7 +782,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 52 "header-lex.l"
+#line 53 "header-lex.l"
 {
                 BEGIN S_NAME;
                 TRACE_DEBUG( "Begin NAME" );
@@ -763,7 +791,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 57 "header-lex.l"
+#line 58 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 TRACE_DEBUG( "Begin WRAP (line started with whitespace)" );
@@ -773,7 +801,7 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 62 "header-lex.l"
+#line 63 "header-lex.l"
 {
                 BEGIN S_WRAP;
                 TRACE_DEBUG( "Begin WRAP (\\r\\n followed either by \\ or \\t" );
@@ -785,7 +813,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 69 "header-lex.l"
+#line 70 "header-lex.l"
 {
                 /* Special case of an empty header: whitespace followed by newlines */
                 TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
@@ -794,7 +822,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 74 "header-lex.l"
+#line 75 "header-lex.l"
 {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
@@ -805,7 +833,7 @@ YY_RULE_SETUP
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 80 "header-lex.l"
+#line 81 "header-lex.l"
 {
                 /* Eat stray newlines, such as those at the end of every line... */
                 }
@@ -813,7 +841,7 @@ YY_RULE_SETUP
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 84 "header-lex.l"
+#line 85 "header-lex.l"
 {
                 /* FIXME: Should be something like [!-9;-~]... */
                 /* Field names must be in these ASCII ranges:
@@ -828,7 +856,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 96 "header-lex.l"
+#line 97 "header-lex.l"
 {
                 TRACE_DEBUG( "TEXT: %s", libsieve_headertext );
 		libsieve_headerlval = libsieve_strbuf(ml, libsieve_headertext, strlen(libsieve_headertext), NOFREE);
@@ -838,7 +866,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 103 "header-lex.l"
+#line 104 "header-lex.l"
 {
                 TRACE_DEBUG( "WRAP: %s", libsieve_headertext );
 		libsieve_headerlval = libsieve_strbuf(ml, libsieve_headertext, strlen(libsieve_headertext), NOFREE);
@@ -848,10 +876,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 110 "header-lex.l"
+#line 111 "header-lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 855 "header-lex.c"
+#line 883 "header-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(S_NAME):
 case YY_STATE_EOF(S_TEXT):
@@ -1248,6 +1276,10 @@ static int yy_get_next_buffer (void)
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
+	if ( YY_CURRENT_BUFFER_LVALUE->yy_at_bol )
+		   
+    libsieve_headerlineno++;
+;
 
 	return c;
 }
@@ -1711,6 +1743,9 @@ static int yy_init_globals (void)
      * This function is called from libsieve_headerlex_destroy(), so don't allocate here.
      */
 
+    /* We do not touch libsieve_headerlineno unless the option is enabled. */
+    libsieve_headerlineno =  1;
+    
     (yy_buffer_stack) = 0;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
@@ -1803,7 +1838,7 @@ void libsieve_headerfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 110 "header-lex.l"
+#line 111 "header-lex.l"
 
 
 

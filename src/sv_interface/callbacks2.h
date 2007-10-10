@@ -51,6 +51,8 @@ int libsieve_do_notify(struct sieve2_context *c, char *id,
 /* Reporting parse and runtime errors. */
 int libsieve_do_error_parse(struct sieve2_context *c, int lineno, char *msg);
 int libsieve_do_error_exec(struct sieve2_context *c, char *msg);
+int libsieve_do_error_header(struct sieve2_context *c, int lineno, char *msg);
+int libsieve_do_error_address(struct sieve2_context *c, char *msg);
 
 /* The TRACE macros are defined in util.h, which is universally included. */
 int libsieve_do_debug_trace(struct sieve2_context *c, int level,
