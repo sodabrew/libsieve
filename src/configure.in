@@ -36,4 +36,6 @@ AC_FUNC_VPRINTF
 
 AM_CONFIG_HEADER(config.h)
 
+AC_CONFIG_FILES([libsieve.pc])
+
 AC_OUTPUT(sv_parser/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)

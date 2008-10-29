@@ -5,6 +5,16 @@ libSieve 2.2.7
 
 - Fixed a mismatched function declaration (thanks to Eugene Prokopiev).
 
+- More cases where Vacation should be ignored (thanks to Dilyan Palauzov).
+
+- Generate Vacation handle according to RFC 5230 (thanks to Dilyan Palauzov).
+
+- Use of NULL without declaration (thanks to Dilyan Palauzov).
+
+- Added pkgconfig support (thanks to Dilyan Palauzov).
+
+- Documentation corrections (thanks to Dilyan Palauzov).
+
 libSieve 2.2.6
 --------------
 

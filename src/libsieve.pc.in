@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Libsieve
+Description: Sieve Interpreter Library
+Version: @VERSION@
+Libs: -L${libdir} -lsieve
+Cflags: -I${includedir}

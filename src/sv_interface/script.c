@@ -374,19 +374,56 @@ int libsieve_eval(struct sieve2_context *context,
                 if (l == SIEVE2_DONE)
                         TRACE_DEBUG("VACATION aborted by Auto-Submitted header.");
 
-                /* is there a Precedence keyword of "junk | bulk | list"? */
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Id", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Id header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Help", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Help header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Subscribe", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Subscribe header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Unsubscribe", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Unsubscribe header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Post", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Post header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Owner", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Owner header.");
+                }
+ 
+                if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Archive", &body) == SIEVE2_OK) {
+                    l = SIEVE2_DONE;
+                    TRACE_DEBUG("VACATION aborted by List-Archive header.");
+                }
+ 
+                /* Is there a Precedence keyword of "junk | bulk | list"? */
                 if (libsieve_do_getheader(context, "precedence", &body) == SIEVE2_OK) {
-                    /* we don't deal with comments, etc. here */
-                    /* skip leading white-space */
-                    while (body[0] && *body[0] && isspace((int) *body[0])) body[0]++;
+                    /* Skip leading white-space */
+                    while (body[0] && *body[0] && isspace((int) *body[0])) {
+                        body[0]++;
+                    }
+
+                    /* We don't deal with comments, etc. here */
                     if (!strcasecmp(body[0], "junk") ||
                         !strcasecmp(body[0], "bulk") ||
-                        !strcasecmp(body[0], "list"))
+                        !strcasecmp(body[0], "list")) {
                         l = SIEVE2_DONE;
-                }
-
-                if (l == SIEVE2_DONE)
                         TRACE_DEBUG("VACATION aborted by Precedence header.");
+                    }
+                }
 
                 /* Note: the domain-part of all addresses are canonicalized */
 
@@ -442,24 +479,29 @@ int libsieve_eval(struct sieve2_context *context,
 
                 if (l == SIEVE2_OK) {
                     /* OK, we're willing to respond to the sender. But is this
-                     * message to me? That is, is my address in the TO, CC or
-                     * BCC fields? But if the vacation action contains :from
-                     * directive, then set the sender address accordingly */
+                     * message to me? That is, is my address in the TO, Cc, Bcc,
+                     * Resent-To, Resent-Cc, or Resent-Bcc fields? But if the
+                     * vacation action contains :from directive, then set the
+                     * sender address accordingly */
 
                     if (c->u.v.from != NULL)
                        found = c->u.v.from;
  
                     if (!found && (libsieve_do_getheader(context, "to", &body) == SIEVE2_OK))
                        found = look_for_me(myaddr, c->u.v.addresses, body);
-
                     if (!found && (libsieve_do_getheader(context, "cc", &body) == SIEVE2_OK))
                        found = look_for_me(myaddr, c->u.v.addresses, body);
-
                     if (!found && (libsieve_do_getheader(context, "bcc", &body) == SIEVE2_OK))
+                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                    if (!found && (libsieve_do_getheader(context, "Resent-To", &body) == SIEVE2_OK))
+                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                    if (!found && (libsieve_do_getheader(context, "Resent-Cc", &body) == SIEVE2_OK))
+                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                    if (!found && (libsieve_do_getheader(context, "Resent-Bcc", &body) == SIEVE2_OK))
                        found = look_for_me(myaddr, c->u.v.addresses, body);
 
                     if (!found) {
-                        TRACE_DEBUG("Vacation didn't find my address in to, cc or bcc.");
+                        TRACE_DEBUG("Vacation didn't find my address in To, Cc, Bcc, Resent-To, Resent-Cc or Resent-Bcc.");
                         l = SIEVE2_DONE;
                     }
                 }
@@ -477,17 +519,28 @@ int libsieve_eval(struct sieve2_context *context,
                             strcpy(buf, "Automated reply");
                         } else {
                             /* s[0] contains the original subject */
-                            const char *origsubj = s[0];
-                            
-                            while (!strncasecmp(origsubj, "Re: ", 4)) {
-                                origsubj += 4;
-                            }
-                            snprintf(buf, sizeof(buf), "Re: %s", origsubj);
+                            snprintf(buf, sizeof(buf), "Auto: %s", (const char*)s[0]);
                         }
                     } else {
                         /* user specified subject */
                         strncpy(buf, c->u.v.subject, sizeof(buf)-1);
                         buf[sizeof(buf)-1] = '\0';
+                    }
+
+                    /* calculate hash from subject, from, mime and reason, RFC 5230, Section 4.2 */
+                    if (c->u.v.handle == NULL) {
+                        int j = 0;
+                        if (c->u.v.subject) j += strlen(c->u.v.subject);
+                        if (c->u.v.from) j+= strlen(c->u.v.from);
+                        /* Add 5: 3 for the separators between the items,
+                         * 1 for mime value and one for the terminating '\0' */
+                        j += strlen(c->u.v.message) + 5;
+                        c->u.v.handle = libsieve_malloc(j);
+                        sprintf(c->u.v.handle, "%s:%s:%s:%i",
+                            c->u.v.subject ? c->u.v.subject : "",
+                            c->u.v.from ? c->u.v.from : "",
+                            c->u.v.message,
+                            c->u.v.mime);
                     }
 
                     /* who do we want the message coming from? */

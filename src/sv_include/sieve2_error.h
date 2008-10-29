@@ -43,7 +43,7 @@ static const char * const sieve2_error_text[] = {
     "Sieve Error: header could not be parsed",
     "Sieve Error: script was not retrieved",
     "Sieve Error: address could not be parsed",
-    NULL
+     (void*) 0
 };
 
 #endif /* SIEVE2_ERROR_H */
