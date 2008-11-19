@@ -88,7 +88,7 @@ void libsieve_headererror(char *s)
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr)
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;

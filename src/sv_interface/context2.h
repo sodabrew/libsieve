@@ -13,6 +13,7 @@
 #define CONTEXT2_H
 
 #include "tree.h"		/* for commandlist_t */
+#include "util.h"		/* for struct catbuf */
 #include "message2.h"
 #include "sieve2.h"
 
@@ -111,9 +112,22 @@ struct sieve2_context {
     sieve2_message_t *message;
     stringlist_t *slflags;
     struct mlbuf *strbuf;
+    struct catbuf *text;
 
     int parse_errors;
     int exec_errors;
+
+    void *sieve_scanner;
+    void *header_scanner;
+    void *addr_scanner;
+
+    char *sieve_ptr;
+    char *header_ptr;
+    char *addr_ptr;
+
+    size_t sieve_len;
+    size_t header_len;
+    size_t addr_len;
 
     struct cur_call cur_call;
 

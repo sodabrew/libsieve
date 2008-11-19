@@ -1348,7 +1348,7 @@ yyreduce:
                 /* Allocate a new cache block */
                 if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
-                }
+                ;}
     break;
 
   case 3:
@@ -1357,7 +1357,7 @@ yyreduce:
                 /* Allocate a new cache block */
                 if (libsieve_headerappend(&hl) != SIEVE2_OK)
                     /* Problems... */;
-                }
+                ;}
     break;
 
   case 4:
@@ -1365,7 +1365,7 @@ yyreduce:
     {
                 TRACE_DEBUG( "header: NAME COLON: %s:", (yyvsp[(1) - (2)]) );
                 libsieve_headerentry(hl->h, (yyvsp[(1) - (2)]), NULL);
-                }
+                ;}
     break;
 
   case 5:
@@ -1373,7 +1373,7 @@ yyreduce:
     {
                 TRACE_DEBUG( "header: NAME COLON body: %s:%s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
                 libsieve_headerentry(hl->h, (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
-                }
+                ;}
     break;
 
   case 6:
@@ -1381,7 +1381,7 @@ yyreduce:
     {
                 /* Default action is $$ = $1 */
                 TRACE_DEBUG( "body: TEXT: %s", (yyvsp[(1) - (1)]) );
-                }
+                ;}
     break;
 
   case 7:
@@ -1389,7 +1389,7 @@ yyreduce:
     {
                 TRACE_DEBUG( "body: body WRAP: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)])), FREEME);
-                }
+                ;}
     break;
 
 
@@ -1623,7 +1623,7 @@ void libsieve_headererror(char *s)
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr)
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr)
 {
     header_list_t *newdata = NULL;
     extern header_list_t *hl;

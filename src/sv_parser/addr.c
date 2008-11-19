@@ -1412,12 +1412,12 @@ yyreduce:
     {
         case 2:
 #line 65 "addr.y"
-    { libsieve_addrappend(&addr); }
+    { libsieve_addrappend(&addr); ;}
     break;
 
   case 3:
 #line 66 "addr.y"
-    { (yyval) = (yyvsp[(1) - (1)]); }
+    { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 4:
@@ -1426,27 +1426,27 @@ yyreduce:
 		/* Lousy case to catch malformed addresses. */
 		libsieve_addrappend(&addr);
 		addr->name = (yyvsp[(1) - (1)]);
-		}
+		;}
     break;
 
   case 5:
 #line 73 "addr.y"
-    { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 6:
 #line 74 "addr.y"
-    { TRACE_DEBUG( "address: group: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "address: group: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 7:
 #line 76 "addr.y"
-    { TRACE_DEBUG( "group: phrase: %s", (yyvsp[(1) - (3)]) ); }
+    { TRACE_DEBUG( "group: phrase: %s", (yyvsp[(1) - (3)]) ); ;}
     break;
 
   case 8:
 #line 77 "addr.y"
-    { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]) ); }
+    { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]) ); ;}
     break;
 
   case 9:
@@ -1456,7 +1456,7 @@ yyreduce:
 		TRACE_DEBUG( "mailboxes: mailbox: %s", (yyvsp[(1) - (1)]) );
 		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(&addr);
-		}
+		;}
     break;
 
   case 10:
@@ -1466,17 +1466,17 @@ yyreduce:
 		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(&addr);
-		}
+		;}
     break;
 
   case 11:
 #line 93 "addr.y"
-    { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 12:
 #line 94 "addr.y"
-    { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 13:
@@ -1486,12 +1486,12 @@ yyreduce:
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->name: %s", (yyvsp[(1) - (2)]) );
 		addr->name = libsieve_strdup( (yyvsp[(1) - (2)]) );
-		}
+		;}
     break;
 
   case 14:
 #line 102 "addr.y"
-    { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[(2) - (3)]) ); }
+    { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[(2) - (3)]) ); ;}
     break;
 
   case 15:
@@ -1501,7 +1501,7 @@ yyreduce:
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->route: %s", (yyvsp[(2) - (5)]) );
 		addr->route = libsieve_strdup( (yyvsp[(2) - (5)]) );
-		}
+		;}
     break;
 
   case 16:
@@ -1513,7 +1513,7 @@ yyreduce:
 		addr->mailbox = libsieve_strdup( (yyvsp[(1) - (3)]) );
 		TRACE_DEBUG( "addr->domain: %s", (yyvsp[(3) - (3)]) );
 		addr->domain = libsieve_strdup( (yyvsp[(3) - (3)]) );
-		}
+		;}
     break;
 
   case 17:
@@ -1521,7 +1521,7 @@ yyreduce:
     {
 		TRACE_DEBUG( "route: domain: %s", (yyvsp[(2) - (2)]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(2) - (2)]))+1, FREEME);
-		}
+		;}
     break;
 
   case 18:
@@ -1529,12 +1529,12 @@ yyreduce:
     {
 		TRACE_DEBUG( "route: domain route: %s %s", (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (4)]), ",", (yyvsp[(4) - (4)]), NULL ), strlen((yyvsp[(2) - (4)]))+strlen((yyvsp[(4) - (4)]))+2, FREEME);
-		}
+		;}
     break;
 
   case 19:
 #line 128 "addr.y"
-    { TRACE_DEBUG( "localpart: word: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "localpart: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 20:
@@ -1542,12 +1542,12 @@ yyreduce:
     {
 		TRACE_DEBUG( "localpart: localpart word: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
-		}
+		;}
     break;
 
   case 21:
 #line 134 "addr.y"
-    { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 22:
@@ -1555,22 +1555,22 @@ yyreduce:
     {
 		TRACE_DEBUG( "domain: domain subdomain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
-		}
+		;}
     break;
 
   case 23:
 #line 140 "addr.y"
-    { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 24:
 #line 141 "addr.y"
-    { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 25:
 #line 143 "addr.y"
-    { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 26:
@@ -1578,12 +1578,12 @@ yyreduce:
     {
 	 	TRACE_DEBUG( "domainlit: DTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
-		}
+		;}
     break;
 
   case 27:
 #line 150 "addr.y"
-    { TRACE_DEBUG( "phrase: word: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "phrase: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 28:
@@ -1591,17 +1591,17 @@ yyreduce:
     {
 		TRACE_DEBUG( "phrase: phrase word: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), " ", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)]))+1, FREEME);
-		}
+		;}
     break;
 
   case 29:
 #line 156 "addr.y"
-    { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 30:
 #line 157 "addr.y"
-    { TRACE_DEBUG( "word: qstring: %s", (yyvsp[(1) - (1)]) ); }
+    { TRACE_DEBUG( "word: qstring: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 31:
@@ -1609,7 +1609,7 @@ yyreduce:
     {
 		TRACE_DEBUG( "qstring: QTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
-		}
+		;}
     break;
 
 
@@ -1842,7 +1842,7 @@ void libsieve_addrerror(char *msg)
 /* Wrapper for addrparse() which sets up the 
  * required environment and allocates variables
  */
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr)
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr)
 {
     struct address *newdata = NULL;
     extern struct mlbuf *ml;

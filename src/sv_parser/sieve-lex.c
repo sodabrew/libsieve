@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -31,7 +31,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -94,11 +94,12 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif	/* __STDC__ */
+#endif	/* defined (__STDC__) */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -117,24 +118,41 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
 
+/* An opaque pointer. */
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void* yyscan_t;
+#endif
+
+/* For convenience, these vars (plus the bison vars far below)
+   are macros in the reentrant scanner. */
+#define yyin yyg->yyin_r
+#define yyout yyg->yyout_r
+#define yyextra yyg->yyextra_r
+#define yyleng yyg->yyleng_r
+#define yytext yyg->yytext_r
+#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
+#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
+#define yy_flex_debug yyg->yy_flex_debug_r
+
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
-#define BEGIN (yy_start) = 1 + 2 *
+#define BEGIN yyg->yy_start = 1 + 2 *
 
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
-#define YY_START (((yy_start) - 1) / 2)
+#define YY_START ((yyg->yy_start - 1) / 2)
 #define YYSTATE YY_START
 
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE libsieve_sieverestart(libsieve_sievein  )
+#define YY_NEW_FILE libsieve_sieverestart(yyin ,yyscanner )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -152,10 +170,6 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int libsieve_sieveleng;
-
-extern FILE *libsieve_sievein, *libsieve_sieveout;
-
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
@@ -164,41 +178,36 @@ extern FILE *libsieve_sievein, *libsieve_sieveout;
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
      *       existing scanners that call yyless() from OUTSIDE libsieve_sievelex. 
      *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-libsieve_sievelineno scanner, because yy_act is
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
      */
     #define  YY_LESS_LINENO(n) \
             do { \
                 int yyl;\
-                for ( yyl = n; yyl < libsieve_sieveleng; ++yyl )\
-                    if ( libsieve_sievetext[yyl] == '\n' )\
-                        --libsieve_sievelineno;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
             }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up libsieve_sievetext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		*yy_cp = (yy_hold_char); \
+		*yy_cp = yyg->yy_hold_char; \
 		YY_RESTORE_YY_MORE_OFFSET \
-		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up libsieve_sievetext again */ \
+		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
 
-#define unput(c) yyunput( c, (yytext_ptr)  )
-
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
+#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -259,17 +268,12 @@ struct yy_buffer_state
 	 *
 	 * When we actually see the EOF, we change the status to "new"
 	 * (via libsieve_sieverestart()), so that the user can continue scanning by
-	 * just pointing libsieve_sievein at a new input file.
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
 	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
-
-/* Stack of input buffers. */
-static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
-static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
@@ -277,60 +281,45 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
  *
  * Returns the top of the stack, or NULL.
  */
-#define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
-                          ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
+#define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
+                          ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
 
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
-#define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
+#define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-/* yy_hold_char holds the character lost when libsieve_sievetext is formed. */
-static char yy_hold_char;
-static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int libsieve_sieveleng;
+void libsieve_sieverestart (FILE *input_file ,yyscan_t yyscanner );
+void libsieve_sieve_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE libsieve_sieve_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void libsieve_sieve_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void libsieve_sieve_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void libsieve_sievepush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void libsieve_sievepop_buffer_state (yyscan_t yyscanner );
 
-/* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
-static int yy_init = 0;		/* whether we need to initialize */
-static int yy_start = 0;	/* start state number */
+static void libsieve_sieveensure_buffer_stack (yyscan_t yyscanner );
+static void libsieve_sieve_load_buffer_state (yyscan_t yyscanner );
+static void libsieve_sieve_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
-/* Flag which is used to allow libsieve_sievewrap()'s to do buffer switches
- * instead of setting up a fresh libsieve_sievein.  A bit of a hack ...
- */
-static int yy_did_buffer_switch_on_eof;
+#define YY_FLUSH_BUFFER libsieve_sieve_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
-void libsieve_sieverestart (FILE *input_file  );
-void libsieve_sieve_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE libsieve_sieve_create_buffer (FILE *file,int size  );
-void libsieve_sieve_delete_buffer (YY_BUFFER_STATE b  );
-void libsieve_sieve_flush_buffer (YY_BUFFER_STATE b  );
-void libsieve_sievepush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void libsieve_sievepop_buffer_state (void );
+YY_BUFFER_STATE libsieve_sieve_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE libsieve_sieve_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE libsieve_sieve_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
-static void libsieve_sieveensure_buffer_stack (void );
-static void libsieve_sieve_load_buffer_state (void );
-static void libsieve_sieve_init_buffer (YY_BUFFER_STATE b,FILE *file  );
-
-#define YY_FLUSH_BUFFER libsieve_sieve_flush_buffer(YY_CURRENT_BUFFER )
-
-YY_BUFFER_STATE libsieve_sieve_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE libsieve_sieve_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE libsieve_sieve_scan_bytes (yyconst char *bytes,int len  );
-
-void *libsieve_sievealloc (yy_size_t  );
-void *libsieve_sieverealloc (void *,yy_size_t  );
-void libsieve_sievefree (void *  );
+void *libsieve_sievealloc (yy_size_t ,yyscan_t yyscanner );
+void *libsieve_sieverealloc (void *,yy_size_t ,yyscan_t yyscanner );
+void libsieve_sievefree (void * ,yyscan_t yyscanner );
 
 #define yy_new_buffer libsieve_sieve_create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        libsieve_sieveensure_buffer_stack (); \
+        libsieve_sieveensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            libsieve_sieve_create_buffer(libsieve_sievein,YY_BUF_SIZE ); \
+            libsieve_sieve_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -338,9 +327,9 @@ void libsieve_sievefree (void *  );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        libsieve_sieveensure_buffer_stack (); \
+        libsieve_sieveensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            libsieve_sieve_create_buffer(libsieve_sievein,YY_BUF_SIZE ); \
+            libsieve_sieve_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -354,34 +343,27 @@ void libsieve_sievefree (void *  );
 
 typedef unsigned char YY_CHAR;
 
-FILE *libsieve_sievein = (FILE *) 0, *libsieve_sieveout = (FILE *) 0;
-
 typedef int yy_state_type;
 
-extern int libsieve_sievelineno;
+#define yytext_ptr yytext_r
 
-int libsieve_sievelineno = 1;
-
-extern char *libsieve_sievetext;
-#define yytext_ptr libsieve_sievetext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
+static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
+static int yy_get_next_buffer (yyscan_t yyscanner );
+static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up libsieve_sievetext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-	(yytext_ptr) = yy_bp; \
-	libsieve_sieveleng = (size_t) (yy_cp - yy_bp); \
-	(yy_hold_char) = *yy_cp; \
+	yyg->yytext_ptr = yy_bp; \
+	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
-	(yy_c_buf_p) = yy_cp;
+	yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 75
-#define YY_END_OF_BUFFER 76
+#define YY_NUM_RULES 22
+#define YY_END_OF_BUFFER 23
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -389,46 +371,17 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[350] =
+static yyconst flex_int16_t yy_accept[82] =
     {   0,
-        0,    0,    0,    0,    0,    0,    0,    0,   76,   74,
-       71,   71,   12,   72,   74,   13,   74,   74,   74,   74,
-       74,   74,   74,   74,   74,   74,   74,   74,   74,   74,
-       74,    5,    4,    4,    3,    3,    7,    7,    7,    6,
-        7,    9,   75,    9,   11,   72,   73,   13,   13,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,   14,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    5,    4,    1,    1,
-        2,    7,    7,    7,    7,    7,    8,    0,    0,    0,
-
-        0,    0,    0,    0,    0,    0,    0,   43,   58,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,   25,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,   66,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       46,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,   16,    0,
-        0,    0,    0,    0,    0,    0,   30,   38,    0,    0,
-        0,    0,    0,    0,   26,   32,    0,   21,    0,    0,
-
-        0,    0,    0,    0,    0,   51,    0,    0,    0,   55,
-        0,   48,    0,    0,    0,    0,   54,    0,    0,   64,
-        0,    0,    0,   69,    0,    0,    0,   18,   17,    0,
-       15,    0,    0,   20,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       59,    0,    0,   40,    0,    0,    0,    0,    0,    0,
-        0,   63,    0,   65,   60,    0,    0,    0,    0,   19,
-        0,    0,   24,   41,    0,   27,    0,    0,    0,    0,
-       10,   10,    0,   39,    0,    0,    0,    0,    0,   70,
-       68,   56,    0,    0,    0,   44,   47,    0,    0,   35,
-
-       22,   33,    0,    0,   37,    0,    0,   31,   34,    0,
-       10,    0,    0,    0,    0,    0,    0,   62,   49,   45,
-       53,   23,   28,   29,    0,   10,   50,    0,    0,    0,
-       61,    0,    0,    0,   52,    0,   67,   36,    0,   57,
-        0,    0,    0,    0,    0,    0,    0,   42,    0
+        0,    0,    0,    0,    0,    0,    0,    0,   23,   21,
+       18,   18,   15,   19,   21,   16,   21,   17,   17,    5,
+        4,    4,    3,    3,    9,    9,    9,    6,   10,    9,
+       10,   12,   22,   12,   14,   19,   20,   16,   16,   17,
+       17,   17,    5,    4,    1,    1,    2,    9,    9,    9,
+        9,    9,    0,   11,   17,    0,    0,   17,    0,    0,
+        0,    0,    0,    0,   13,   13,    0,    0,    0,    0,
+       13,    0,    0,   13,    7,    0,    0,    0,    0,    8,
+        0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -436,17 +389,17 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    1,    5,    6,    1,    1,    1,    1,    1,
-        1,    7,    1,    1,    1,    8,    9,   10,   10,   10,
-       10,   10,   10,   10,   10,   10,   10,   11,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-       12,    1,    1,    1,   12,    1,   12,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,   13,    1,    1,   14,    1,   15,   16,   17,   18,
+        1,    5,    1,    6,    7,    8,    1,    1,    1,    1,
+        1,    9,    1,    1,    1,   10,   11,   12,   12,   12,
+       12,   12,   12,   12,   12,   12,   12,   13,    1,    1,
+        1,    1,    1,    1,   14,   14,   14,   14,   14,   14,
+       15,   16,   16,   16,   15,   16,   15,   16,   16,   16,
+       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
+        1,   17,    1,   18,   16,    1,   14,   14,   19,   20,
 
-       19,   20,   21,   22,   23,   24,   25,   26,   27,   28,
-       29,   30,   31,   32,   33,   34,   35,   36,   37,   38,
-       39,   40,    1,    1,    1,    1,    1,    1,    1,    1,
+       21,   14,   16,   22,   23,   16,   16,   16,   16,   24,
+       25,   16,   16,   16,   16,   26,   27,   16,   16,   28,
+       16,   16,   29,   18,   30,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -463,223 +416,106 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[41] =
+static yyconst flex_int32_t yy_meta[31] =
     {   0,
-        1,    1,    2,    1,    3,    1,    1,    4,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1
+        1,    1,    2,    1,    3,    4,    1,    4,    1,    5,
+        1,    6,    1,    7,    8,    8,    1,    4,    7,    7,
+        7,    8,    8,    8,    8,    8,    8,    8,    4,    1
     } ;
 
-static yyconst flex_int16_t yy_base[357] =
+static yyconst flex_int16_t yy_base[93] =
     {   0,
-        0,    0,   38,   40,   46,   49,   53,   54,  421,  422,
-      422,  422,  415,    0,  412,   35,   48,   60,  395,   41,
-       49,   70,  397,  397,  400,  385,  394,   68,   63,  384,
-      396,    0,    0,  407,  422,   89,   95,   97,  100,  422,
-      102,  422,  422,  400,  422,    0,  422,   84,  422,   91,
-      379,   97,   88,   96,   40,  378,  106,  377,   88,  386,
-      369,   94,  388,  384,  375,  361,  366,  365,  361,  373,
-      369,  368,  360,  377,  422,  372,  358,  355,  110,  354,
-      347,  357,  347,  349,  356,  106,    0,    0,  422,  379,
-      422,  127,  132,  135,  139,  143,  422,  363,  354,  122,
+        0,    0,   28,   30,   38,   65,   34,   36,  191,  192,
+      192,  192,  184,    0,  180,   35,    0,    0,  167,    0,
+        0,  184,  192,   48,   32,   57,   59,  192,  155,   74,
+      192,  192,  192,  172,  192,    0,  192,   42,  192,    0,
+        0,  151,    0,    0,  192,  175,  192,   62,   81,   83,
+       86,   92,   26,  192,  138,  136,  117,  101,   80,   76,
+      108,   84,   74,    0,  192,   85,   98,    0,   56,  101,
+      103,   45,   52,  192,  192,   49,   51,    0,   29,  192,
+      192,  115,  123,  131,  139,  141,  144,  152,  160,  168,
+      174,  179
 
-      340,  344,  350,  361,  346,  346,  352,  422,  422,  116,
-      338,  121,  344,  338,  335,  349,  346,  350,  347,  345,
-      337,  131,  333,  332,  343,  139,  340,  325,  324,  337,
-      335,  336,  323,  327,  328,  327,  330,  319,  312,  326,
-      326,  314,  309,  323,  326,  325,  316,  306,  422,  307,
-      302,  307,  301,  318,  317,  310,  303,  311,  306,  312,
-      422,  309,  292,  302,  304,  295,  298,  288,  300,  294,
-      298,  284,  280,  288,  294,  292,  291,  295,  422,  289,
-      282,  273,  287,  282,  278,  284,  422,  422,  282,  269,
-      283,  263,  275,  271,  422,  422,  285,  422,  263,  260,
-
-      275,  273,  276,  275,  255,  422,  265,  264,  253,  422,
-      259,  422,  258,  261,  267,  252,  422,  265,  250,  422,
-      240,  258,  244,  422,  256,  259,  240,  422,  422,  240,
-      422,  242,  237,  422,  241,  253,  235,  227,  246,  230,
-      244,  230,  246,  162,  235,  236,  244,  224,  224,  232,
-      422,  228,  225,  422,  233,  221,  231,  228,  230,  221,
-      218,  422,  228,  422,  422,  223,  210,  224,  211,  422,
-      206,  218,  422,  422,  221,  422,  217,  217,  214,  167,
-      422,  231,  156,  422,  204,  204,  198,  215,  201,  422,
-      422,  422,  213,  194,  207,  422,  422,  192,  190,  422,
-
-      422,  422,  204,  193,  422,  187,  194,  422,  422,  171,
-      173,  191,  189,  198,  182,  182,  182,  422,  422,  422,
-      422,  422,  422,  422,  198,  422,  422,  178,  178,  181,
-      422,  175,  187,  184,  422,  174,  422,  422,  185,  422,
-      185,  164,  153,  133,  139,   61,   37,  422,  422,  177,
-      181,  185,  189,  193,  196,  200
     } ;
 
-static yyconst flex_int16_t yy_def[357] =
+static yyconst flex_int16_t yy_def[93] =
     {   0,
-      349,    1,  350,  350,  351,  351,  352,  352,  349,  349,
-      349,  349,  349,  353,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  354,  354,  354,  349,  349,  355,  355,  355,  349,
-      355,  349,  349,  349,  349,  353,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  354,  354,  349,  349,
-      349,  355,  355,  355,  355,  355,  349,  349,  349,  349,
+       81,    1,   82,   82,   83,   83,   84,   84,   81,   81,
+       81,   81,   81,   85,   81,   81,   86,   87,   87,   88,
+       88,   88,   81,   81,   89,   89,   89,   81,   81,   89,
+       81,   81,   81,   81,   81,   85,   81,   81,   81,   87,
+       87,   87,   88,   88,   81,   81,   81,   89,   89,   89,
+       89,   89,   81,   81,   87,   81,   81,   87,   81,   81,
+       81,   81,   81,   61,   81,   81,   90,   91,   81,   90,
+       90,   91,   81,   81,   81,   81,   81,   92,   92,   81,
+        0,   81,   81,   81,   81,   81,   81,   81,   81,   81,
+       81,   81
 
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  356,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  356,
-      356,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,    0,  349,
-      349,  349,  349,  349,  349,  349
     } ;
 
-static yyconst flex_int16_t yy_nxt[463] =
+static yyconst flex_int16_t yy_nxt[223] =
     {   0,
-       10,   11,   12,   11,   13,   14,   10,   10,   15,   16,
-       17,   10,   10,   10,   18,   10,   10,   19,   20,   21,
-       10,   22,   23,   10,   24,   10,   25,   26,   10,   10,
-       10,   27,   28,   29,   30,   31,   10,   10,   10,   10,
-       33,   34,   33,   34,   48,   35,   49,   36,   38,   39,
-       40,   38,   39,   40,  348,   43,   43,  108,   41,   44,
-       44,   41,   50,   71,   51,   52,   68,   53,   69,   54,
-       55,   72,  109,   56,   57,   58,   59,   64,   70,   60,
-       61,   83,   62,   63,   73,   65,   80,   66,   74,  347,
-       81,   89,   90,   48,   84,   49,   91,   93,   94,   93,
+       10,   11,   12,   11,   11,   13,   14,   10,   10,   10,
+       15,   16,   17,   18,   18,   18,   10,   10,   18,   18,
+       18,   18,   18,   18,   18,   19,   18,   18,   10,   10,
+       21,   22,   21,   22,   49,   50,   33,   23,   33,   24,
+       26,   27,   34,   28,   34,   29,   38,   56,   51,   39,
+       45,   46,   57,   38,   30,   31,   39,   47,   80,   49,
+       50,   52,   50,   78,   49,   50,   31,   26,   27,   77,
+       28,   76,   29,   51,   75,   51,   49,   50,   51,   48,
+       73,   30,   31,   49,   50,   52,   50,   65,   49,   50,
+       51,   48,   69,   31,   49,   50,   68,   51,   63,   51,
 
-       94,   82,   96,   94,   93,   94,   92,   95,   98,   95,
-      106,  101,   95,  104,   95,  102,   99,  115,  107,  105,
-      111,  119,  146,  116,  112,  103,  120,  136,  113,   93,
-       94,  147,  160,  137,   93,   94,  138,   96,   94,   95,
-      139,   93,   94,   92,   95,   93,   94,   95,  150,  151,
-      174,   95,  161,  163,  164,   95,  152,  179,  281,  311,
-      346,  180,  175,  280,  281,  282,  345,  283,  280,  281,
-      282,  344,  283,  281,  311,  326,  311,   32,   32,   32,
-       32,   37,   37,   37,   37,   42,   42,   42,   42,   46,
-      343,   46,   46,   87,   87,   87,   92,   92,  342,   92,
+       65,   71,   51,   65,   71,   74,   71,   62,   51,   64,
+       65,   66,   64,   61,   67,   20,   20,   20,   20,   20,
+       20,   20,   20,   25,   25,   25,   25,   25,   25,   25,
+       25,   32,   32,   32,   32,   32,   32,   32,   32,   36,
+       60,   36,   36,   36,   36,   36,   36,   40,   40,   41,
+       41,   41,   43,   43,   43,   43,   59,   43,   43,   43,
+       48,   48,   48,   58,   48,   48,   48,   48,   70,   70,
+       70,   70,   70,   70,   70,   70,   72,   45,   55,   72,
+       72,   79,   54,   53,   79,   79,   44,   42,   37,   35,
+       81,    9,   81,   81,   81,   81,   81,   81,   81,   81,
 
-      310,  310,  310,  310,  341,  340,  339,  338,  337,  336,
-      335,  334,  333,  332,  331,  330,  329,  328,  327,  325,
-      324,  323,  322,  321,  320,  319,  318,  317,  316,  315,
-      314,  313,  312,  281,  309,  308,  307,  306,  305,  304,
-      303,  302,  301,  300,  299,  298,  297,  296,  295,  294,
-      293,  292,  291,  290,  289,  288,  287,  286,  285,  284,
-      279,  278,  277,  276,  275,  274,  273,  272,  271,  270,
-      269,  268,  267,  266,  265,  264,  263,  262,  261,  260,
-      259,  258,  257,  256,  255,  254,  253,  252,  251,  250,
-      249,  248,  247,  246,  245,  244,  243,  242,  241,  240,
-
-      239,  238,  237,  236,  235,  234,  233,  232,  231,  230,
-      229,  228,  227,  226,  225,  224,  223,  222,  221,  220,
-      219,  218,  217,  216,  215,  214,  213,  212,  211,  210,
-      209,  208,  207,  206,  205,  204,  203,  202,  201,  200,
-      199,  198,  197,  196,  195,  194,  193,  192,  191,  190,
-      189,  188,  187,  186,  185,  184,  183,  182,  181,  178,
-      177,  176,  173,  172,  171,  170,  169,  168,  167,  166,
-      165,  162,  159,  158,  157,  156,  155,  154,  153,  149,
-      148,   89,  145,  144,  143,  142,  141,  140,  135,  134,
-      133,  132,  131,  130,  129,  128,  127,  126,  125,  124,
-
-      123,  122,  121,  118,  117,  114,  110,  100,   97,   88,
-       86,   85,   79,   78,   77,   76,   75,   67,   47,   45,
-      349,    9,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349
+       81,   81,   81,   81,   81,   81,   81,   81,   81,   81,
+       81,   81,   81,   81,   81,   81,   81,   81,   81,   81,
+       81,   81
     } ;
 
-static yyconst flex_int16_t yy_chk[463] =
+static yyconst flex_int16_t yy_chk[223] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        3,    3,    4,    4,   16,    3,   16,    4,    5,    5,
-        5,    6,    6,    6,  347,    7,    8,   55,    5,    7,
-        8,    6,   17,   21,   17,   17,   20,   17,   20,   17,
-       17,   21,   55,   17,   17,   17,   17,   18,   20,   17,
-       17,   29,   17,   17,   22,   18,   28,   18,   22,  346,
-       28,   36,   36,   48,   29,   48,   36,   37,   37,   38,
+        3,    3,    4,    4,   25,   25,    7,    3,    8,    4,
+        5,    5,    7,    5,    8,    5,   16,   53,   25,   16,
+       24,   24,   53,   38,    5,    5,   38,   24,   79,   26,
+       26,   27,   27,   77,   48,   48,    5,    6,    6,   76,
+        6,   73,    6,   26,   72,   27,   30,   30,   48,   30,
+       69,    6,    6,   49,   49,   50,   50,   66,   51,   51,
+       30,   51,   63,    6,   52,   52,   62,   49,   60,   50,
 
-       38,   28,   39,   39,   41,   41,   41,   37,   50,   38,
-       54,   52,   39,   53,   41,   52,   50,   59,   54,   53,
-       57,   62,   86,   59,   57,   52,   62,   79,   57,   92,
-       92,   86,  110,   79,   93,   93,   79,   94,   94,   92,
-       79,   95,   95,   95,   93,   96,   96,   94,  100,  100,
-      122,   95,  110,  112,  112,   96,  100,  126,  283,  283,
-      345,  126,  122,  244,  244,  244,  344,  244,  280,  280,
-      280,  343,  280,  310,  310,  311,  311,  350,  350,  350,
-      350,  351,  351,  351,  351,  352,  352,  352,  352,  353,
-      342,  353,  353,  354,  354,  354,  355,  355,  341,  355,
+       67,   67,   51,   70,   70,   71,   71,   59,   52,   61,
+       61,   61,   61,   58,   61,   82,   82,   82,   82,   82,
+       82,   82,   82,   83,   83,   83,   83,   83,   83,   83,
+       83,   84,   84,   84,   84,   84,   84,   84,   84,   85,
+       57,   85,   85,   85,   85,   85,   85,   86,   86,   87,
+       87,   87,   88,   88,   88,   88,   56,   88,   88,   88,
+       89,   89,   89,   55,   89,   89,   89,   89,   90,   90,
+       90,   90,   90,   90,   90,   90,   91,   46,   42,   91,
+       91,   92,   34,   29,   92,   92,   22,   19,   15,   13,
+        9,   81,   81,   81,   81,   81,   81,   81,   81,   81,
 
-      356,  356,  356,  356,  339,  336,  334,  333,  332,  330,
-      329,  328,  325,  317,  316,  315,  314,  313,  312,  307,
-      306,  304,  303,  299,  298,  295,  294,  293,  289,  288,
-      287,  286,  285,  282,  279,  278,  277,  275,  272,  271,
-      269,  268,  267,  266,  263,  261,  260,  259,  258,  257,
-      256,  255,  253,  252,  250,  249,  248,  247,  246,  245,
-      243,  242,  241,  240,  239,  238,  237,  236,  235,  233,
-      232,  230,  227,  226,  225,  223,  222,  221,  219,  218,
-      216,  215,  214,  213,  211,  209,  208,  207,  205,  204,
-      203,  202,  201,  200,  199,  197,  194,  193,  192,  191,
-
-      190,  189,  186,  185,  184,  183,  182,  181,  180,  178,
-      177,  176,  175,  174,  173,  172,  171,  170,  169,  168,
-      167,  166,  165,  164,  163,  162,  160,  159,  158,  157,
-      156,  155,  154,  153,  152,  151,  150,  148,  147,  146,
-      145,  144,  143,  142,  141,  140,  139,  138,  137,  136,
-      135,  134,  133,  132,  131,  130,  129,  128,  127,  125,
-      124,  123,  121,  120,  119,  118,  117,  116,  115,  114,
-      113,  111,  107,  106,  105,  104,  103,  102,  101,   99,
-       98,   90,   85,   84,   83,   82,   81,   80,   78,   77,
-       76,   74,   73,   72,   71,   70,   69,   68,   67,   66,
-
-       65,   64,   63,   61,   60,   58,   56,   51,   44,   34,
-       31,   30,   27,   26,   25,   24,   23,   19,   15,   13,
-        9,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349,  349,  349,  349,  349,  349,  349,  349,  349,
-      349,  349
+       81,   81,   81,   81,   81,   81,   81,   81,   81,   81,
+       81,   81,   81,   81,   81,   81,   81,   81,   81,   81,
+       81,   81
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[76] =
+static yyconst flex_int32_t yy_rule_can_match_eol[23] =
     {   0,
-1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,     };
-
-static yy_state_type yy_last_accepting_state;
-static char *yy_last_accepting_cpos;
-
-extern int libsieve_sieve_flex_debug;
-int libsieve_sieve_flex_debug = 0;
+1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 
+    0, 0, 0,     };
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -688,68 +524,54 @@ int libsieve_sieve_flex_debug = 0;
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *libsieve_sievetext;
 #line 1 "sieve-lex.l"
 #line 2 "sieve-lex.l"
-/* sieve.l -- sieve lexer
- * Larry Greenfield
- */
-/***********************************************************
-        Copyright 1999 by Carnegie Mellon University
-
-                      All Rights Reserved
-
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Carnegie Mellon
-University not be used in advertising or publicity pertaining to
-distribution of the software without specific, written prior
-permission.
-
-CARNEGIE MELLON UNIVERSITY DISCLAIMS ALL WARRANTIES WITH REGARD TO
-THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS, IN NO EVENT SHALL CARNEGIE MELLON UNIVERSITY BE LIABLE FOR
-ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
-OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-******************************************************************/
+/* * * *
+ * sieve-lex.l -- RFC 5228 Sieve Lexer
+ *
+ * Copyright 2007, 2008 by Aaron Stone
+ *
+ * Licensed under the GNU Lesser General Public License (LGPL)
+ * version 2.1, and other versions at the author's discretion.
+ * * * */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+/* C */
+#include <ctype.h>
 #include <string.h>
+
 /* sv_util */
 #include "util.h"
+
+/* sv_parser */
+#include "sieve-encodedchar.h"
+#include "sieve-keywords.h"
+#include "sieve.h"
+#include "parser.h"
 
 /* sv_interface */
 #include "tree.h"
 #include "sieve.h"
 
 #include "callbacks2.h"
-extern struct sieve2_context *libsieve_parse_context;
+
+#define context yyextra
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
+#define THIS_CONTEXT context
 
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
+#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
+#define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_sieveget_extra(yyscanner), msg)
 
-int libsieve_sieveinput(char *buf, int max_size);
-extern int libsieve_sieveerror(char *);
-
-#define YY_FATAL_ERROR libsieve_sievefatalerror
-void libsieve_sievefatalerror(const char msg[]);
-
-/* Holds a catbuf for the text: multiline. */
-static struct catbuf *text;
+extern int libsieve_sieveerror(struct sieve2_context *, char *msg);
 
 
 
 
-#line 753 "sieve-lex.c"
+#line 575 "sieve-lex.c"
 
 #define INITIAL 0
 #define MULTILINE 1
@@ -764,11 +586,76 @@ static struct catbuf *text;
 #include <unistd.h>
 #endif
 
-#ifndef YY_EXTRA_TYPE
-#define YY_EXTRA_TYPE void *
-#endif
+#define YY_EXTRA_TYPE struct sieve2_context *
 
-static int yy_init_globals (void );
+/* Holds the entire state of the reentrant scanner. */
+struct yyguts_t
+    {
+
+    /* User-defined. Not touched by flex. */
+    YY_EXTRA_TYPE yyextra_r;
+
+    /* The rest are the same as the globals declared in the non-reentrant scanner. */
+    FILE *yyin_r, *yyout_r;
+    size_t yy_buffer_stack_top; /**< index of top of stack. */
+    size_t yy_buffer_stack_max; /**< capacity of stack. */
+    YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
+    char yy_hold_char;
+    int yy_n_chars;
+    int yyleng_r;
+    char *yy_c_buf_p;
+    int yy_init;
+    int yy_start;
+    int yy_did_buffer_switch_on_eof;
+    int yy_start_stack_ptr;
+    int yy_start_stack_depth;
+    int *yy_start_stack;
+    yy_state_type yy_last_accepting_state;
+    char* yy_last_accepting_cpos;
+
+    int yylineno_r;
+    int yy_flex_debug_r;
+
+    char *yytext_r;
+    int yy_more_flag;
+    int yy_more_len;
+
+    }; /* end struct yyguts_t */
+
+static int yy_init_globals (yyscan_t yyscanner );
+
+int libsieve_sievelex_init (yyscan_t* scanner);
+
+int libsieve_sievelex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+
+/* Accessor methods to globals.
+   These are made visible to non-reentrant scanners for convenience. */
+
+int libsieve_sievelex_destroy (yyscan_t yyscanner );
+
+int libsieve_sieveget_debug (yyscan_t yyscanner );
+
+void libsieve_sieveset_debug (int debug_flag ,yyscan_t yyscanner );
+
+YY_EXTRA_TYPE libsieve_sieveget_extra (yyscan_t yyscanner );
+
+void libsieve_sieveset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+
+FILE *libsieve_sieveget_in (yyscan_t yyscanner );
+
+void libsieve_sieveset_in  (FILE * in_str ,yyscan_t yyscanner );
+
+FILE *libsieve_sieveget_out (yyscan_t yyscanner );
+
+void libsieve_sieveset_out  (FILE * out_str ,yyscan_t yyscanner );
+
+int libsieve_sieveget_leng (yyscan_t yyscanner );
+
+char *libsieve_sieveget_text (yyscan_t yyscanner );
+
+int libsieve_sieveget_lineno (yyscan_t yyscanner );
+
+void libsieve_sieveset_lineno (int line_number ,yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -776,26 +663,26 @@ static int yy_init_globals (void );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int libsieve_sievewrap (void );
+extern "C" int libsieve_sievewrap (yyscan_t yyscanner );
 #else
-extern int libsieve_sievewrap (void );
+extern int libsieve_sievewrap (yyscan_t yyscanner );
 #endif
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
 
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput (yyscan_t yyscanner );
 #else
-static int input (void );
+static int input (yyscan_t yyscanner );
 #endif
 
 #endif
@@ -810,7 +697,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( libsieve_sievetext, libsieve_sieveleng, 1, libsieve_sieveout )
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -821,20 +708,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( libsieve_sievein )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( libsieve_sievein ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, libsieve_sievein))==0 && ferror(libsieve_sievein)) \
+		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -842,7 +729,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(libsieve_sievein); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -864,7 +751,7 @@ static int input (void );
 
 /* Report a fatal error. */
 #ifndef YY_FATAL_ERROR
-#define YY_FATAL_ERROR(msg) yy_fatal_error( msg )
+#define YY_FATAL_ERROR(msg) yy_fatal_error( msg , yyscanner)
 #endif
 
 /* end tables serialization structures and prototypes */
@@ -875,12 +762,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int libsieve_sievelex (void);
+extern int libsieve_sievelex (yyscan_t yyscanner);
 
-#define YY_DECL int libsieve_sievelex (void)
+#define YY_DECL int libsieve_sievelex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after libsieve_sievetext and libsieve_sieveleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -893,9 +780,9 @@ extern int libsieve_sievelex (void);
 #endif
 
 #define YY_RULE_SETUP \
-	if ( libsieve_sieveleng > 0 ) \
+	if ( yyleng > 0 ) \
 		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
-				(libsieve_sievetext[libsieve_sieveleng - 1] == '\n'); \
+				(yytext[yyleng - 1] == '\n'); \
 	YY_USER_ACTION
 
 /** The main scanner function which does all the work.
@@ -905,50 +792,51 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    
-#line 73 "sieve-lex.l"
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 912 "sieve-lex.c"
+#line 60 "sieve-lex.l"
 
-	if ( !(yy_init) )
+#line 800 "sieve-lex.c"
+
+	if ( !yyg->yy_init )
 		{
-		(yy_init) = 1;
+		yyg->yy_init = 1;
 
 #ifdef YY_USER_INIT
 		YY_USER_INIT;
 #endif
 
-		if ( ! (yy_start) )
-			(yy_start) = 1;	/* first start state */
+		if ( ! yyg->yy_start )
+			yyg->yy_start = 1;	/* first start state */
 
-		if ( ! libsieve_sievein )
-			libsieve_sievein = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! libsieve_sieveout )
-			libsieve_sieveout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			libsieve_sieveensure_buffer_stack ();
+			libsieve_sieveensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				libsieve_sieve_create_buffer(libsieve_sievein,YY_BUF_SIZE );
+				libsieve_sieve_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 		}
 
-		libsieve_sieve_load_buffer_state( );
+		libsieve_sieve_load_buffer_state(yyscanner );
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
-		yy_cp = (yy_c_buf_p);
+		yy_cp = yyg->yy_c_buf_p;
 
-		/* Support of libsieve_sievetext. */
-		*yy_cp = (yy_hold_char);
+		/* Support of yytext. */
+		*yy_cp = yyg->yy_hold_char;
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
 		 * the current run.
 		 */
 		yy_bp = yy_cp;
 
-		yy_current_state = (yy_start);
+		yy_current_state = yyg->yy_start;
 		yy_current_state += YY_AT_BOL();
 yy_match:
 		do
@@ -956,21 +844,21 @@ yy_match:
 			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
-				(yy_last_accepting_state) = yy_current_state;
-				(yy_last_accepting_cpos) = yy_cp;
+				yyg->yy_last_accepting_state = yy_current_state;
+				yyg->yy_last_accepting_cpos = yy_cp;
 				}
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 350 )
+				if ( yy_current_state >= 82 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 349 );
-		yy_cp = (yy_last_accepting_cpos);
-		yy_current_state = (yy_last_accepting_state);
+		while ( yy_current_state != 81 );
+		yy_cp = yyg->yy_last_accepting_cpos;
+		yy_current_state = yyg->yy_last_accepting_state;
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -980,10 +868,12 @@ yy_find_action:
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
 			int yyl;
-			for ( yyl = 0; yyl < libsieve_sieveleng; ++yyl )
-				if ( libsieve_sievetext[yyl] == '\n' )
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
 					   
-    libsieve_sievelineno++;
+    do{ yylineno++;
+        yycolumn=0;
+    }while(0)
 ;
 			}
 
@@ -993,410 +883,182 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 			case 0: /* must back up */
 			/* undo the effects of YY_DO_BEFORE_ACTION */
-			*yy_cp = (yy_hold_char);
-			yy_cp = (yy_last_accepting_cpos);
-			yy_current_state = (yy_last_accepting_state);
+			*yy_cp = yyg->yy_hold_char;
+			yy_cp = yyg->yy_last_accepting_cpos;
+			yy_current_state = yyg->yy_last_accepting_state;
 			goto yy_find_action;
 
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 74 "sieve-lex.l"
-{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
+#line 61 "sieve-lex.l"
+{ TRACE_DEBUG("Ending a text: block, found [%s]", context->text->str);
 			  BEGIN INITIAL;
-			  libsieve_sievelval.sval = libsieve_catbuf_free(text);
+			  libsieve_sievelval.sval = libsieve_catbuf_free(context->text);
+			  context->text = NULL;
 			  return STRING; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 78 "sieve-lex.l"
+#line 66 "sieve-lex.l"
 { TRACE_DEBUG("Dot-stuffing - one dot dropped.");
-			  libsieve_catbuf(text, libsieve_sievetext, libsieve_sieveleng - 1); }
+			  libsieve_catbuf(context->text, yytext, yyleng - 1); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 80 "sieve-lex.l"
+#line 68 "sieve-lex.l"
 { TRACE_DEBUG("Just a normal dot. Keep it.");
-			  libsieve_catbuf(text, libsieve_sievetext, libsieve_sieveleng); }
+			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 82 "sieve-lex.l"
+#line 70 "sieve-lex.l"
 { TRACE_DEBUG("Multiline newline");
-			  libsieve_catbuf(text, libsieve_sievetext, libsieve_sieveleng); }
+			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 84 "sieve-lex.l"
-{ TRACE_DEBUG("Multiline line [%s]", libsieve_sievetext);
-			  libsieve_catbuf(text, libsieve_sievetext, libsieve_sieveleng); }
+#line 72 "sieve-lex.l"
+{ TRACE_DEBUG("Multiline line [%s]", yytext);
+			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case YY_STATE_EOF(MULTILINE):
-#line 86 "sieve-lex.l"
-{ libsieve_sieveerror("unexpected end of file in string"); 
-			  yyterminate(); }
+#line 74 "sieve-lex.l"
+{ libsieve_sieveerror(context, "unexpected end of file in string"); 
+			  if (context->text) {
+			    libsieve_free(libsieve_catbuf_free(context->text));
+			    context->text = NULL;
+			  }
+			  throw(SIEVE2_ERROR_PARSE); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 89 "sieve-lex.l"
-{ BEGIN INITIAL; }
+#line 81 "sieve-lex.l"
+{ TRACE_DEBUG("Ending a string, found [%s]", context->text->str);
+			  BEGIN INITIAL;
+			  libsieve_sievelval.sval = libsieve_catbuf_free(context->text);
+			  context->text = NULL;
+			  return STRING; }
 	YY_BREAK
 case 7:
-/* rule 7 can match eol */
 YY_RULE_SETUP
-#line 90 "sieve-lex.l"
-{ libsieve_sievelval.sval = libsieve_strndup(libsieve_sievetext, libsieve_sieveleng);
-			  return STRING; }
+#line 86 "sieve-lex.l"
+{
+			  size_t len = 0;
+			  char *decoded = libsieve_encoded_char_hex(context, yytext, yyleng, &len);
+			  libsieve_catbuf(context->text, decoded, len);
+			  libsieve_free(decoded); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 93 "sieve-lex.l"
-{ BEGIN INITIAL; }
+#line 91 "sieve-lex.l"
+{
+			  size_t len = 0;
+			  char *decoded = libsieve_encoded_char_uni(context, yytext, yyleng, &len);
+			  libsieve_catbuf(context->text, decoded, len);
+			  libsieve_free(decoded); }
 	YY_BREAK
 case 9:
-YY_RULE_SETUP
-#line 94 "sieve-lex.l"
-;            /* ignore comments */
-	YY_BREAK
-case 10:
-/* rule 10 can match eol */
+/* rule 9 can match eol */
 YY_RULE_SETUP
 #line 96 "sieve-lex.l"
-{ TRACE_DEBUG("Beginning a text: block.");
-			  BEGIN MULTILINE;
-			  text = libsieve_catbuf_alloc(); }
+{
+			  TRACE_DEBUG("More string found [%s]", yytext);
+			  libsieve_catbuf(context->text, yytext, yyleng); }
+	YY_BREAK
+case 10:
+YY_RULE_SETUP
+#line 99 "sieve-lex.l"
+{ TRACE_DEBUG("Lone string char [%s]", yytext);
+			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 99 "sieve-lex.l"
-{ libsieve_sievelval.sval = libsieve_strdup("");
-			  return STRING; }
+#line 102 "sieve-lex.l"
+{ BEGIN INITIAL; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 101 "sieve-lex.l"
-{ BEGIN QSTRING; }
+#line 103 "sieve-lex.l"
+;            /* ignore comments */
 	YY_BREAK
 case 13:
+/* rule 13 can match eol */
 YY_RULE_SETUP
-#line 102 "sieve-lex.l"
-{ libsieve_sievelval.nval = libsieve_strtonum(libsieve_sievetext);
-			  return NUMBER; }
+#line 105 "sieve-lex.l"
+{ TRACE_DEBUG("Beginning a text: block.");
+			  BEGIN MULTILINE;
+			  if (context->text) libsieve_free(libsieve_catbuf_free(context->text));
+			  context->text = libsieve_catbuf_alloc(); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 104 "sieve-lex.l"
-return IF;
+#line 109 "sieve-lex.l"
+{ libsieve_sievelval.sval = libsieve_strdup("");
+			  return STRING; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 105 "sieve-lex.l"
-return ELSIF;
+#line 111 "sieve-lex.l"
+{ BEGIN QSTRING;
+			  if (context->text) libsieve_free(libsieve_catbuf_free(context->text));
+			  context->text = libsieve_catbuf_alloc(); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 106 "sieve-lex.l"
-return ELSE;
+#line 114 "sieve-lex.l"
+{ libsieve_sievelval.nval = libsieve_strtonum(yytext);
+			  return NUMBER; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 107 "sieve-lex.l"
-return ANYOF;
+#line 117 "sieve-lex.l"
+{ int k = libsieve_keyword(yytext, yyleng);
+			  if (!k) {
+			    int len;
+			    char error[1024];
+			    memset(error, 0, 1024);
+			    len = snprintf(error, 1023, "invalid keyword: %s", yytext);
+			    if (len < 0 || len > 1023) {
+			      snprintf(error, 1023, "invalid keyword.");
+			    }
+			    libsieve_sieveerror(context, error); 
+			    if (context->text) {
+			      libsieve_free(libsieve_catbuf_free(context->text));
+			      context->text = NULL;
+			    }
+			    throw(SIEVE2_ERROR_PARSE);
+			} return k; }
 	YY_BREAK
 case 18:
+/* rule 18 can match eol */
 YY_RULE_SETUP
-#line 108 "sieve-lex.l"
-return ALLOF;
+#line 134 "sieve-lex.l"
+;	/* ignore whitespace */
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 109 "sieve-lex.l"
-return EXISTS;
+#line 135 "sieve-lex.l"
+;		/* ignore comments */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 110 "sieve-lex.l"
-return SFALSE;
+#line 136 "sieve-lex.l"
+{ BEGIN COMMENT; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 111 "sieve-lex.l"
-return STRUE;
+#line 137 "sieve-lex.l"
+return yytext[0];
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 112 "sieve-lex.l"
-return ADDRESS;
-	YY_BREAK
-case 23:
-YY_RULE_SETUP
-#line 113 "sieve-lex.l"
-return ENVELOPE;
-	YY_BREAK
-case 24:
-YY_RULE_SETUP
-#line 114 "sieve-lex.l"
-return HEADER;
-	YY_BREAK
-case 25:
-YY_RULE_SETUP
-#line 115 "sieve-lex.l"
-return NOT;
-	YY_BREAK
-case 26:
-YY_RULE_SETUP
-#line 116 "sieve-lex.l"
-return SIZE;
-	YY_BREAK
-case 27:
-YY_RULE_SETUP
-#line 117 "sieve-lex.l"
-return REJCT;
-	YY_BREAK
-case 28:
-YY_RULE_SETUP
-#line 118 "sieve-lex.l"
-return FILEINTO;
-	YY_BREAK
-case 29:
-YY_RULE_SETUP
-#line 119 "sieve-lex.l"
-return REDIRECT;
-	YY_BREAK
-case 30:
-YY_RULE_SETUP
-#line 120 "sieve-lex.l"
-return KEEP;
-	YY_BREAK
-case 31:
-YY_RULE_SETUP
-#line 121 "sieve-lex.l"
-return REQUIRE;
-	YY_BREAK
-case 32:
-YY_RULE_SETUP
-#line 122 "sieve-lex.l"
-return STOP;
-	YY_BREAK
-case 33:
-YY_RULE_SETUP
-#line 123 "sieve-lex.l"
-return DISCARD;
-	YY_BREAK
-case 34:
-YY_RULE_SETUP
-#line 124 "sieve-lex.l"
-return SETFLAG;
-	YY_BREAK
-case 35:
-YY_RULE_SETUP
-#line 125 "sieve-lex.l"
-return ADDFLAG;
-	YY_BREAK
-case 36:
-YY_RULE_SETUP
-#line 126 "sieve-lex.l"
-return REMOVEFLAG;
-	YY_BREAK
-case 37:
-YY_RULE_SETUP
-#line 127 "sieve-lex.l"
-return HASFLAG;
-	YY_BREAK
-case 38:
-YY_RULE_SETUP
-#line 128 "sieve-lex.l"
-return MARK;
-	YY_BREAK
-case 39:
-YY_RULE_SETUP
-#line 129 "sieve-lex.l"
-return UNMARK;
-	YY_BREAK
-case 40:
-YY_RULE_SETUP
-#line 130 "sieve-lex.l"
-return FLAGS;
-	YY_BREAK
-case 41:
-YY_RULE_SETUP
-#line 131 "sieve-lex.l"
-return NOTIFY;
-	YY_BREAK
-case 42:
-YY_RULE_SETUP
-#line 132 "sieve-lex.l"
-return VALIDNOTIF;
-	YY_BREAK
-case 43:
-YY_RULE_SETUP
-#line 133 "sieve-lex.l"
-return ID;
-	YY_BREAK
-case 44:
-YY_RULE_SETUP
-#line 134 "sieve-lex.l"
-return METHOD;
-	YY_BREAK
-case 45:
-YY_RULE_SETUP
-#line 135 "sieve-lex.l"
-return OPTIONS;
-	YY_BREAK
-case 46:
-YY_RULE_SETUP
-#line 136 "sieve-lex.l"
-return LOW;
-	YY_BREAK
-case 47:
-YY_RULE_SETUP
-#line 137 "sieve-lex.l"
-return NORMAL;
-	YY_BREAK
-case 48:
-YY_RULE_SETUP
-#line 138 "sieve-lex.l"
-return HIGH;
-	YY_BREAK
-case 49:
-YY_RULE_SETUP
 #line 139 "sieve-lex.l"
-return MESSAGE;
+ECHO;
 	YY_BREAK
-case 50:
-YY_RULE_SETUP
-#line 140 "sieve-lex.l"
-return VACATION;
-	YY_BREAK
-case 51:
-YY_RULE_SETUP
-#line 141 "sieve-lex.l"
-return DAYS;
-	YY_BREAK
-case 52:
-YY_RULE_SETUP
-#line 142 "sieve-lex.l"
-return ADDRESSES;
-	YY_BREAK
-case 53:
-YY_RULE_SETUP
-#line 143 "sieve-lex.l"
-return SUBJECT;
-	YY_BREAK
-case 54:
-YY_RULE_SETUP
-#line 144 "sieve-lex.l"
-return MIME;
-	YY_BREAK
-case 55:
-YY_RULE_SETUP
-#line 145 "sieve-lex.l"
-return FROM;
-	YY_BREAK
-case 56:
-YY_RULE_SETUP
-#line 146 "sieve-lex.l"
-return HANDLE;
-	YY_BREAK
-case 57:
-YY_RULE_SETUP
-#line 147 "sieve-lex.l"
-return COMPARATOR;
-	YY_BREAK
-case 58:
-YY_RULE_SETUP
-#line 148 "sieve-lex.l"
-return IS;
-	YY_BREAK
-case 59:
-YY_RULE_SETUP
-#line 149 "sieve-lex.l"
-return COUNT;
-	YY_BREAK
-case 60:
-YY_RULE_SETUP
-#line 150 "sieve-lex.l"
-return VALUE;
-	YY_BREAK
-case 61:
-YY_RULE_SETUP
-#line 151 "sieve-lex.l"
-return CONTAINS;
-	YY_BREAK
-case 62:
-YY_RULE_SETUP
-#line 152 "sieve-lex.l"
-return MATCHES;
-	YY_BREAK
-case 63:
-YY_RULE_SETUP
-#line 153 "sieve-lex.l"
-return REGEX;
-	YY_BREAK
-case 64:
-YY_RULE_SETUP
-#line 154 "sieve-lex.l"
-return OVER;
-	YY_BREAK
-case 65:
-YY_RULE_SETUP
-#line 155 "sieve-lex.l"
-return UNDER;
-	YY_BREAK
-case 66:
-YY_RULE_SETUP
-#line 156 "sieve-lex.l"
-return ALL;
-	YY_BREAK
-case 67:
-YY_RULE_SETUP
-#line 157 "sieve-lex.l"
-return LOCALPART;
-	YY_BREAK
-case 68:
-YY_RULE_SETUP
-#line 158 "sieve-lex.l"
-return DOMAIN;
-	YY_BREAK
-case 69:
-YY_RULE_SETUP
-#line 159 "sieve-lex.l"
-return USER;
-	YY_BREAK
-case 70:
-YY_RULE_SETUP
-#line 160 "sieve-lex.l"
-return DETAIL;
-	YY_BREAK
-case 71:
-/* rule 71 can match eol */
-YY_RULE_SETUP
-#line 161 "sieve-lex.l"
-;	/* ignore whitespace */
-	YY_BREAK
-case 72:
-YY_RULE_SETUP
-#line 162 "sieve-lex.l"
-;		/* ignore comments */
-	YY_BREAK
-case 73:
-YY_RULE_SETUP
-#line 163 "sieve-lex.l"
-{ BEGIN COMMENT; }
-	YY_BREAK
-case 74:
-YY_RULE_SETUP
-#line 164 "sieve-lex.l"
-return libsieve_sievetext[0];
-	YY_BREAK
-case 75:
-YY_RULE_SETUP
-#line 166 "sieve-lex.l"
-YY_FATAL_ERROR( "flex scanner jammed" );
-	YY_BREAK
-#line 1400 "sieve-lex.c"
+#line 1062 "sieve-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(QSTRING):
 case YY_STATE_EOF(COMMENT):
@@ -1405,25 +1067,25 @@ case YY_STATE_EOF(COMMENT):
 	case YY_END_OF_BUFFER:
 		{
 		/* Amount of text matched not including the EOB char. */
-		int yy_amount_of_matched_text = (int) (yy_cp - (yytext_ptr)) - 1;
+		int yy_amount_of_matched_text = (int) (yy_cp - yyg->yytext_ptr) - 1;
 
 		/* Undo the effects of YY_DO_BEFORE_ACTION. */
-		*yy_cp = (yy_hold_char);
+		*yy_cp = yyg->yy_hold_char;
 		YY_RESTORE_YY_MORE_OFFSET
 
 		if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW )
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed libsieve_sievein at a new source and called
+			 * just pointed yyin at a new source and called
 			 * libsieve_sievelex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = libsieve_sievein;
+			yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -1434,13 +1096,13 @@ case YY_STATE_EOF(COMMENT):
 		 * end-of-buffer state).  Contrast this with the test
 		 * in input().
 		 */
-		if ( (yy_c_buf_p) <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
+		if ( yyg->yy_c_buf_p <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
 			{ /* This was really a NUL. */
 			yy_state_type yy_next_state;
 
-			(yy_c_buf_p) = (yytext_ptr) + yy_amount_of_matched_text;
+			yyg->yy_c_buf_p = yyg->yytext_ptr + yy_amount_of_matched_text;
 
-			yy_current_state = yy_get_previous_state(  );
+			yy_current_state = yy_get_previous_state( yyscanner );
 
 			/* Okay, we're now positioned to make the NUL
 			 * transition.  We couldn't have
@@ -1451,44 +1113,44 @@ case YY_STATE_EOF(COMMENT):
 			 * will run more slowly).
 			 */
 
-			yy_next_state = yy_try_NUL_trans( yy_current_state );
+			yy_next_state = yy_try_NUL_trans( yy_current_state , yyscanner);
 
-			yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+			yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
 
 			if ( yy_next_state )
 				{
 				/* Consume the NUL. */
-				yy_cp = ++(yy_c_buf_p);
+				yy_cp = ++yyg->yy_c_buf_p;
 				yy_current_state = yy_next_state;
 				goto yy_match;
 				}
 
 			else
 				{
-				yy_cp = (yy_last_accepting_cpos);
-				yy_current_state = (yy_last_accepting_state);
+				yy_cp = yyg->yy_last_accepting_cpos;
+				yy_current_state = yyg->yy_last_accepting_state;
 				goto yy_find_action;
 				}
 			}
 
-		else switch ( yy_get_next_buffer(  ) )
+		else switch ( yy_get_next_buffer( yyscanner ) )
 			{
 			case EOB_ACT_END_OF_FILE:
 				{
-				(yy_did_buffer_switch_on_eof) = 0;
+				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( libsieve_sievewrap( ) )
+				if ( libsieve_sievewrap(yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * libsieve_sievetext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
 					 * YY_NULL, it'll still work - another
 					 * YY_NULL will get returned.
 					 */
-					(yy_c_buf_p) = (yytext_ptr) + YY_MORE_ADJ;
+					yyg->yy_c_buf_p = yyg->yytext_ptr + YY_MORE_ADJ;
 
 					yy_act = YY_STATE_EOF(YY_START);
 					goto do_action;
@@ -1496,30 +1158,30 @@ case YY_STATE_EOF(COMMENT):
 
 				else
 					{
-					if ( ! (yy_did_buffer_switch_on_eof) )
+					if ( ! yyg->yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
 					}
 				break;
 				}
 
 			case EOB_ACT_CONTINUE_SCAN:
-				(yy_c_buf_p) =
-					(yytext_ptr) + yy_amount_of_matched_text;
+				yyg->yy_c_buf_p =
+					yyg->yytext_ptr + yy_amount_of_matched_text;
 
-				yy_current_state = yy_get_previous_state(  );
+				yy_current_state = yy_get_previous_state( yyscanner );
 
-				yy_cp = (yy_c_buf_p);
-				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+				yy_cp = yyg->yy_c_buf_p;
+				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
 				goto yy_match;
 
 			case EOB_ACT_LAST_MATCH:
-				(yy_c_buf_p) =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)];
+				yyg->yy_c_buf_p =
+				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars];
 
-				yy_current_state = yy_get_previous_state(  );
+				yy_current_state = yy_get_previous_state( yyscanner );
 
-				yy_cp = (yy_c_buf_p);
-				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+				yy_cp = yyg->yy_c_buf_p;
+				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
 				goto yy_find_action;
 			}
 		break;
@@ -1539,20 +1201,21 @@ case YY_STATE_EOF(COMMENT):
  *	EOB_ACT_CONTINUE_SCAN - continue scanning from current position
  *	EOB_ACT_END_OF_FILE - end of file
  */
-static int yy_get_next_buffer (void)
+static int yy_get_next_buffer (yyscan_t yyscanner)
 {
-    	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = (yytext_ptr);
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	register char *source = yyg->yytext_ptr;
 	register int number_to_move, i;
 	int ret_val;
 
-	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
+	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
 		YY_FATAL_ERROR(
 		"fatal flex scanner internal error--end of buffer missed" );
 
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0 )
 		{ /* Don't try to fill the buffer, so this is an EOF. */
-		if ( (yy_c_buf_p) - (yytext_ptr) - YY_MORE_ADJ == 1 )
+		if ( yyg->yy_c_buf_p - yyg->yytext_ptr - YY_MORE_ADJ == 1 )
 			{
 			/* We matched a single character, the EOB, so
 			 * treat this as a final EOF.
@@ -1572,7 +1235,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1581,7 +1244,7 @@ static int yy_get_next_buffer (void)
 		/* don't do the read, it's not guaranteed to return an EOF,
 		 * just force an EOF
 		 */
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars) = 0;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars = 0;
 
 	else
 		{
@@ -1595,7 +1258,7 @@ static int yy_get_next_buffer (void)
 			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
-				(int) ((yy_c_buf_p) - b->yy_ch_buf);
+				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
@@ -1608,7 +1271,7 @@ static int yy_get_next_buffer (void)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					libsieve_sieverealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					libsieve_sieverealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1618,7 +1281,7 @@ static int yy_get_next_buffer (void)
 				YY_FATAL_ERROR(
 				"fatal error - scanner input buffer overflow" );
 
-			(yy_c_buf_p) = &b->yy_ch_buf[yy_c_buf_p_offset];
+			yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
 			num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
 						number_to_move - 1;
@@ -1630,17 +1293,17 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), num_to_read );
+			yyg->yy_n_chars, (size_t) num_to_read );
 
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
 
-	if ( (yy_n_chars) == 0 )
+	if ( yyg->yy_n_chars == 0 )
 		{
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			libsieve_sieverestart(libsieve_sievein  );
+			libsieve_sieverestart(yyin  ,yyscanner);
 			}
 
 		else
@@ -1654,37 +1317,46 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	(yy_n_chars) += number_to_move;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
+	if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) libsieve_sieverealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
-	(yytext_ptr) = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
+	yyg->yy_n_chars += number_to_move;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
+
+	yyg->yytext_ptr = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
 
 	return ret_val;
 }
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
 
-    static yy_state_type yy_get_previous_state (void)
+    static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    
-	yy_current_state = (yy_start);
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+	yy_current_state = yyg->yy_start;
 	yy_current_state += YY_AT_BOL();
 
-	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
+	for ( yy_cp = yyg->yytext_ptr + YY_MORE_ADJ; yy_cp < yyg->yy_c_buf_p; ++yy_cp )
 		{
 		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
 		if ( yy_accept[yy_current_state] )
 			{
-			(yy_last_accepting_state) = yy_current_state;
-			(yy_last_accepting_cpos) = yy_cp;
+			yyg->yy_last_accepting_state = yy_current_state;
+			yyg->yy_last_accepting_cpos = yy_cp;
 			}
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 350 )
+			if ( yy_current_state >= 82 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1698,57 +1370,59 @@ static int yy_get_next_buffer (void)
  * synopsis
  *	next_state = yy_try_NUL_trans( current_state );
  */
-    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
+    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state , yyscan_t yyscanner)
 {
 	register int yy_is_jam;
-    	register char *yy_cp = (yy_c_buf_p);
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
+	register char *yy_cp = yyg->yy_c_buf_p;
 
 	register YY_CHAR yy_c = 1;
 	if ( yy_accept[yy_current_state] )
 		{
-		(yy_last_accepting_state) = yy_current_state;
-		(yy_last_accepting_cpos) = yy_cp;
+		yyg->yy_last_accepting_state = yy_current_state;
+		yyg->yy_last_accepting_cpos = yy_cp;
 		}
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 350 )
+		if ( yy_current_state >= 82 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 349);
+	yy_is_jam = (yy_current_state == 81);
 
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
-    static int yyinput (void)
+    static int yyinput (yyscan_t yyscanner)
 #else
-    static int input  (void)
+    static int input  (yyscan_t yyscanner)
 #endif
 
 {
 	int c;
-    
-	*(yy_c_buf_p) = (yy_hold_char);
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	if ( *(yy_c_buf_p) == YY_END_OF_BUFFER_CHAR )
+	*yyg->yy_c_buf_p = yyg->yy_hold_char;
+
+	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
 		{
 		/* yy_c_buf_p now points to the character we want to return.
 		 * If this occurs *before* the EOB characters, then it's a
 		 * valid NUL; if not, then we've hit the end of the buffer.
 		 */
-		if ( (yy_c_buf_p) < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
+		if ( yyg->yy_c_buf_p < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
 			/* This was really a NUL. */
-			*(yy_c_buf_p) = '\0';
+			*yyg->yy_c_buf_p = '\0';
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
-			++(yy_c_buf_p);
+			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			++yyg->yy_c_buf_p;
 
-			switch ( yy_get_next_buffer(  ) )
+			switch ( yy_get_next_buffer( yyscanner ) )
 				{
 				case EOB_ACT_LAST_MATCH:
 					/* This happens because yy_g_n_b()
@@ -1762,39 +1436,41 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					libsieve_sieverestart(libsieve_sievein );
+					libsieve_sieverestart(yyin ,yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( libsieve_sievewrap( ) )
+					if ( libsieve_sievewrap(yyscanner ) )
 						return EOF;
 
-					if ( ! (yy_did_buffer_switch_on_eof) )
+					if ( ! yyg->yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
 #ifdef __cplusplus
-					return yyinput();
+					return yyinput(yyscanner);
 #else
-					return input();
+					return input(yyscanner);
 #endif
 					}
 
 				case EOB_ACT_CONTINUE_SCAN:
-					(yy_c_buf_p) = (yytext_ptr) + offset;
+					yyg->yy_c_buf_p = yyg->yytext_ptr + offset;
 					break;
 				}
 			}
 		}
 
-	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve libsieve_sievetext */
-	(yy_hold_char) = *++(yy_c_buf_p);
+	c = *(unsigned char *) yyg->yy_c_buf_p;	/* cast for 8-bit char's */
+	*yyg->yy_c_buf_p = '\0';	/* preserve yytext */
+	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
 
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_at_bol )
 		   
-    libsieve_sievelineno++;
+    do{ yylineno++;
+        yycolumn=0;
+    }while(0)
 ;
 
 	return c;
@@ -1803,76 +1479,79 @@ static int yy_get_next_buffer (void)
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
- * 
+ * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void libsieve_sieverestart  (FILE * input_file )
+    void libsieve_sieverestart  (FILE * input_file , yyscan_t yyscanner)
 {
-    
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
 	if ( ! YY_CURRENT_BUFFER ){
-        libsieve_sieveensure_buffer_stack ();
+        libsieve_sieveensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            libsieve_sieve_create_buffer(libsieve_sievein,YY_BUF_SIZE );
+            libsieve_sieve_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 	}
 
-	libsieve_sieve_init_buffer(YY_CURRENT_BUFFER,input_file );
-	libsieve_sieve_load_buffer_state( );
+	libsieve_sieve_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+	libsieve_sieve_load_buffer_state(yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
- * 
+ * @param yyscanner The scanner object.
  */
-    void libsieve_sieve_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void libsieve_sieve_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
-    
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		libsieve_sievepop_buffer_state();
 	 *		libsieve_sievepush_buffer_state(new_buffer);
      */
-	libsieve_sieveensure_buffer_stack ();
+	libsieve_sieveensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
-		*(yy_c_buf_p) = (yy_hold_char);
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+		*yyg->yy_c_buf_p = yyg->yy_hold_char;
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	libsieve_sieve_load_buffer_state( );
+	libsieve_sieve_load_buffer_state(yyscanner );
 
 	/* We don't actually know whether we did this switch during
 	 * EOF (libsieve_sievewrap()) processing, but the only time this flag
 	 * is looked at is after libsieve_sievewrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
-	(yy_did_buffer_switch_on_eof) = 1;
+	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void libsieve_sieve_load_buffer_state  (void)
+static void libsieve_sieve_load_buffer_state  (yyscan_t yyscanner)
 {
-    	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	libsieve_sievein = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
-	(yy_hold_char) = *(yy_c_buf_p);
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyg->yy_hold_char = *yyg->yy_c_buf_p;
 }
 
 /** Allocate and initialize an input buffer state.
  * @param file A readable stream.
  * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
- * 
+ * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE libsieve_sieve_create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE libsieve_sieve_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) libsieve_sievealloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) libsieve_sievealloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieve_create_buffer()" );
 
@@ -1881,24 +1560,25 @@ static void libsieve_sieve_load_buffer_state  (void)
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) libsieve_sievealloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) libsieve_sievealloc(b->yy_buf_size + 2 ,yyscanner );
 	if ( ! b->yy_ch_buf )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieve_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	libsieve_sieve_init_buffer(b,file );
+	libsieve_sieve_init_buffer(b,file ,yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
  * @param b a buffer created with libsieve_sieve_create_buffer()
- * 
+ * @param yyscanner The scanner object.
  */
-    void libsieve_sieve_delete_buffer (YY_BUFFER_STATE  b )
+    void libsieve_sieve_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
-    
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
 	if ( ! b )
 		return;
 
@@ -1906,21 +1586,22 @@ static void libsieve_sieve_load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		libsieve_sievefree((void *) b->yy_ch_buf  );
+		libsieve_sievefree((void *) b->yy_ch_buf ,yyscanner );
 
-	libsieve_sievefree((void *) b  );
+	libsieve_sievefree((void *) b ,yyscanner );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a libsieve_sieverestart() or at EOF.
  */
-    static void libsieve_sieve_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void libsieve_sieve_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
 	int oerrno = errno;
-    
-	libsieve_sieve_flush_buffer(b );
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+	libsieve_sieve_flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
@@ -1941,11 +1622,12 @@ static void libsieve_sieve_load_buffer_state  (void)
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
- * 
+ * @param yyscanner The scanner object.
  */
-    void libsieve_sieve_flush_buffer (YY_BUFFER_STATE  b )
+    void libsieve_sieve_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
-    	if ( ! b )
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	if ( ! b )
 		return;
 
 	b->yy_n_chars = 0;
@@ -1963,110 +1645,117 @@ static void libsieve_sieve_load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		libsieve_sieve_load_buffer_state( );
+		libsieve_sieve_load_buffer_state(yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
  *  the current state. This function will allocate the stack
  *  if necessary.
  *  @param new_buffer The new state.
- *  
+ *  @param yyscanner The scanner object.
  */
-void libsieve_sievepush_buffer_state (YY_BUFFER_STATE new_buffer )
+void libsieve_sievepush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
-    	if (new_buffer == NULL)
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	if (new_buffer == NULL)
 		return;
 
-	libsieve_sieveensure_buffer_stack();
+	libsieve_sieveensure_buffer_stack(yyscanner);
 
 	/* This block is copied from libsieve_sieve_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
-		*(yy_c_buf_p) = (yy_hold_char);
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+		*yyg->yy_c_buf_p = yyg->yy_hold_char;
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
 
 	/* Only push if top exists. Otherwise, replace top. */
 	if (YY_CURRENT_BUFFER)
-		(yy_buffer_stack_top)++;
+		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
 	/* copied from libsieve_sieve_switch_to_buffer. */
-	libsieve_sieve_load_buffer_state( );
-	(yy_did_buffer_switch_on_eof) = 1;
+	libsieve_sieve_load_buffer_state(yyscanner );
+	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
 /** Removes and deletes the top of the stack, if present.
  *  The next element becomes the new top.
- *  
+ *  @param yyscanner The scanner object.
  */
-void libsieve_sievepop_buffer_state (void)
+void libsieve_sievepop_buffer_state (yyscan_t yyscanner)
 {
-    	if (!YY_CURRENT_BUFFER)
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	if (!YY_CURRENT_BUFFER)
 		return;
 
-	libsieve_sieve_delete_buffer(YY_CURRENT_BUFFER );
+	libsieve_sieve_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
-	if ((yy_buffer_stack_top) > 0)
-		--(yy_buffer_stack_top);
+	if (yyg->yy_buffer_stack_top > 0)
+		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		libsieve_sieve_load_buffer_state( );
-		(yy_did_buffer_switch_on_eof) = 1;
+		libsieve_sieve_load_buffer_state(yyscanner );
+		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
 
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void libsieve_sieveensure_buffer_stack (void)
+static void libsieve_sieveensure_buffer_stack (yyscan_t yyscanner)
 {
 	int num_to_alloc;
-    
-	if (!(yy_buffer_stack)) {
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+	if (!yyg->yy_buffer_stack) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)libsieve_sievealloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)libsieve_sievealloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
-								);
-		
-		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+								, yyscanner);
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieveensure_buffer_stack()" );
+								  
+		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
-		(yy_buffer_stack_max) = num_to_alloc;
-		(yy_buffer_stack_top) = 0;
+		yyg->yy_buffer_stack_max = num_to_alloc;
+		yyg->yy_buffer_stack_top = 0;
 		return;
 	}
 
-	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
+	if (yyg->yy_buffer_stack_top >= (yyg->yy_buffer_stack_max) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
 		int grow_size = 8 /* arbitrary grow size */;
 
-		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)libsieve_sieverealloc
-								((yy_buffer_stack),
+		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)libsieve_sieverealloc
+								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
-								);
+								, yyscanner);
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieveensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
-		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
-		(yy_buffer_stack_max) = num_to_alloc;
+		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
+		yyg->yy_buffer_stack_max = num_to_alloc;
 	}
 }
 
 /** Setup the input buffer state to scan directly from a user-specified character buffer.
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
- * 
+ * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object. 
  */
-YY_BUFFER_STATE libsieve_sieve_scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE libsieve_sieve_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
@@ -2076,7 +1765,7 @@ YY_BUFFER_STATE libsieve_sieve_scan_buffer  (char * base, yy_size_t  size )
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) libsieve_sievealloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) libsieve_sievealloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieve_scan_buffer()" );
 
@@ -2090,33 +1779,33 @@ YY_BUFFER_STATE libsieve_sieve_scan_buffer  (char * base, yy_size_t  size )
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	libsieve_sieve_switch_to_buffer(b  );
+	libsieve_sieve_switch_to_buffer(b ,yyscanner );
 
 	return b;
 }
 
 /** Setup the input buffer state to scan a string. The next call to libsieve_sievelex() will
  * scan from a @e copy of @a str.
- * @param str a NUL-terminated string to scan
- * 
+ * @param yystr a NUL-terminated string to scan
+ * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
  *       libsieve_sieve_scan_bytes() instead.
  */
-YY_BUFFER_STATE libsieve_sieve_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE libsieve_sieve_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
     
-	return libsieve_sieve_scan_bytes(yystr,strlen(yystr) );
+	return libsieve_sieve_scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to libsieve_sievelex() will
  * scan from a @e copy of @a bytes.
  * @param bytes the byte buffer to scan
  * @param len the number of bytes in the buffer pointed to by @a bytes.
- * 
+ * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE libsieve_sieve_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE libsieve_sieve_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -2125,7 +1814,7 @@ YY_BUFFER_STATE libsieve_sieve_scan_bytes  (yyconst char * yybytes, int  _yybyte
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
-	buf = (char *) libsieve_sievealloc(n  );
+	buf = (char *) libsieve_sievealloc(n ,yyscanner );
 	if ( ! buf )
 		YY_FATAL_ERROR( "out of dynamic memory in libsieve_sieve_scan_bytes()" );
 
@@ -2134,7 +1823,7 @@ YY_BUFFER_STATE libsieve_sieve_scan_bytes  (yyconst char * yybytes, int  _yybyte
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = libsieve_sieve_scan_buffer(buf,n );
+	b = libsieve_sieve_scan_buffer(buf,n ,yyscanner);
 	if ( ! b )
 		YY_FATAL_ERROR( "bad buffer in libsieve_sieve_scan_bytes()" );
 
@@ -2150,7 +1839,7 @@ YY_BUFFER_STATE libsieve_sieve_scan_bytes  (yyconst char * yybytes, int  _yybyte
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 {
     	(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
@@ -2162,120 +1851,252 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up libsieve_sievetext. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		libsieve_sievetext[libsieve_sieveleng] = (yy_hold_char); \
-		(yy_c_buf_p) = libsieve_sievetext + yyless_macro_arg; \
-		(yy_hold_char) = *(yy_c_buf_p); \
-		*(yy_c_buf_p) = '\0'; \
-		libsieve_sieveleng = yyless_macro_arg; \
+		yytext[yyleng] = yyg->yy_hold_char; \
+		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
+		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
+		*yyg->yy_c_buf_p = '\0'; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-/** Get the current line number.
- * 
+/** Get the user-defined data for this scanner.
+ * @param yyscanner The scanner object.
  */
-int libsieve_sieveget_lineno  (void)
+YY_EXTRA_TYPE libsieve_sieveget_extra  (yyscan_t yyscanner)
 {
-        
-    return libsieve_sievelineno;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yyextra;
+}
+
+/** Get the current line number.
+ * @param yyscanner The scanner object.
+ */
+int libsieve_sieveget_lineno  (yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    
+        if (! YY_CURRENT_BUFFER)
+            return 0;
+    
+    return yylineno;
+}
+
+/** Get the current column number.
+ * @param yyscanner The scanner object.
+ */
+int libsieve_sieveget_column  (yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    
+        if (! YY_CURRENT_BUFFER)
+            return 0;
+    
+    return yycolumn;
 }
 
 /** Get the input stream.
- * 
+ * @param yyscanner The scanner object.
  */
-FILE *libsieve_sieveget_in  (void)
+FILE *libsieve_sieveget_in  (yyscan_t yyscanner)
 {
-        return libsieve_sievein;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yyin;
 }
 
 /** Get the output stream.
- * 
+ * @param yyscanner The scanner object.
  */
-FILE *libsieve_sieveget_out  (void)
+FILE *libsieve_sieveget_out  (yyscan_t yyscanner)
 {
-        return libsieve_sieveout;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yyout;
 }
 
 /** Get the length of the current token.
- * 
+ * @param yyscanner The scanner object.
  */
-int libsieve_sieveget_leng  (void)
+int libsieve_sieveget_leng  (yyscan_t yyscanner)
 {
-        return libsieve_sieveleng;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yyleng;
 }
 
 /** Get the current token.
- * 
+ * @param yyscanner The scanner object.
  */
 
-char *libsieve_sieveget_text  (void)
+char *libsieve_sieveget_text  (yyscan_t yyscanner)
 {
-        return libsieve_sievetext;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yytext;
+}
+
+/** Set the user-defined data. This data is never touched by the scanner.
+ * @param user_defined The data to be associated with this scanner.
+ * @param yyscanner The scanner object.
+ */
+void libsieve_sieveset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    yyextra = user_defined ;
 }
 
 /** Set the current line number.
  * @param line_number
- * 
+ * @param yyscanner The scanner object.
  */
-void libsieve_sieveset_lineno (int  line_number )
+void libsieve_sieveset_lineno (int  line_number , yyscan_t yyscanner)
 {
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+        /* lineno is only valid if an input buffer exists. */
+        if (! YY_CURRENT_BUFFER )
+           yy_fatal_error( "libsieve_sieveset_lineno called with no buffer" , yyscanner); 
     
-    libsieve_sievelineno = line_number;
+    yylineno = line_number;
+}
+
+/** Set the current column.
+ * @param line_number
+ * @param yyscanner The scanner object.
+ */
+void libsieve_sieveset_column (int  column_no , yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+        /* column is only valid if an input buffer exists. */
+        if (! YY_CURRENT_BUFFER )
+           yy_fatal_error( "libsieve_sieveset_column called with no buffer" , yyscanner); 
+    
+    yycolumn = column_no;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
  * @param in_str A readable stream.
- * 
+ * @param yyscanner The scanner object.
  * @see libsieve_sieve_switch_to_buffer
  */
-void libsieve_sieveset_in (FILE *  in_str )
+void libsieve_sieveset_in (FILE *  in_str , yyscan_t yyscanner)
 {
-        libsieve_sievein = in_str ;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    yyin = in_str ;
 }
 
-void libsieve_sieveset_out (FILE *  out_str )
+void libsieve_sieveset_out (FILE *  out_str , yyscan_t yyscanner)
 {
-        libsieve_sieveout = out_str ;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    yyout = out_str ;
 }
 
-int libsieve_sieveget_debug  (void)
+int libsieve_sieveget_debug  (yyscan_t yyscanner)
 {
-        return libsieve_sieve_flex_debug;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    return yy_flex_debug;
 }
 
-void libsieve_sieveset_debug (int  bdebug )
+void libsieve_sieveset_debug (int  bdebug , yyscan_t yyscanner)
 {
-        libsieve_sieve_flex_debug = bdebug ;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    yy_flex_debug = bdebug ;
 }
 
-static int yy_init_globals (void)
+/* Accessor methods for yylval and yylloc */
+
+/* User-visible API */
+
+/* libsieve_sievelex_init is special because it creates the scanner itself, so it is
+ * the ONLY reentrant function that doesn't take the scanner as the last argument.
+ * That's why we explicitly handle the declaration, instead of using our macros.
+ */
+
+int libsieve_sievelex_init(yyscan_t* ptr_yy_globals)
+
 {
-        /* Initialization is the same as for the non-reentrant scanner.
+    if (ptr_yy_globals == NULL){
+        errno = EINVAL;
+        return 1;
+    }
+
+    *ptr_yy_globals = (yyscan_t) libsieve_sievealloc ( sizeof( struct yyguts_t ), NULL );
+
+    if (*ptr_yy_globals == NULL){
+        errno = ENOMEM;
+        return 1;
+    }
+
+    /* By setting to 0xAA, we expose bugs in yy_init_globals. Leave at 0x00 for releases. */
+    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
+
+    return yy_init_globals ( *ptr_yy_globals );
+}
+
+/* libsieve_sievelex_init_extra has the same functionality as libsieve_sievelex_init, but follows the
+ * convention of taking the scanner as the last argument. Note however, that
+ * this is a *pointer* to a scanner, as it will be allocated by this call (and
+ * is the reason, too, why this function also must handle its own declaration).
+ * The user defined value in the first argument will be available to libsieve_sievealloc in
+ * the yyextra field.
+ */
+
+int libsieve_sievelex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+
+{
+    struct yyguts_t dummy_yyguts;
+
+    libsieve_sieveset_extra (yy_user_defined, &dummy_yyguts);
+
+    if (ptr_yy_globals == NULL){
+        errno = EINVAL;
+        return 1;
+    }
+	
+    *ptr_yy_globals = (yyscan_t) libsieve_sievealloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+	
+    if (*ptr_yy_globals == NULL){
+        errno = ENOMEM;
+        return 1;
+    }
+    
+    /* By setting to 0xAA, we expose bugs in
+    yy_init_globals. Leave at 0x00 for releases. */
+    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
+    
+    libsieve_sieveset_extra (yy_user_defined, *ptr_yy_globals);
+    
+    return yy_init_globals ( *ptr_yy_globals );
+}
+
+static int yy_init_globals (yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    /* Initialization is the same as for the non-reentrant scanner.
      * This function is called from libsieve_sievelex_destroy(), so don't allocate here.
      */
 
-    /* We do not touch libsieve_sievelineno unless the option is enabled. */
-    libsieve_sievelineno =  1;
-    
-    (yy_buffer_stack) = 0;
-    (yy_buffer_stack_top) = 0;
-    (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
-    (yy_init) = 0;
-    (yy_start) = 0;
+    yyg->yy_buffer_stack = 0;
+    yyg->yy_buffer_stack_top = 0;
+    yyg->yy_buffer_stack_max = 0;
+    yyg->yy_c_buf_p = (char *) 0;
+    yyg->yy_init = 0;
+    yyg->yy_start = 0;
+
+    yyg->yy_start_stack_ptr = 0;
+    yyg->yy_start_stack_depth = 0;
+    yyg->yy_start_stack =  NULL;
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    libsieve_sievein = stdin;
-    libsieve_sieveout = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    libsieve_sievein = (FILE *) 0;
-    libsieve_sieveout = (FILE *) 0;
+    yyin = (FILE *) 0;
+    yyout = (FILE *) 0;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
@@ -2285,24 +2106,32 @@ static int yy_init_globals (void)
 }
 
 /* libsieve_sievelex_destroy is for both reentrant and non-reentrant scanners. */
-int libsieve_sievelex_destroy  (void)
+int libsieve_sievelex_destroy  (yyscan_t yyscanner)
 {
-    
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		libsieve_sieve_delete_buffer(YY_CURRENT_BUFFER  );
+		libsieve_sieve_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		libsieve_sievepop_buffer_state();
+		libsieve_sievepop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	libsieve_sievefree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
+	libsieve_sievefree(yyg->yy_buffer_stack ,yyscanner);
+	yyg->yy_buffer_stack = NULL;
+
+    /* Destroy the start condition stack. */
+        libsieve_sievefree(yyg->yy_start_stack ,yyscanner );
+        yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
      * libsieve_sievelex() is called, initialization will occur. */
-    yy_init_globals( );
+    yy_init_globals( yyscanner);
 
+    /* Destroy the main struct (reentrant only). */
+    libsieve_sievefree ( yyscanner , yyscanner );
+    yyscanner = NULL;
     return 0;
 }
 
@@ -2311,7 +2140,7 @@ int libsieve_sievelex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
 {
 	register int i;
 	for ( i = 0; i < n; ++i )
@@ -2320,7 +2149,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 {
 	register int n;
 	for ( n = 0; s[n]; ++n )
@@ -2330,12 +2159,12 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *libsieve_sievealloc (yy_size_t  size )
+void *libsieve_sievealloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	return (void *) malloc( size );
 }
 
-void *libsieve_sieverealloc  (void * ptr, yy_size_t  size )
+void *libsieve_sieverealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -2347,56 +2176,15 @@ void *libsieve_sieverealloc  (void * ptr, yy_size_t  size )
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void libsieve_sievefree (void * ptr )
+void libsieve_sievefree (void * ptr , yyscan_t yyscanner)
 {
 	free( (char *) ptr );	/* see libsieve_sieverealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 166 "sieve-lex.l"
+#line 139 "sieve-lex.l"
 
 
-/* take input from sieve string provided by sieve parser */
-int libsieve_sieveinput(char *buf, int max_size)
-{
-    extern char *libsieve_sieveptr;	/* current position in sieve string */
-    size_t n;			/* number of characters to read from string */
-
-    n = strlen(libsieve_sieveptr) < (size_t)max_size ? strlen(libsieve_sieveptr) : max_size;
-    if (n > 0) {
-	memcpy(buf, libsieve_sieveptr, n);
-	libsieve_sieveptr += n;
-    }
-
-    return n;
-}
-
-/* Clean up after ourselves by free()ing the current buffer */
-void libsieve_sievelexfree()
-{
-    libsieve_sievelex_destroy();
-}
-
-/* Kind of a hack, but this sets up the file statics */
-void libsieve_sievelexalloc()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Restart the lexer before each invocation of the parser */
-void libsieve_sievelexrestart()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Replacement for the YY_FATAL_ERROR macro,
- * which would print msg to stderr and exit. */
-void libsieve_sievefatalerror(const char msg[])
-{
-    /* Basically stop and don't do anything
-     * Supress the unused yy_fatal_error warning. */
-    if (0) yy_fatal_error(msg);
-}
 
 
