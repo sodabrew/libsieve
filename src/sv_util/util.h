@@ -34,11 +34,14 @@
 /* All assertions are always tested, and errors thrown upwards. */
 #define libsieve_assert(cond) ( (cond) ? 0 : ( TRACE_ERROR("Assertion failed: [%s]", #cond), throw(SIEVE2_ERROR_INTERNAL) ) )
 
+#define libsieve_alloc(type, num) (type *)libsieve_alloc_(sizeof(type), num)
+
 /* These are the memory oriented functions */
 
 void libsieve_free(void *ptr);
 void libsieve_freev(void **ptr);
 void *libsieve_malloc(size_t size);
+void *libsieve_alloc_(size_t size, size_t num);
 void *libsieve_realloc(void *ptr, size_t size);
 void *libsieve_memset(void *ptr, int c, size_t len);
 

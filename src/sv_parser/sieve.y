@@ -188,11 +188,11 @@ action: REJCT STRING             { if (!libsieve_parse_context->require.reject) 
 	                             YYERROR;
                                    }
 
-                                   if (!static_verify_stringlist($3, static_verify_flag)) {
+                                   if (!static_verify_stringlist(context, $3, static_verify_flag)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   if (!static_verify_mailbox($4)) {
+				   if (!static_verify_mailbox(context, $4)) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           $$ = libsieve_new_command(FILEINTO);
@@ -202,14 +202,14 @@ action: REJCT STRING             { if (!libsieve_parse_context->require.reject) 
 				     libsieve_sieveerror(context, "fileinto not required");
 	                             YYERROR;
                                    }
-				   if (!static_verify_mailbox($2)) {
+				   if (!static_verify_mailbox(context, $2)) {
 				     YYERROR; /* vm should call sieveerror() */
 				   }
 	                           $$ = libsieve_new_command(FILEINTO);
 				   $$->u.f.slflags = NULL;
 				   $$->u.f.mailbox = $2; }
 	| REDIRECT STRING         { $$ = libsieve_new_command(REDIRECT);
-				   if (!static_verify_address($2)) {
+				   if (!static_verify_address(context, $2)) {
 				     YYERROR; /* va should call sieveerror() */
 				   }
 				   $$->u.str = $2; }
@@ -227,7 +227,7 @@ action: REJCT STRING             { if (!libsieve_parse_context->require.reject) 
                                     libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
-                                  if (!static_verify_stringlist($2, static_verify_flag)) {
+                                  if (!static_verify_stringlist(context, $2, static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
 				    }
                                  $$ = libsieve_new_command(SETFLAG);
@@ -236,7 +236,7 @@ action: REJCT STRING             { if (!libsieve_parse_context->require.reject) 
                                     libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
-                                 if (!static_verify_stringlist($2, static_verify_flag)) {
+                                 if (!static_verify_stringlist(context, $2, static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
                                     }
                                  $$ = libsieve_new_command(ADDFLAG);
@@ -245,7 +245,7 @@ action: REJCT STRING             { if (!libsieve_parse_context->require.reject) 
                                      libsieve_sieveerror(context, "imap4flags not required");
                                      YYERROR;
                                      }
-                                 if (!static_verify_stringlist($2, static_verify_flag)) {
+                                 if (!static_verify_stringlist(context, $2, static_verify_flag)) {
                                      YYERROR; /* vf should call sieveerror() */
                                      }
                                  $$ = libsieve_new_command(REMOVEFLAG);
@@ -305,7 +305,7 @@ vtags: /* empty */		 { $$ = static_new_vtags(); }
 	| vtags ADDRESSES stringlist { if ($$->addresses != NULL) { 
 					libsieve_sieveerror(context, "duplicate :addresses"); 
 					YYERROR;
-				       } else if (!static_verify_stringlist($3,
+				       } else if (!static_verify_stringlist(context, $3,
 							static_verify_address)) {
 					  YYERROR;
 				       } else {
@@ -355,7 +355,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
                                        libsieve_sieveerror(context, "imap4flags not required");
                                        YYERROR;
                                     }
-                                    if (!static_verify_stringlist($3, static_verify_flag)) {
+                                    if (!static_verify_stringlist(context, $3, static_verify_flag)) {
                                        YYERROR; /* vf should call sieveerror() */
 				    }
                                     $$ = libsieve_new_test(HASFLAG);
@@ -369,13 +369,13 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
                                     $$->u.hf.sl = $3; }
 	| HEADER htags stringlist stringlist
 				 { patternlist_t *pl;
-                                   if (!static_verify_stringlist($3, static_verify_header)) {
+                                   if (!static_verify_stringlist(context, $3, static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   $2 = static_canon_htags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs(context, $4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -385,13 +385,13 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 				   if ($$ == NULL) { YYERROR; } }
 	| addrorenv aetags stringlist stringlist
 				 { patternlist_t *pl;
-                                   if (!static_verify_stringlist($3, static_verify_header)) {
+                                   if (!static_verify_stringlist(context, $3, static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
 				   $2 = static_canon_aetags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs(context, $4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -488,7 +488,7 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
      * inside the context, and the context into the scanner's yyextra. */
     libsieve_sievelex_init_extra(context, &context->sieve_scanner);
 
-    if (libsieve_sieveparse( context->sieve_scanner )) {
+    if (libsieve_sieveparse( context )) {
         libsieve_sievelex_destroy( context->sieve_scanner );
 	return NULL;
     } else {
@@ -743,39 +743,38 @@ static void static_free_ntags(struct ntags *n)
     libsieve_free(n);
 }
 
-static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *))
+static int static_verify_stringlist(struct sieve2_context *context, stringlist_t *sl,
+                                    int (*verify)(struct sieve2_context *, const char *))
 {
-    for (; sl != NULL && verify(sl->s); sl = sl->next) ;
+    for (; sl != NULL && verify(context, sl->s); sl = sl->next) ;
     return (sl == NULL);
 }
 
-static int static_verify_flag(const char *s)
+static int static_verify_flag(struct sieve2_context *context, const char *s)
 {
     /* xxx if not a flag, call sieveerror */
     return 1;
 }
 
-extern char *libsieve_addrptr;		/* pointer to sieve string for address lexer */
-
-static int static_verify_address(const char *s)
+static int static_verify_address(struct sieve2_context *context, const char *s)
 {
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(libsieve_parse_context, &addr, &s);
+    addr = libsieve_addr_parse_buffer(context, &addr, &s);
     if (addr == NULL) {
         return 0;
     }
-    libsieve_addrstructfree(addr, CHARSALSO);
+    libsieve_addrstructfree(context, addr, CHARSALSO);
     return 1;
 }
 
-static int static_verify_mailbox(const char *s UNUSED)
+static int static_verify_mailbox(struct sieve2_context *context UNUSED, const char *s UNUSED)
 {
     /* xxx if not a mailbox, call sieveerror */
     return 1;
 }
 
-static int static_verify_header(const char *hdr)
+static int static_verify_header(struct sieve2_context *context, const char *hdr)
 {
     const char *h = hdr;
     char *err;
@@ -799,7 +798,7 @@ static int static_verify_header(const char *hdr)
  
 /* Was this supposed to be modifying its argument?! */
 /*
-static int static_verify_flag(const char *flag)
+static int static_verify_flag(struct sieve2_context *context, const char *flag)
 {
     int ret;
     char *f, *err;
@@ -832,7 +831,7 @@ static int static_verify_flag(const char *flag)
 }
 */
  
-static regex_t *static_verify_regex(const char *s, int cflags)
+static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags)
 {
     int ret;
     char errbuf[100];
@@ -847,7 +846,7 @@ static regex_t *static_verify_regex(const char *s, int cflags)
     return reg;
 }
 
-static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
+static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp)
 {
     stringlist_t *sl2;
     patternlist_t *pl = NULL;
@@ -859,7 +858,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = static_verify_regex(sl2->s, cflags)) == NULL) {
+	if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
 	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}

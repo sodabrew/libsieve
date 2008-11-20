@@ -111,7 +111,8 @@ struct cur_call {
 struct sieve2_context {
     sieve2_message_t *message;
     stringlist_t *slflags;
-    struct mlbuf *strbuf;
+    struct mlbuf *strbuf; /* Used by sieve parser */
+    struct mlbuf *ml; /* Used by address parser */
     struct catbuf *text;
 
     int parse_errors;
@@ -128,6 +129,8 @@ struct sieve2_context {
     size_t sieve_len;
     size_t header_len;
     size_t addr_len;
+
+    int addr_ncom;
 
     struct cur_call cur_call;
 

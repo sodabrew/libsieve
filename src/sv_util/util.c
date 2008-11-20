@@ -58,6 +58,23 @@ void *libsieve_malloc (size_t size)
     return 0;
 }
 
+/* Like calloc but opposite order of args,
+ * and has a wrapper macro to do the casting. */
+void *libsieve_alloc_(size_t size, size_t num)
+{
+    void *ret;
+
+    ret = libsieve_malloc(size * num);
+    if (ret == NULL)
+        return ret;
+
+    ret = libsieve_memset(ret, 0, size * num);
+    if (ret == NULL)
+        return ret;
+
+    return ret;
+}
+
 /* Wrapper around realloc() */
 void *libsieve_realloc (void *ptr, size_t size)
 {

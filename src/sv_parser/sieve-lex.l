@@ -39,8 +39,6 @@
 #define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
 #define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_sieveget_extra(yyscanner), msg)
 
-extern int libsieve_sieveerror(struct sieve2_context *, char *msg);
-
 %}
 
 %option noyywrap nounput

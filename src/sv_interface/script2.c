@@ -47,22 +47,17 @@ int sieve2_alloc(sieve2_context_t **context)
 {
     struct sieve2_context *c;
 
-    c = (struct sieve2_context *)
-        libsieve_malloc(sizeof(struct sieve2_context));
+    *context = NULL;
+
+    c = libsieve_alloc(struct sieve2_context, 1);
     if (c == NULL) {
-        *context = NULL;
         return SIEVE2_ERROR_NOMEM;
     }
-    memset(c, 0, sizeof(struct sieve2_context));
-
-    // TODO: Contextualize the lexer and parser.
-    libsieve_addrlexalloc();
-    libsieve_headerlexalloc();
-    libsieve_headeryaccalloc();
 
     libsieve_message2_alloc(&c->message);
 
     libsieve_strbufalloc(&c->strbuf);
+    libsieve_strbufalloc(&c->ml);
 
     *context = c;
 
@@ -84,11 +79,8 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_message2_free(&c->message);
 
-    libsieve_addrlexfree();
-    libsieve_headerlexfree();
-    libsieve_headeryaccfree();
-
     libsieve_strbuffree(&c->strbuf, FREEME);
+    libsieve_strbuffree(&c->ml, FREEME);
 
     if (c->slflags) {
 	libsieve_free_sl_only(c->slflags);

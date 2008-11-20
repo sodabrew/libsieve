@@ -566,12 +566,10 @@ static yyconst flex_int32_t yy_rule_can_match_eol[23] =
 #define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
 #define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_sieveget_extra(yyscanner), msg)
 
-extern int libsieve_sieveerror(struct sieve2_context *, char *msg);
 
 
 
-
-#line 575 "sieve-lex.c"
+#line 573 "sieve-lex.c"
 
 #define INITIAL 0
 #define MULTILINE 1
@@ -794,9 +792,9 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 60 "sieve-lex.l"
+#line 58 "sieve-lex.l"
 
-#line 800 "sieve-lex.c"
+#line 798 "sieve-lex.c"
 
 	if ( !yyg->yy_init )
 		{
@@ -891,7 +889,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 61 "sieve-lex.l"
+#line 59 "sieve-lex.l"
 { TRACE_DEBUG("Ending a text: block, found [%s]", context->text->str);
 			  BEGIN INITIAL;
 			  libsieve_sievelval.sval = libsieve_catbuf_free(context->text);
@@ -900,32 +898,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 66 "sieve-lex.l"
+#line 64 "sieve-lex.l"
 { TRACE_DEBUG("Dot-stuffing - one dot dropped.");
 			  libsieve_catbuf(context->text, yytext, yyleng - 1); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 68 "sieve-lex.l"
+#line 66 "sieve-lex.l"
 { TRACE_DEBUG("Just a normal dot. Keep it.");
 			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 70 "sieve-lex.l"
+#line 68 "sieve-lex.l"
 { TRACE_DEBUG("Multiline newline");
 			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 72 "sieve-lex.l"
+#line 70 "sieve-lex.l"
 { TRACE_DEBUG("Multiline line [%s]", yytext);
 			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case YY_STATE_EOF(MULTILINE):
-#line 74 "sieve-lex.l"
+#line 72 "sieve-lex.l"
 { libsieve_sieveerror(context, "unexpected end of file in string"); 
 			  if (context->text) {
 			    libsieve_free(libsieve_catbuf_free(context->text));
@@ -935,7 +933,7 @@ case YY_STATE_EOF(MULTILINE):
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 81 "sieve-lex.l"
+#line 79 "sieve-lex.l"
 { TRACE_DEBUG("Ending a string, found [%s]", context->text->str);
 			  BEGIN INITIAL;
 			  libsieve_sievelval.sval = libsieve_catbuf_free(context->text);
@@ -944,7 +942,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 86 "sieve-lex.l"
+#line 84 "sieve-lex.l"
 {
 			  size_t len = 0;
 			  char *decoded = libsieve_encoded_char_hex(context, yytext, yyleng, &len);
@@ -953,7 +951,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 91 "sieve-lex.l"
+#line 89 "sieve-lex.l"
 {
 			  size_t len = 0;
 			  char *decoded = libsieve_encoded_char_uni(context, yytext, yyleng, &len);
@@ -963,31 +961,31 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 96 "sieve-lex.l"
+#line 94 "sieve-lex.l"
 {
 			  TRACE_DEBUG("More string found [%s]", yytext);
 			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 99 "sieve-lex.l"
+#line 97 "sieve-lex.l"
 { TRACE_DEBUG("Lone string char [%s]", yytext);
 			  libsieve_catbuf(context->text, yytext, yyleng); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 102 "sieve-lex.l"
+#line 100 "sieve-lex.l"
 { BEGIN INITIAL; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 103 "sieve-lex.l"
+#line 101 "sieve-lex.l"
 ;            /* ignore comments */
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 105 "sieve-lex.l"
+#line 103 "sieve-lex.l"
 { TRACE_DEBUG("Beginning a text: block.");
 			  BEGIN MULTILINE;
 			  if (context->text) libsieve_free(libsieve_catbuf_free(context->text));
@@ -995,26 +993,26 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 109 "sieve-lex.l"
+#line 107 "sieve-lex.l"
 { libsieve_sievelval.sval = libsieve_strdup("");
 			  return STRING; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 111 "sieve-lex.l"
+#line 109 "sieve-lex.l"
 { BEGIN QSTRING;
 			  if (context->text) libsieve_free(libsieve_catbuf_free(context->text));
 			  context->text = libsieve_catbuf_alloc(); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 114 "sieve-lex.l"
+#line 112 "sieve-lex.l"
 { libsieve_sievelval.nval = libsieve_strtonum(yytext);
 			  return NUMBER; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 117 "sieve-lex.l"
+#line 115 "sieve-lex.l"
 { int k = libsieve_keyword(yytext, yyleng);
 			  if (!k) {
 			    int len;
@@ -1035,30 +1033,30 @@ YY_RULE_SETUP
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 134 "sieve-lex.l"
+#line 132 "sieve-lex.l"
 ;	/* ignore whitespace */
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 135 "sieve-lex.l"
+#line 133 "sieve-lex.l"
 ;		/* ignore comments */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 136 "sieve-lex.l"
+#line 134 "sieve-lex.l"
 { BEGIN COMMENT; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 137 "sieve-lex.l"
+#line 135 "sieve-lex.l"
 return yytext[0];
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 139 "sieve-lex.l"
+#line 137 "sieve-lex.l"
 ECHO;
 	YY_BREAK
-#line 1062 "sieve-lex.c"
+#line 1060 "sieve-lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(QSTRING):
 case YY_STATE_EOF(COMMENT):
@@ -2183,7 +2181,7 @@ void libsieve_sievefree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 139 "sieve-lex.l"
+#line 137 "sieve-lex.l"
 
 
 

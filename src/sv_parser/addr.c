@@ -126,6 +126,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* Better yacc error messages make me happy */
 #define YYERROR_VERBOSE
+#define YYLEX_PARAM context->addr_scanner
 /* Must be defined before addr.h */
 #define YYSTYPE char *
 
@@ -135,18 +136,18 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_parser */
 #include "addr.h"
 #include "addrinc.h"
+#include "addr-lex.h"
 
 /* sv_interface */
 #include "callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
+#define THIS_CONTEXT context
+
+#define ml context->ml
 
 /* There are global to this file */
-char *libsieve_addrptr;          /* pointer to sieve string for address lexer */
-extern struct sieve2_context *libsieve_parse_context;
 static struct address *addr = NULL;
-static struct mlbuf *ml = NULL;
 
 
 /* Enabling traces.  */
@@ -180,7 +181,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 184 "addr.c"
+#line 185 "addr.c"
 
 #ifdef short
 # undef short
@@ -474,10 +475,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    65,    65,    66,    67,    73,    74,    76,    77,    79,
-      85,    93,    94,    95,   102,   103,   110,   119,   123,   128,
-     129,   134,   135,   140,   141,   143,   145,   150,   151,   156,
-     157,   159
+       0,    68,    68,    69,    70,    76,    77,    79,    80,    82,
+      88,    96,    97,    98,   105,   106,   113,   122,   126,   131,
+     132,   137,   138,   143,   144,   146,   148,   153,   154,   159,
+     160,   162
 };
 #endif
 
@@ -629,7 +630,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (YY_("syntax error: cannot back up")); \
+      yyerror (context, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -686,7 +687,7 @@ while (YYID (0))
 #ifdef YYLEX_PARAM
 # define YYLEX yylex (YYLEX_PARAM)
 #else
-# define YYLEX yylex ()
+# define YYLEX yylex (addr_scanner)
 #endif
 
 /* Enable debugging if requested.  */
@@ -709,7 +710,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value); \
+		  Type, Value, context); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -723,17 +724,19 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, context)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   if (!yyvaluep)
     return;
+  YYUSE (context);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -755,13 +758,14 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, struct sieve2_context *context)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep)
+yy_symbol_print (yyoutput, yytype, yyvaluep, context)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -769,7 +773,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
   else
     YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, context);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -809,12 +813,13 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, int yyrule, struct sieve2_context *context)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule)
+yy_reduce_print (yyvsp, yyrule, context)
     YYSTYPE *yyvsp;
     int yyrule;
+    struct sieve2_context *context;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -828,7 +833,7 @@ yy_reduce_print (yyvsp, yyrule)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       );
+		       		       , context);
       fprintf (stderr, "\n");
     }
 }
@@ -836,7 +841,7 @@ yy_reduce_print (yyvsp, yyrule)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule); \
+    yy_reduce_print (yyvsp, Rule, context); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1087,16 +1092,18 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, struct sieve2_context *context)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep)
+yydestruct (yymsg, yytype, yyvaluep, context)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
+    struct sieve2_context *context;
 #endif
 {
   YYUSE (yyvaluep);
+  YYUSE (context);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1121,7 +1128,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (void);
+int yyparse (struct sieve2_context *context);
 #else
 int yyparse ();
 #endif
@@ -1158,11 +1165,11 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (void)
+yyparse (struct sieve2_context *context)
 #else
 int
-yyparse ()
-
+yyparse (context)
+    struct sieve2_context *context;
 #endif
 #endif
 {
@@ -1411,76 +1418,76 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 65 "addr.y"
-    { libsieve_addrappend(&addr); ;}
+#line 68 "addr.y"
+    { libsieve_addrappend(context, &addr); ;}
     break;
 
   case 3:
-#line 66 "addr.y"
+#line 69 "addr.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 4:
-#line 67 "addr.y"
+#line 70 "addr.y"
     {
 		/* Lousy case to catch malformed addresses. */
-		libsieve_addrappend(&addr);
+		libsieve_addrappend(context, &addr);
 		addr->name = (yyvsp[(1) - (1)]);
 		;}
     break;
 
   case 5:
-#line 73 "addr.y"
+#line 76 "addr.y"
     { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 6:
-#line 74 "addr.y"
+#line 77 "addr.y"
     { TRACE_DEBUG( "address: group: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 7:
-#line 76 "addr.y"
+#line 79 "addr.y"
     { TRACE_DEBUG( "group: phrase: %s", (yyvsp[(1) - (3)]) ); ;}
     break;
 
   case 8:
-#line 77 "addr.y"
+#line 80 "addr.y"
     { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]) ); ;}
     break;
 
   case 9:
-#line 79 "addr.y"
+#line 82 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailbox: %s", (yyvsp[(1) - (1)]) );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(&addr);
+		libsieve_addrappend(context, &addr);
 		;}
     break;
 
   case 10:
-#line 85 "addr.y"
+#line 88 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(&addr);
+		libsieve_addrappend(context, &addr);
 		;}
     break;
 
   case 11:
-#line 93 "addr.y"
+#line 96 "addr.y"
     { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 12:
-#line 94 "addr.y"
+#line 97 "addr.y"
     { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 13:
-#line 95 "addr.y"
+#line 98 "addr.y"
     {
 		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		// This is a "top terminal" state...
@@ -1490,12 +1497,12 @@ yyreduce:
     break;
 
   case 14:
-#line 102 "addr.y"
+#line 105 "addr.y"
     { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[(2) - (3)]) ); ;}
     break;
 
   case 15:
-#line 103 "addr.y"
+#line 106 "addr.y"
     {
 		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]) );
 		// This is a "top terminal" state...
@@ -1505,7 +1512,7 @@ yyreduce:
     break;
 
   case 16:
-#line 110 "addr.y"
+#line 113 "addr.y"
     {
 		TRACE_DEBUG( "addrspec: localpart domain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		// This is a "top terminal" state...
@@ -1517,7 +1524,7 @@ yyreduce:
     break;
 
   case 17:
-#line 119 "addr.y"
+#line 122 "addr.y"
     {
 		TRACE_DEBUG( "route: domain: %s", (yyvsp[(2) - (2)]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1525,7 +1532,7 @@ yyreduce:
     break;
 
   case 18:
-#line 123 "addr.y"
+#line 126 "addr.y"
     {
 		TRACE_DEBUG( "route: domain route: %s %s", (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (4)]), ",", (yyvsp[(4) - (4)]), NULL ), strlen((yyvsp[(2) - (4)]))+strlen((yyvsp[(4) - (4)]))+2, FREEME);
@@ -1533,12 +1540,12 @@ yyreduce:
     break;
 
   case 19:
-#line 128 "addr.y"
+#line 131 "addr.y"
     { TRACE_DEBUG( "localpart: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 20:
-#line 129 "addr.y"
+#line 132 "addr.y"
     {
 		TRACE_DEBUG( "localpart: localpart word: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1546,12 +1553,12 @@ yyreduce:
     break;
 
   case 21:
-#line 134 "addr.y"
+#line 137 "addr.y"
     { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 22:
-#line 135 "addr.y"
+#line 138 "addr.y"
     {
 		TRACE_DEBUG( "domain: domain subdomain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1559,22 +1566,22 @@ yyreduce:
     break;
 
   case 23:
-#line 140 "addr.y"
+#line 143 "addr.y"
     { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 24:
-#line 141 "addr.y"
+#line 144 "addr.y"
     { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 25:
-#line 143 "addr.y"
+#line 146 "addr.y"
     { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 26:
-#line 145 "addr.y"
+#line 148 "addr.y"
     {
 	 	TRACE_DEBUG( "domainlit: DTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1582,12 +1589,12 @@ yyreduce:
     break;
 
   case 27:
-#line 150 "addr.y"
+#line 153 "addr.y"
     { TRACE_DEBUG( "phrase: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 28:
-#line 151 "addr.y"
+#line 154 "addr.y"
     {
 		TRACE_DEBUG( "phrase: phrase word: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), " ", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1595,17 +1602,17 @@ yyreduce:
     break;
 
   case 29:
-#line 156 "addr.y"
+#line 159 "addr.y"
     { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 30:
-#line 157 "addr.y"
+#line 160 "addr.y"
     { TRACE_DEBUG( "word: qstring: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 31:
-#line 159 "addr.y"
+#line 162 "addr.y"
     {
 		TRACE_DEBUG( "qstring: QTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1614,7 +1621,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1618 "addr.c"
+#line 1625 "addr.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1650,7 +1657,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (YY_("syntax error"));
+      yyerror (context, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1674,11 +1681,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (yymsg);
+	    yyerror (context, yymsg);
 	  }
 	else
 	  {
-	    yyerror (YY_("syntax error"));
+	    yyerror (context, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -1702,7 +1709,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval);
+		      yytoken, &yylval, context);
 	  yychar = YYEMPTY;
 	}
     }
@@ -1758,7 +1765,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp);
+		  yystos[yystate], yyvsp, context);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1796,7 +1803,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (YY_("memory exhausted"));
+  yyerror (context, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1804,7 +1811,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval);
+		 yytoken, &yylval, context);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1812,7 +1819,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp);
+		  yystos[*yyssp], yyvsp, context);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1828,15 +1835,15 @@ yyreturn:
 }
 
 
-#line 164 "addr.y"
+#line 167 "addr.y"
 
 
 /* Run an execution error callback. */
-void libsieve_addrerror(char *msg)
+void libsieve_addrerror(struct sieve2_context *context, char *msg)
 {
-    libsieve_parse_context->exec_errors++;
+    context->exec_errors++;
 
-    libsieve_do_error_address(libsieve_parse_context, msg);
+    libsieve_do_error_address(context, msg);
 }
 
 /* Wrapper for addrparse() which sets up the 
@@ -1845,28 +1852,19 @@ void libsieve_addrerror(char *msg)
 struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr)
 {
     struct address *newdata = NULL;
-    extern struct mlbuf *ml;
     extern struct address *addr;
 
     addr = NULL;
-    libsieve_addrappend(&addr);
+    libsieve_addrappend(context, &addr);
 
     libsieve_strbufalloc(&ml);
 
-    libsieve_addrptr = (char *)*ptr;
+    libsieve_addrlex_init_extra(context, &context->addr_scanner);
+    context->addr_ptr = *ptr;
 
-    libsieve_addrlexrestart();
-
-/*
-        serr = libsieve_strconcat("address '", s, "': ", aerr, NULL);
-        libsieve_sieveerror(serr);
-        libsieve_free(serr);
-        libsieve_free(aerr);
-	*/
-
-    if(libsieve_addrparse()) {
-        // FIXME: Make sure that this is sufficient cleanup
-        libsieve_addrstructfree(addr, CHARSALSO);
+    if(libsieve_addrparse( context )) {
+        libsieve_addrlex_destroy( context->addr_scanner );
+        libsieve_addrstructfree(context, addr, CHARSALSO);
         libsieve_strbuffree(&ml, FREEME);
         return NULL;
     }
@@ -1881,8 +1879,9 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struc
      * we notice that addrparse() leaves an extra struct
      * at the top, but at least we can hide that here!
      */
-    newdata = libsieve_addrstructcopy(addr->next, STRUCTONLY);
-    libsieve_addrstructfree(addr, STRUCTONLY);
+    newdata = libsieve_addrstructcopy(context, addr->next, STRUCTONLY);
+    libsieve_addrlex_destroy( context->addr_scanner );
+    libsieve_addrstructfree(context, addr, STRUCTONLY);
     libsieve_strbuffree(&ml, FREEME);
 
     if (*data == NULL)
@@ -1891,7 +1890,7 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struc
     return *data;
 }
 
-void libsieve_addrstructfree(struct address *addr, int freeall)
+void libsieve_addrstructfree(struct sieve2_context *context, struct address *addr, int freeall)
 {
     struct address *bddr;
 
@@ -1912,7 +1911,7 @@ void libsieve_addrstructfree(struct address *addr, int freeall)
     }
 }
 
-struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
+struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct address *addr, int copyall)
 {
     struct address *new;
     struct address *tmp = addr;
@@ -1958,7 +1957,7 @@ struct address *libsieve_addrstructcopy(struct address *addr, int copyall)
     return top;
 }
 
-void libsieve_addrappend(struct address **a)
+void libsieve_addrappend(struct sieve2_context *context, struct address **a)
 {
     struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
     TRACE_DEBUG( "Prepending a new addr struct" );

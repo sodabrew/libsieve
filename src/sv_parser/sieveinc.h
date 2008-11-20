@@ -61,13 +61,14 @@ static struct ntags *static_new_ntags(void);
 static struct ntags *static_canon_ntags(struct ntags *n);
 static void static_free_ntags(struct ntags *n);
 
-static int static_verify_stringlist(stringlist_t *sl, int (*verify)(const char *));
-static int static_verify_mailbox(const char *s);
-static int static_verify_address(const char *s);
-static int static_verify_header(const char *s);
-static int static_verify_flag(const char *s);
-static regex_t *static_verify_regex(const char *s, int cflags);
-static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp);
+static int static_verify_stringlist(struct sieve2_context *context, stringlist_t *sl,
+                                    int (*verify)(struct sieve2_context *, const char *));
+static int static_verify_mailbox(struct sieve2_context *context, const char *s);
+static int static_verify_address(struct sieve2_context *context, const char *s);
+static int static_verify_header(struct sieve2_context *context, const char *s);
+static int static_verify_flag(struct sieve2_context *context, const char *s);
+static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags);
+static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp);
 static int static_ok_header(char *s);
 
 static int static_check_reqs(struct sieve2_context *context, char *req);
