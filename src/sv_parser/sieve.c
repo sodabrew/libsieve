@@ -2543,7 +2543,6 @@ yyreturn:
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
 {
     commandlist_t *t;
-    extern commandlist_t *ret;
 
     /* Due to the YYLEX calling convention, we need to put the scanner
      * inside the context, and the context into the scanner's yyextra. */
@@ -2554,8 +2553,8 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
         return NULL;
     } else {
         libsieve_sievelex_destroy( context->sieve_scanner );
-        t = ret;
-        ret = NULL;
+        t = context->sieve_ret;
+        context->sieve_ret = NULL;
         return t;
     }
 }
@@ -2687,7 +2686,7 @@ static commandlist_t *static_build_validnotif(
 
 static struct hftags *static_new_hftags(void)
 {
-    struct hftags *r = (struct hftags *) libsieve_malloc(sizeof(struct hftags));
+    struct hftags *r = libsieve_alloc(struct hftags , 1);
 
     r->comptag = -1;
     r->comparator = NULL;
@@ -2697,7 +2696,7 @@ static struct hftags *static_new_hftags(void)
 
 static struct aetags *static_new_aetags(void)
 {
-    struct aetags *r = (struct aetags *) libsieve_malloc(sizeof(struct aetags));
+    struct aetags *r = libsieve_alloc(struct aetags, 1);
 
     r->addrtag = r->comptag = -1;
     r->comparator = NULL;
@@ -2722,7 +2721,7 @@ static void static_free_aetags(struct aetags *ae)
 
 static struct htags *static_new_htags(void)
 {
-    struct htags *r = (struct htags *) libsieve_malloc(sizeof(struct htags));
+    struct htags *r = libsieve_alloc(struct htags, 1);
 
     r->comptag = -1;
     r->comparator = NULL;
@@ -2746,7 +2745,7 @@ static void static_free_htags(struct htags *h)
 
 static struct vtags *static_new_vtags(void)
 {
-    struct vtags *r = (struct vtags *) libsieve_malloc(sizeof(struct vtags));
+    struct vtags *r = libsieve_alloc(struct vtags, 1);
 
     r->days = -1;
     r->addresses = NULL;
@@ -2783,7 +2782,7 @@ static void static_free_vtags(struct vtags *v)
 
 static struct ntags *static_new_ntags(void)
 {
-    struct ntags *r = (struct ntags *) libsieve_malloc(sizeof(struct ntags));
+    struct ntags *r = libsieve_alloc(struct ntags, 1);
 
     r->method = NULL;
     r->id = NULL;
@@ -2904,7 +2903,7 @@ static regex_t *static_verify_regex(struct sieve2_context *context, const char *
 {
     int ret;
     char errbuf[100];
-    regex_t *reg = (regex_t *) libsieve_malloc(sizeof(regex_t));
+    regex_t *reg = libsieve_alloc(regex_t, 1);
 
     if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
         (void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));

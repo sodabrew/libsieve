@@ -53,8 +53,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #define ml context->ml
 
-/* There are global to this file */
-static struct address *addr = NULL;
 %}
 
 %name-prefix="libsieve_addr"
@@ -65,12 +63,12 @@ static struct address *addr = NULL;
 
 %%
 
-start:  /* Empty */			{ libsieve_addrappend(context, &addr); }
+start:  /* Empty */			{ libsieve_addrappend(context, &context->addr_addr); }
 	| address			{ $$ = $1; }
 	| word				{
 		/* Lousy case to catch malformed addresses. */
-		libsieve_addrappend(context, &addr);
-		addr->name = $1;
+		libsieve_addrappend(context, &context->addr_addr);
+		context->addr_addr->name = $1;
 		};
 
 address: mailboxes			{ TRACE_DEBUG( "address: mailbox: %s", $1 ); }
@@ -83,13 +81,13 @@ mailboxes: mailbox			{
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailbox: %s", $1 );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(context, &addr);
+		libsieve_addrappend(context, &context->addr_addr);
 		}
 	| mailboxes ',' mailbox		{
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", $1, $3 );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(context, &addr);
+		libsieve_addrappend(context, &context->addr_addr);
 		};
 
 mailbox: 
@@ -99,7 +97,7 @@ mailbox:
 		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", $1, $2 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->name: %s", $1 );
-		addr->name = libsieve_strdup( $1 );
+		context->addr_addr->name = libsieve_strdup( $1 );
 		};
 
 routeaddr: '<' addrspec '>'		{ TRACE_DEBUG( "routeaddr: addrspec: %s", $2 ); }
@@ -107,16 +105,16 @@ routeaddr: '<' addrspec '>'		{ TRACE_DEBUG( "routeaddr: addrspec: %s", $2 ); }
 		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", $2, $4 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->route: %s", $2 );
-		addr->route = libsieve_strdup( $2 );
+		context->addr_addr->route = libsieve_strdup( $2 );
 		};
 	
 addrspec: localpart '@' domain		{
 		TRACE_DEBUG( "addrspec: localpart domain: %s %s", $1, $3 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->mailbox: %s", $1 );
-		addr->mailbox = libsieve_strdup( $1 );
+		context->addr_addr->mailbox = libsieve_strdup( $1 );
 		TRACE_DEBUG( "addr->domain: %s", $3 );
-		addr->domain = libsieve_strdup( $3 );
+		context->addr_addr->domain = libsieve_strdup( $3 );
 		};
 
 route: '@' domain			{
@@ -180,19 +178,16 @@ void libsieve_addrerror(struct sieve2_context *context, char *msg)
 struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const char *ptr, struct address **data)
 {
     struct address *newdata = NULL;
-    extern struct address *addr;
 
-    addr = NULL;
-    libsieve_addrappend(context, &addr);
-
-    libsieve_strbufalloc(&ml);
+    context->addr_addr = NULL;
+    libsieve_addrappend(context, &context->addr_addr);
 
     libsieve_addrlex_init_extra(context, &context->addr_scanner);
     libsieve_addr_scan_string(ptr, context->addr_scanner);
 
     if(libsieve_addrparse( context )) {
         libsieve_addrlex_destroy( context->addr_scanner );
-        libsieve_addrstructfree(context, addr, CHARSALSO);
+        libsieve_addrstructfree(context, context->addr_addr, CHARSALSO);
         libsieve_strbuffree(&ml, FREEME);
         return NULL;
     }
@@ -207,9 +202,9 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const
      * we notice that addrparse() leaves an extra struct
      * at the top, but at least we can hide that here!
      */
-    newdata = libsieve_addrstructcopy(context, addr->next, STRUCTONLY);
+    newdata = libsieve_addrstructcopy(context, context->addr_addr->next, STRUCTONLY);
     libsieve_addrlex_destroy( context->addr_scanner );
-    libsieve_addrstructfree(context, addr, STRUCTONLY);
+    libsieve_addrstructfree(context, context->addr_addr, STRUCTONLY);
     libsieve_strbuffree(&ml, FREEME);
 
     if (*data == NULL)
@@ -250,7 +245,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
 	return NULL;
     }
 
-    top = libsieve_malloc(sizeof(struct address));
+    top = libsieve_alloc(struct address, 1);
 
     TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
     top->mailbox = tmp->mailbox;
@@ -263,7 +258,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
     tmp = tmp->next;
     new = top;
     while (tmp != NULL) {
-        new->next = (struct address *)libsieve_malloc(sizeof(struct address));
+        new->next = libsieve_alloc(struct address, 1);
         if (new->next == NULL) {
             TRACE_DEBUG("malloc failed, returning what we have so far.");
 	    return top;
@@ -287,7 +282,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
 
 void libsieve_addrappend(struct sieve2_context *context, struct address **a)
 {
-    struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
+    struct address *new = libsieve_alloc(struct address, 1);
     TRACE_DEBUG( "Prepending a new addr struct" );
     new->mailbox = NULL;
     new->domain = NULL;

@@ -146,8 +146,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #define ml context->ml
 
-/* There are global to this file */
-static struct address *addr = NULL;
 
 
 /* Enabling traces.  */
@@ -181,7 +179,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 185 "addr.c"
+#line 183 "addr.c"
 
 #ifdef short
 # undef short
@@ -475,10 +473,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    68,    68,    69,    70,    76,    77,    79,    80,    82,
-      88,    96,    97,    98,   105,   106,   113,   122,   126,   131,
-     132,   137,   138,   143,   144,   146,   148,   153,   154,   159,
-     160,   162
+       0,    66,    66,    67,    68,    74,    75,    77,    78,    80,
+      86,    94,    95,    96,   103,   104,   111,   120,   124,   129,
+     130,   135,   136,   141,   142,   144,   146,   151,   152,   157,
+     158,   160
 };
 #endif
 
@@ -1418,113 +1416,113 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 68 "addr.y"
-    { libsieve_addrappend(context, &addr); ;}
+#line 66 "addr.y"
+    { libsieve_addrappend(context, &context->addr_addr); ;}
     break;
 
   case 3:
-#line 69 "addr.y"
+#line 67 "addr.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 4:
-#line 70 "addr.y"
+#line 68 "addr.y"
     {
 		/* Lousy case to catch malformed addresses. */
-		libsieve_addrappend(context, &addr);
-		addr->name = (yyvsp[(1) - (1)]);
+		libsieve_addrappend(context, &context->addr_addr);
+		context->addr_addr->name = (yyvsp[(1) - (1)]);
 		;}
     break;
 
   case 5:
-#line 76 "addr.y"
+#line 74 "addr.y"
     { TRACE_DEBUG( "address: mailbox: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 6:
-#line 77 "addr.y"
+#line 75 "addr.y"
     { TRACE_DEBUG( "address: group: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 7:
-#line 79 "addr.y"
+#line 77 "addr.y"
     { TRACE_DEBUG( "group: phrase: %s", (yyvsp[(1) - (3)]) ); ;}
     break;
 
   case 8:
-#line 80 "addr.y"
+#line 78 "addr.y"
     { TRACE_DEBUG( "group: phrase mailboxes: %s %s", (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]) ); ;}
     break;
 
   case 9:
-#line 82 "addr.y"
+#line 80 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailbox: %s", (yyvsp[(1) - (1)]) );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(context, &addr);
+		libsieve_addrappend(context, &context->addr_addr);
 		;}
     break;
 
   case 10:
-#line 88 "addr.y"
+#line 86 "addr.y"
     {
 	 	/* Each new address is allocated here and back-linked */
 		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		TRACE_DEBUG( "allocating newaddr" );
-		libsieve_addrappend(context, &addr);
+		libsieve_addrappend(context, &context->addr_addr);
 		;}
     break;
 
   case 11:
-#line 96 "addr.y"
+#line 94 "addr.y"
     { TRACE_DEBUG( "mailbox: routeaddr: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 12:
-#line 97 "addr.y"
+#line 95 "addr.y"
     { TRACE_DEBUG( "mailbox: addrspec: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 13:
-#line 98 "addr.y"
+#line 96 "addr.y"
     {
 		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->name: %s", (yyvsp[(1) - (2)]) );
-		addr->name = libsieve_strdup( (yyvsp[(1) - (2)]) );
+		context->addr_addr->name = libsieve_strdup( (yyvsp[(1) - (2)]) );
 		;}
     break;
 
   case 14:
-#line 105 "addr.y"
+#line 103 "addr.y"
     { TRACE_DEBUG( "routeaddr: addrspec: %s", (yyvsp[(2) - (3)]) ); ;}
     break;
 
   case 15:
-#line 106 "addr.y"
+#line 104 "addr.y"
     {
 		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]) );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->route: %s", (yyvsp[(2) - (5)]) );
-		addr->route = libsieve_strdup( (yyvsp[(2) - (5)]) );
+		context->addr_addr->route = libsieve_strdup( (yyvsp[(2) - (5)]) );
 		;}
     break;
 
   case 16:
-#line 113 "addr.y"
+#line 111 "addr.y"
     {
 		TRACE_DEBUG( "addrspec: localpart domain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->mailbox: %s", (yyvsp[(1) - (3)]) );
-		addr->mailbox = libsieve_strdup( (yyvsp[(1) - (3)]) );
+		context->addr_addr->mailbox = libsieve_strdup( (yyvsp[(1) - (3)]) );
 		TRACE_DEBUG( "addr->domain: %s", (yyvsp[(3) - (3)]) );
-		addr->domain = libsieve_strdup( (yyvsp[(3) - (3)]) );
+		context->addr_addr->domain = libsieve_strdup( (yyvsp[(3) - (3)]) );
 		;}
     break;
 
   case 17:
-#line 122 "addr.y"
+#line 120 "addr.y"
     {
 		TRACE_DEBUG( "route: domain: %s", (yyvsp[(2) - (2)]) );
                 (yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1532,7 +1530,7 @@ yyreduce:
     break;
 
   case 18:
-#line 126 "addr.y"
+#line 124 "addr.y"
     {
 		TRACE_DEBUG( "route: domain route: %s %s", (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( "@", (yyvsp[(2) - (4)]), ",", (yyvsp[(4) - (4)]), NULL ), strlen((yyvsp[(2) - (4)]))+strlen((yyvsp[(4) - (4)]))+2, FREEME);
@@ -1540,12 +1538,12 @@ yyreduce:
     break;
 
   case 19:
-#line 131 "addr.y"
+#line 129 "addr.y"
     { TRACE_DEBUG( "localpart: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 20:
-#line 132 "addr.y"
+#line 130 "addr.y"
     {
 		TRACE_DEBUG( "localpart: localpart word: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1553,12 +1551,12 @@ yyreduce:
     break;
 
   case 21:
-#line 137 "addr.y"
+#line 135 "addr.y"
     { TRACE_DEBUG( "domain: subdomain: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 22:
-#line 138 "addr.y"
+#line 136 "addr.y"
     {
 		TRACE_DEBUG( "domain: domain subdomain: %s %s", (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (3)]), ".", (yyvsp[(3) - (3)]), NULL ), strlen((yyvsp[(1) - (3)]))+strlen((yyvsp[(3) - (3)]))+1, FREEME);
@@ -1566,22 +1564,22 @@ yyreduce:
     break;
 
   case 23:
-#line 143 "addr.y"
+#line 141 "addr.y"
     { TRACE_DEBUG( "subdomain: domainref: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 24:
-#line 144 "addr.y"
+#line 142 "addr.y"
     { TRACE_DEBUG( "subdomain: domainlit: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 25:
-#line 146 "addr.y"
+#line 144 "addr.y"
     { TRACE_DEBUG( "domainref: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 26:
-#line 148 "addr.y"
+#line 146 "addr.y"
     {
 	 	TRACE_DEBUG( "domainlit: DTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1589,12 +1587,12 @@ yyreduce:
     break;
 
   case 27:
-#line 153 "addr.y"
+#line 151 "addr.y"
     { TRACE_DEBUG( "phrase: word: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 28:
-#line 154 "addr.y"
+#line 152 "addr.y"
     {
 		TRACE_DEBUG( "phrase: phrase word: %s %s", (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]) );
 		(yyval) = libsieve_strbuf(ml, libsieve_strconcat( (yyvsp[(1) - (2)]), " ", (yyvsp[(2) - (2)]), NULL ), strlen((yyvsp[(1) - (2)]))+strlen((yyvsp[(2) - (2)]))+1, FREEME);
@@ -1602,17 +1600,17 @@ yyreduce:
     break;
 
   case 29:
-#line 159 "addr.y"
+#line 157 "addr.y"
     { TRACE_DEBUG( "word: ATOM: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 30:
-#line 160 "addr.y"
+#line 158 "addr.y"
     { TRACE_DEBUG( "word: qstring: %s", (yyvsp[(1) - (1)]) ); ;}
     break;
 
   case 31:
-#line 162 "addr.y"
+#line 160 "addr.y"
     {
 		TRACE_DEBUG( "qstring: QTEXT: %s", (yyvsp[(2) - (3)]) );
 		(yyval) = (yyvsp[(2) - (3)]);
@@ -1621,7 +1619,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1625 "addr.c"
+#line 1623 "addr.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1835,7 +1833,7 @@ yyreturn:
 }
 
 
-#line 167 "addr.y"
+#line 165 "addr.y"
 
 
 /* Run an execution error callback. */
@@ -1852,19 +1850,16 @@ void libsieve_addrerror(struct sieve2_context *context, char *msg)
 struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const char *ptr, struct address **data)
 {
     struct address *newdata = NULL;
-    extern struct address *addr;
 
-    addr = NULL;
-    libsieve_addrappend(context, &addr);
-
-    libsieve_strbufalloc(&ml);
+    context->addr_addr = NULL;
+    libsieve_addrappend(context, &context->addr_addr);
 
     libsieve_addrlex_init_extra(context, &context->addr_scanner);
     libsieve_addr_scan_string(ptr, context->addr_scanner);
 
     if(libsieve_addrparse( context )) {
         libsieve_addrlex_destroy( context->addr_scanner );
-        libsieve_addrstructfree(context, addr, CHARSALSO);
+        libsieve_addrstructfree(context, context->addr_addr, CHARSALSO);
         libsieve_strbuffree(&ml, FREEME);
         return NULL;
     }
@@ -1879,9 +1874,9 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const
      * we notice that addrparse() leaves an extra struct
      * at the top, but at least we can hide that here!
      */
-    newdata = libsieve_addrstructcopy(context, addr->next, STRUCTONLY);
+    newdata = libsieve_addrstructcopy(context, context->addr_addr->next, STRUCTONLY);
     libsieve_addrlex_destroy( context->addr_scanner );
-    libsieve_addrstructfree(context, addr, STRUCTONLY);
+    libsieve_addrstructfree(context, context->addr_addr, STRUCTONLY);
     libsieve_strbuffree(&ml, FREEME);
 
     if (*data == NULL)
@@ -1922,7 +1917,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
 	return NULL;
     }
 
-    top = libsieve_malloc(sizeof(struct address));
+    top = libsieve_alloc(struct address, 1);
 
     TRACE_DEBUG("I'd like to copy this pointer: %p: %s", tmp->mailbox, tmp->mailbox);
     top->mailbox = tmp->mailbox;
@@ -1935,7 +1930,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
     tmp = tmp->next;
     new = top;
     while (tmp != NULL) {
-        new->next = (struct address *)libsieve_malloc(sizeof(struct address));
+        new->next = libsieve_alloc(struct address, 1);
         if (new->next == NULL) {
             TRACE_DEBUG("malloc failed, returning what we have so far.");
 	    return top;
@@ -1959,7 +1954,7 @@ struct address *libsieve_addrstructcopy(struct sieve2_context *context, struct a
 
 void libsieve_addrappend(struct sieve2_context *context, struct address **a)
 {
-    struct address *new = (struct address *)libsieve_malloc(sizeof(struct address));
+    struct address *new = libsieve_alloc(struct address, 1);
     TRACE_DEBUG( "Prepending a new addr struct" );
     new->mailbox = NULL;
     new->domain = NULL;

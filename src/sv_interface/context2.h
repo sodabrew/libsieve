@@ -123,14 +123,13 @@ struct sieve2_context {
     void *addr_scanner;
 
     char *sieve_ptr;
-    char *header_ptr;
-    char *addr_ptr;
 
     size_t sieve_len;
-    size_t header_len;
-    size_t addr_len;
 
     int addr_ncom;
+    header_list_t *header_hl;
+    commandlist_t *sieve_ret;
+    struct address *addr_addr;
 
     struct cur_call cur_call;
 

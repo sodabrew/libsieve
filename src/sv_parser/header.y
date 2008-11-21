@@ -29,9 +29,6 @@
 /* sv_include */
 #include "sieve2_error.h"
 
-// FIXME: ZAP THESE
-static header_list_t *hl = NULL;
-
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT context
 
@@ -51,22 +48,22 @@ static header_list_t *hl = NULL;
 %%
 headers: header                 {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(context, &context->header_hl) != SIEVE2_OK)
                     /* Problems... */;
                 }
         | headers header        {
                 /* Allocate a new cache block */
-                if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+                if (libsieve_headerappend(context, &context->header_hl) != SIEVE2_OK)
                     /* Problems... */;
                 };
 
 header: NAME COLON              {
                 TRACE_DEBUG( "header: NAME COLON: %s:", $1 );
-                libsieve_headerentry(context, hl->h, $1, NULL);
+                libsieve_headerentry(context, context->header_hl->h, $1, NULL);
                 }
         | NAME COLON body       {
                 TRACE_DEBUG( "header: NAME COLON body: %s:%s", $1, $3 );
-                libsieve_headerentry(context, hl->h, $1, $3);
+                libsieve_headerentry(context, context->header_hl->h, $1, $3);
                 };
 
 body: TEXT                      {
@@ -94,10 +91,9 @@ void libsieve_headererror(struct sieve2_context *context, char *s)
 header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, const char *ptr, header_list_t **data)
 {
     header_list_t *newdata = NULL;
-    extern header_list_t *hl;
 
-    hl = NULL;
-    if (libsieve_headerappend(context, &hl) != SIEVE2_OK)
+    context->header_hl = NULL;
+    if (libsieve_headerappend(context, &context->header_hl) != SIEVE2_OK)
         /* Problems... */;
 
     libsieve_headerlex_init_extra(context, &context->header_scanner);
@@ -105,15 +101,15 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, cons
 
     if(libsieve_headerparse(context)) {
         TRACE_DEBUG( "Header parse error, returning null" );
-	while (hl) {
-	    header_list_t *next = hl->next;
-            libsieve_free(hl->h->contents);
-            libsieve_free(hl->h);
-            libsieve_free(hl);
-	    hl = next;
+	while (context->header_hl) {
+	    header_list_t *next = context->header_hl->next;
+            libsieve_free(context->header_hl->h->contents);
+            libsieve_free(context->header_hl->h);
+            libsieve_free(context->header_hl);
+	    context->header_hl = next;
 	}
         libsieve_headerlex_destroy( context->header_scanner );
-	hl = NULL;
+	context->header_hl = NULL;
 	return NULL;
     }
 
@@ -124,16 +120,16 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, cons
     }
 
     /* Same thing with that extra struct... */
-    newdata = hl->next;
-    libsieve_free(hl->h->contents);
-    libsieve_free(hl->h);
-    libsieve_free(hl);
+    newdata = context->header_hl->next;
+    libsieve_free(context->header_hl->h->contents);
+    libsieve_free(context->header_hl->h);
+    libsieve_free(context->header_hl);
 
     if(*data == NULL)
         *data = newdata;
 
     libsieve_headerlex_destroy( context->header_scanner );
-    hl = newdata;
+    context->header_hl = newdata;
     return *data;
 }
 
@@ -143,17 +139,17 @@ int libsieve_headerappend(struct sieve2_context *context, header_list_t **hl)
     header_t *newhead = NULL;
     char **c = NULL;
 
-    newlist = (header_list_t *)libsieve_malloc(sizeof(header_list_t));
+    newlist = libsieve_alloc(header_list_t, 1);
     if (newlist == NULL)
         return SIEVE2_ERROR_NOMEM;
 
-    newhead = (header_t *)libsieve_malloc(sizeof(header_t));
+    newhead = libsieve_alloc(header_t, 1);
     if (newhead == NULL) {
         libsieve_free(newlist);
         return SIEVE2_ERROR_NOMEM;
     }
 
-    c = (char **)libsieve_malloc(2 * sizeof(char *));
+    c = libsieve_alloc(char *, 2);
     if (c == NULL) {
         libsieve_free(newlist);
         libsieve_free(newhead);
