@@ -112,7 +112,7 @@ int libsieve_message2_parseheader(void *context, sieve2_message_t *m)
     size_t c, cl;
     header_list_t *hl = NULL, *hlfree;
 
-    if ((hl = libsieve_header_parse_buffer(context, &hl, &m->header)) == NULL) {
+    if ((hl = libsieve_header_parse_buffer(context, m->header, &hl)) == NULL) {
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_HEADER;
     }

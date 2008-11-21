@@ -40,13 +40,13 @@ struct ntags {
 
 static commandlist_t *ret;
 
-static test_t *static_build_address(int t, struct aetags *ae,
+static test_t *static_build_address(struct sieve2_context *context, int t, struct aetags *ae,
 			     stringlist_t *sl, patternlist_t *pl);
-static test_t *static_build_header(int t, struct htags *h,
+static test_t *static_build_header(struct sieve2_context *context, int t, struct htags *h,
 			    stringlist_t *sl, patternlist_t *pl);
-static commandlist_t *static_build_vacation(int t, struct vtags *h, char *s);
-static commandlist_t *static_build_notify(int t, struct ntags *n);
-static commandlist_t *static_build_validnotif(int t, stringlist_t *sl);
+static commandlist_t *static_build_vacation(struct sieve2_context *context, int t, struct vtags *h, char *s);
+static commandlist_t *static_build_notify(struct sieve2_context *context, int t, struct ntags *n);
+static commandlist_t *static_build_validnotif(struct sieve2_context *context, int t, stringlist_t *sl);
 static struct aetags *static_new_aetags(void);
 static struct aetags *static_canon_aetags(struct aetags *ae);
 static void static_free_aetags(struct aetags *ae);

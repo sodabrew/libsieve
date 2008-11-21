@@ -27,7 +27,7 @@ struct addr_marker {
     char *freeme;
 };
 
-struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr);
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const char *ptr, struct address **data);
 
 /* SIEVE */
 #include "tree.h"
@@ -43,6 +43,6 @@ int libsieve_sieveerror(struct sieve2_context *context, char *msg);
 int libsieve_sieveerror_exec(struct sieve2_context *context, char *msg);
 
 /* HEADER */
-header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr);
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, const char *ptr, header_list_t **data);
 
 #endif /* PARSER_H */

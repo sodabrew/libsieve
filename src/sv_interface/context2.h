@@ -112,7 +112,7 @@ struct sieve2_context {
     sieve2_message_t *message;
     stringlist_t *slflags;
     struct mlbuf *strbuf; /* Used by sieve parser */
-    struct mlbuf *ml; /* Used by address parser */
+    struct mlbuf *ml; /* Used by address, header parsers */
     struct catbuf *text;
 
     int parse_errors;

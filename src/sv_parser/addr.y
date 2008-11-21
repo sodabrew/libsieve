@@ -177,7 +177,7 @@ void libsieve_addrerror(struct sieve2_context *context, char *msg)
 /* Wrapper for addrparse() which sets up the 
  * required environment and allocates variables
  */
-struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr)
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const char *ptr, struct address **data)
 {
     struct address *newdata = NULL;
     extern struct address *addr;
@@ -188,7 +188,7 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struc
     libsieve_strbufalloc(&ml);
 
     libsieve_addrlex_init_extra(context, &context->addr_scanner);
-    context->addr_ptr = *ptr;
+    libsieve_addr_scan_string(ptr, context->addr_scanner);
 
     if(libsieve_addrparse( context )) {
         libsieve_addrlex_destroy( context->addr_scanner );

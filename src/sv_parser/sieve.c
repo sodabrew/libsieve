@@ -257,9 +257,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
-
-struct sieve2_context *libsieve_parse_context;
+#define THIS_CONTEXT context
 
 /* Better yacc error messages please */
 #define YYERROR_VERBOSE
@@ -287,7 +285,7 @@ struct sieve2_context *libsieve_parse_context;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 69 "sieve.y"
+#line 67 "sieve.y"
 {
     int nval;
     char *sval;
@@ -302,7 +300,7 @@ typedef union YYSTYPE
     struct ntags *ntag;
 }
 /* Line 187 of yacc.c.  */
-#line 306 "sieve.c"
+#line 304 "sieve.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -315,7 +313,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 319 "sieve.c"
+#line 317 "sieve.c"
 
 #ifdef short
 # undef short
@@ -635,15 +633,15 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   109,   109,   110,   113,   114,   117,   154,   155,   158,
-     159,   160,   163,   164,   165,   168,   173,   180,   183,   201,
-     211,   216,   217,   218,   226,   235,   244,   253,   261,   270,
-     271,   274,   277,   280,   283,   288,   289,   290,   295,   296,
-     297,   300,   301,   305,   313,   319,   325,   331,   337,   338,
-     341,   342,   345,   346,   349,   350,   351,   352,   353,   354,
-     370,   386,   402,   403,   405,   408,   409,   412,   413,   418,
-     422,   428,   429,   433,   440,   441,   442,   443,   448,   455,
-     456,   457,   458,   459,   460,   467,   468,   471,   474,   475
+       0,   107,   107,   108,   111,   112,   115,   152,   153,   156,
+     157,   158,   161,   162,   163,   166,   171,   178,   181,   199,
+     209,   214,   215,   216,   224,   233,   242,   251,   259,   268,
+     269,   272,   275,   278,   281,   286,   287,   288,   293,   294,
+     295,   298,   299,   303,   311,   317,   323,   329,   335,   336,
+     339,   340,   343,   344,   347,   348,   349,   350,   351,   352,
+     368,   384,   400,   401,   403,   406,   407,   410,   411,   416,
+     420,   426,   427,   431,   438,   439,   440,   441,   446,   453,
+     454,   455,   456,   457,   458,   465,   466,   469,   472,   473
 };
 #endif
 
@@ -1661,17 +1659,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 109 "sieve.y"
+#line 107 "sieve.y"
     { ret = NULL; ;}
     break;
 
   case 3:
-#line 110 "sieve.y"
+#line 108 "sieve.y"
     { ret = (yyvsp[(2) - (2)].cl); ;}
     break;
 
   case 6:
-#line 117 "sieve.y"
+#line 115 "sieve.y"
     {
                                     int unsupp = 0;
                                     char *msg;
@@ -1685,9 +1683,9 @@ yyreduce:
                                         s = sl;
                                         sl = sl->next;
 
-					/* Returns 1 if supported, 0 if not. */
-                                        if (!static_check_reqs(libsieve_parse_context, s->s)) {
-					    unsupp = 1;
+                                        /* Returns 1 if supported, 0 if not. */
+                                        if (!static_check_reqs(context, s->s)) {
+                                            unsupp = 1;
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
                                             libsieve_free(freemsg);
@@ -1697,7 +1695,7 @@ yyreduce:
                                         libsieve_free(s);
                                     }
 
-				    /* If something wasn't supported, bomb out with msg. */
+                                    /* If something wasn't supported, bomb out with msg. */
                                     if (unsupp) {
                                         libsieve_sieveerror(context, msg);
                                         libsieve_free(msg);
@@ -1710,155 +1708,155 @@ yyreduce:
     break;
 
   case 7:
-#line 154 "sieve.y"
+#line 152 "sieve.y"
     { (yyval.cl) = (yyvsp[(1) - (1)].cl); ;}
     break;
 
   case 8:
-#line 155 "sieve.y"
+#line 153 "sieve.y"
     { (yyvsp[(1) - (2)].cl)->next = (yyvsp[(2) - (2)].cl); (yyval.cl) = (yyvsp[(1) - (2)].cl); ;}
     break;
 
   case 9:
-#line 158 "sieve.y"
+#line 156 "sieve.y"
     { (yyval.cl) = (yyvsp[(1) - (2)].cl); ;}
     break;
 
   case 10:
-#line 159 "sieve.y"
+#line 157 "sieve.y"
     { (yyval.cl) = libsieve_new_if((yyvsp[(2) - (4)].test), (yyvsp[(3) - (4)].cl), (yyvsp[(4) - (4)].cl)); ;}
     break;
 
   case 11:
-#line 160 "sieve.y"
+#line 158 "sieve.y"
     { (yyval.cl) = libsieve_new_command(STOP); ;}
     break;
 
   case 12:
-#line 163 "sieve.y"
+#line 161 "sieve.y"
     { (yyval.cl) = NULL; ;}
     break;
 
   case 13:
-#line 164 "sieve.y"
+#line 162 "sieve.y"
     { (yyval.cl) = libsieve_new_if((yyvsp[(2) - (4)].test), (yyvsp[(3) - (4)].cl), (yyvsp[(4) - (4)].cl)); ;}
     break;
 
   case 14:
-#line 165 "sieve.y"
+#line 163 "sieve.y"
     { (yyval.cl) = (yyvsp[(2) - (2)].cl); ;}
     break;
 
   case 15:
-#line 168 "sieve.y"
-    { if (!libsieve_parse_context->require.reject) {
-				     libsieve_sieveerror(context, "reject not required");
-				     YYERROR;
-				   }
-				   (yyval.cl) = libsieve_new_command(REJCT); (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); ;}
+#line 166 "sieve.y"
+    { if (!context->require.reject) {
+                                     libsieve_sieveerror(context, "reject not required");
+                                     YYERROR;
+                                   }
+                                   (yyval.cl) = libsieve_new_command(REJCT); (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); ;}
     break;
 
   case 16:
-#line 173 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
-				     libsieve_sieveerror(context, "imap4flags not required");
-	                             YYERROR;
+#line 171 "sieve.y"
+    { if (!context->require.imap4flags) {
+                                     libsieve_sieveerror(context, "imap4flags not required");
+                                     YYERROR;
                                    }
-	                           (yyval.cl) = libsieve_new_command(KEEP);
+                                   (yyval.cl) = libsieve_new_command(KEEP);
                                    (yyval.cl)->u.f.mailbox = NULL; 
-				   (yyval.cl)->u.f.slflags = (yyvsp[(3) - (3)].sl); ;}
+                                   (yyval.cl)->u.f.slflags = (yyvsp[(3) - (3)].sl); ;}
     break;
 
   case 17:
-#line 180 "sieve.y"
+#line 178 "sieve.y"
     { (yyval.cl) = libsieve_new_command(KEEP);
-	                           (yyval.cl)->u.f.mailbox = NULL;
-				   (yyval.cl)->u.f.slflags = NULL; ;}
+                                   (yyval.cl)->u.f.mailbox = NULL;
+                                   (yyval.cl)->u.f.slflags = NULL; ;}
     break;
 
   case 18:
-#line 183 "sieve.y"
-    { if (!libsieve_parse_context->require.fileinto) {
-				     libsieve_sieveerror(context, "fileinto not required");
-	                             YYERROR;
-                                   } if (!libsieve_parse_context->require.imap4flags) {
-				     libsieve_sieveerror(context, "imap4flags not required");
-	                             YYERROR;
+#line 181 "sieve.y"
+    { if (!context->require.fileinto) {
+                                     libsieve_sieveerror(context, "fileinto not required");
+                                     YYERROR;
+                                   } if (!context->require.imap4flags) {
+                                     libsieve_sieveerror(context, "imap4flags not required");
+                                     YYERROR;
                                    }
 
                                    if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_flag)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   if (!static_verify_mailbox(context, (yyvsp[(4) - (4)].sval))) {
-				     YYERROR; /* vm should call sieveerror() */
-				   }
-	                           (yyval.cl) = libsieve_new_command(FILEINTO);
-				   (yyval.cl)->u.f.slflags = (yyvsp[(3) - (4)].sl);
-				   (yyval.cl)->u.f.mailbox = (yyvsp[(4) - (4)].sval); ;}
+                                   if (!static_verify_mailbox(context, (yyvsp[(4) - (4)].sval))) {
+                                     YYERROR; /* vm should call sieveerror() */
+                                   }
+                                   (yyval.cl) = libsieve_new_command(FILEINTO);
+                                   (yyval.cl)->u.f.slflags = (yyvsp[(3) - (4)].sl);
+                                   (yyval.cl)->u.f.mailbox = (yyvsp[(4) - (4)].sval); ;}
     break;
 
   case 19:
-#line 201 "sieve.y"
-    { if (!libsieve_parse_context->require.fileinto) {
-				     libsieve_sieveerror(context, "fileinto not required");
-	                             YYERROR;
+#line 199 "sieve.y"
+    { if (!context->require.fileinto) {
+                                     libsieve_sieveerror(context, "fileinto not required");
+                                     YYERROR;
                                    }
-				   if (!static_verify_mailbox(context, (yyvsp[(2) - (2)].sval))) {
-				     YYERROR; /* vm should call sieveerror() */
-				   }
-	                           (yyval.cl) = libsieve_new_command(FILEINTO);
-				   (yyval.cl)->u.f.slflags = NULL;
-				   (yyval.cl)->u.f.mailbox = (yyvsp[(2) - (2)].sval); ;}
+                                   if (!static_verify_mailbox(context, (yyvsp[(2) - (2)].sval))) {
+                                     YYERROR; /* vm should call sieveerror() */
+                                   }
+                                   (yyval.cl) = libsieve_new_command(FILEINTO);
+                                   (yyval.cl)->u.f.slflags = NULL;
+                                   (yyval.cl)->u.f.mailbox = (yyvsp[(2) - (2)].sval); ;}
     break;
 
   case 20:
-#line 211 "sieve.y"
+#line 209 "sieve.y"
     { (yyval.cl) = libsieve_new_command(REDIRECT);
-				   if (!static_verify_address(context, (yyvsp[(2) - (2)].sval))) {
-				     YYERROR; /* va should call sieveerror() */
-				   }
-				   (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); ;}
+                                   if (!static_verify_address(context, (yyvsp[(2) - (2)].sval))) {
+                                     YYERROR; /* va should call sieveerror() */
+                                   }
+                                   (yyval.cl)->u.str = (yyvsp[(2) - (2)].sval); ;}
     break;
 
   case 21:
-#line 216 "sieve.y"
+#line 214 "sieve.y"
     { (yyval.cl) = libsieve_new_command(STOP); ;}
     break;
 
   case 22:
-#line 217 "sieve.y"
+#line 215 "sieve.y"
     { (yyval.cl) = libsieve_new_command(DISCARD); ;}
     break;
 
   case 23:
-#line 218 "sieve.y"
-    { if (!libsieve_parse_context->require.vacation) {
-				     libsieve_sieveerror(context, "vacation not required");
-				     (yyval.cl) = libsieve_new_command(VACATION);
-				     YYERROR;
-				   } else {
-  				     (yyval.cl) = static_build_vacation(VACATION,
-					    static_canon_vtags((yyvsp[(2) - (3)].vtag)), (yyvsp[(3) - (3)].sval));
-				   } ;}
+#line 216 "sieve.y"
+    { if (!context->require.vacation) {
+                                     libsieve_sieveerror(context, "vacation not required");
+                                     (yyval.cl) = libsieve_new_command(VACATION);
+                                     YYERROR;
+                                   } else {
+                                       (yyval.cl) = static_build_vacation(context, VACATION,
+                                            static_canon_vtags((yyvsp[(2) - (3)].vtag)), (yyvsp[(3) - (3)].sval));
+                                   } ;}
     break;
 
   case 24:
-#line 226 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
+#line 224 "sieve.y"
+    { if (!context->require.imap4flags) {
                                     libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
                                   if (!static_verify_stringlist(context, (yyvsp[(2) - (2)].sl), static_verify_flag)) {
                                     YYERROR; /* vf should call sieveerror() */
-				    }
+                                    }
                                  (yyval.cl) = libsieve_new_command(SETFLAG);
                                  (yyval.cl)->u.sl = (yyvsp[(2) - (2)].sl); ;}
     break;
 
   case 25:
-#line 235 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
+#line 233 "sieve.y"
+    { if (!context->require.imap4flags) {
                                     libsieve_sieveerror(context, "imap4flags not required");
                                     YYERROR;
                                     }
@@ -1870,8 +1868,8 @@ yyreduce:
     break;
 
   case 26:
-#line 244 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
+#line 242 "sieve.y"
+    { if (!context->require.imap4flags) {
                                      libsieve_sieveerror(context, "imap4flags not required");
                                      YYERROR;
                                      }
@@ -1883,449 +1881,449 @@ yyreduce:
     break;
 
   case 27:
-#line 253 "sieve.y"
-    { if (!libsieve_parse_context->require.notify) {
-	       		             libsieve_sieveerror(context, "notify not required");
-	       		             (yyval.cl) = libsieve_new_command(NOTIFY); 
-	       		             YYERROR;
-				 } else {
-				     (yyval.cl) = static_build_notify(NOTIFY,
-	       		             static_canon_ntags((yyvsp[(2) - (2)].ntag)));
-	       		         } ;}
+#line 251 "sieve.y"
+    { if (!context->require.notify) {
+                                            libsieve_sieveerror(context, "notify not required");
+                                            (yyval.cl) = libsieve_new_command(NOTIFY); 
+                                            YYERROR;
+                                 } else {
+                                     (yyval.cl) = static_build_notify(context, NOTIFY,
+                                            static_canon_ntags((yyvsp[(2) - (2)].ntag)));
+                                        } ;}
     break;
 
   case 28:
-#line 261 "sieve.y"
-    { if (!libsieve_parse_context->require.notify) {
+#line 259 "sieve.y"
+    { if (!context->require.notify) {
                                      libsieve_sieveerror(context, "notify not required");
-				     (yyval.cl) = libsieve_new_command(VALIDNOTIF);
-				     YYERROR;
-				 } else {
-				     (yyval.cl) = static_build_validnotif(VALIDNOTIF, (yyvsp[(2) - (2)].sl));
-				 } ;}
+                                     (yyval.cl) = libsieve_new_command(VALIDNOTIF);
+                                     YYERROR;
+                                 } else {
+                                     (yyval.cl) = static_build_validnotif(context, VALIDNOTIF, (yyvsp[(2) - (2)].sl));
+                                 } ;}
     break;
 
   case 29:
-#line 270 "sieve.y"
+#line 268 "sieve.y"
     { (yyval.ntag) = static_new_ntags(); ;}
     break;
 
   case 30:
-#line 271 "sieve.y"
+#line 269 "sieve.y"
     { if ((yyval.ntag)->id != NULL) { 
-					libsieve_sieveerror(context, "duplicate :method"); YYERROR; }
-				   else { (yyval.ntag)->id = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :method"); YYERROR; }
+                                   else { (yyval.ntag)->id = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 31:
-#line 274 "sieve.y"
+#line 272 "sieve.y"
     { if ((yyval.ntag)->method != NULL) { 
-					libsieve_sieveerror(context, "duplicate :method"); YYERROR; }
-				   else { (yyval.ntag)->method = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :method"); YYERROR; }
+                                   else { (yyval.ntag)->method = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 32:
-#line 277 "sieve.y"
+#line 275 "sieve.y"
     { if ((yyval.ntag)->options != NULL) { 
-					libsieve_sieveerror(context, "duplicate :options"); YYERROR; }
-				     else { (yyval.ntag)->options = (yyvsp[(3) - (3)].sl); } ;}
+                                        libsieve_sieveerror(context, "duplicate :options"); YYERROR; }
+                                     else { (yyval.ntag)->options = (yyvsp[(3) - (3)].sl); } ;}
     break;
 
   case 33:
-#line 280 "sieve.y"
+#line 278 "sieve.y"
     { if ((yyval.ntag)->priority != NULL) { 
-					libsieve_sieveerror(context, "duplicate :priority"); YYERROR; }
-				   else { (yyval.ntag)->priority = (yyvsp[(2) - (2)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :priority"); YYERROR; }
+                                   else { (yyval.ntag)->priority = (yyvsp[(2) - (2)].sval); } ;}
     break;
 
   case 34:
-#line 283 "sieve.y"
+#line 281 "sieve.y"
     { if ((yyval.ntag)->message != NULL) { 
-					libsieve_sieveerror(context, "duplicate :message"); YYERROR; }
-				   else { (yyval.ntag)->message = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :message"); YYERROR; }
+                                   else { (yyval.ntag)->message = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 35:
-#line 288 "sieve.y"
+#line 286 "sieve.y"
     { (yyval.hftag) = static_new_hftags(); ;}
     break;
 
   case 36:
-#line 289 "sieve.y"
+#line 287 "sieve.y"
     { (yyval.hftag)->comptag = (yyvsp[(2) - (2)].nval); ;}
     break;
 
   case 37:
-#line 290 "sieve.y"
+#line 288 "sieve.y"
     { if ((yyval.hftag)->comparator != NULL) { 
-				   libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
-				   else { (yyval.hftag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
+                                   libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
+                                   else { (yyval.hftag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 38:
-#line 295 "sieve.y"
+#line 293 "sieve.y"
     { (yyval.sval) = "low"; ;}
     break;
 
   case 39:
-#line 296 "sieve.y"
+#line 294 "sieve.y"
     { (yyval.sval) = "normal"; ;}
     break;
 
   case 40:
-#line 297 "sieve.y"
+#line 295 "sieve.y"
     { (yyval.sval) = "high"; ;}
     break;
 
   case 41:
-#line 300 "sieve.y"
+#line 298 "sieve.y"
     { (yyval.vtag) = static_new_vtags(); ;}
     break;
 
   case 42:
-#line 301 "sieve.y"
+#line 299 "sieve.y"
     { if ((yyval.vtag)->days != -1) { 
-					libsieve_sieveerror(context, "duplicate :days");
-					YYERROR; }
-				   else { (yyval.vtag)->days = (yyvsp[(3) - (3)].nval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :days");
+                                        YYERROR; }
+                                   else { (yyval.vtag)->days = (yyvsp[(3) - (3)].nval); } ;}
     break;
 
   case 43:
-#line 305 "sieve.y"
+#line 303 "sieve.y"
     { if ((yyval.vtag)->addresses != NULL) { 
-					libsieve_sieveerror(context, "duplicate :addresses"); 
-					YYERROR;
-				       } else if (!static_verify_stringlist(context, (yyvsp[(3) - (3)].sl),
-							static_verify_address)) {
-					  YYERROR;
-				       } else {
-					 (yyval.vtag)->addresses = (yyvsp[(3) - (3)].sl); } ;}
+                                        libsieve_sieveerror(context, "duplicate :addresses"); 
+                                        YYERROR;
+                                       } else if (!static_verify_stringlist(context, (yyvsp[(3) - (3)].sl),
+                                                        static_verify_address)) {
+                                          YYERROR;
+                                       } else {
+                                         (yyval.vtag)->addresses = (yyvsp[(3) - (3)].sl); } ;}
     break;
 
   case 44:
-#line 313 "sieve.y"
+#line 311 "sieve.y"
     { if ((yyval.vtag)->subject != NULL) { 
-					libsieve_sieveerror(context, "duplicate :subject"); 
-					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
-					YYERROR;
-				   } else { (yyval.vtag)->subject = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :subject"); 
+                                        YYERROR;
+                                   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+                                        YYERROR;
+                                   } else { (yyval.vtag)->subject = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 45:
-#line 319 "sieve.y"
+#line 317 "sieve.y"
     { if ((yyval.vtag)->handle != NULL) { 
-					libsieve_sieveerror(context, "duplicate :handle"); 
-					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
-					YYERROR;
-				   } else { (yyval.vtag)->handle = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :handle"); 
+                                        YYERROR;
+                                   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+                                        YYERROR;
+                                   } else { (yyval.vtag)->handle = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 46:
-#line 325 "sieve.y"
+#line 323 "sieve.y"
     { if ((yyval.vtag)->from != NULL) { 
-					libsieve_sieveerror(context, "duplicate :from"); 
-					YYERROR;
-				   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
-					YYERROR;
-				   } else { (yyval.vtag)->from = (yyvsp[(3) - (3)].sval); } ;}
+                                        libsieve_sieveerror(context, "duplicate :from"); 
+                                        YYERROR;
+                                   } else if (!static_ok_header((yyvsp[(3) - (3)].sval))) {
+                                        YYERROR;
+                                   } else { (yyval.vtag)->from = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 47:
-#line 331 "sieve.y"
+#line 329 "sieve.y"
     { if ((yyval.vtag)->mime != -1) { 
-					libsieve_sieveerror(context, "duplicate :mime"); 
-					YYERROR; }
-				   else { (yyval.vtag)->mime = MIME; } ;}
+                                        libsieve_sieveerror(context, "duplicate :mime"); 
+                                        YYERROR; }
+                                   else { (yyval.vtag)->mime = MIME; } ;}
     break;
 
   case 48:
-#line 337 "sieve.y"
+#line 335 "sieve.y"
     { (yyval.sl) = (yyvsp[(2) - (3)].sl); ;}
     break;
 
   case 49:
-#line 338 "sieve.y"
+#line 336 "sieve.y"
     { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); ;}
     break;
 
   case 50:
-#line 341 "sieve.y"
+#line 339 "sieve.y"
     { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (1)].sval), NULL); ;}
     break;
 
   case 51:
-#line 342 "sieve.y"
+#line 340 "sieve.y"
     { (yyval.sl) = libsieve_new_sl((yyvsp[(1) - (3)].sval), (yyvsp[(3) - (3)].sl)); ;}
     break;
 
   case 52:
-#line 345 "sieve.y"
+#line 343 "sieve.y"
     { (yyval.cl) = (yyvsp[(2) - (3)].cl); ;}
     break;
 
   case 53:
-#line 346 "sieve.y"
+#line 344 "sieve.y"
     { (yyval.cl) = NULL; ;}
     break;
 
   case 54:
-#line 349 "sieve.y"
+#line 347 "sieve.y"
     { (yyval.test) = libsieve_new_test(ANYOF); (yyval.test)->u.tl = (yyvsp[(2) - (2)].testl); ;}
     break;
 
   case 55:
-#line 350 "sieve.y"
+#line 348 "sieve.y"
     { (yyval.test) = libsieve_new_test(ALLOF); (yyval.test)->u.tl = (yyvsp[(2) - (2)].testl); ;}
     break;
 
   case 56:
-#line 351 "sieve.y"
+#line 349 "sieve.y"
     { (yyval.test) = libsieve_new_test(EXISTS); (yyval.test)->u.sl = (yyvsp[(2) - (2)].sl); ;}
     break;
 
   case 57:
-#line 352 "sieve.y"
+#line 350 "sieve.y"
     { (yyval.test) = libsieve_new_test(SFALSE); ;}
     break;
 
   case 58:
-#line 353 "sieve.y"
+#line 351 "sieve.y"
     { (yyval.test) = libsieve_new_test(STRUE); ;}
     break;
 
   case 59:
-#line 354 "sieve.y"
-    { if (!libsieve_parse_context->require.imap4flags) {
+#line 352 "sieve.y"
+    { if (!context->require.imap4flags) {
                                        libsieve_sieveerror(context, "imap4flags not required");
                                        YYERROR;
                                     }
                                     if (!static_verify_stringlist(context, (yyvsp[(3) - (3)].sl), static_verify_flag)) {
                                        YYERROR; /* vf should call sieveerror() */
-				    }
+                                    }
                                     (yyval.test) = libsieve_new_test(HASFLAG);
-				    if ((yyvsp[(2) - (3)].hftag)->comptag != -1) { 
-				       (yyval.test)->u.hf.comp = libsieve_comparator_lookup((yyvsp[(2) - (3)].hftag)->comparator, (yyvsp[(2) - (3)].hftag)->comptag);
-				       (yyval.test)->u.hf.comptag = (yyvsp[(2) - (3)].hftag)->comptag;
-				    }
-				    if ((yyvsp[(2) - (3)].hftag)) {
-				       libsieve_free((yyvsp[(2) - (3)].hftag));
-				    }
+                                    if ((yyvsp[(2) - (3)].hftag)->comptag != -1) { 
+                                       (yyval.test)->u.hf.comp = libsieve_comparator_lookup((yyvsp[(2) - (3)].hftag)->comparator, (yyvsp[(2) - (3)].hftag)->comptag);
+                                       (yyval.test)->u.hf.comptag = (yyvsp[(2) - (3)].hftag)->comptag;
+                                    }
+                                    if ((yyvsp[(2) - (3)].hftag)) {
+                                       libsieve_free((yyvsp[(2) - (3)].hftag));
+                                    }
                                     (yyval.test)->u.hf.sl = (yyvsp[(3) - (3)].sl); ;}
     break;
 
   case 60:
-#line 371 "sieve.y"
+#line 369 "sieve.y"
     { patternlist_t *pl;
                                    if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   (yyvsp[(2) - (4)].htag) = static_canon_htags((yyvsp[(2) - (4)].htag));
-				   if ((yyvsp[(2) - (4)].htag)->comptag == REGEX) {
-				     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].htag)->comparator);
-				     if (!pl) { YYERROR; }
-				   }
-				   else
-				     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
-				       
-				   (yyval.test) = static_build_header(HEADER, (yyvsp[(2) - (4)].htag), (yyvsp[(3) - (4)].sl), pl);
-				   if ((yyval.test) == NULL) { YYERROR; } ;}
+                                   (yyvsp[(2) - (4)].htag) = static_canon_htags((yyvsp[(2) - (4)].htag));
+                                   if ((yyvsp[(2) - (4)].htag)->comptag == REGEX) {
+                                     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].htag)->comparator);
+                                     if (!pl) { YYERROR; }
+                                   }
+                                   else
+                                     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
+                                       
+                                   (yyval.test) = static_build_header(context, HEADER, (yyvsp[(2) - (4)].htag), (yyvsp[(3) - (4)].sl), pl);
+                                   if ((yyval.test) == NULL) { YYERROR; } ;}
     break;
 
   case 61:
-#line 387 "sieve.y"
+#line 385 "sieve.y"
     { patternlist_t *pl;
                                    if (!static_verify_stringlist(context, (yyvsp[(3) - (4)].sl), static_verify_header)) {
                                      YYERROR; /* vh should call sieveerror() */
                                    }
 
-				   (yyvsp[(2) - (4)].aetag) = static_canon_aetags((yyvsp[(2) - (4)].aetag));
-				   if ((yyvsp[(2) - (4)].aetag)->comptag == REGEX) {
-				     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].aetag)->comparator);
-				     if (!pl) { YYERROR; }
-				   }
-				   else
-				     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
-				       
-				   (yyval.test) = static_build_address((yyvsp[(1) - (4)].nval), (yyvsp[(2) - (4)].aetag), (yyvsp[(3) - (4)].sl), pl);
-				   if ((yyval.test) == NULL) { YYERROR; } ;}
+                                   (yyvsp[(2) - (4)].aetag) = static_canon_aetags((yyvsp[(2) - (4)].aetag));
+                                   if ((yyvsp[(2) - (4)].aetag)->comptag == REGEX) {
+                                     pl = static_verify_regexs(context, (yyvsp[(4) - (4)].sl), (yyvsp[(2) - (4)].aetag)->comparator);
+                                     if (!pl) { YYERROR; }
+                                   }
+                                   else
+                                     pl = (patternlist_t *) (yyvsp[(4) - (4)].sl);
+                                       
+                                   (yyval.test) = static_build_address(context, (yyvsp[(1) - (4)].nval), (yyvsp[(2) - (4)].aetag), (yyvsp[(3) - (4)].sl), pl);
+                                   if ((yyval.test) == NULL) { YYERROR; } ;}
     break;
 
   case 62:
-#line 402 "sieve.y"
+#line 400 "sieve.y"
     { (yyval.test) = libsieve_new_test(NOT); (yyval.test)->u.t = (yyvsp[(2) - (2)].test); ;}
     break;
 
   case 63:
-#line 403 "sieve.y"
+#line 401 "sieve.y"
     { (yyval.test) = libsieve_new_test(SIZE); (yyval.test)->u.sz.t = (yyvsp[(2) - (3)].nval);
-		                   (yyval.test)->u.sz.n = (yyvsp[(3) - (3)].nval); ;}
+                                   (yyval.test)->u.sz.n = (yyvsp[(3) - (3)].nval); ;}
     break;
 
   case 64:
-#line 405 "sieve.y"
+#line 403 "sieve.y"
     { (yyval.test) = NULL; ;}
     break;
 
   case 65:
-#line 408 "sieve.y"
+#line 406 "sieve.y"
     { (yyval.nval) = ADDRESS; ;}
     break;
 
   case 66:
-#line 409 "sieve.y"
+#line 407 "sieve.y"
     { (yyval.nval) = ENVELOPE; ;}
     break;
 
   case 67:
-#line 412 "sieve.y"
+#line 410 "sieve.y"
     { (yyval.aetag) = static_new_aetags(); ;}
     break;
 
   case 68:
-#line 413 "sieve.y"
+#line 411 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (2)].aetag);
-				   if ((yyval.aetag)->addrtag != -1) { 
-			libsieve_sieveerror(context, "duplicate or conflicting address part tag");
-			YYERROR; }
-				   else { (yyval.aetag)->addrtag = (yyvsp[(2) - (2)].nval); } ;}
+                                   if ((yyval.aetag)->addrtag != -1) { 
+                        libsieve_sieveerror(context, "duplicate or conflicting address part tag");
+                        YYERROR; }
+                                   else { (yyval.aetag)->addrtag = (yyvsp[(2) - (2)].nval); } ;}
     break;
 
   case 69:
-#line 418 "sieve.y"
+#line 416 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (2)].aetag);
-				   if ((yyval.aetag)->comptag != -1) { 
-			libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
-				   else { (yyval.aetag)->comptag = (yyvsp[(2) - (2)].nval); } ;}
+                                   if ((yyval.aetag)->comptag != -1) { 
+                        libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
+                                   else { (yyval.aetag)->comptag = (yyvsp[(2) - (2)].nval); } ;}
     break;
 
   case 70:
-#line 422 "sieve.y"
+#line 420 "sieve.y"
     { (yyval.aetag) = (yyvsp[(1) - (3)].aetag);
-				   if ((yyval.aetag)->comparator != NULL) { 
-			libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
-				   else { (yyval.aetag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
+                                   if ((yyval.aetag)->comparator != NULL) { 
+                        libsieve_sieveerror(context, "duplicate comparator tag"); YYERROR; }
+                                   else { (yyval.aetag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 71:
-#line 428 "sieve.y"
+#line 426 "sieve.y"
     { (yyval.htag) = static_new_htags(); ;}
     break;
 
   case 72:
-#line 429 "sieve.y"
+#line 427 "sieve.y"
     { (yyval.htag) = (yyvsp[(1) - (2)].htag);
-				   if ((yyval.htag)->comptag != -1) { 
-			libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
-				   else { (yyval.htag)->comptag = (yyvsp[(2) - (2)].nval); } ;}
+                                   if ((yyval.htag)->comptag != -1) { 
+                        libsieve_sieveerror(context, "duplicate comparator type tag"); YYERROR; }
+                                   else { (yyval.htag)->comptag = (yyvsp[(2) - (2)].nval); } ;}
     break;
 
   case 73:
-#line 433 "sieve.y"
+#line 431 "sieve.y"
     { (yyval.htag) = (yyvsp[(1) - (3)].htag);
-				   if ((yyval.htag)->comparator != NULL) { 
-			libsieve_sieveerror(context, "duplicate comparator tag");
-					YYERROR; }
-				   else { (yyval.htag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
+                                   if ((yyval.htag)->comparator != NULL) { 
+                        libsieve_sieveerror(context, "duplicate comparator tag");
+                                        YYERROR; }
+                                   else { (yyval.htag)->comparator = (yyvsp[(3) - (3)].sval); } ;}
     break;
 
   case 74:
-#line 440 "sieve.y"
+#line 438 "sieve.y"
     { (yyval.nval) = ALL; ;}
     break;
 
   case 75:
-#line 441 "sieve.y"
+#line 439 "sieve.y"
     { (yyval.nval) = LOCALPART; ;}
     break;
 
   case 76:
-#line 442 "sieve.y"
+#line 440 "sieve.y"
     { (yyval.nval) = DOMAIN; ;}
     break;
 
   case 77:
-#line 443 "sieve.y"
-    { if (!libsieve_parse_context->require.subaddress) {
-				     libsieve_sieveerror(context, "subaddress not required");
-				     YYERROR;
-				   }
-				   (yyval.nval) = USER; ;}
+#line 441 "sieve.y"
+    { if (!context->require.subaddress) {
+                                     libsieve_sieveerror(context, "subaddress not required");
+                                     YYERROR;
+                                   }
+                                   (yyval.nval) = USER; ;}
     break;
 
   case 78:
-#line 448 "sieve.y"
-    { if (!libsieve_parse_context->require.subaddress) {
-				     libsieve_sieveerror(context, "subaddress not required");
-				     YYERROR;
-				   }
-				   (yyval.nval) = DETAIL; ;}
+#line 446 "sieve.y"
+    { if (!context->require.subaddress) {
+                                     libsieve_sieveerror(context, "subaddress not required");
+                                     YYERROR;
+                                   }
+                                   (yyval.nval) = DETAIL; ;}
     break;
 
   case 79:
-#line 455 "sieve.y"
+#line 453 "sieve.y"
     { (yyval.nval) = IS; ;}
     break;
 
   case 80:
-#line 456 "sieve.y"
+#line 454 "sieve.y"
     { (yyval.nval) = VALUE | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ ;}
     break;
 
   case 81:
-#line 457 "sieve.y"
+#line 455 "sieve.y"
     { (yyval.nval) = COUNT | libsieve_relational_lookup((yyvsp[(2) - (2)].sval)); libsieve_free((yyvsp[(2) - (2)].sval)); /* HACK: bits above 10 carry the relational. And we don't need this string anymore, either. */ ;}
     break;
 
   case 82:
-#line 458 "sieve.y"
+#line 456 "sieve.y"
     { (yyval.nval) = CONTAINS; ;}
     break;
 
   case 83:
-#line 459 "sieve.y"
+#line 457 "sieve.y"
     { (yyval.nval) = MATCHES; ;}
     break;
 
   case 84:
-#line 460 "sieve.y"
-    { if (!libsieve_parse_context->require.regex) {
-				     libsieve_sieveerror(context, "regex not required");
-				     YYERROR;
-				     }
-				   (yyval.nval) = REGEX; ;}
+#line 458 "sieve.y"
+    { if (!context->require.regex) {
+                                     libsieve_sieveerror(context, "regex not required");
+                                     YYERROR;
+                                     }
+                                   (yyval.nval) = REGEX; ;}
     break;
 
   case 85:
-#line 467 "sieve.y"
+#line 465 "sieve.y"
     { (yyval.nval) = OVER; ;}
     break;
 
   case 86:
-#line 468 "sieve.y"
+#line 466 "sieve.y"
     { (yyval.nval) = UNDER; ;}
     break;
 
   case 87:
-#line 471 "sieve.y"
+#line 469 "sieve.y"
     { (yyval.testl) = (yyvsp[(2) - (3)].testl); ;}
     break;
 
   case 88:
-#line 474 "sieve.y"
+#line 472 "sieve.y"
     { (yyval.testl) = libsieve_new_testlist((yyvsp[(1) - (1)].test), NULL); ;}
     break;
 
   case 89:
-#line 475 "sieve.y"
+#line 473 "sieve.y"
     { (yyval.testl) = libsieve_new_testlist((yyvsp[(1) - (3)].test), (yyvsp[(3) - (3)].testl)); ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2329 "sieve.c"
+#line 2327 "sieve.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2539,7 +2537,7 @@ yyreturn:
 }
 
 
-#line 478 "sieve.y"
+#line 476 "sieve.y"
 
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
@@ -2547,20 +2545,18 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context)
     commandlist_t *t;
     extern commandlist_t *ret;
 
-    libsieve_parse_context = context;
-
     /* Due to the YYLEX calling convention, we need to put the scanner
      * inside the context, and the context into the scanner's yyextra. */
     libsieve_sievelex_init_extra(context, &context->sieve_scanner);
 
     if (libsieve_sieveparse( context )) {
         libsieve_sievelex_destroy( context->sieve_scanner );
-	return NULL;
+        return NULL;
     } else {
         libsieve_sievelex_destroy( context->sieve_scanner );
         t = ret;
-	ret = NULL;
-	return t;
+        ret = NULL;
+        return t;
     }
 }
 
@@ -2584,87 +2580,95 @@ int libsieve_sieveerror(struct sieve2_context *context, char *msg)
     return 0;
 }
 
-static test_t *static_build_address(int t, struct aetags *ae,
-			     stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_address(
+        struct sieve2_context *context,
+        int t, struct aetags *ae, stringlist_t *sl, patternlist_t *pl)
 {
-    test_t *ret = libsieve_new_test(t);	/* can be either ADDRESS or ENVELOPE */
+    test_t *ret = libsieve_new_test(t);        /* can be either ADDRESS or ENVELOPE */
 
     libsieve_assert((t == ADDRESS) || (t == ENVELOPE));
 
     if (ret) {
-	ret->u.ae.comptag = ae->comptag;
-	ret->u.ae.comp = libsieve_comparator_lookup(ae->comparator, ae->comptag);
-	ret->u.ae.sl = sl;
-	ret->u.ae.pl = pl;
-	ret->u.ae.addrpart = ae->addrtag;
-	static_free_aetags(ae);
-	if (ret->u.ae.comp == NULL) {
-	    libsieve_free_test(ret);
-	    ret = NULL;
-	}
+        ret->u.ae.comptag = ae->comptag;
+        ret->u.ae.comp = libsieve_comparator_lookup(ae->comparator, ae->comptag);
+        ret->u.ae.sl = sl;
+        ret->u.ae.pl = pl;
+        ret->u.ae.addrpart = ae->addrtag;
+        static_free_aetags(ae);
+        if (ret->u.ae.comp == NULL) {
+            libsieve_free_test(ret);
+            ret = NULL;
+        }
     }
     return ret;
 }
 
-static test_t *static_build_header(int t, struct htags *h,
-			    stringlist_t *sl, patternlist_t *pl)
+static test_t *static_build_header(
+        struct sieve2_context *context,
+        int t, struct htags *h, stringlist_t *sl, patternlist_t *pl)
 {
-    test_t *ret = libsieve_new_test(t);	/* can be HEADER */
+    test_t *ret = libsieve_new_test(t);        /* can be HEADER */
 
     libsieve_assert(t == HEADER);
 
     if (ret) {
-	ret->u.h.comptag = h->comptag;
-	ret->u.h.comp = libsieve_comparator_lookup(h->comparator, h->comptag);
-	ret->u.h.sl = sl;
-	ret->u.h.pl = pl;
-	static_free_htags(h);
-	if (ret->u.h.comp == NULL) {
-	    libsieve_free_test(ret);
-	    ret = NULL;
-	}
+        ret->u.h.comptag = h->comptag;
+        ret->u.h.comp = libsieve_comparator_lookup(h->comparator, h->comptag);
+        ret->u.h.sl = sl;
+        ret->u.h.pl = pl;
+        static_free_htags(h);
+        if (ret->u.h.comp == NULL) {
+            libsieve_free_test(ret);
+            ret = NULL;
+        }
     }
     return ret;
 }
 
-static commandlist_t *static_build_vacation(int t, struct vtags *v, char *reason)
+static commandlist_t *static_build_vacation(
+        struct sieve2_context *context,
+        int t, struct vtags *v, char *reason)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
     libsieve_assert(t == VACATION);
 
     if (ret) {
-	ret->u.v.subject = v->subject; v->subject = NULL;
-	ret->u.v.handle = v->handle; v->handle = NULL;
-	ret->u.v.from = v->from; v->from = NULL;
-	ret->u.v.days = v->days;
-	ret->u.v.mime = v->mime;
-	ret->u.v.addresses = v->addresses; v->addresses = NULL;
-	static_free_vtags(v);
-	ret->u.v.message = reason;
+        ret->u.v.subject = v->subject; v->subject = NULL;
+        ret->u.v.handle = v->handle; v->handle = NULL;
+        ret->u.v.from = v->from; v->from = NULL;
+        ret->u.v.days = v->days;
+        ret->u.v.mime = v->mime;
+        ret->u.v.addresses = v->addresses; v->addresses = NULL;
+        static_free_vtags(v);
+        ret->u.v.message = reason;
     }
     return ret;
 }
 
-static commandlist_t *static_build_notify(int t, struct ntags *n)
+static commandlist_t *static_build_notify(
+        struct sieve2_context *context,
+        int t, struct ntags *n)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
     libsieve_assert(t == NOTIFY);
 
     if (ret) {
-	ret->u.n.method = n->method; n->method = NULL;
-	ret->u.n.id = n->id; n->id = NULL;
-	ret->u.n.options = n->options; n->options = NULL;
-	ret->u.n.priority = n->priority;
-	ret->u.n.message = n->message; n->message = NULL;
-	static_free_ntags(n);
+        ret->u.n.method = n->method; n->method = NULL;
+        ret->u.n.id = n->id; n->id = NULL;
+        ret->u.n.options = n->options; n->options = NULL;
+        ret->u.n.priority = n->priority;
+        ret->u.n.message = n->message; n->message = NULL;
+        static_free_ntags(n);
     }
     return ret;
 }
 
 // FIXME: I think we just test and return true or false... check around.
-static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
+static commandlist_t *static_build_validnotif(
+        struct sieve2_context *context,
+        int t, stringlist_t *sl)
 {
     commandlist_t *ret = libsieve_new_command(t);
 
@@ -2672,11 +2676,11 @@ static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
 
 /*
     if (ret) {
-	ret->u.d.comptag = d->comptag;
-	ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
-	ret->u.d.pattern = d->pattern; d->pattern = NULL;
-	ret->u.d.priority = d->priority;
-	static_free_dtags(d);
+        ret->u.d.comptag = d->comptag;
+        ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
+        ret->u.d.pattern = d->pattern; d->pattern = NULL;
+        ret->u.d.priority = d->priority;
+        static_free_dtags(d);
     }*/
     return ret;
 }
@@ -2825,7 +2829,7 @@ static int static_verify_address(struct sieve2_context *context, const char *s)
 {
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(context, &addr, &s);
+    addr = libsieve_addr_parse_buffer(context, s, &addr);
     if (addr == NULL) {
         return 0;
     }
@@ -2845,18 +2849,18 @@ static int static_verify_header(struct sieve2_context *context, const char *hdr)
     char *err;
 
     while (*h) {
-	/* field-name      =       1*ftext
-	   ftext           =       %d33-57 / %d59-126         
-	   ; Any character except
-	   ;  controls, SP, and
-	   ;  ":". */
-	if (!((*h >= 33 && *h <= 57) || (*h >= 59 && *h <= 126))) {
-	    err = libsieve_strconcat("header '", hdr, "': not a valid header", NULL);
-	    libsieve_sieveerror(libsieve_parse_context, err);
-	    libsieve_free(err);
-	    return 0;
-	}
-	h++;
+        /* field-name      =       1*ftext
+           ftext           =       %d33-57 / %d59-126         
+           ; Any character except
+           ;  controls, SP, and
+           ;  ":". */
+        if (!((*h >= 33 && *h <= 57) || (*h >= 59 && *h <= 126))) {
+            err = libsieve_strconcat("header '", hdr, "': not a valid header", NULL);
+            libsieve_sieveerror(context, err);
+            libsieve_free(err);
+            return 0;
+        }
+        h++;
     }
     return 1;
 }
@@ -2872,22 +2876,22 @@ static int static_verify_flag(struct sieve2_context *context, const char *flag)
     f = libsieve_strdup(flag);
  
     if (f[0] == '\\') {
-	libsieve_strtolower(f,strlen(f));
-	if (strcmp(f, "\\\\seen") && strcmp(f, "\\\\answered") &&
-	    strcmp(f, "\\\\flagged") && strcmp(f, "\\\\draft") &&
-	    strcmp(f, "\\\\deleted")) {
+        libsieve_strtolower(f,strlen(f));
+        if (strcmp(f, "\\\\seen") && strcmp(f, "\\\\answered") &&
+            strcmp(f, "\\\\flagged") && strcmp(f, "\\\\draft") &&
+            strcmp(f, "\\\\deleted")) {
             err = libsieve_strconcat("flag '", f, "': not a system flag", NULL);
-	    libsieve_sieveerror(err);
-	    libsieve_free(err);
-	    ret = 0;
-	}
-	ret = 1;
+            libsieve_sieveerror(err);
+            libsieve_free(err);
+            ret = 0;
+        }
+        ret = 1;
     }
     else if (!libsieve_strisatom(f,strlen(f))) {
-	err = libsieve_strconcat("flag '", f, "': not a valid keyword", NULL);
-	libsieve_sieveerror(err);
-	libsieve_free(err);
-	ret = 0;
+        err = libsieve_strconcat("flag '", f, "': not a valid keyword", NULL);
+        libsieve_sieveerror(err);
+        libsieve_free(err);
+        ret = 0;
     }
     ret = 1;
 
@@ -2903,10 +2907,10 @@ static regex_t *static_verify_regex(struct sieve2_context *context, const char *
     regex_t *reg = (regex_t *) libsieve_malloc(sizeof(regex_t));
 
     if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
-	(void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
-	libsieve_sieveerror(libsieve_parse_context, errbuf);
-	libsieve_free(reg);
-	return NULL;
+        (void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
+        libsieve_sieveerror(context, errbuf);
+        libsieve_free(reg);
+        return NULL;
     }
     return reg;
 }
@@ -2919,19 +2923,19 @@ static patternlist_t *static_verify_regexs(struct sieve2_context *context, strin
     regex_t *reg;
 
     if (!strcmp(comp, "i;ascii-casemap")) {
-	cflags |= REG_ICASE;
+        cflags |= REG_ICASE;
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
-	    libsieve_free_pl(pl, REGEX);
-	    break;
-	}
-	pl = libsieve_new_pl(reg, pl);
+        if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
+            libsieve_free_pl(pl, REGEX);
+            break;
+        }
+        pl = libsieve_new_pl(reg, pl);
     }
     if (sl2 == NULL) {
-	libsieve_free_sl(sl);
-	return pl;
+        libsieve_free_sl(sl);
+        return pl;
     }
     return NULL;
 }
@@ -2957,23 +2961,23 @@ static int static_check_reqs(struct sieve2_context *c, char *req)
     } else if (!strcmp("notify",req)) {
         return c->require.notify = c->support.notify;
     } else if (!strcmp("subaddress", req)) {
-	return c->require.subaddress = c->support.subaddress;
+        return c->require.subaddress = c->support.subaddress;
     /* imap4flags is built into the parser. */
     } else if (!strcmp("imap4flags", req)) {
         return c->require.imap4flags = 1;
     /* regex is built into the parser. */
     } else if (!strcmp("regex", req)) {
-	return c->require.regex = 1;
+        return c->require.regex = 1;
     /* relational is built into the parser. */
     } else if (!strcmp("relational", req)) {
-	return c->require.relational = 1;
+        return c->require.relational = 1;
     /* These comparators are built into the parser. */
     } else if (!strcmp("comparator-i;octet", req)) {
-	return 1;
+        return 1;
     } else if (!strcmp("comparator-i;ascii-casemap", req)) {
-	return 1;
+        return 1;
     } else if (!strcmp("comparator-i;ascii-numeric", req)) {
-	return 1;
+        return 1;
     }
     /* If we don't recognize it, then we don't support it! */
     return 0;

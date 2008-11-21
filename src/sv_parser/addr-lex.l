@@ -47,8 +47,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT context
 
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
+// #undef YY_INPUT
+// #define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
 #define YY_FATAL_ERROR libsieve_addrfatalerror
 
 void libsieve_addrfatalerror(const char msg[]);
@@ -58,7 +58,7 @@ void libsieve_addrfatalerror(const char msg[]);
 
 %}
 
-%option noyywrap nounput
+%option nounput noyywrap 
 %option never-interactive
 %option prefix="libsieve_addr"
 %option header-file="addr-lex.h"
