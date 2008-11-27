@@ -42,6 +42,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define THIS_MODULE "sv_comparator"
 #define THIS_CONTEXT libsieve_parse_context
 // FIXME: Not dealing with context right now.
+#undef TRACE_DEBUG
 #define TRACE_DEBUG(...) 
 
 /* --- i;octet comparators --- */
