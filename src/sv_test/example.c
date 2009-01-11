@@ -497,7 +497,9 @@ int main(int argc, char *argv[])
 		usage_error = 1;
 	} else {
 		s = 1, m = 2; // Where to look in argv
-		if (strcmp(argv[1], "-l") == 0) {
+		if (strcmp(argv[1], "-h") == 0) {
+			usage_error = 1;
+		} else if (strcmp(argv[1], "-l") == 0) {
 			printf("%s", sieve2_license());
 			exitcode = 0;
 			goto endnofree;
@@ -522,9 +524,12 @@ int main(int argc, char *argv[])
 	}
 
 	if (usage_error) {
-		printf("Usage:\n");
-		printf("%s script\n", argv[0]);
-		printf("%s script message\n", argv[0]);
+		printf("Usage:\n"
+		       "    example -l: print license\n"
+		       "    example -c: print credits\n"
+		       "    example -d: debug script execution\n"
+		       "    example [-d] script\n"
+		       "    example [-d] script message\n");
 		exitcode = 1;
 		goto endnofree;
 	}
