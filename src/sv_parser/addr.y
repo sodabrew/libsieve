@@ -185,10 +185,9 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const
     libsieve_addrlex_init_extra(context, &context->addr_scanner);
     libsieve_addr_scan_string(ptr, context->addr_scanner);
 
-    if(libsieve_addrparse( context )) {
-        libsieve_addrlex_destroy( context->addr_scanner );
+    if (libsieve_addrparse(context)) {
+        libsieve_addrlex_destroy(context->addr_scanner);
         libsieve_addrstructfree(context, context->addr_addr, CHARSALSO);
-        libsieve_strbuffree(&ml, FREEME);
         return NULL;
     }
 
@@ -203,9 +202,8 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const
      * at the top, but at least we can hide that here!
      */
     newdata = libsieve_addrstructcopy(context, context->addr_addr->next, STRUCTONLY);
-    libsieve_addrlex_destroy( context->addr_scanner );
+    libsieve_addrlex_destroy(context->addr_scanner);
     libsieve_addrstructfree(context, context->addr_addr, STRUCTONLY);
-    libsieve_strbuffree(&ml, FREEME);
 
     if (*data == NULL)
         *data = newdata;

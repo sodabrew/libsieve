@@ -186,6 +186,7 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
+        c->script.ptr = c->script.script;
         c->script.cmds = libsieve_sieve_parse_buffer(c);
         libsieve_free_tree(c->script.cmds);
         c->script.cmds = NULL;
@@ -226,7 +227,6 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
         return SIEVE2_ERROR_GETSCRIPT;
 
     try {
-
         /* If the client app doesn't have its own header parser,
          * we will use an internal one. */
         if (!c->callbacks.getheader) {
@@ -245,6 +245,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
             }
         }
  
+        c->script.ptr = c->script.script;
         c->script.cmds = libsieve_sieve_parse_buffer(c);
         if (c->script.error_count > 0) {
             if (c->script.cmds) {

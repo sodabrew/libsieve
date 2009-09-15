@@ -82,8 +82,9 @@ struct actions2 {
 struct script2 {
     int error_count;
     int error_lineno;
+    char *ptr; // lexer position
     const char *script;
-    int length;
+    int length; //FIXME: size_t?
     commandlist_t *cmds;
 };
 
@@ -121,10 +122,6 @@ struct sieve2_context {
     void *sieve_scanner;
     void *header_scanner;
     void *addr_scanner;
-
-    char *sieve_ptr;
-
-    size_t sieve_len;
 
     int addr_ncom;
     header_list_t *header_hl;

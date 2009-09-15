@@ -284,6 +284,7 @@ int my_getscript(sieve2_context_t *s, void *my)
 		if (m->s_buf) free(m->s_buf);
 
 		/* Read the script file given as an argument. */
+		printf("Reading script: %s\n", m->scriptfile);
 		res = read_file(m->scriptfile, &m->s_buf, end_of_nothing);
 		if (res != SIEVE2_OK) {
 			printf("my_getscript: read_file() returns %d\n", res);
@@ -572,6 +573,8 @@ int main(int argc, char *argv[])
 		exitcode = 1;
 		goto freesieve;
 	}
+
+        // libsieve_sieve_setdebug(1);
 
 	printf("Validating script...");
 	res = sieve2_validate(sieve2_context, my_context);

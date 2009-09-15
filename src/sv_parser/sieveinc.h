@@ -38,8 +38,6 @@ struct ntags {
     char *message;
 };
 
-static commandlist_t *ret;
-
 static test_t *static_build_address(struct sieve2_context *context, int t, struct aetags *ae,
 			     stringlist_t *sl, patternlist_t *pl);
 static test_t *static_build_header(struct sieve2_context *context, int t, struct htags *h,

@@ -36,6 +36,8 @@ struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, const
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
 
+void libsieve_sieve_setdebug(int debug);
+
 int libsieve_sievelex(yyscan_t yyscanner);
 int libsieve_addrlex(yyscan_t yyscanner);
 

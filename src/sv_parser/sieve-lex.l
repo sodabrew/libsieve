@@ -36,7 +36,7 @@
 #define THIS_CONTEXT context
 
 #undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->sieve_ptr, &context->sieve_len, b, ms))
+#define YY_INPUT(b, r, ms) (r = libsieve_lexinput(&context->script.ptr, &context->script.length, b, ms))
 #define YY_FATAL_ERROR(msg) libsieve_do_error_exec(libsieve_sieveget_extra(yyscanner), msg)
 
 %}
@@ -127,12 +127,12 @@ CRLF		(\r\n|\r|\n)
 			      context->text = NULL;
 			    }
 			    throw(SIEVE2_ERROR_PARSE);
-			} return k; }
+			  } return k; }
 	
 <INITIAL>[ \t\n\r] ;	/* ignore whitespace */
 <INITIAL>#.* ;		/* ignore comments */
 <INITIAL>\/\*           { BEGIN COMMENT; }
-.			return yytext[0];
+.			{ return yytext[0]; }
 
 %%
 
