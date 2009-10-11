@@ -1,0 +1,13 @@
+Return-Path: <root@exemplo.pt>
+Delivered-To: jorge@decimal.pt
+Received: (qmail 29638 invoked from network); 2 Dec 2004 15:53:06 -0000
+Received: from unknown (HELO exemplo.pt) (213.146.207.15)
+by 0 with SMTP; 2 Dec 2004 15:53:06 -0000
+Received: (qmail 3727 invoked by uid 0); 2 Mar 2004 14:56:35 -0000
+Date: 2 Mar 2004 14:56:35 -0000
+Message-ID: <20040302145635.3726.qmail@exemplo.pt>
+From: root@exemplo.pt
+To: jorge@decimal.pt
+X-DBMail-PhysMessage-ID: 35634
+
+criar uma tabela de cursos e acrescentar o campo para introduzir o mesmo, depois criar uma listagem para puder tirar -> listgem de forma‡ao indvidual / especializa‡ao <-

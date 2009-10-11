@@ -1,0 +1,9 @@
+Subject: hello 
+X-Spam-Report: 
+              *  0.7 FH_HOST_EQ_D_D_D_D Host starts with d-d-d-d
+              *  0.7 FH_HOST_EQ_D_D_D_DB Host is d-d-d-d
+              *  2.0 SL_REC_IP_ONLY Sender has no PTR-record
+              *  2.4 FRT_STRONG1 BODY: ReplaceTags: Strong (1)
+Date: today
+
+Foo
