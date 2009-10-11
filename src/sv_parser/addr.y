@@ -105,8 +105,12 @@ routeaddr: '<' addrspec '>'		{ TRACE_DEBUG( "routeaddr: addrspec: %s", $2 ); }
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "addr->route: %s", $2 );
 		addr->route = libsieve_strdup( $2 );
+		}
+	| '<' '>'			{
+		TRACE_DEBUG("routeaddr: <>");
+		addr->mailbox = libsieve_strdup( "" );
 		};
-	
+
 addrspec: localpart '@' domain		{
 		TRACE_DEBUG( "addrspec: localpart domain: %s %s", $1, $3 );
 		// This is a "top terminal" state...

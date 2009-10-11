@@ -206,20 +206,32 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
     case ANYOF:
         res = 0;
         for (tl = t->u.tl; tl != NULL && !res; tl = tl->next) {
-            res |= static_evaltest(context, tl->t);
+            /* Short-circuit as soon as any test passes. */
+            if (static_evaltest(context, tl->t)) {
+                res = 1;
+                break;
+            }
         }
         break;
     case ALLOF:
         res = 1;
         for (tl = t->u.tl; tl != NULL && res; tl = tl->next) {
             res &= static_evaltest(context, tl->t);
+            /* Short-circuit as soon as any test fails. */
+            if (! static_evaltest(context, tl->t)) {
+                res = 0;
+                break;
+            }
         }
         break;
     case EXISTS:
         res = 1;
         for (sl = t->u.sl; sl != NULL && res; sl = sl->next) {
             char **headbody = NULL;
-            res &= (libsieve_do_getheader(context, sl->s, &headbody) == SIEVE2_OK);
+            if (libsieve_do_getheader(context, sl->s, &headbody) != SIEVE2_OK) {
+                res = 0;
+                break;
+            }
         }
         break;
     case SFALSE:

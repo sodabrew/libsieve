@@ -98,9 +98,13 @@ char *libsieve_get_address(struct sieve2_context *context,
 #define U_DOMAIN "unspecified-domain"
 #define U_USER "unknown-user"
     if (a->mailbox || a->domain) {
-    	char *m = a->mailbox ? a->mailbox : U_USER;
-    	char *d = a->domain ? a->domain : U_DOMAIN;
-    	address = am->freeme = libsieve_strconcat(m, "@", d, NULL);
+        if (strlen(a->mailbox) == 0 && a->domain == NULL) {
+            address = "";
+        } else {
+    	    char *m = a->mailbox ? a->mailbox : U_USER;
+    	    char *d = a->domain ? a->domain : U_DOMAIN;
+    	    address = am->freeme = libsieve_strconcat(m, "@", d, NULL);
+	}
     } else {
     	ret = NULL;
 	goto got_address;
