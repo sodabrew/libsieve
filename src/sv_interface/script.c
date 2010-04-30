@@ -474,14 +474,30 @@ int libsieve_eval(struct sieve2_context *context,
 
                     /* ok, is it any of the other addresses i've
                        specified? */
-                    if (l == SIEVE2_OK)
-                        for (sl = c->u.v.addresses; sl != NULL; sl = sl->next)
+                    if (l == SIEVE2_OK) {
+                        for (sl = c->u.v.addresses; sl != NULL; sl = sl->next) {
                             if (sl->s && !strcmp(sl->s, reply_to))
                                 l = SIEVE2_DONE;
+			}
+		    }
 
                     if (l == SIEVE2_DONE)
                         TRACE_DEBUG("VACATION aborted because the message is from a secondary address.");
                 
+		    /* check myaddr matches any of the addresses specified in 
+		     * the script */
+                    if (l == SIEVE2_OK) {
+			l = SIEVE2_DONE;
+                        for (sl = c->u.v.addresses; sl != NULL; sl = sl->next) {
+                            if (sl->s && !strcmp(sl->s, myaddr))
+                                l = SIEVE2_OK;
+			}
+		    }
+
+                    if (l == SIEVE2_DONE)
+                        TRACE_DEBUG("VACATION aborted: no match found in script.");
+                
+
                     /* ok, is it a system address? */
                     if (l == SIEVE2_OK && sysaddr(reply_to)) {
                         TRACE_DEBUG("VACATION aborted because the message is from a system address.");
