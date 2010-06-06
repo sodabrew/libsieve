@@ -90,7 +90,7 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, char **body)
         struct address *data = NULL;
         struct addr_marker *marker = NULL;
         char *addr;
-        
+
         libsieve_parse_address(body[l], &data, &marker);
         /* loop through each address in the header */
         while (!found && ((addr = libsieve_get_address(NULL, ADDRESS_ALL, &marker, 1)) != NULL)) {
@@ -178,7 +178,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
 
                     libsieve_parse_address(body[l], &data, &marker);
                     val = libsieve_get_address(context, addrpart, &marker, 0);
-                    while (val != NULL && !res) { 
+                    while (val != NULL && !res) {
                         /* loop through each address */
                         if (libsieve_relational_count(t->u.h.comptag)) {
                             count++;
@@ -322,7 +322,7 @@ int libsieve_eval(struct sieve2_context *context,
     stringlist_t *sl;
 
     TRACE_DEBUG("starting into libsieve_eval");
-    
+
     if (c == NULL)
         TRACE_DEBUG("the commandlist is null");
     else
@@ -390,37 +390,37 @@ int libsieve_eval(struct sieve2_context *context,
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Id header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Help", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Help header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Subscribe", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Subscribe header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Unsubscribe", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Unsubscribe header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Post", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Post header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Owner", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Owner header.");
                 }
- 
+
                 if (l == SIEVE2_OK && libsieve_do_getheader(context, "List-Archive", &body) == SIEVE2_OK) {
                     l = SIEVE2_DONE;
                     TRACE_DEBUG("VACATION aborted by List-Archive header.");
                 }
- 
+
                 /* Is there a Precedence keyword of "junk | bulk | list"? */
                 if (libsieve_do_getheader(context, "precedence", &body) == SIEVE2_OK) {
                     /* Skip leading white-space */
@@ -478,25 +478,24 @@ int libsieve_eval(struct sieve2_context *context,
                         for (sl = c->u.v.addresses; sl != NULL; sl = sl->next) {
                             if (sl->s && !strcmp(sl->s, reply_to))
                                 l = SIEVE2_DONE;
-			}
-		    }
+                        }
+                    }
 
                     if (l == SIEVE2_DONE)
                         TRACE_DEBUG("VACATION aborted because the message is from a secondary address.");
-                
-		    /* check myaddr matches any of the addresses specified in 
-		     * the script */
+
+                    /* check myaddr matches any of the addresses specified in
+                     * the script */
                     if (l == SIEVE2_OK) {
-			l = SIEVE2_DONE;
+                        l = SIEVE2_DONE;
                         for (sl = c->u.v.addresses; sl != NULL; sl = sl->next) {
                             if (sl->s && !strcmp(sl->s, myaddr))
                                 l = SIEVE2_OK;
-			}
-		    }
+                        }
+                    }
 
                     if (l == SIEVE2_DONE)
                         TRACE_DEBUG("VACATION aborted: no match found in script.");
-                
 
                     /* ok, is it a system address? */
                     if (l == SIEVE2_OK && sysaddr(reply_to)) {
@@ -514,7 +513,7 @@ int libsieve_eval(struct sieve2_context *context,
 
                     if (c->u.v.from != NULL)
                        found = c->u.v.from;
- 
+
                     if (!found && (libsieve_do_getheader(context, "to", &body) == SIEVE2_OK))
                        found = look_for_me(myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "cc", &body) == SIEVE2_OK))
@@ -537,11 +536,11 @@ int libsieve_eval(struct sieve2_context *context,
                 if (l == SIEVE2_OK) {
                     /* ok, ok, if we got here maybe we should reply */
                     char buf[128];
-                
+
                     if (c->u.v.subject == NULL) {
                         /* we have to generate a subject */
                         char **s;
-                    
+
                         if (libsieve_do_getheader(context, "subject", &s) != SIEVE2_OK ||
                             s[0] == NULL) {
                             strcpy(buf, "Automated reply");
@@ -573,13 +572,13 @@ int libsieve_eval(struct sieve2_context *context,
 
                     /* who do we want the message coming from? */
                     fromaddr = found;
-                
+
                     res = libsieve_do_vacation(context, reply_to,
                                       libsieve_strdup(fromaddr),
                                       libsieve_strdup(buf),
                                       c->u.v.message, c->u.v.handle,
                                       c->u.v.days, c->u.v.mime);
-                
+
                      if (res == SIEVE2_ERROR_EXEC)
                          *errmsg = "Vacation can not be used with Reject or Vacation";
 
