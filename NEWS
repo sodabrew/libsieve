@@ -11,7 +11,6 @@ libSieve 2.2.8
 
 - Add AM_MAINTAINER_MODE to only rebuild flex/bison sources if required.
 
-
 libSieve 2.2.7
 --------------
 
