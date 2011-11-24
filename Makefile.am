@@ -5,7 +5,8 @@ EXTRA_DIST              = libsieve.pc.in src/sv_regex/README src/sv_regex/regcom
 pkgconfigdir            = $(libdir)/pkgconfig
 pkgconfig_DATA          = libsieve.pc
 
-SUBDIRS                 = . src/sv_test src/sv_include
+SUBDIRS                 = . src/sv_test
+include_HEADERS		= src/sv_include/sieve2.h src/sv_include/sieve2_error.h
 
 AM_CFLAGS		= -Wall -I$(top_srcdir)/src/sv_util -I$(top_srcdir)/src/sv_parser -I$(top_srcdir)/src/sv_interface -I$(top_srcdir)/src/sv_regex -I$(top_srcdir)/src/sv_include -g
 AM_LFLAGS		= -s -olex.yy.c
