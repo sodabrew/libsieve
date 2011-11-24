@@ -39,6 +39,6 @@ AC_FUNC_VPRINTF
 
 AM_CONFIG_HEADER(config.h)
 
-AC_CONFIG_FILES([src/libsieve.pc])
+AC_CONFIG_FILES([libsieve.pc])
 
-AC_OUTPUT(src/sv_parser/Makefile src/sv_regex/Makefile src/sv_interface/Makefile src/sv_util/Makefile src/sv_test/Makefile src/sv_include/Makefile src/Makefile)
+AC_OUTPUT(src/sv_parser/Makefile src/sv_regex/Makefile src/sv_interface/Makefile src/sv_util/Makefile src/sv_test/Makefile src/sv_include/Makefile Makefile)
