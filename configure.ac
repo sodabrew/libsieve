@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(sv_parser/sieve.y)
+AC_INIT(src/sv_parser/sieve.y)
 AM_INIT_AUTOMAKE(libsieve, 2.2.8)
 
 dnl Don't rebuild flex/bison output unless I say so.
 AM_MAINTAINER_MODE
-
+AC_CONFIG_MACRO_DIR([m4])
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_YACC
@@ -39,6 +39,6 @@ AC_FUNC_VPRINTF
 
 AM_CONFIG_HEADER(config.h)
 
-AC_CONFIG_FILES([libsieve.pc])
+AC_CONFIG_FILES([src/libsieve.pc])
 
-AC_OUTPUT(sv_parser/Makefile sv_regex/Makefile sv_interface/Makefile sv_util/Makefile sv_test/Makefile sv_include/Makefile Makefile)
+AC_OUTPUT(src/sv_parser/Makefile src/sv_regex/Makefile src/sv_interface/Makefile src/sv_util/Makefile src/sv_test/Makefile src/sv_include/Makefile src/Makefile)
