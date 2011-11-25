@@ -162,7 +162,7 @@ int libsieve_do_vacation(struct sieve2_context *c,
 		char *addr, char *fromaddr,
 		char *subj, char *msg,
 		char *handle,
-		int days, int mime)
+		const int days, const int mime)
 {
     if (c->actions.reject)
         return SIEVE2_ERROR_EXEC;
@@ -227,7 +227,7 @@ int libsieve_do_error_exec(struct sieve2_context *c, char *msg)
     return SIEVE2_OK;
 }
 
-int libsieve_do_error_parse(struct sieve2_context *c, int lineno, const char *msg)
+int libsieve_do_error_parse(struct sieve2_context *c, const int lineno, const char *msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_PARSE);
 
@@ -252,7 +252,7 @@ int libsieve_do_error_address(struct sieve2_context *c, const char *msg)
     return SIEVE2_OK;
 }
 
-int libsieve_do_error_header(struct sieve2_context *c, int lineno, const char *msg)
+int libsieve_do_error_header(struct sieve2_context *c, const int lineno, const char *msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_HEADER);
 
@@ -265,7 +265,7 @@ int libsieve_do_error_header(struct sieve2_context *c, int lineno, const char *m
     return SIEVE2_OK;
 }
 
-int libsieve_do_debug_trace(struct sieve2_context *c, int level,
+int libsieve_do_debug_trace(struct sieve2_context *c, const int level,
 		const char *module, const char *file, const char *function,
 		const char *formatstring, ...)
 {

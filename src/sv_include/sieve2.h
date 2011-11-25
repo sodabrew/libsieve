@@ -109,7 +109,7 @@ sieve2_getvalue_stringlist(
 
 extern int sieve2_getvalue_int(
 	sieve2_context_t *sieve2_context,
-	char *name);
+	char const * const name);
 
 /* If you allocated the memory, you have to free it. */
 extern int sieve2_setvalue_string(
@@ -123,7 +123,7 @@ extern int sieve2_setvalue_stringlist(
 
 extern int sieve2_setvalue_int(
 	sieve2_context_t *sieve2_context,
-	char *name, int value);
+	char const * const name, const int value);
 
 /* This translates the error numbers into static strings.
  * For fancier errors, callbacks from the context are used,

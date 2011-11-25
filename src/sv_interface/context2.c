@@ -192,7 +192,7 @@ char * * sieve2_getvalue_stringlist(
 
 int sieve2_getvalue_int(
     sieve2_context_t *c,
-    char *name)
+    char const * const name)
 {
     int i;
 
@@ -254,7 +254,7 @@ int sieve2_setvalue_stringlist(
 
 int sieve2_setvalue_int(
     sieve2_context_t *c,
-    char *name, int value)
+    char const * const name, const int value)
 {
     int i;
 

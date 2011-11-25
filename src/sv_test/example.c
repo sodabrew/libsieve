@@ -56,7 +56,7 @@ struct freelist {
 };
 
 struct my_context {
-	int m_size;
+	const int m_size;
 	char *m_buf;
 	char *s_buf;
 	char *scriptfile;
