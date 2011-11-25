@@ -41,4 +41,4 @@ AM_CONFIG_HEADER(config.h)
 
 AC_CONFIG_FILES([libsieve.pc])
 
-AC_OUTPUT(src/sv_test/Makefile Makefile)
+AC_OUTPUT(Makefile)

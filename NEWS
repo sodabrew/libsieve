@@ -1,3 +1,7 @@
+- Move all Makefile.am-s to single /Makefile.am
+
+- Move the build root from /src/ to /
+
 libSieve 2.2.8
 --------------
 
