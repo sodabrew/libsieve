@@ -36,6 +36,5 @@ AC_FUNC_VPRINTF
 
 AM_CONFIG_HEADER(config.h)
 
-AC_CONFIG_FILES([libsieve.pc])
-
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([libsieve.pc Makefile])
+AC_OUTPUT
