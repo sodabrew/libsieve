@@ -96,16 +96,16 @@ extern int sieve2_execute(sieve2_context_t *sieve2_context,
                           void *user_data);
 
 /* libSieve will free this memory for you, don't worry about it. */
-extern char * 
+extern const char * 
 sieve2_getvalue_string(
 	sieve2_context_t *sieve2_context,
-	char *value);
+	char const * const value);
 
 /* libSieve will free this memory for you, don't worry about it. */
 extern char * * 
 sieve2_getvalue_stringlist(
 	sieve2_context_t *sieve2_context,
-	char *name);
+	char const * const name);
 
 extern int sieve2_getvalue_int(
 	sieve2_context_t *sieve2_context,
@@ -114,12 +114,12 @@ extern int sieve2_getvalue_int(
 /* If you allocated the memory, you have to free it. */
 extern int sieve2_setvalue_string(
 	sieve2_context_t *sieve2_context,
-	char *name, char *value);
+	char const * const name, char* const value);
 
 /* If you allocated the memory, you have to free it. */
 extern int sieve2_setvalue_stringlist(
 	sieve2_context_t *sieve2_context,
-	char *name, char **value);
+	char const * const name, char **value);
 
 extern int sieve2_setvalue_int(
 	sieve2_context_t *sieve2_context,

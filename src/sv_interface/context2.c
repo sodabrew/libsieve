@@ -155,9 +155,9 @@ int libsieve_callback_end(
  * API on the inside, just in reverse! */
 
 /* libSieve will free this memory for you, don't worry about it. */
-char * sieve2_getvalue_string(
+const char * sieve2_getvalue_string(
     sieve2_context_t *c,
-    char *name)
+    char const * const name)
 {
     int i;
 
@@ -175,7 +175,7 @@ char * sieve2_getvalue_string(
 /* libSieve will free this memory for you, don't worry about it. */
 char * * sieve2_getvalue_stringlist(
     sieve2_context_t *c,
-    char *name)
+    char const * const name)
 {
     int i;
 
@@ -210,7 +210,7 @@ int sieve2_getvalue_int(
 /* If you allocated the memory, you have to free it. */
 int sieve2_setvalue_string(
     sieve2_context_t *c,
-    char *name, char *value)
+    char const * const name, char * const value)
 {
     int i;
 
@@ -232,7 +232,7 @@ int sieve2_setvalue_string(
 
 int sieve2_setvalue_stringlist(
     sieve2_context_t *c,
-    char *name, char **value)
+    char const * const name, char **value)
 {
     int i;
 

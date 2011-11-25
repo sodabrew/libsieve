@@ -7,7 +7,7 @@
 int libsieve_addrlex(void);
 int libsieve_addrparse(void);
 int libsieve_addrinput(char *buf, int max_size);
-void libsieve_addrerror(char *str);
+void libsieve_addrerror(const char *str);
 void libsieve_addrappend(struct address **a);
 
 #define STRUCTONLY 0

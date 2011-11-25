@@ -54,7 +54,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define THIS_CONTEXT libsieve_parse_context
 
 struct sieve2_context *libsieve_parse_context;
-extern int libsieve_sieveerror(char *msg);
+extern int libsieve_sieveerror(const char *msg);
 extern int libsieve_sievelex(void);
 
 #define YYERROR_VERBOSE /* i want better error messages! */
@@ -510,7 +510,7 @@ int libsieve_sieveerror_exec(char *msg)
     return 0;
 }
 
-int libsieve_sieveerror(char *msg)
+int libsieve_sieveerror(const char *msg)
 {
     extern int libsieve_sievelineno;
 

@@ -77,7 +77,7 @@ body: TEXT                      {
 %%
 
 /* copy header error message into buffer provided by sieve parser */
-void libsieve_headererror(char *s)
+void libsieve_headererror(const char *s)
 {
     extern int libsieve_headerlineno;
     TRACE_DEBUG( "Header parse error on line %d: %s",

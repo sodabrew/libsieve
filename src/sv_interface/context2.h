@@ -101,7 +101,7 @@ struct cur_call {
         } type;
         union {
             int i;
-            char *s;
+            char const *s;
             char **sl;
         } value;
     } values [MAX_VALUES];

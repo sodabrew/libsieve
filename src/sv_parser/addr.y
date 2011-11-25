@@ -168,7 +168,7 @@ qstring: QUOTE QTEXT QUOTE	{
 %%
 
 /* Run an execution error callback. */
-void libsieve_addrerror(char *msg)
+void libsieve_addrerror(const char *msg)
 {
     libsieve_parse_context->exec_errors++;
 
