@@ -1,3 +1,5 @@
+- Add SILENT_RULES to Makefile.am
+
 - Move all Makefile.am-s to single /Makefile.am
 
 - Move the build root from /src/ to /

@@ -3,6 +3,7 @@ AC_PREREQ([2.68])
 AC_INIT(libsieve, 2.2.8)
 AC_CONFIG_SRCDIR(src/sv_parser/sieve.y)
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects])
+AM_SILENT_RULES([yes])
 
 dnl Don't rebuild flex/bison output unless I say so.
 AM_MAINTAINER_MODE
