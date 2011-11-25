@@ -56,6 +56,7 @@ void libsieve_addrfatalerror(const char msg[]);
 
 %option noyywrap
 %option nounput
+%option noinput
 %option prefix="libsieve_addr"
 %option never-interactive
 

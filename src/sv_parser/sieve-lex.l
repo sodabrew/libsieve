@@ -57,6 +57,7 @@ static struct catbuf *text;
 %}
 
 %option yylineno
+%option noinput
 %option noyywrap
 %option nounput
 %option prefix="libsieve_sieve"
