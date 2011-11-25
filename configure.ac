@@ -1,6 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/sv_parser/sieve.y)
-AM_INIT_AUTOMAKE(libsieve, 2.2.8)
+AC_PREREQ([2.68])
+AC_INIT(libsieve, 2.2.8)
+AC_CONFIG_SRCDIR(src/sv_parser/sieve.y)
+AM_INIT_AUTOMAKE([])
 
 dnl Don't rebuild flex/bison output unless I say so.
 AM_MAINTAINER_MODE
