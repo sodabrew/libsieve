@@ -34,7 +34,7 @@ dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_VPRINTF
 
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADERS(config.h)
 
 AC_CONFIG_FILES([libsieve.pc Makefile])
 AC_OUTPUT
