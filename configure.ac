@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.68])
 AC_INIT(libsieve, 2.2.8)
 AC_CONFIG_SRCDIR(src/sv_parser/sieve.y)
-AM_INIT_AUTOMAKE([])
+AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects])
 
 dnl Don't rebuild flex/bison output unless I say so.
 AM_MAINTAINER_MODE
@@ -14,6 +14,7 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
 AM_PROG_LEX
+AM_PROG_CC_C_O
 
 dnl Gperf for the Sieve lexer
 AM_MISSING_PROG([GPERF], [gperf])
@@ -34,7 +35,7 @@ dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_VPRINTF
 
-AM_CONFIG_HEADERS(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_CONFIG_FILES([libsieve.pc Makefile])
 AC_OUTPUT
