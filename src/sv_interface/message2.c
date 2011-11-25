@@ -19,7 +19,7 @@
 #include <string.h>
 
 /* sv_parser */
-#include "headerinc.h"
+#include "src/sv_parser/headerinc.h"
 
 /* sv_interface */
 #include "message2.h"
@@ -27,7 +27,7 @@
 #include "callbacks2.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 #define THIS_MODULE "sv_interface"
 #define THIS_CONTEXT c

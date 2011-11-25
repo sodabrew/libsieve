@@ -28,7 +28,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef TREE_H
 #define TREE_H
 
-#include "comparator.h"
+#include "src/sv_parser/comparator.h"
 
 //#include <sys/types.h>
 #include "regex.h"

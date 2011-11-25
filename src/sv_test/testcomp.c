@@ -22,9 +22,9 @@
  * DO NOT TRY TO USE THEM IN
  * YOUR OWN APPLICATION CODE.
  * */
-#include "comparator.h"
-#include "tree.h"
-#include "sieve.h"
+#include "src/sv_parser/comparator.h"
+#include "src/sv_interface/tree.h"
+#include "src/sv_parser/sieve.h"
 
 
 struct testcase {

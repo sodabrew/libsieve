@@ -27,7 +27,7 @@
 #include "callbacks2.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* Reject is incompatible with:
  * fileinto, redirect, keep, reject, vacation,

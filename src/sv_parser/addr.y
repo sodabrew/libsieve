@@ -37,14 +37,14 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define YYSTYPE char *
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* sv_parser */
 #include "addr.h"
 #include "addrinc.h"
 
 /* sv_interface */
-#include "callbacks2.h"
+#include "src/sv_interface/callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT libsieve_parse_context

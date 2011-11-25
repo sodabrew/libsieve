@@ -21,9 +21,9 @@ void libsieve_addrlexalloc(void);
 void libsieve_addrlexrestart(void);
 
 /* SIEVE */
-#include "tree.h"
-#include "context2.h"
-#include "message2.h"
+#include "src/sv_interface/tree.h"
+#include "src/sv_interface/context2.h"
+#include "src/sv_interface/message2.h"
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
 int libsieve_sieveerror_exec(char *msg);

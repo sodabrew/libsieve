@@ -29,7 +29,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define MESSAGE_H
 
 #include "tree.h"		/* for stringlist_t */
-#include "addrinc.h"		/* for struct address */
+#include "src/sv_parser/addrinc.h"		/* for struct address */
 
 typedef enum {
     ACTION_NULL = -1,

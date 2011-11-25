@@ -35,8 +35,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <string.h>
 /* sv_util */
-#include "util.h"
-#include "callbacks2.h"
+#include "src/sv_util/util.h"
+#include "src/sv_interface/callbacks2.h"
 
 /* sv_parser */
 #include "addr.h"

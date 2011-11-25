@@ -1,9 +1,9 @@
 #ifndef SIEVEINC_H
 #define SIEVEINC_H
 
-#include "tree.h"
-#include "script.h"
-#include "context2.h"
+#include "src/sv_interface/tree.h"
+#include "src/sv_interface/script.h"
+#include "src/sv_interface/context2.h"
 
 struct vtags {
     int days;

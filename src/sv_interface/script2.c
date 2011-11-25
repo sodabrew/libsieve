@@ -31,10 +31,10 @@
 #include "sieve2_error.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* sv_parser */
-#include "parser.h"
+#include "src/sv_parser/parser.h"
 
 char * sieve2_errstr(int code)
 {

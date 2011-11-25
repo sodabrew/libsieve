@@ -43,12 +43,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "addrinc.h"
 
 /* sv_interface */
-#include "callbacks2.h"
-#include "script.h"
-#include "tree.h"
+#include "src/sv_interface/callbacks2.h"
+#include "src/sv_interface/script.h"
+#include "src/sv_interface/tree.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT libsieve_parse_context

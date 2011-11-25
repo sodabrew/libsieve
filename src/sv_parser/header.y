@@ -20,13 +20,13 @@
 #define YYSTYPE char *
 
 /* sv_util */
-#include "util.h"
-#include "callbacks2.h"
+#include "src/sv_util/util.h"
+#include "src/sv_interface/callbacks2.h"
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
 /* sv_include */
-#include "sieve2_error.h"
+#include "src/sv_include/sieve2_error.h"
 
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT libsieve_parse_context

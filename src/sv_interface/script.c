@@ -42,14 +42,14 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "callbacks2.h"
 #include "context2.h"
 #include "script.h"
-#include "sieve.h"
+#include "src/sv_parser/sieve.h"
 #include "tree.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* sv_parser */
-#include "parser.h"
+#include "src/sv_parser/parser.h"
 
 #define THIS_MODULE "sv_interface"
 #define THIS_CONTEXT context

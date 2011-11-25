@@ -33,12 +33,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "memory.h"
 
 #include "tree.h"
-#include "sieve.h"
+#include "src/sv_parser/sieve.h"
 
 #include "context2.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 stringlist_t *libsieve_new_sl(char *s, stringlist_t *n)
 {

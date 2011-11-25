@@ -42,10 +42,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "callbacks2.h"
 
 /* sv_parser */
-#include "parser.h"
+#include "src/sv_parser/parser.h"
 
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* given a header, extract an address out of it.  if marker points to NULL,
    extract the first address.  otherwise, it's an index into the header to

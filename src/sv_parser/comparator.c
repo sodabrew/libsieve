@@ -34,10 +34,10 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 
 #include "comparator.h"
-#include "tree.h"
+#include "src/sv_interface/tree.h"
 #include "sieve.h"
-#include "util.h"
-#include "callbacks2.h"
+#include "src/sv_util/util.h"
+#include "src/sv_interface/callbacks2.h"
 
 #define THIS_MODULE "sv_comparator"
 #define THIS_CONTEXT libsieve_parse_context

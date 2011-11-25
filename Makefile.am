@@ -7,7 +7,7 @@ pkgconfig_DATA          = libsieve.pc
 
 include_HEADERS		= src/sv_include/sieve2.h src/sv_include/sieve2_error.h
 
-AM_CFLAGS		= -Wall -I$(top_srcdir)/src/sv_util -I$(top_srcdir)/src/sv_parser -I$(top_srcdir)/src/sv_interface -I$(top_srcdir)/src/sv_regex -I$(top_srcdir)/src/sv_include -g
+AM_CFLAGS		= -Wall -I$(top_srcdir) -I$(top_builddir)
 AM_LFLAGS		= -s -olex.yy.c
 AM_YFLAGS		= -d -p$*
 

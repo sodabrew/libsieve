@@ -31,13 +31,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <string.h>
 /* sv_util */
-#include "util.h"
+#include "src/sv_util/util.h"
 
 /* sv_interface */
-#include "tree.h"
+#include "src/sv_interface/tree.h"
 #include "sieve.h"
-
-#include "callbacks2.h"
+#include "src/sv_interface/callbacks2.h"
 extern struct sieve2_context *libsieve_parse_context;
 #define THIS_MODULE "sv_parser"
 #define THIS_CONTEXT libsieve_parse_context
