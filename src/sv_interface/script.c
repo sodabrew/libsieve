@@ -75,7 +75,7 @@ static int sysaddr(char *addr)
 }
 
 /* look for myaddr and myaddrs in the body of a header - return the match */
-static char *look_for_me(char *myaddr, stringlist_t *myaddrs, char **body)
+static char *look_for_me(struct sieve2_context *context, char *myaddr, stringlist_t *myaddrs, char **body)
 {
     char *found = NULL;
     int l;
@@ -91,7 +91,7 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, char **body)
         struct addr_marker *marker = NULL;
         char *addr;
 
-        libsieve_parse_address(body[l], &data, &marker);
+        libsieve_parse_address(context, body[l], &data, &marker);
         /* loop through each address in the header */
         while (!found && ((addr = libsieve_get_address(NULL, ADDRESS_ALL, &marker, 1)) != NULL)) {
             if (!strcasecmp(addr, myaddr)) {
@@ -105,7 +105,7 @@ static char *look_for_me(char *myaddr, stringlist_t *myaddrs, char **body)
                 char *altaddr;
 
                 /* is this address one of my addresses? */
-                libsieve_parse_address(sl->s, &altdata, &altmarker);
+                libsieve_parse_address(context, sl->s, &altdata, &altmarker);
                 altaddr = libsieve_get_address(NULL, ADDRESS_ALL, &altmarker, 1);
                 if (!strcasecmp(addr, altaddr))
                     found = sl->s;
@@ -176,7 +176,7 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
                     struct addr_marker *marker = NULL;
                     char *val;
 
-                    libsieve_parse_address(body[l], &data, &marker);
+                    libsieve_parse_address(context, body[l], &data, &marker);
                     val = libsieve_get_address(context, addrpart, &marker, 0);
                     while (val != NULL && !res) {
                         /* loop through each address */
@@ -443,7 +443,7 @@ int libsieve_eval(struct sieve2_context *context,
                 if (l == SIEVE2_OK) {
                     l = libsieve_do_getenvelope(context, "to", body);
                     if (body[0]) {
-                        libsieve_parse_address(body[0], &data, &marker);
+                        libsieve_parse_address(context, body[0], &data, &marker);
                         tmp = libsieve_get_address(context, ADDRESS_ALL, &marker, 1);
                         myaddr = (tmp != NULL) ? libsieve_strdup(tmp) : NULL;
                         libsieve_free_address(&data, &marker);
@@ -455,7 +455,7 @@ int libsieve_eval(struct sieve2_context *context,
                 if (l == SIEVE2_OK && body[0]) {
                     /* we have to parse this address & decide whether we
                        want to respond to it */
-                    libsieve_parse_address(body[0], &data, &marker);
+                    libsieve_parse_address(context, body[0], &data, &marker);
                     tmp = libsieve_get_address(context, ADDRESS_ALL, &marker, 1);
                     reply_to = (tmp != NULL) ? libsieve_strdup(tmp) : NULL;
                     libsieve_free_address(&data, &marker);
@@ -515,17 +515,17 @@ int libsieve_eval(struct sieve2_context *context,
                        found = c->u.v.from;
 
                     if (!found && (libsieve_do_getheader(context, "to", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "cc", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "bcc", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "Resent-To", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "Resent-Cc", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
                     if (!found && (libsieve_do_getheader(context, "Resent-Bcc", &body) == SIEVE2_OK))
-                       found = look_for_me(myaddr, c->u.v.addresses, body);
+                       found = look_for_me(context, myaddr, c->u.v.addresses, body);
 
                     if (!found) {
                         TRACE_DEBUG("Vacation didn't find my address in To, Cc, Bcc, Resent-To, Resent-Cc or Resent-Bcc.");

@@ -763,11 +763,11 @@ static int static_verify_address(const char *s)
 {
     struct address *addr = NULL;
 
-    addr = libsieve_addr_parse_buffer(&addr, &s);
+    addr = libsieve_addr_parse_buffer(libsieve_parse_context, &addr, &s);
     if (addr == NULL) {
         return 0;
     }
-    libsieve_addrstructfree(addr, CHARSALSO);
+    libsieve_addrstructfree(libsieve_parse_context, addr, CHARSALSO);
     return 1;
 }
 

@@ -55,8 +55,9 @@ int sieve2_alloc(sieve2_context_t **context)
     }
     memset(c, 0, sizeof(struct sieve2_context));
 
+
     // TODO: Contextualize the lexer and parser.
-    libsieve_addrlexalloc();
+    libsieve_addrlex_init(&c->addr_scan);
     libsieve_sievelexalloc();
     libsieve_headerlexalloc();
     libsieve_headeryaccalloc();
@@ -85,7 +86,7 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_message2_free(&c->message);
 
-    libsieve_addrlexfree();
+    libsieve_addrlex_destroy(c->addr_scan);
     libsieve_sievelexfree();
     libsieve_headerlexfree();
     libsieve_headeryaccfree();

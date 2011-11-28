@@ -15,15 +15,14 @@ struct addr_marker {
     char *freeme;
 };
 
-struct address *libsieve_addr_parse_buffer(struct address **data, const char **ptr);
-void libsieve_addrlexfree(void);
-void libsieve_addrlexalloc(void);
-void libsieve_addrlexrestart(void);
-
 /* SIEVE */
 #include "src/sv_interface/tree.h"
 #include "src/sv_interface/context2.h"
 #include "src/sv_interface/message2.h"
+
+struct address *libsieve_addr_parse_buffer(struct sieve2_context *context, struct address **data, const char **ptr);
+int libsieve_addrlex_destroy(void *yyscanner);
+int libsieve_addrlex_init(void **yyscanner);
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
 int libsieve_sieveerror_exec(char *msg);
