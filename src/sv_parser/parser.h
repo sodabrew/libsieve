@@ -31,11 +31,8 @@ void libsieve_sievelexfree(void);
 void libsieve_sievelexalloc(void);
 void libsieve_sievelexrestart(void);
 
-header_list_t *libsieve_header_parse_buffer(header_list_t **data, char **ptr);
-void libsieve_headerlexfree(void);
-void libsieve_headerlexalloc(void);
-void libsieve_headerlexrestart(void);
-void libsieve_headeryaccfree(void);
-void libsieve_headeryaccalloc(void);
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr);
+int libsieve_headerlex_destroy(void* yyscanner);
+int libsieve_headerlex_init(void** yyscanner);
 
 #endif /* PARSER_H */

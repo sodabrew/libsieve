@@ -53,8 +53,7 @@ static int freecache(sieve2_message_t *m)
     /* Free the header hash cache entries */
     for (i = 0; i < m->hashsize; i++) {
         if (m->hash[i]) {
-	    /* The individual contents were allocated by the lex/yacc parser,
-	     * and so they are freed by headerlexfree() and headeryaccfree().
+	    /* The individual contents were allocated by the lex/yacc parser.
 	     * */
             libsieve_free(m->hash[i]->contents);
         }
@@ -107,12 +106,13 @@ int libsieve_message2_free(sieve2_message_t **m)
  * then uses the header parser to work at filling
  * the header hash in m->hash
  */
-int libsieve_message2_parseheader(sieve2_message_t *m)
+int libsieve_message2_parseheader(struct sieve2_context *context)
 {
     size_t c, cl;
     header_list_t *hl = NULL, *hlfree;
+    sieve2_message_t *m = context->message;
 
-    if ((hl = libsieve_header_parse_buffer(&hl, &m->header)) == NULL) {
+    if ((hl = libsieve_header_parse_buffer(context, &hl, &m->header)) == NULL) {
         /* That's a shame, we didn't find anything, or worse! */
         return SIEVE2_ERROR_HEADER;
     }

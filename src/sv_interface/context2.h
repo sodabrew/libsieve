@@ -13,8 +13,8 @@
 #define CONTEXT2_H
 
 #include "tree.h"		/* for commandlist_t */
-#include "message2.h"
 #include "sieve2.h"
+#include "message2.h"
 
 struct callbacks2 {
     sieve2_callback_func redirect;
@@ -113,6 +113,8 @@ struct sieve2_context {
     struct mlbuf *strbuf;
     void *addr_scan;
     struct address *addr_addr;
+    void *header_scan;
+    struct header_list *header_hl;
     int parse_errors;
     int exec_errors;
 

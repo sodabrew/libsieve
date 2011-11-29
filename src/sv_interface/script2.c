@@ -59,8 +59,7 @@ int sieve2_alloc(sieve2_context_t **context)
     // TODO: Contextualize the lexer and parser.
     libsieve_addrlex_init(&c->addr_scan);
     libsieve_sievelexalloc();
-    libsieve_headerlexalloc();
-    libsieve_headeryaccalloc();
+    libsieve_headerlex_init(&c->header_scan);
 
     libsieve_message2_alloc(&c->message);
 
@@ -88,8 +87,8 @@ int sieve2_free(sieve2_context_t **context)
 
     libsieve_addrlex_destroy(c->addr_scan);
     libsieve_sievelexfree();
-    libsieve_headerlexfree();
-    libsieve_headeryaccfree();
+    libsieve_sievelex_destroy(c->sieve_scan);
+    libsieve_headerlex_destroy(c->header_scan);
 
     libsieve_strbuffree(&c->strbuf, FREEME);
 
@@ -251,7 +250,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
                 return SIEVE2_ERROR_HEADER;
             /* Our "internal callback" instead of the user's getheader. */
             c->callbacks.getheader = libsieve_message2_getheader;
-            if (libsieve_message2_parseheader(c->message) != SIEVE2_OK)
+            if (libsieve_message2_parseheader(c) != SIEVE2_OK)
                 return SIEVE2_ERROR_HEADER;
             }
         }
