@@ -27,14 +27,15 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef COMPARATOR_H
 #define COMPARATOR_H
 
-#include "regex.h"
+#include "src/sv_regex/regex.h"
+#include "src/sv_include/sieve2.h"
 
 /* compares pat to text; returns 1 if it's true, 0 otherwise 
    first arg is pat, second arg is text */
-typedef int comparator_t(const char *, const char *);
+typedef int comparator_t(struct sieve2_context *context, const char *, const char *);
 
 /* returns a pointer to a comparator function given it's name */
-comparator_t *libsieve_comparator_lookup(const char *comp, int mode);
+comparator_t *libsieve_comparator_lookup(struct sieve2_context *context, const char *comp, int mode);
 
 enum num {
     gt = 1, // >
@@ -47,6 +48,6 @@ enum num {
 
 /* returns a magic number of the relational comparator. */
 int libsieve_relational_lookup(const char *rel);
-int libsieve_relational_count(int mode);
+int libsieve_relational_count(struct sieve2_context *context, int mode);
 
 #endif

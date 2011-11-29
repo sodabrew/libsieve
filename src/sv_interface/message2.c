@@ -30,7 +30,6 @@
 #include "src/sv_util/util.h"
 
 #define THIS_MODULE "sv_interface"
-#define THIS_CONTEXT c
 
 static int hashheader(char *header, int hashsize)
 {

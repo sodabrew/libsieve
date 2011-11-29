@@ -36,10 +36,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* sv_interface */
 #include "src/sv_interface/tree.h"
 #include "sieve.h"
+#include "sieveinc.h"
 #include "src/sv_interface/callbacks2.h"
-extern struct sieve2_context *libsieve_parse_context;
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
 
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))

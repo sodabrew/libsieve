@@ -17,7 +17,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 /* THESE ARE INTERNAL HEADERS,
  * DO NOT TRY TO USE THEM IN
  * YOUR OWN APPLICATION CODE.
@@ -185,14 +184,14 @@ struct testcase tc[] = {
 
 	{ NULL, 0, NULL, NULL, 0 } };
 
-static int test_comparator(void)
+static int test_comparator(void* context)
 {
 	struct testcase *t;
 	int didfail = 0;
 
 	for (t = tc; t->comp != NULL; t++) {
 		comparator_t *c =
-			libsieve_comparator_lookup(t->comp, t->mode);
+         	  libsieve_comparator_lookup(context, t->comp, t->mode);
 		int res;
 		char *mode;
 
@@ -209,7 +208,7 @@ static int test_comparator(void)
 			continue;
 		}
 
-		res = c(t->pat, t->text);
+		res = c(context, t->pat, t->text);
 		if (res != t->result) {
 			printf("FAIL: %s/%s(%s, %s) = %d, not %d\n", 
 				t->comp, mode,
@@ -224,15 +223,17 @@ static int test_comparator(void)
 int main(int argc, char *argv[])
 {
 	int res;
-
-	res = test_comparator();
+	sieve2_context_t *context;
+	sieve2_alloc(&context);
+	res = test_comparator(context);
 	if (res > 0) {
 		printf("Failed %d tests.\n", res);
+		sieve2_free(&context);
 		exit(1);
 	} else {
 		printf("Passed all tests.\n");
+		sieve2_free(&context);
 		exit(0);
 	}
-
 }
 

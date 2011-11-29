@@ -27,7 +27,6 @@
 #include "src/sv_interface/callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
 %}
 
 %option yylineno

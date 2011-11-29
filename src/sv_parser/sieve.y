@@ -35,7 +35,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <ctype.h>
 
 /* sv_regex */
-#include "regex.h"
+#include "src/sv_regex/regex.h"
 
 /* sv_parser */
 #include "comparator.h"
@@ -51,7 +51,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "src/sv_util/util.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT libsieve_parse_context
 
 struct sieve2_context *libsieve_parse_context;
 extern int libsieve_sieveerror(const char *msg);
@@ -124,7 +123,7 @@ require: REQUIRE stringlist ';'	{
                                         sl = sl->next;
 
 					/* Returns 1 if supported, 0 if not. */
-                                        if (!static_check_reqs(libsieve_parse_context, s->s)) {
+                                        if (!static_check_reqs(context, s->s)) {
 					    unsupp = 1;
                                             freemsg = msg;
                                             msg = libsieve_strconcat(freemsg, " ", s->s, NULL);
@@ -356,7 +355,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 				    }
                                     $$ = libsieve_new_test(HASFLAG);
 				    if ($2->comptag != -1) { 
-				       $$->u.hf.comp = libsieve_comparator_lookup($2->comparator, $2->comptag);
+				       $$->u.hf.comp = libsieve_comparator_lookup(context, $2->comparator, $2->comptag);
 				       $$->u.hf.comptag = $2->comptag;
 				    }
 				    if ($2) {
@@ -371,7 +370,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 
 				   $2 = static_canon_htags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs(context, $4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -387,7 +386,7 @@ test: ANYOF testlist		 { $$ = libsieve_new_test(ANYOF); $$->u.tl = $2; }
 
 				   $2 = static_canon_aetags($2);
 				   if ($2->comptag == REGEX) {
-				     pl = static_verify_regexs($4, $2->comparator);
+				     pl = static_verify_regexs(context, $4, $2->comparator);
 				     if (!pl) { YYERROR; }
 				   }
 				   else
@@ -530,7 +529,7 @@ static test_t *static_build_address(int t, struct aetags *ae,
 
     if (ret) {
 	ret->u.ae.comptag = ae->comptag;
-	ret->u.ae.comp = libsieve_comparator_lookup(ae->comparator, ae->comptag);
+	ret->u.ae.comp = libsieve_comparator_lookup(context, ae->comparator, ae->comptag);
 	ret->u.ae.sl = sl;
 	ret->u.ae.pl = pl;
 	ret->u.ae.addrpart = ae->addrtag;
@@ -552,7 +551,7 @@ static test_t *static_build_header(int t, struct htags *h,
 
     if (ret) {
 	ret->u.h.comptag = h->comptag;
-	ret->u.h.comp = libsieve_comparator_lookup(h->comparator, h->comptag);
+	ret->u.h.comp = libsieve_comparator_lookup(context, h->comparator, h->comptag);
 	ret->u.h.sl = sl;
 	ret->u.h.pl = pl;
 	static_free_htags(h);
@@ -610,7 +609,7 @@ static commandlist_t *static_build_validnotif(int t, stringlist_t *sl)
 /*
     if (ret) {
 	ret->u.d.comptag = d->comptag;
-	ret->u.d.comp = libsieve_comparator_lookup("i;ascii-casemap", d->comptag);
+	ret->u.d.comp = libsieve_comparator_lookup(context, "i;ascii-casemap", d->comptag);
 	ret->u.d.pattern = d->pattern; d->pattern = NULL;
 	ret->u.d.priority = d->priority;
 	static_free_dtags(d);
@@ -834,7 +833,7 @@ static int static_verify_flag(const char *flag)
 }
 */
  
-static regex_t *static_verify_regex(const char *s, int cflags)
+static regex_t *static_verify_regex(struct sieve2_context *context, const char *s, int cflags)
 {
     int ret;
     char errbuf[100];
@@ -842,14 +841,14 @@ static regex_t *static_verify_regex(const char *s, int cflags)
 
     if ((ret = libsieve_regcomp(reg, s, cflags)) != 0) {
 	(void) libsieve_regerror(ret, reg, errbuf, sizeof(errbuf));
-	libsieve_sieveerror(errbuf);
+	libsieve_sieveerror(context, context->sieve_scan, errbuf);
 	libsieve_free(reg);
 	return NULL;
     }
     return reg;
 }
 
-static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
+static patternlist_t *static_verify_regexs(struct sieve2_context *context, stringlist_t *sl, char *comp)
 {
     stringlist_t *sl2;
     patternlist_t *pl = NULL;
@@ -861,7 +860,7 @@ static patternlist_t *static_verify_regexs(stringlist_t *sl, char *comp)
     }
 
     for (sl2 = sl; sl2 != NULL; sl2 = sl2->next) {
-	if ((reg = static_verify_regex(sl2->s, cflags)) == NULL) {
+        if ((reg = static_verify_regex(context, sl2->s, cflags)) == NULL) {
 	    libsieve_free_pl(pl, REGEX);
 	    break;
 	}

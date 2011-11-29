@@ -40,13 +40,11 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "src/sv_interface/callbacks2.h"
 
 #define THIS_MODULE "sv_comparator"
-#define THIS_CONTEXT libsieve_parse_context
-extern struct sieve2_context *libsieve_parse_context;
 
 /* --- i;octet comparators --- */
 
 /* just compare the two; these should be NULL terminated */
-static int octet_is(const char *pat, const char *text)
+static int octet_is(struct sieve2_context *context, const char *pat, const char *text)
 {
     size_t sl;
     sl = strlen(pat);
@@ -55,12 +53,12 @@ static int octet_is(const char *pat, const char *text)
 }
 
 /* we do a brute force attack */
-static int octet_contains(const char *pat, const char *text)
+static int octet_contains(struct sieve2_context *context, const char *pat, const char *text)
 {
     return (strstr(text, pat) != NULL);
 }
 
-static int octet_matches_(const char *pat, const char *text, int casemap)
+static int octet_matches_(struct sieve2_context *context, const char *pat, const char *text, int casemap)
 {
     const char *p;
     const char *t;
@@ -100,7 +98,7 @@ static int octet_matches_(const char *pat, const char *text, int casemap)
 
 	    while (*t != '\0') {
 		/* recurse */
-		if (octet_matches_(p, t, casemap)) return 1;
+	        if (octet_matches_(context, p, t, casemap)) return 1;
 		t++;
 	    }
 	case '\\':
@@ -122,12 +120,12 @@ static int octet_matches_(const char *pat, const char *text, int casemap)
     abort();
 }
 
-static int octet_matches(const char *pat, const char *text)
+static int octet_matches(struct sieve2_context *context, const char *pat, const char *text)
 {
-    return octet_matches_(pat, text, 0);
+    return octet_matches_(context, pat, text, 0);
 }
 
-static int octet_regex(const char *pat, const char *text)
+static int octet_regex(struct sieve2_context *context, const char *pat, const char *text)
 {
     return (!libsieve_regexec((const regex_t *)pat, text, 0, NULL, 0));
 }
@@ -136,7 +134,7 @@ static int octet_regex(const char *pat, const char *text)
 /* --- i;ascii-casemap comparators --- */
 
 /* sheer brute force */
-static int ascii_casemap_contains(const char *pat, const char *text)
+static int ascii_casemap_contains(struct sieve2_context *context, const char *pat, const char *text)
 {
     int N, M, i, j;
 
@@ -156,12 +154,12 @@ static int ascii_casemap_contains(const char *pat, const char *text)
     return (j == M); /* we found a match! */
 }
 
-static int ascii_casemap_matches(const char *pat, const char *text)
+static int ascii_casemap_matches(struct sieve2_context *context, const char *pat, const char *text)
 {
-    return octet_matches_(pat, text, 1);
+    return octet_matches_(context, pat, text, 1);
 }
 
-static int ascii_numeric_unknown(const char *pat, const char *text)
+static int ascii_numeric_unknown(struct sieve2_context *context, const char *pat, const char *text)
 {
     TRACE_DEBUG("Unknown numeric comparison requested");
     return 0;
@@ -171,7 +169,7 @@ static int ascii_numeric_unknown(const char *pat, const char *text)
  * Note that the inequalities are backwards.
  * This is because pat is the RHS and text is the LHS.
  */
-static int ascii_numeric(enum num num, const char *pat, const char *text)
+static int ascii_numeric(struct sieve2_context *context, enum num num, const char *pat, const char *text)
 {
     TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);
     if (isdigit((int)(unsigned char)*pat)) {
@@ -200,20 +198,20 @@ static int ascii_numeric(enum num num, const char *pat, const char *text)
     else return 1; /* both not digits */
 }
 
-static int ascii_numeric_gt(const char *pat, const char *text)
-    { return ascii_numeric(gt, pat, text); }
-static int ascii_numeric_ge(const char *pat, const char *text)
-    { return ascii_numeric(ge, pat, text); }
-static int ascii_numeric_lt(const char *pat, const char *text)
-    { return ascii_numeric(lt, pat, text); }
-static int ascii_numeric_le(const char *pat, const char *text)
-    { return ascii_numeric(le, pat, text); }
-static int ascii_numeric_eq(const char *pat, const char *text)
-    { return ascii_numeric(eq, pat, text); }
-static int ascii_numeric_ne(const char *pat, const char *text)
-    { return ascii_numeric(ne, pat, text); }
+static int ascii_numeric_gt(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, gt, pat, text); }
+static int ascii_numeric_ge(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, ge, pat, text); }
+static int ascii_numeric_lt(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, lt, pat, text); }
+static int ascii_numeric_le(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, le, pat, text); }
+static int ascii_numeric_eq(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, eq, pat, text); }
+static int ascii_numeric_ne(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_numeric(context, ne, pat, text); }
 
-static int ascii_casemap_unknown(const char *pat, const char *text)
+static int ascii_casemap_unknown(struct sieve2_context *context, const char *pat, const char *text)
 {
     TRACE_DEBUG("Unknown casemap comparison requested");
     return 0;
@@ -223,7 +221,7 @@ static int ascii_casemap_unknown(const char *pat, const char *text)
  * Note that the inequalities are backwards.
  * This is because pat is the RHS and text is the LHS.
  */
-static int ascii_casemap(enum num num, const char *pat, const char *text)
+static int ascii_casemap(struct sieve2_context* context, enum num num, const char *pat, const char *text)
 {
     TRACE_DEBUG("Testing [%s] [%d] [%s]", pat, num, text);
     switch (num) {
@@ -244,18 +242,18 @@ static int ascii_casemap(enum num num, const char *pat, const char *text)
     }
 }
 
-static int ascii_casemap_gt(const char *pat, const char *text)
-    { return ascii_casemap(gt, pat, text); }
-static int ascii_casemap_ge(const char *pat, const char *text)
-    { return ascii_casemap(ge, pat, text); }
-static int ascii_casemap_lt(const char *pat, const char *text)
-    { return ascii_casemap(lt, pat, text); }
-static int ascii_casemap_le(const char *pat, const char *text)
-    { return ascii_casemap(le, pat, text); }
-static int ascii_casemap_eq(const char *pat, const char *text)
-    { return ascii_casemap(eq, pat, text); }
-static int ascii_casemap_ne(const char *pat, const char *text)
-    { return ascii_casemap(ne, pat, text); }
+static int ascii_casemap_gt(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, gt, pat, text); }
+static int ascii_casemap_ge(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, ge, pat, text); }
+static int ascii_casemap_lt(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, lt, pat, text); }
+static int ascii_casemap_le(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, le, pat, text); }
+static int ascii_casemap_eq(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, eq, pat, text); }
+static int ascii_casemap_ne(struct sieve2_context *context, const char *pat, const char *text)
+    { return ascii_casemap(context, ne, pat, text); }
 
 int libsieve_relational_lookup(const char *rel)
 {
@@ -280,7 +278,7 @@ int libsieve_relational_lookup(const char *rel)
     }
 }
 
-comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
+comparator_t *libsieve_comparator_lookup(struct sieve2_context *context, const char *comp, int mode)
 {
     comparator_t *ret;
 
@@ -385,7 +383,7 @@ comparator_t *libsieve_comparator_lookup(const char *comp, int mode)
     return ret;
 }
 
-int libsieve_relational_count(int mode)
+int libsieve_relational_count(struct sieve2_context *context, int mode)
 {
     if ((mode & COUNT) == COUNT) {
         TRACE_DEBUG("Count relation [%d]", mode >> 10);

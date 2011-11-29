@@ -41,7 +41,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "addrinc.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
 %}
 
 %option noyywrap

@@ -52,7 +52,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "src/sv_parser/parser.h"
 
 #define THIS_MODULE "sv_interface"
-#define THIS_CONTEXT context
 
 static int sysaddr(char *addr)
 {
@@ -180,22 +179,22 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
                     val = libsieve_get_address(context, addrpart, &marker, 0);
                     while (val != NULL && !res) {
                         /* loop through each address */
-                        if (libsieve_relational_count(t->u.h.comptag)) {
+		        if (libsieve_relational_count(context, t->u.h.comptag)) {
                             count++;
                         } else {
-                            res |= t->u.ae.comp(pl->p, val);
+			  res |= t->u.ae.comp(context, pl->p, val);
                         }
                         val = libsieve_get_address(context, addrpart, &marker, 0);
                            }
                     libsieve_free_address(&data, &marker);
                 }
 
-                if (libsieve_relational_count(t->u.h.comptag)) {
+                if (libsieve_relational_count(context, t->u.h.comptag)) {
                     char countstr[20];
                     snprintf(countstr, 19, "%d", count);
                     TRACE_DEBUG("Count was [%s] compfunc is [%p](%s, %s)",
                             countstr, t->u.ae.comp, (char *)pl->p, countstr);
-                    res |= t->u.ae.comp(pl->p, countstr);
+                    res |= t->u.ae.comp(context, pl->p, countstr);
                 }
             }
 
@@ -255,19 +254,19 @@ static int static_evaltest(struct sieve2_context *context, test_t *t)
                 for (l = 0; val[l] != NULL && !res; l++) {
                     TRACE_DEBUG("test HEADER comparing [%s] with [%s]",
                         (char *)pl->p, val[l]);
-                    if (libsieve_relational_count(t->u.h.comptag)) {
+                    if (libsieve_relational_count(context, t->u.h.comptag)) {
                         count++;
                     } else {
-                        res |= t->u.h.comp(pl->p, val[l]);
+		        res |= t->u.h.comp(context, pl->p, val[l]);
                     }
                 }
 
-                if (libsieve_relational_count(t->u.h.comptag)) {
+                if (libsieve_relational_count(context, t->u.h.comptag)) {
                     char countstr[20];
                     snprintf(countstr, 19, "%d", count);
                     TRACE_DEBUG("Count was [%s] compfunc is [%p](%s, %s)",
                         countstr, t->u.h.comp, (char *)pl->p, countstr);
-                    res |= t->u.h.comp(pl->p, countstr);
+                    res |= t->u.h.comp(context, pl->p, countstr);
                 }
             }
         }

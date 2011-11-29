@@ -51,7 +51,6 @@ static struct address *libsieve_addrstructcopy(struct sieve2_context *context);
 #include "src/sv_interface/callbacks2.h"
 
 #define THIS_MODULE "sv_parser"
-#define THIS_CONTEXT context
 
 %}
 
