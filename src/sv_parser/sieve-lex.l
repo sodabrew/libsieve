@@ -39,18 +39,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "sieveinc.h"
 #include "src/sv_interface/callbacks2.h"
 #define THIS_MODULE "sv_parser"
-
-#undef YY_INPUT
-#define YY_INPUT(b, r, ms) (r = libsieve_sieveinput(b, ms))
-
-int libsieve_sieveinput(char *buf, int max_size);
-extern int libsieve_sieveerror(char *);
-
-#define YY_FATAL_ERROR libsieve_sievefatalerror
-void libsieve_sievefatalerror(const char msg[]);
-
-/* Holds a catbuf for the text: multiline. */
-static struct catbuf *text;
+extern YY_DECL;
 
 %}
 
@@ -58,6 +47,9 @@ static struct catbuf *text;
 %option noinput
 %option noyywrap
 %option nounput
+%option reentrant
+%option fast 8bit
+%option header-file="lex.yy.h" bison-bridge extra-type="struct catbuf*"
 %option prefix="libsieve_sieve"
 %option never-interactive
 
@@ -70,23 +62,23 @@ CRLF		(\r\n|\r|\n)
 %state COMMENT
 
 %%
-<MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", text->str);
+<MULTILINE>^\.{CRLF}	{ TRACE_DEBUG("Ending a text: block, found [%s]", yyextra->str);
 			  BEGIN INITIAL;
-			  libsieve_sievelval.sval = libsieve_catbuf_free(text);
+			  (*yylval).sval = libsieve_catbuf_free(yyextra);
 			  return STRING; }
 <MULTILINE>^\.\.	{ TRACE_DEBUG("Dot-stuffing - one dot dropped.");
-			  libsieve_catbuf(text, yytext, yyleng - 1); }
+			  libsieve_catbuf(yyextra, yytext, yyleng - 1); }
 <MULTILINE>\.		{ TRACE_DEBUG("Just a normal dot. Keep it.");
-			  libsieve_catbuf(text, yytext, yyleng); }
+			  libsieve_catbuf(yyextra, yytext, yyleng); }
 <MULTILINE>{CRLF}	{ TRACE_DEBUG("Multiline newline");
-			  libsieve_catbuf(text, yytext, yyleng); }
+			  libsieve_catbuf(yyextra, yytext, yyleng); }
 <MULTILINE>[^\.]+	{ TRACE_DEBUG("Multiline line [%s]", yytext);
-			  libsieve_catbuf(text, yytext, yyleng); }
-<MULTILINE><<EOF>>	{ libsieve_sieveerror("unexpected end of file in string"); 
+			  libsieve_catbuf(yyextra, yytext, yyleng); }
+<MULTILINE><<EOF>>	{ libsieve_sieveerror(context, yyscanner, "unexpected end of file in string"); 
 			  yyterminate(); }
 
 <QSTRING>\"		{ BEGIN INITIAL; }
-<QSTRING>([^\"]|\\\"|{CRLF})+ { libsieve_sievelval.sval = libsieve_strndup(yytext, yyleng);
+<QSTRING>([^\"]|\\\"|{CRLF})+ { (*yylval).sval = libsieve_strndup(yytext, yyleng);
 			  return STRING; }
 
 <COMMENT>\*\/           { BEGIN INITIAL; }
@@ -94,11 +86,11 @@ CRLF		(\r\n|\r|\n)
 
 <INITIAL>text:{ws}?(#.*)?{CRLF}	{ TRACE_DEBUG("Beginning a text: block.");
 			  BEGIN MULTILINE;
-			  text = libsieve_catbuf_alloc(); }
-<INITIAL>\"\"		{ libsieve_sievelval.sval = libsieve_strdup("");
+			  yyextra = libsieve_catbuf_alloc(); }
+<INITIAL>\"\"		{ (*yylval).sval = libsieve_strdup("");
 			  return STRING; }
 <INITIAL>\"		{ BEGIN QSTRING; }
-<INITIAL>[0-9]+[KMG]?	{ libsieve_sievelval.nval = libsieve_strtonum(yytext);
+<INITIAL>[0-9]+[KMG]?	{ (*yylval).nval = libsieve_strtonum(yytext);
 			  return NUMBER; }
 <INITIAL>if		return IF;
 <INITIAL>elsif		return ELSIF;
@@ -163,45 +155,3 @@ CRLF		(\r\n|\r|\n)
 .			return yytext[0];
 
 %%
-/* take input from sieve string provided by sieve parser */
-int libsieve_sieveinput(char *buf, int max_size)
-{
-    extern char *libsieve_sieveptr;	/* current position in sieve string */
-    size_t n;			/* number of characters to read from string */
-
-    n = strlen(libsieve_sieveptr) < (size_t)max_size ? strlen(libsieve_sieveptr) : max_size;
-    if (n > 0) {
-	memcpy(buf, libsieve_sieveptr, n);
-	libsieve_sieveptr += n;
-    }
-
-    return n;
-}
-
-/* Clean up after ourselves by free()ing the current buffer */
-void libsieve_sievelexfree()
-{
-    libsieve_sievelex_destroy();
-}
-
-/* Kind of a hack, but this sets up the file statics */
-void libsieve_sievelexalloc()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Restart the lexer before each invocation of the parser */
-void libsieve_sievelexrestart()
-{
-    libsieve_sieverestart( (FILE *)YY_CURRENT_BUFFER );
-}
-
-/* Replacement for the YY_FATAL_ERROR macro,
- * which would print msg to stderr and exit. */
-void libsieve_sievefatalerror(const char msg[])
-{
-    /* Basically stop and don't do anything
-     * Supress the unused yy_fatal_error warning. */
-    if (0) yy_fatal_error(msg);
-}
-
