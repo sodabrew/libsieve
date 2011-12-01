@@ -61,7 +61,7 @@ static struct address *libsieve_addrstructcopy(struct sieve2_context *context);
 %lex-param {void *addr_scan}
 %parse-param {struct sieve2_context *context}
 %parse-param {void *addr_scan}
-%token ATOM QTEXT DTEXT QUOTE
+%token DOTATOM ATOM QTEXT DTEXT QUOTE
 
 %%
 
@@ -73,49 +73,49 @@ start:  /* Empty */			{ libsieve_addrappend(context); }
 		context->addr_addr->name = $1;
 		};
 
-address: mailboxes			{ TRACE_DEBUG( "address: mailbox: %s", $1 ); }
+address: mailbox_list			{ TRACE_DEBUG( "address: mailbox: %s", $1 ); }
 	| group				{ TRACE_DEBUG( "address: group: %s", $1 ); };
 
 group: phrase ':' ';'			{ TRACE_DEBUG( "group: phrase: %s", $1 ); }
-	| phrase ':' mailboxes ';'	{ TRACE_DEBUG( "group: phrase mailboxes: %s %s", $1, $3 ); };
+	| phrase ':' mailbox_list ';'	{ TRACE_DEBUG( "group: phrase mailbox_list: %s %s", $1, $3 ); };
 
-mailboxes: mailbox			{
+mailbox_list: mailbox			{
 	 	/* Each new address is allocated here and back-linked */
-		TRACE_DEBUG( "mailboxes: mailbox: %s", $1 );
+		TRACE_DEBUG( "mailbox_list: mailbox: %s", $1 );
 		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(context);
 		}
-	| mailboxes ',' mailbox		{
+	| mailbox_list ',' mailbox		{
 	 	/* Each new address is allocated here and back-linked */
-		TRACE_DEBUG( "mailboxes: mailboxes mailbox: %s %s", $1, $3 );
+		TRACE_DEBUG( "mailbox_list: mailbox_list mailbox: %s %s", $1, $3 );
 		TRACE_DEBUG( "allocating newaddr" );
 		libsieve_addrappend(context);
 		};
 
 mailbox: 
-	routeaddr			{ TRACE_DEBUG( "mailbox: routeaddr: %s", $1 ); }
-	| addrspec			{ TRACE_DEBUG( "mailbox: addrspec: %s", $1 ); }
-	| phrase routeaddr		{
-		TRACE_DEBUG( "mailbox: phrase routeaddr: %s %s", $1, $2 );
+	angle_addr			{ TRACE_DEBUG( "mailbox: angle_addr: %s", $1 ); }
+	| addr_spec			{ TRACE_DEBUG( "mailbox: addr_spec: %s", $1 ); }
+	| phrase angle_addr		{
+		TRACE_DEBUG( "mailbox: phrase angle_addr: %s %s", $1, $2 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "context->addr_addr->name: %s", $1 );
 		context->addr_addr->name = libsieve_strdup( $1 );
 		};
 
-routeaddr: '<' addrspec '>'		{ TRACE_DEBUG( "routeaddr: addrspec: %s", $2 ); }
-	| '<' route ':' addrspec '>'	{
-		TRACE_DEBUG( "routeaddr: route addrspec: %s:%s", $2, $4 );
+angle_addr: '<' addr_spec '>'		{ TRACE_DEBUG( "angle_addr: addr_spec: %s", $2 ); }
+	| '<' route ':' addr_spec '>'	{
+		TRACE_DEBUG( "angle_addr: route addr_spec: %s:%s", $2, $4 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "context->addr_addr->route: %s", $2 );
 		context->addr_addr->route = libsieve_strdup( $2 );
 		}
 	| '<' '>'			{
-		TRACE_DEBUG("routeaddr: <>");
+		TRACE_DEBUG("angle_addr: <>");
 		context->addr_addr->mailbox = libsieve_strdup( "" );
 		};
 
-addrspec: localpart '@' domain		{
-		TRACE_DEBUG( "addrspec: localpart domain: %s %s", $1, $3 );
+addr_spec: local_part '@' domain		{
+		TRACE_DEBUG( "addr_spec: local_part domain: %s %s", $1, $3 );
 		// This is a "top terminal" state...
 		TRACE_DEBUG( "context->addr_addr->mailbox: %s", $1 );
 		context->addr_addr->mailbox = libsieve_strdup( $1 );
@@ -132,22 +132,13 @@ route: '@' domain			{
 		$$ = libsieve_strbuf(context->strbuf, libsieve_strconcat( "@", $2, ",", $4, NULL ), strlen($2)+strlen($4)+2, FREEME);
 		};
 
-localpart: word				{ TRACE_DEBUG( "localpart: word: %s", $1 ); }
-	| localpart '.' word		{
-		TRACE_DEBUG( "localpart: localpart word: %s %s", $1, $3 );
-		$$ = libsieve_strbuf(context->addr_ml, libsieve_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);
-		};
+local_part: DOTATOM { TRACE_DEBUG( "local_part: DOTATOM: %s", $1 ); }
+	| ATOM	    { TRACE_DEBUG( "local_part: ATOM : %s", $1); }
+	| qstring   { TRACE_DEBUG( "local_part: qstring: %s", $1); }
 
-domain: subdomain			{ TRACE_DEBUG( "domain: subdomain: %s", $1 ); }
-	| domain '.' subdomain		{
-		TRACE_DEBUG( "domain: domain subdomain: %s %s", $1, $3 );
-		$$ = libsieve_strbuf(context->addr_ml, libsieve_strconcat( $1, ".", $3, NULL ), strlen($1)+strlen($3)+1, FREEME);
-		};
-
-subdomain: domainref		{ TRACE_DEBUG( "subdomain: domainref: %s", $1 ); }
-	| domainlit		{ TRACE_DEBUG( "subdomain: domainlit: %s", $1 ); };
-
-domainref: ATOM			{ TRACE_DEBUG( "domainref: ATOM: %s", $1 ); };
+domain: DOTATOM			{ TRACE_DEBUG( "domain: DOTATOM: %s", $1 ); }
+	| ATOM		{ TRACE_DEBUG("domain: ATOM: %s", $1); }
+	| domainlit	{ TRACE_DEBUG( "domain: domainlit: %s", $1); };
 
 domainlit: '[' DTEXT ']'	{
 	 	TRACE_DEBUG( "domainlit: DTEXT: %s", $2 );
@@ -158,7 +149,11 @@ phrase: word			{ TRACE_DEBUG( "phrase: word: %s", $1 ); }
 	| phrase word		{
 		TRACE_DEBUG( "phrase: phrase word: %s %s", $1, $2 );
 		$$ = libsieve_strbuf(context->strbuf, libsieve_strconcat( $1, " ", $2, NULL ), strlen($1)+strlen($2)+1, FREEME);
-		};
+		}
+	| phrase DOTATOM	{
+		TRACE_DEBUG( "phrase: phrase DOTATOM: %s %s", $1, $2 );
+		$$ = libsieve_strbuf(context->strbuf, libsieve_strconcat( $1, " ", $2, NULL ), strlen($1)+strlen($2)+1, FREEME);
+		}
 
 word: ATOM			{ TRACE_DEBUG( "word: ATOM: %s", $1 ); }
 	| qstring		{ TRACE_DEBUG( "word: qstring: %s", $1 ); };

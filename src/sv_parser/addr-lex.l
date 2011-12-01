@@ -77,6 +77,11 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		(*yylval) = libsieve_strbuf(context->strbuf, yytext, strlen(yytext), NOFREE);
 		return ATOM;
 				}
+([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])([^<>\(\)@,;:\"\[\]\\ \t\n\r])*        {
+                /* Match any set of non-special-characters, the first char may not be dot */
+                (*yylval) = libsieve_strbuf(context->strbuf, yytext, strlen(yytext), NOFREE);
+               return DOTATOM;
+                                }
 <QSTRING>([^\"]|\\\")+		{
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
@@ -105,4 +110,3 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 				  yyterminate(); }
 
 %%
-

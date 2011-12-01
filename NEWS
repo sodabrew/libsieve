@@ -1,3 +1,5 @@
+- Add support for DOT in addresses (RFC5322, 4.1. Miscellaneous Obsolete Tokens)
+
 - libsieve is now reentrant
 
 - Add SILENT_RULES to Makefile.am
