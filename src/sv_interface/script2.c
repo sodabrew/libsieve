@@ -36,14 +36,14 @@
 /* sv_parser */
 #include "src/sv_parser/parser.h"
 
-char * sieve2_errstr(int code)
+VISIBLE char * sieve2_errstr(int code) 
 {
     if (code < SIEVE2_OK || code > SIEVE2_ERROR_LAST)
         return "Invalid error code.";
     return (char *)sieve2_error_text[code];
 }
 
-int sieve2_alloc(sieve2_context_t **context)
+VISIBLE int sieve2_alloc(sieve2_context_t **context)
 {
     struct sieve2_context *c;
 
@@ -68,7 +68,7 @@ int sieve2_alloc(sieve2_context_t **context)
     return SIEVE2_OK;
 }
 
-int sieve2_free(sieve2_context_t **context)
+VISIBLE int sieve2_free(sieve2_context_t **context)
 {
     struct sieve2_context *c;
 
@@ -125,8 +125,8 @@ static void static_check_support(struct sieve2_context *c)
 /* Register the user's callback functions into the Sieve context.
  * Also set up the support structure based on which actions have
  * callbacks registered for them. */
-int sieve2_callbacks(sieve2_context_t *context,
-                     sieve2_callback_t *callbacks)
+VISIBLE int sieve2_callbacks(sieve2_context_t *context,
+			     sieve2_callback_t *callbacks)
 {
     struct sieve2_context *c = (struct sieve2_context *)context;
     sieve2_callback_t *cb;
@@ -176,7 +176,7 @@ int sieve2_callbacks(sieve2_context_t *context,
     return SIEVE2_OK;
 }
 
-int sieve2_validate(sieve2_context_t *context, void *user_data)
+VISIBLE int sieve2_validate(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
 
@@ -215,7 +215,7 @@ int sieve2_validate(sieve2_context_t *context, void *user_data)
  * SIEVE2_ERROR_PARSE for script parse errors
  * SIEVE2_ERROR_EXEC for script evaluation errors
  */
-int sieve2_execute(sieve2_context_t *context, void *user_data)
+VISIBLE int sieve2_execute(sieve2_context_t *context, void *user_data)
 {
     struct sieve2_context *c = context;
     const char *errmsg = NULL;
@@ -277,7 +277,7 @@ int sieve2_execute(sieve2_context_t *context, void *user_data)
     return SIEVE2_OK;
 }
 
-char * sieve2_listextensions(sieve2_context_t *sieve2_context)
+VISIBLE char * sieve2_listextensions(sieve2_context_t *sieve2_context)
 {
     char *ext;
     struct sieve2_context *c = sieve2_context;
@@ -302,7 +302,7 @@ char * sieve2_listextensions(sieve2_context_t *sieve2_context)
 #  define NL "\n"
 #endif
 
-char * sieve2_credits(void)
+VISIBLE char * sieve2_credits (void)
 {
     return "libSieve is written and maintained by Aaron Stone"
         " with many thanks to those who have helped to debug"
@@ -318,7 +318,7 @@ char * sieve2_credits(void)
         ;
 }
 
-char * sieve2_license(void)
+VISIBLE char * sieve2_license(void)
 {
     return "libSieve is Copyright 2002, 2003, 2005 by Aaron Stone"
         " and is licensed under the GNU Lesser General Public License,"

@@ -155,7 +155,7 @@ int libsieve_callback_end(
  * API on the inside, just in reverse! */
 
 /* libSieve will free this memory for you, don't worry about it. */
-const char * sieve2_getvalue_string(
+VISIBLE const char * sieve2_getvalue_string(
     sieve2_context_t *c,
     char const * const name)
 {
@@ -173,7 +173,7 @@ const char * sieve2_getvalue_string(
 }
 
 /* libSieve will free this memory for you, don't worry about it. */
-char * * sieve2_getvalue_stringlist(
+VISIBLE char * * sieve2_getvalue_stringlist(
     sieve2_context_t *c,
     char const * const name)
 {
@@ -190,7 +190,7 @@ char * * sieve2_getvalue_stringlist(
     return NULL;
 }
 
-int sieve2_getvalue_int(
+VISIBLE int sieve2_getvalue_int(
     sieve2_context_t *c,
     char const * const name)
 {
@@ -208,7 +208,7 @@ int sieve2_getvalue_int(
 }
 
 /* If you allocated the memory, you have to free it. */
-int sieve2_setvalue_string(
+VISIBLE int sieve2_setvalue_string(
     sieve2_context_t *c,
     char const * const name, char * const value)
 {
@@ -230,7 +230,7 @@ int sieve2_setvalue_string(
     return SIEVE2_ERROR_FAIL;
 }
 
-int sieve2_setvalue_stringlist(
+VISIBLE int sieve2_setvalue_stringlist(
     sieve2_context_t *c,
     char const * const name, char **value)
 {
@@ -252,7 +252,7 @@ int sieve2_setvalue_stringlist(
     return SIEVE2_ERROR_FAIL;
 }
 
-int sieve2_setvalue_int(
+VISIBLE int sieve2_setvalue_int(
     sieve2_context_t *c,
     char const * const name, const int value)
 {
@@ -273,4 +273,3 @@ int sieve2_setvalue_int(
     /* This was caused by programming error. */
     return SIEVE2_ERROR_FAIL;
 }
-

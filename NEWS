@@ -1,3 +1,5 @@
+- Hide internal symbols (do not export them) from the final shared library (works with GCC>=4)
+
 - Add support for DOT in addresses (RFC5322, 4.1. Miscellaneous Obsolete Tokens)
 
 - libsieve is now reentrant

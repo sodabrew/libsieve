@@ -278,7 +278,7 @@ int libsieve_relational_lookup(const char *rel)
     }
 }
 
-comparator_t *libsieve_comparator_lookup(struct sieve2_context *context, const char *comp, int mode)
+VISIBLE comparator_t *libsieve_comparator_lookup(struct sieve2_context *context, const char *comp, int mode)
 {
     comparator_t *ret;
 

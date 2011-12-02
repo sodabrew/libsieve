@@ -25,7 +25,7 @@ dnl AC_ARG_PROGRAM
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h malloc.h unistd.h alloca.h)
-
+gl_VISIBILITY
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T

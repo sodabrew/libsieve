@@ -22,10 +22,17 @@
 #ifdef __GNUC__
 #define UNUSED __attribute__((__unused__))
 #define PRINTF_ARGS(X, Y) __attribute__((format(printf, X, Y)))
+#if __GNUC__ >= 4
+#define VISIBLE __attribute__((visibility("default")))
+#else
+#define VISIBLE
+#endif
 #else
 #define UNUSED
 #define PRINTF_ARGS(X, Y)
+#define VISIBLE
 #endif
+
 
 /* Things that are happening normally. */
 #define TRACE_DEBUG(fmt...) libsieve_do_debug_trace(context, 4, THIS_MODULE, __FILE__, __func__, fmt)
