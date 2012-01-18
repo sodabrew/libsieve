@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.68])
-AC_INIT(libsieve, 2.2.8)
+AC_INIT(libsieve, 2.3.0)
 AC_CONFIG_SRCDIR(src/sv_parser/sieve.y)
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects])
 AM_SILENT_RULES([yes])
