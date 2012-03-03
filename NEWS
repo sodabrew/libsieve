@@ -1,5 +1,6 @@
 libSieve 2.3.0
 --------------
+This release is made possible by the tremendous effort of Dilyan Palauzov.
 
 - Hide internal symbols (do not export them) from the final shared library (works with GCC>=4)
 
@@ -12,6 +13,11 @@ libSieve 2.3.0
 - Move all Makefile.am-s to single /Makefile.am
 
 - Move the build root from /src/ to /
+
+libSieve 2.2.9
+--------------
+
+- Vacation segfault fix (thanks to Paul Stevens).
 
 libSieve 2.2.8
 --------------

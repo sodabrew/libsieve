@@ -488,7 +488,7 @@ int libsieve_eval(struct sieve2_context *context,
                     if (l == SIEVE2_OK) {
                         l = SIEVE2_DONE;
                         for (sl = c->u.v.addresses; sl != NULL; sl = sl->next) {
-                            if (sl->s && !strcmp(sl->s, myaddr))
+                            if (sl->s && myaddr && !strcmp(sl->s, myaddr))
                                 l = SIEVE2_OK;
                         }
                     }
@@ -573,8 +573,7 @@ int libsieve_eval(struct sieve2_context *context,
                     fromaddr = found;
 
                     res = libsieve_do_vacation(context, reply_to,
-                                      libsieve_strdup(fromaddr),
-                                      libsieve_strdup(buf),
+                                      fromaddr, buf,
                                       c->u.v.message, c->u.v.handle,
                                       c->u.v.days, c->u.v.mime);
 
@@ -582,9 +581,9 @@ int libsieve_eval(struct sieve2_context *context,
                          *errmsg = "Vacation can not be used with Reject or Vacation";
 
                 } else {
-                    libsieve_free(reply_to);
                     if (l != SIEVE2_DONE) res = -1; /* something went wrong */
                 }
+		libsieve_free(reply_to);
                 libsieve_free(myaddr);
                 break;
             }
