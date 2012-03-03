@@ -15,29 +15,23 @@
 #define YYSTYPE char *
 
 #include <string.h>
-
 /* sv_util */
 #include "src/sv_util/util.h"
-
+/* sv_interface */
+#include "src/sv_interface/callbacks2.h"
 /* sv_parser */
 #include "header.h"
 #include "headerinc.h"
 
-/* sv_interface */
-#include "src/sv_interface/callbacks2.h"
-
 #define THIS_MODULE "sv_parser"
 %}
 
-%option yylineno
-%option noinput
-%option noyywrap
-%option nounput
-%option reentrant
-%option 8bit fast
-%option header-file="lex.yy.h" bison-bridge
+%option yylineno 8bit fast
+%option noyywrap noinput nounput
+%option reentrant never-interactive
+%option outfile="header-lex.c" header-file="header-lex.h"
+%option bison-bridge
 %option prefix="libsieve_header"
-%option never-interactive
 
 %x S_NAME S_TEXT S_WRAP
 

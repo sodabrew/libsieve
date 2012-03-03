@@ -7,7 +7,7 @@ pkgconfig_DATA          = libsieve.pc
 
 include_HEADERS		= src/sv_include/sieve2.h src/sv_include/sieve2_error.h
 
-AM_CFLAGS		= -Wall -I$(top_srcdir) -I$(top_builddir) ${CFLAG_VISIBILITY}
+AM_CFLAGS		= -Wall -I$(top_srcdir) -I$(top_srcdir)/src/sv_include -I$(top_builddir) ${CFLAG_VISIBILITY}
 AM_LFLAGS		= -s -olex.yy.c
 AM_YFLAGS		= -d -p$*
 

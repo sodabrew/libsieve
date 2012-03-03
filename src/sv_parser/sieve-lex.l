@@ -32,26 +32,24 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 /* sv_util */
 #include "src/sv_util/util.h"
-
 /* sv_interface */
 #include "src/sv_interface/tree.h"
+#include "src/sv_interface/callbacks2.h"
+/* sv_parser */
 #include "sieve.h"
 #include "sieveinc.h"
-#include "src/sv_interface/callbacks2.h"
+
 #define THIS_MODULE "sv_parser"
 extern YY_DECL;
 
 %}
 
-%option yylineno
-%option noinput
-%option noyywrap
-%option nounput
-%option reentrant
-%option fast 8bit
-%option header-file="lex.yy.h" bison-bridge extra-type="struct catbuf*"
+%option yylineno 8bit fast
+%option noyywrap noinput nounput
+%option reentrant never-interactive
+%option outfile="sieve-lex.c" header-file="sieve-lex.h"
+%option bison-bridge extra-type="struct catbuf*"
 %option prefix="libsieve_sieve"
-%option never-interactive
 
 ws		[ \t]+
 ident		[a-zA-Z_][a-zA-Z_0-9]*

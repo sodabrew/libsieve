@@ -24,7 +24,6 @@ int libsieve_addrlex_destroy(void *yyscanner);
 int libsieve_addrlex_init(void **yyscanner);
 
 commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
-
 int libsieve_sievelex_destroy(void *yyscanner);
 int libsieve_sievelex_init(void **yyscanner);
 

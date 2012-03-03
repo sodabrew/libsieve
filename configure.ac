@@ -1,12 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.68])
-AC_INIT(libsieve, 2.3.0)
-AC_CONFIG_SRCDIR(src/sv_parser/sieve.y)
+AC_INIT([libsieve], [2.3.0])
+AC_CONFIG_SRCDIR([src/sv_parser/sieve.y])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects])
 AM_SILENT_RULES([yes])
 
-dnl Don't rebuild flex/bison output unless I say so.
-AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
 dnl Checks for programs.
 AC_PROG_CC
@@ -17,15 +15,16 @@ AC_PROG_LIBTOOL
 AM_PROG_LEX
 AM_PROG_CC_C_O
 
-dnl Gperf for the Sieve lexer
-AM_MISSING_PROG([GPERF], [gperf])
+dnl Gperf may used in a future Sieve lexer
+dnl AM_MISSING_PROG([GPERF], [gperf])
 
-dnl AC_ARG_PROGRAM
-
-dnl Checks for header files.
+dnl Checks for header files
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h malloc.h unistd.h alloca.h)
+
+dnl Checks for GCC visibility macros
 gl_VISIBILITY
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T

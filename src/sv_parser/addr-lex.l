@@ -34,8 +34,8 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 /* sv_util */
 #include "src/sv_util/util.h"
+/* sv_interface */
 #include "src/sv_interface/callbacks2.h"
-
 /* sv_parser */
 #include "addr.h"
 #include "addrinc.h"
@@ -43,14 +43,12 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define THIS_MODULE "sv_parser"
 %}
 
-%option noyywrap
-%option nounput
-%option reentrant
-%option noinput
-%option fast 8bit
-%option header-file="lex.yy.h" bison-bridge extra-type="int"
+%option 8bit fast
+%option noyywrap noinput nounput
+%option reentrant never-interactive
+%option outfile="addr-lex.c" header-file="addr-lex.h"
+%option bison-bridge extra-type="int"
 %option prefix="libsieve_addr"
-%option never-interactive
 
 %x QSTRING DOMAINLIT COMMENT
 

@@ -29,9 +29,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define TREE_H
 
 #include "src/sv_parser/comparator.h"
-
-//#include <sys/types.h>
-#include "regex.h"
+#include "src/sv_regex/regex.h"
 
 
 /* abstract syntax tree for sieve */

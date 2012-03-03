@@ -123,6 +123,8 @@ extern YY_DECL;
 #define YYERROR_VERBOSE /* i want better error messages! */
 %}
 
+%defines "sieve.h"
+%output "sieve.c"
 %name-prefix="libsieve_sieve"
 
 %define api.pure

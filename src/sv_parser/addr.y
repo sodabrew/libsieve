@@ -54,6 +54,8 @@ static struct address *libsieve_addrstructcopy(struct sieve2_context *context);
 
 %}
 
+%defines "addr.h"
+%output "addr.c"
 %name-prefix="libsieve_addr"
 
 %define api.pure
