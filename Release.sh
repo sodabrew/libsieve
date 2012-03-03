@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 PACKAGE="libsieve"
 VERSION=$(sed -ne '/AC_INIT/s/^AC_INIT(.*\[\(.*\)\])/\1/p' configure.ac)
 DIRS="src m4"
@@ -11,19 +13,15 @@ mkdir ${PACKAGE}-${VERSION}
 echo
 echo "->Copying all files to directory: " ${PACKAGE}-${VERSION}
 cp -pr ${DIRS} ${FILES} ${PACKAGE}-${VERSION}
-$? && exit
 echo
 echo "->Changing to directory: " ${PACKAGE}-${VERSION}
 cd ${PACKAGE}-${VERSION}/ 
-$? && exit
 echo
 echo "->Bootstrapping autotools: "
 autoreconf -f -i
-$? && exit
 echo
 echo "->Removing autotools cache: "
 rm -fr autom4te.cache
-$? && exit
 echo
 echo "->Generating flex and bison: "
 cd src/sv_parser
@@ -35,9 +33,7 @@ cd ../../..
 echo
 echo "->Making compressed tar file " ${PACKAGE}-${VERSION}.tar.gz
 tar cf - ${PACKAGE}-${VERSION} | gzip > ${PACKAGE}-${VERSION}.tar.gz
-$? && exit
 echo
 echo "->Removing temporary directory: " ${PACKAGE}-${VERSION}
 rm -rf ${PACKAGE}-${VERSION}
-$? && exit
 echo
