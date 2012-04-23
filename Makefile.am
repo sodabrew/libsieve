@@ -11,25 +11,14 @@ AM_CFLAGS		= -Wall -I$(top_srcdir) -I$(top_srcdir)/src/sv_include -I$(top_buildd
 AM_LFLAGS		= -s -olex.yy.c
 AM_YFLAGS		= -d -p$*
 
-noinst_LTLIBRARIES      = src/sv_parser/libparser.la src/sv_regex/libregex.la src/sv_interface/libinterface.la src/sv_util/libutil.la
-
 noinst_PROGRAMS		= src/sv_test/example src/sv_test/testcomp
 src_sv_test_example_LDADD      	= src/libsieve.la
 src_sv_test_testcomp_LDADD     	= src/libsieve.la
 
-src_sv_parser_libparser_la_SOURCES    = src/sv_parser/addr.y src/sv_parser/addr-lex.l src/sv_parser/sieve.y src/sv_parser/sieve-lex.l src/sv_parser/header.y src/sv_parser/header-lex.l src/sv_parser/comparator.c
-src_sv_parser_libparser_la_LDFLAGS    = -no-undefined
-
-src_sv_regex_libregex_la_SOURCES     = src/sv_regex/regex.h src/sv_regex/regex.c
-src_sv_regex_libregex_la_LDFLAGS     = -no-undefined
-
-src_sv_interface_libinterface_la_SOURCES = src/sv_interface/tree.c  src/sv_interface/message.c src/sv_interface/script.c src/sv_interface/message2.c src/sv_interface/script2.c src/sv_interface/context2.c src/sv_interface/callbacks2.c
-src_sv_interface_libinterface_la_LDFLAGS = -no-undefined
-
-src_sv_util_libutil_la_SOURCES      = src/sv_util/util.c src/sv_util/md5.c src/sv_util/exception.c
-src_sv_util_libutil_la_LDFLAGS      = -no-undefined
-
 lib_LTLIBRARIES         = src/libsieve.la
-src_libsieve_la_SOURCES     = src/sv_empty.c
 src_libsieve_la_LDFLAGS     = -no-undefined -version-info 1:5
-src_libsieve_la_LIBADD      = src/sv_util/libutil.la src/sv_parser/libparser.la src/sv_interface/libinterface.la src/sv_regex/libregex.la
+src_libsieve_la_SOURCES      = \
+	src/sv_interface/callbacks2.c src/sv_interface/callbacks2.h src/sv_interface/context2.c src/sv_interface/context2.h src/sv_interface/message2.c src/sv_interface/message2.h src/sv_interface/message.c src/sv_interface/message.h src/sv_interface/script2.c src/sv_interface/script.c src/sv_interface/script.h src/sv_interface/tree.c src/sv_interface/tree.h \
+	src/sv_parserv/addrinc.h src/sv_parser/addr.y src/sv_parser/addr-lex.l src/sv_parser/comparator.c src/sv_parser/comparator.h src/sv_parserv/headerinc.h src/sv_parser/header.y src/sv_parser/header-lex.l src/sv_parserv/parser.h src/sv_parserv/sieveinc.h src/sv_parser/sieve.y src/sv_parser/sieve-lex.l \
+	src/sv_regex/regex.h src/sv_regex/regex.c \
+	src/sv_util/exception.c src/sv_util/exception.h src/sv_util/md5.c src/sv_util/util.c src/sv_util/util.h
