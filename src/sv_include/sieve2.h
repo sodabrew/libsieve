@@ -99,31 +99,31 @@ extern int sieve2_execute(sieve2_context_t *sieve2_context,
 extern const char * 
 sieve2_getvalue_string(
 	sieve2_context_t *sieve2_context,
-	char const * const value);
+	const char * const value);
 
 /* libSieve will free this memory for you, don't worry about it. */
 extern char * * 
 sieve2_getvalue_stringlist(
 	sieve2_context_t *sieve2_context,
-	char const * const name);
+	const char * const name);
 
 extern int sieve2_getvalue_int(
 	sieve2_context_t *sieve2_context,
-	char const * const name);
+	const char * const name);
 
 /* If you allocated the memory, you have to free it. */
 extern int sieve2_setvalue_string(
 	sieve2_context_t *sieve2_context,
-	char const * const name, char* const value);
+	const char * const name, const char * const value);
 
 /* If you allocated the memory, you have to free it. */
 extern int sieve2_setvalue_stringlist(
 	sieve2_context_t *sieve2_context,
-	char const * const name, char **value);
+	const char * const name, char ** const value);
 
 extern int sieve2_setvalue_int(
 	sieve2_context_t *sieve2_context,
-	char const * const name, const int value);
+	const char * const name, const int value);
 
 /* This translates the error numbers into static strings.
  * For fancier errors, callbacks from the context are used,
