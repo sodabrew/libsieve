@@ -1,6 +1,8 @@
 ACLOCAL_AMFLAGS         = -I m4
 AUTOMAKE_OPTIONS        = foreign
 
+BUILT_SOURCES		= src/sv_parser/addr.c src/sv_parser/addr-lex.c src/sv_parser/header.c src/sv_parser/header-lex.c src/sv_parser/sieve.c src/sv_parser/sieve-lex.c
+
 EXTRA_DIST              = libsieve.pc.in src/sv_regex/README src/sv_regex/regcomp.c src/sv_regex/regexec.c src/sv_regex/regex_internal.c src/sv_regex/regex_internal.h src/sv_test/lmtp-1 src/sv_test/lmtp-2 src/sv_test/messagea.mbox src/sv_test/messageb.mbox src/sv_test/messagec.mbox src/sv_test/messaged.mbox src/sv_test/messagef.mbox src/sv_test/messageg.mbox src/sv_test/messageh.mbox src/sv_test/messagei.mbox src/sv_test/messagej.mbox src/sv_test/messagek.mbox src/sv_test/script10.sv src/sv_test/script11.sv src/sv_test/script12.sv src/sv_test/script13.sv src/sv_test/script14.sv src/sv_test/script15.sv src/sv_test/script16.sv src/sv_test/script17.sv src/sv_test/script18.sv src/sv_test/script19.sv src/sv_test/script1.sv src/sv_test/script20.sv src/sv_test/script21.sv src/sv_test/script22.sv src/sv_test/script23.sv src/sv_test/script2.sv src/sv_test/script3.sv src/sv_test/script4.sv src/sv_test/script5.sv src/sv_test/script6.sv src/sv_test/script7.sv src/sv_test/script8.sv src/sv_test/script9.sv src/sv_test/testmessage.sh src/sv_test/testvalid.sh
 pkgconfigdir            = $(libdir)/pkgconfig
 pkgconfig_DATA          = libsieve.pc
@@ -9,7 +11,6 @@ include_HEADERS		= src/sv_include/sieve2.h src/sv_include/sieve2_error.h
 
 AM_CFLAGS		= -Wall -I$(top_srcdir) -I$(top_srcdir)/src/sv_include -I$(top_builddir) ${CFLAG_VISIBILITY}
 AM_LFLAGS		= -s -olex.yy.c
-AM_YFLAGS		= -d -p$*
 
 noinst_PROGRAMS		= src/sv_test/example src/sv_test/testcomp
 src_sv_test_example_LDADD      	= src/libsieve.la

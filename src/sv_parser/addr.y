@@ -53,9 +53,7 @@ static struct address *libsieve_addrstructcopy(struct sieve2_context *context);
 #define THIS_MODULE "sv_parser"
 
 %}
-
-%defines "addr.h"
-%output "addr.c"
+%defines
 %name-prefix="libsieve_addr"
 
 %define api.pure

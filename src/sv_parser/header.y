@@ -37,8 +37,7 @@ static void libsieve_headererror(struct sieve2_context *context, void *yyscanner
 
 %}
 
-%defines "header.h"
-%output "header.c"
+%defines
 %name-prefix="libsieve_header"
 %define api.pure
 %lex-param {struct sieve2_context *context}
