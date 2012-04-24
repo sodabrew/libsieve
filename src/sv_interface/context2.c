@@ -157,7 +157,7 @@ int libsieve_callback_end(
 /* libSieve will free this memory for you, don't worry about it. */
 VISIBLE const char * sieve2_getvalue_string(
     sieve2_context_t *c,
-    char const * const name)
+    const char * const name)
 {
     int i;
 
@@ -175,7 +175,7 @@ VISIBLE const char * sieve2_getvalue_string(
 /* libSieve will free this memory for you, don't worry about it. */
 VISIBLE char * * sieve2_getvalue_stringlist(
     sieve2_context_t *c,
-    char const * const name)
+    const char * const name)
 {
     int i;
 
@@ -192,7 +192,7 @@ VISIBLE char * * sieve2_getvalue_stringlist(
 
 VISIBLE int sieve2_getvalue_int(
     sieve2_context_t *c,
-    char const * const name)
+    const char * const name)
 {
     int i;
 
@@ -210,7 +210,7 @@ VISIBLE int sieve2_getvalue_int(
 /* If you allocated the memory, you have to free it. */
 VISIBLE int sieve2_setvalue_string(
     sieve2_context_t *c,
-    char const * const name, char * const value)
+    const char * const name, const char * const value)
 {
     int i;
 
@@ -232,7 +232,7 @@ VISIBLE int sieve2_setvalue_string(
 
 VISIBLE int sieve2_setvalue_stringlist(
     sieve2_context_t *c,
-    char const * const name, char **value)
+    const char * const name, char ** const value)
 {
     int i;
 
@@ -254,7 +254,7 @@ VISIBLE int sieve2_setvalue_stringlist(
 
 VISIBLE int sieve2_setvalue_int(
     sieve2_context_t *c,
-    char const * const name, const int value)
+    const char * const name, const int value)
 {
     int i;
 

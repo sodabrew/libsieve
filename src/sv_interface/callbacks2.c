@@ -227,7 +227,7 @@ int libsieve_do_error_exec(struct sieve2_context *c, char *msg)
     return SIEVE2_OK;
 }
 
-int libsieve_do_error_parse(struct sieve2_context *c, const int lineno, const char *msg)
+int libsieve_do_error_parse(struct sieve2_context *c, const int lineno, const char * const msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_PARSE);
 
@@ -240,7 +240,7 @@ int libsieve_do_error_parse(struct sieve2_context *c, const int lineno, const ch
     return SIEVE2_OK;
 }
 
-int libsieve_do_error_address(struct sieve2_context *c, const char *msg)
+int libsieve_do_error_address(struct sieve2_context *c, const char * const msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_ADDRESS);
 
@@ -252,7 +252,7 @@ int libsieve_do_error_address(struct sieve2_context *c, const char *msg)
     return SIEVE2_OK;
 }
 
-int libsieve_do_error_header(struct sieve2_context *c, const int lineno, const char *msg)
+int libsieve_do_error_header(struct sieve2_context *c, const int lineno, const char * const msg)
 {
     libsieve_callback_begin(c, SIEVE2_ERRCALL_HEADER);
 
