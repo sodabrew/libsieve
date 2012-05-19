@@ -59,16 +59,12 @@ headers: header                 {
                     /* Problems... */;
                 };
 
-header: NAME COLON              {
-                TRACE_DEBUG( "header: NAME COLON: %s:", $1 );
-                libsieve_headerentry(context, $1, NULL);
-                }
-        | NAME COLON body       {
+header: NAME COLON body       {
                 TRACE_DEBUG( "header: NAME COLON body: %s:%s", $1, $3 );
                 libsieve_headerentry(context, $1, $3);
                 };
 
-body: TEXT                      {
+body: /* empty */ | TEXT                      {
                 /* Default action is $$ = $1 */
                 TRACE_DEBUG( "body: TEXT: %s", $1 );
                 }
