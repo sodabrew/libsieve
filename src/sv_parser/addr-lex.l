@@ -45,6 +45,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 %option 8bit fast
 %option noyywrap noinput nounput
+%option noyyget_extra noyyget_leng noyyget_text noyyget_in noyyset_in
+%option noyyset_out noyyget_out noyyget_lval noyyset_lval
+%option noyyset_debug noyyget_debug
 %option reentrant never-interactive
 %option outfile="addr-lex.c" header-file="addr-lex.h"
 %option bison-bridge extra-type="int"

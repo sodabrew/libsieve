@@ -28,6 +28,9 @@
 
 %option yylineno 8bit fast
 %option noyywrap noinput nounput
+%option noyyget_extra noyyget_leng noyyget_text noyyget_in noyyset_in
+%option noyyset_out noyyget_out noyyget_lval noyyset_lval
+%option noyyset_debug noyyget_debug
 %option reentrant never-interactive
 %option outfile="header-lex.c" header-file="header-lex.h"
 %option bison-bridge
