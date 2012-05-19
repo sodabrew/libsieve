@@ -100,6 +100,7 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, char
         /* Problems... */;
     YY_BUFFER_STATE buf = libsieve_header_scan_string(*ptr, header_scan);
 
+    libsieve_headerset_lineno(1, header_scan);
     if(libsieve_headerparse(context, header_scan)) {
         TRACE_DEBUG( "Header parse error, returning null" );
 	while (context->header_hl) {
