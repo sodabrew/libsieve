@@ -54,12 +54,12 @@
 		 * unfolding is only supposed to pull off an extra CRLF pair. */
                 yyless(2);
                 }
-:([\ \t])+(\r|\n)+      {
+:([\ \t])*(\r|\n)+      {
                 /* Special case of an empty header: whitespace followed by newlines */
                 TRACE_DEBUG( "Eat some whitespace and return COLON, forget TEXT" );
                 return COLON;
                 }
-:([\ \t])+              {
+:([\ \t])*              {
                 /* Eat some (optional) whitespace following the colon */
                 BEGIN S_TEXT;
                 TRACE_DEBUG( "Begin TEXT, eat some whitespace and return COLON" );
