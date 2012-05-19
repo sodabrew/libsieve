@@ -90,9 +90,9 @@ void libsieve_headererror(struct sieve2_context *context, yyscan_t yyscanner, co
 /* Wrapper for headerparse() which sets up the 
  * required environment and allocates variables
  * */
-header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr)
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, char **ptr)
 {
-    header_list_t *newdata = NULL;
+    header_list_t *newdata;
     yyscan_t header_scan = context->header_scan;
 
     context->header_hl = NULL;
@@ -114,12 +114,6 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
 	return NULL;
     }
 
-    /* Get to the tail end... */
-    newdata = *data;
-    while(newdata != NULL) {
-        newdata = newdata->next;
-    }
-
     /* Same thing with that extra struct... */
     newdata = context->header_hl->next;
     libsieve_header_delete_buffer(buf, header_scan);
@@ -127,11 +121,8 @@ header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, head
     libsieve_free(context->header_hl->h);
     libsieve_free(context->header_hl);
 
-    if(*data == NULL)
-        *data = newdata;
-
     context->header_hl = newdata;
-    return *data;
+    return newdata;
 }
 
 int libsieve_headerappend(struct sieve2_context *context)

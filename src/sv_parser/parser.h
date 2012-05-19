@@ -27,7 +27,7 @@ commandlist_t *libsieve_sieve_parse_buffer(struct sieve2_context *context);
 int libsieve_sievelex_destroy(void *yyscanner);
 int libsieve_sievelex_init(void **yyscanner);
 
-header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, header_list_t **data, char **ptr);
+header_list_t *libsieve_header_parse_buffer(struct sieve2_context *context, char **ptr);
 int libsieve_headerlex_destroy(void* yyscanner);
 int libsieve_headerlex_init(void** yyscanner);
 
