@@ -10,7 +10,7 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT([disable-static])
 
 AM_PROG_LEX
 AM_PROG_CC_C_O
