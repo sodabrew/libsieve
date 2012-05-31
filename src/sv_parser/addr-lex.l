@@ -58,31 +58,31 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 \"				{ BEGIN QSTRING; TRACE_DEBUG( "Begin QSTRING" ); return QUOTE; }
 \[				{ BEGIN DOMAINLIT; TRACE_DEBUG( "Begin DOMAINLIT" ); return yytext[0]; }
-\(				{ yyextra = 1; TRACE_DEBUG( "Begin COMMENT" ); BEGIN COMMENT; }
+\(				{ BEGIN COMMENT; TRACE_DEBUG( "Begin COMMENT" ); yyextra = 1; /* no return */ }
 \)				{ libsieve_addrerror(context, yyscanner, "address parse error, "
 					  "unexpected `')'' "
 					  "(unbalanced comment)");
 				  yyterminate(); }
 
-[<>\(\)@,;:\"\.\[\]\\]	{
+[<>\(\)@,;:\"\.\[\]\\]		{
 		/* Return the special character */
 		return yytext[0];
 				}
-([ \t\n\r])+			{
+([\ \t\n\r])+			{
 		TRACE_DEBUG( "Whitespace silently murdered." );
 		/* Ignore whitespace by not returning */
 				}
-([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])+	{
+([^<>\(\)@,;:\"\.\[\]\\\ \t\n\r])+	{
 		/* Match any set of non-special-characters */
 		(*yylval) = libsieve_strbuf(context->strbuf, yytext, strlen(yytext), NOFREE);
 		return ATOM;
 				}
-([^<>\(\)@,;:\"\.\[\]\\ \t\n\r])([^<>\(\)@,;:\"\[\]\\ \t\n\r])*        {
+([^<>\(\)@,;:\"\.\[\]\\\ \t\n\r])([^<>\(\)@,;:\"\[\]\\\ \t\n\r])*        {
                 /* Match any set of non-special-characters, the first char may not be dot */
                 (*yylval) = libsieve_strbuf(context->strbuf, yytext, strlen(yytext), NOFREE);
                return DOTATOM;
                                 }
-<QSTRING>([^\"]|\\\")+		{
+<QSTRING>([^\"]|\\\")+	{
 		/* Match anything that's not a quote or is an escaped quote */
 		/* We ended up making this a symbol rather than real character */
 		(*yylval) = libsieve_strbuf(context->strbuf, yytext, strlen(yytext), NOFREE);
@@ -94,15 +94,19 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		return QUOTE;
 				}
 
-<DOMAINLIT>([^\[\]\n\r\\]|\\.)*	return DTEXT;
+<DOMAINLIT>([^\[\]])+	{ return DTEXT; }
+<DOMAINLIT>\[			{ libsieve_addrerror(context, yyscanner, "address parse error, "
+					  "unexpected `'['' "
+					  "(already inside domainlit)");
+				  yyterminate(); }
 <DOMAINLIT>\]			{
 		BEGIN INITIAL;
 		TRACE_DEBUG( "End DOMAINLIT" );
 		return yytext[0];
 		};
 
-<COMMENT>([^\(\)\n\0\\]|\\.)*	/* ignore comments */
-<COMMENT>\(			yyextra++;
+<COMMENT>([^\(\)])+		{ /* ignore comments */ }
+<COMMENT>\(			{ yyextra++; }
 <COMMENT>\)			{ yyextra--; if (yyextra == 0) BEGIN INITIAL; }
 <COMMENT><<EOF>>		{ libsieve_addrerror(context, yyscanner, "address parse error, "
 					  "expecting `')'' "
