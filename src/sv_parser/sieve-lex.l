@@ -50,7 +50,6 @@ extern YY_DECL;
 %option noyyset_out noyyget_out noyyget_lval noyyset_lval
 %option noyyset_debug noyyget_debug
 %option reentrant never-interactive
-%option outfile="sieve-lex.c" header-file="sieve-lex.h"
 %option bison-bridge extra-type="struct catbuf*"
 %option prefix="libsieve_sieve"
 

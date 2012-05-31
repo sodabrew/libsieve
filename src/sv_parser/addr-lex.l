@@ -49,7 +49,6 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %option noyyset_out noyyget_out noyyget_lval noyyset_lval
 %option noyyset_debug noyyget_debug
 %option reentrant never-interactive
-%option outfile="addr-lex.c" header-file="addr-lex.h"
 %option bison-bridge extra-type="int"
 %option prefix="libsieve_addr"
 

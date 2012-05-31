@@ -32,7 +32,6 @@
 %option noyyset_out noyyget_out noyyget_lval noyyset_lval
 %option noyyset_debug noyyget_debug
 %option reentrant never-interactive
-%option outfile="header-lex.c" header-file="header-lex.h"
 %option bison-bridge
 %option prefix="libsieve_header"
 
